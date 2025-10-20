@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кібербезпека: 12 Кроків</title>
+    <!-- Завантаження Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Завантаження Lucide Icons для іконок -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Налаштування шрифту Play */
+        @import url('https://fonts.googleapis.com/css2?family=Play:wght@400;700&display=swap');
+        :root {
+            font-family: 'Play', sans-serif; /* Використовуємо новий шрифт Play */
+        }
+
+        /* --- ГАРАНТОВАНЕ ПРИХОВУВАННЯ КОНТЕНТУ НА СТАРТІ --- */
+        #lesson-screen.hidden {
+            display: none !important; /* Примусово приховуємо симуляцію та помічника */
+        }
+        /* ------------------------------------------------ */
+
+        /* Стилі для анімації переходу */
+        .fade-in {
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Стиль для бульбашки помічника (трикутник) */
+        #helper-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -10px; 
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid #fcd34d; 
+        }
+        @media (min-width: 1024px) {
+            #helper-bubble::after {
+                left: -18px; 
+                bottom: 30px; 
+                transform: translateX(0);
+                border-top: 10px solid transparent;
+                border-bottom: 10px solid transparent;
+                border-right: 10px solid #fcd34d; 
+            }
+        }
+
+        /* Стилі для кнопок в інтерактивній частині */
+        .interactive-button {
+            transition: all 0.2s;
+        }
+        .interactive-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Стиль для вибраної картки (ДО натискання Submit) */
+        .privacy-card:has(input:checked) {
+            border-color: #3b82f6; 
+            background-color: #eff6ff; 
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+            transform: scale(1.02);
+        }
+        .privacy-card:has(input:checked) .privacy-icon {
+            color: #1d4ed8; 
+        }
+        
+        /* Спеціальний клас для приховування пояснення до відповіді */
+        .privacy-hint {
+            display: none;
+        }
+
+        /* Стиль для чату */
+        .chat-message {
+            max-width: 80%;
+            border-radius: 12px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .chat-user-1 {
+            background-color: #d1fae5; 
+            align-self: flex-start;
+        }
+        .chat-user-2 {
+            background-color: #bfdbfe; 
+            align-self: flex-end;
+        }
+        
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-green-100 to-teal-200">
+
+    <!-- 1. Початковий екран (Видимий на старті) -->
+    <div id="start-screen" class="flex flex-col items-center justify-center text-center p-8 bg-white shadow-2xl rounded-2xl max-w-lg w-full transition-opacity duration-500">
+        <div class="text-6xl text-blue-600 mb-6">
+            <i data-lucide="shield-check" class="w-16 h-16 mx-auto"></i>
+        </div>
+        <h1 class="text-4xl font-extrabold text-gray-800 mb-4">Кібербезпека: Твій Захист в Мережі</h1>
+        <p class="text-lg text-gray-600 mb-8">Розширений інтерактивний урок (12 кроків) для 5 класу. Будь справжнім Кібер-Героєм!</p>
+        <button id="start-button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-transform duration-200 transform hover:scale-105">
+            Розпочати Пригоду
+        </button>
+    </div>
+
+    <!-- 2. Контейнер уроку (Прихований на старті завдяки класу 'hidden' та CSS) -->
+    <div id="lesson-screen" class="hidden w-full max-w-7xl lg:flex lg:flex-row p-4 transition-all duration-700">
+
+        <!-- 1. Контейнер Симуляції Браузера (основний) -->
+        <div id="browser-sim" class="w-full lg:w-3/4 bg-white shadow-xl rounded-2xl overflow-hidden flex flex-col h-[600px] border-4 border-gray-300">
+            
+            <!-- Панель вкладок та управління -->
+            <div class="flex-shrink-0 bg-gray-200 p-2 border-b border-gray-300 flex items-center">
+                
+                <!-- Кнопки навігації -->
+                <div class="flex space-x-2 mr-4">
+                    <button class="text-gray-500 hover:text-gray-800 p-1 rounded-full bg-gray-300 transition"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
+                    <button class="text-gray-500 hover:text-gray-800 p-1 rounded-full bg-gray-300 transition"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
+                    <button class="text-gray-500 hover:text-gray-800 p-1 rounded-full bg-gray-300 transition"><i data-lucide="rotate-ccw" class="w-5 h-5"></i></button>
+                </div>
+                
+                <!-- Адресний рядок -->
+                <div class="flex-grow bg-white border border-gray-400 rounded-full py-1 px-4 flex items-center shadow-inner">
+                    <i data-lucide="lock" class="w-4 h-4 text-green-500 mr-2"></i>
+                    <span id="address-bar" class="text-sm text-gray-700 font-medium truncate">https://безпечний.сайт</span>
+                    <i data-lucide="star" class="w-4 h-4 text-gray-400 ml-auto cursor-pointer hover:text-yellow-500 transition"></i>
+                </div>
+            </div>
+
+            <!-- Область вмісту браузера -->
+            <div id="browser-content" class="flex-grow p-6 overflow-y-auto bg-gray-50 flex items-center justify-center text-center">
+                <!-- Контент буде завантажуватися тут -->
+            </div>
+            
+        </div>
+
+        <!-- 2. Контейнер Помічника -->
+        <div id="helper-container" class="w-full mt-8 lg:mt-0 lg:ml-8 lg:w-72 flex flex-col items-center lg:items-start">
+            
+            <!-- НОВИЙ БЛОК: РАХУНОК ГРИ -->
+            <div class="w-full max-w-xs lg:w-auto lg:max-w-none bg-blue-600 text-white p-3 rounded-xl shadow-lg mb-4 text-center">
+                <div class="text-sm font-light">Твій Рахунок:</div>
+                <div id="current-score" class="text-3xl font-extrabold transition-all duration-500 ease-out">0</div>
+            </div>
+            <!-- КІНЕЦЬ БЛОКУ РАХУНКУ -->
+
+            <div id="helper-bubble" class="bg-yellow-400 border-2 border-yellow-600 p-4 rounded-xl relative mb-4 w-full max-w-xs lg:w-auto lg:max-w-none shadow-md">
+                <!-- Початковий текст помічника -->
+                <p id="helper-text" class="text-base text-gray-900 font-bold leading-relaxed"></p>
+            </div>
+            <!-- Зображення персонажа-помічника -->
+            <img id="helper-image" src="https://placehold.co/150x150/ffb74d/333?text=%D0%9A%D1%96%D0%B1%D0%B5%D1%80-%D0%9A%D1%80%D0%BE%D0%BB%D0%B8%D0%BA" alt="Зображення помічника Кібер-Кролика" class="w-32 h-32 mx-auto rounded-full shadow-2xl border-4 border-blue-500 object-cover">
+        </div>
+
+    </div>
+
+    <script>
+        // Ініціалізація Lucide Icons
+        lucide.createIcons();
+
+        // Елементи DOM
+        const startScreen = document.getElementById('start-screen');
+        const lessonScreen = document.getElementById('lesson-screen');
+        const startButton = document.getElementById('start-button');
+        const helperText = document.getElementById('helper-text');
+        const browserContent = document.getElementById('browser-content');
+        const addressBar = document.getElementById('address-bar');
+        
+        // --- НОВІ ЗМІННІ ДЛЯ РАХУНКУ ---
+        const scoreDisplay = document.getElementById('current-score');
+        let score = 0;
+        // --------------------------------
+
+        let currentStep = 0;
+
+        // Визначення кроків уроку та їх контенту (13 кроків)
+        const lessonSteps = [
+            // --- 1. ПАРОЛІ (Крок 1/2) ---
+            {
+                helper: "Привіт! Я Кібер-Кролик. Почнемо з головного: створення надійного пароля для входу на ігровий сайт «Кібер-Світ». Спробуй обрати найкращий варіант!",
+                browser: `<div class="p-8 bg-gray-900 border-4 border-indigo-500 rounded-xl max-w-lg w-full shadow-2xl text-center">
+                              <i data-lucide="key-round" class="w-12 h-12 mx-auto text-indigo-400 mb-4 animate-pulse"></i>
+                              <h2 class="text-4xl font-extrabold text-white mb-2 tracking-widest">КІБЕР-СВІТ</h2>
+                              <p class="text-xl text-yellow-400 font-semibold mb-4 border-b border-indigo-600 pb-2">Обери НАЙБЕЗПЕЧНІШИЙ пароль:</p>
+                              
+                              <div class="space-y-4 w-full mx-auto">
+                                  <button class="password-option p-4 w-full text-left interactive-button bg-gray-800 text-gray-200 border border-indigo-600 rounded-xl shadow-lg hover:bg-indigo-800 flex items-center" data-correct="false" onclick="handlePasswordStrength(this)">
+                                      <span class="font-mono">1. 12345678</span>
+                                  </button>
+                                  <button class="password-option p-4 w-full text-left interactive-button bg-gray-800 text-gray-200 border border-indigo-600 rounded-xl shadow-lg hover:bg-indigo-800 flex items-center" data-correct="false" onclick="handlePasswordStrength(this)">
+                                      <span class="font-mono">2. СвоєІм'я2025</span>
+                                  </button>
+                                  <button class="password-option p-4 w-full text-left interactive-button bg-gray-800 text-gray-200 border border-indigo-600 rounded-xl shadow-lg hover:bg-indigo-800 flex items-center" data-correct="true" onclick="handlePasswordStrength(this)">
+                                      <span class="font-mono">3. Cyber_Hero@2025!</span>
+                                  </button>
+                              </div>
+                          </div>`,
+                address: "https://kibersvit.com/register"
+            },
+            // --- 1. ПАРОЛІ (Крок 2/2) ---
+            {
+                helper: "Чудово! Ти знаєш, як створити міцний пароль. А тепер питання: чи варто дозволяти браузеру ЗАПАМ'ЯТОВУВАТИ його?",
+                browser: `<div class="p-8 bg-white border-4 border-indigo-500 rounded-xl max-w-md mx-auto shadow-2xl text-center">
+                              <i data-lucide="lock-open" class="w-10 h-10 mx-auto text-indigo-600 mb-4"></i>
+                              <h2 class="text-3xl font-extrabold text-gray-800 mb-4">ЗАПАМ'ЯТАТИ ПАРОЛЬ?</h2>
+                              <p class="text-lg text-gray-600 mb-6">Ваш браузер пропонує зберегти пароль для 'kibersvit.com'.</p>
+                              
+                              <div class="flex flex-col space-y-3">
+                                  <button class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg interactive-button" data-correct="false" onclick="handleBinaryChoice(this, false, 'pass-save')">Так, це швидко і зручно!</button>
+                                  <button class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg interactive-button" data-correct="true" onclick="handleBinaryChoice(this, true, 'pass-save')">Ні, краще запам'ятати або використати менеджер паролів.</button>
+                              </div>
+                          </div>`,
+                address: "https://kibersvit.com/login"
+            },
+            // --- 2. ФІШИНГ (Крок 1/2) ---
+            {
+                helper: "Ти впорався з паролями. Тепер — ФІШИНГ. З'явилося дивне повідомлення з обіцянкою призу. Це пастка!",
+                browser: `<div class="p-8 bg-red-100 border-4 border-red-500 rounded-xl max-w-md mx-auto shadow-2xl">
+                              <h2 class="text-3xl font-extrabold text-red-700 mb-4 flex items-center justify-center">
+                                  <i data-lucide="gift" class="w-8 h-8 mr-2"></i> ВІТАЄМО! ТИ ВИГРАВ!
+                              </h2>
+                              <p class="text-xl text-gray-800 mb-6">Твій телефон щойно виграв 10 000 гривень! Щоб забрати приз, натисни кнопку нижче і введи свої дані!</p>
+                              <p class="text-sm text-gray-600 mb-4 font-mono truncate">Посилання: http://priz-tviy.biz/dati-groshi</p>
+                              <p class="text-lg font-bold text-red-600 mb-4">Що ти зробиш?</p>
+                              <div class="flex flex-col space-y-3">
+                                  <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg interactive-button" data-correct="false" onclick="handleBinaryChoice(this, false, 'phish-pop')">Натиснути і забрати приз!</button>
+                                  <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg interactive-button" data-correct="true" onclick="handleBinaryChoice(this, true, 'phish-pop')">Закрити вікно і нічого не натискати!</button>
+                              </div>
+                          </div>`,
+                address: "http://shakhray.net"
+            },
+            // --- 2. ФІШИНГ (Крок 2/2) ---
+            {
+                helper: "Молодець! Ти уникнув поп-ап пастки. А тепер уяви: тобі прийшло повідомлення у грі від твого друга, який просить терміново перейти за посиланням 'для голосування'.",
+                browser: `<div class="p-8 bg-gray-100 border-4 border-red-500 rounded-xl max-w-md mx-auto shadow-2xl text-center">
+                              <i data-lucide="mail-warning" class="w-10 h-10 mx-auto text-yellow-600 mb-4"></i>
+                              <h2 class="text-3xl font-extrabold text-gray-800 mb-4">ТЕРМІНОВЕ ПОВІДОМЛЕННЯ</h2>
+                              <p class="text-lg text-gray-600 mb-4 font-bold">Від: Друг_Вася (Vasia_Pro)</p>
+                              <p class="text-xl text-red-700 font-semibold mb-6">"Ей, це терміново! Клікни сюди, щоб проголосувати за мене у конкурсі! www.megasite-vote.ru/vasiapro"</p>
+                              
+                              <div class="flex flex-col space-y-3">
+                                  <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg interactive-button" data-correct="false" onclick="handleBinaryChoice(this, false, 'phish-friend')">Клікнути, адже це Вася.</button>
+                                  <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg interactive-button" data-correct="true" onclick="handleBinaryChoice(this, true, 'phish-friend')">Спочатку написати Васі та запитати, чи це справді його посилання.</button>
+                              </div>
+                          </div>`,
+                address: "https://igry-chatu.com/message"
+            },
+            // --- 3. ПРИВАТНІСТЬ (Крок 1/2) ---
+            {
+                helper: "Ти молодець, завжди перевіряй посилання. Тепер про твою ПРИВАТНІСТЬ. Обери лише один варіант, який ти можеш безпечно поширити у своєму фан-профілі!",
+                browser: `<div class="p-6 max-w-lg w-full mx-auto bg-white rounded-xl shadow-xl border-t-4 border-blue-500">
+                              <h2 class="text-3xl font-bold text-gray-800 mb-6">Створи Свій Фан-Профіль!</h2>
+                              <p class="text-lg text-gray-600 mb-6">Обери ЛИШЕ ОДИН варіант, який ти можеш безпечно поширити.</p>
+                              
+                              <form id="privacy-form-1" class="space-y-4">
+                                  <label for="choice-hobby" class="privacy-card block p-4 bg-gray-50 border-2 border-gray-300 rounded-xl cursor-pointer hover:bg-yellow-100 transition-all duration-200 shadow-md">
+                                      <input type="radio" id="choice-hobby" name="data-choice" value="safe" class="hidden" data-label="Улюблене хобі героя/гра">
+                                      <div class="flex items-center space-x-3">
+                                          <i data-lucide="gamepad-2" class="w-6 h-6 text-blue-500 privacy-icon"></i>
+                                          <span class="font-medium text-lg text-gray-800">Улюблене хобі героя/гра</span>
+                                      </div>
+                                  </label>
+                                  <label for="choice-phone" class="privacy-card block p-4 bg-gray-50 border-2 border-gray-300 rounded-xl cursor-pointer hover:bg-red-100 transition-all duration-200 shadow-md">
+                                      <input type="radio" id="choice-phone" name="data-choice" value="danger-phone" class="hidden" data-label="Номер мобільного телефону">
+                                      <div class="flex items-center space-x-3">
+                                          <i data-lucide="phone" class="w-6 h-6 text-red-500 privacy-icon"></i>
+                                          <span class="font-medium text-lg text-gray-800">Номер мобільного телефону</span>
+                                      </div>
+                                  </label>
+                                  <label for="choice-dob" class="privacy-card block p-4 bg-gray-50 border-2 border-gray-300 rounded-xl cursor-pointer hover:bg-red-100 transition-all duration-200 shadow-md">
+                                      <input type="radio" id="choice-dob" name="data-choice" value="danger-dob" class="hidden" data-label="Точна дата народження">
+                                      <div class="flex items-center space-x-3">
+                                          <i data-lucide="calendar-check" class="w-6 h-6 text-red-500 privacy-icon"></i>
+                                          <span class="font-medium text-lg text-gray-800">Точна дата народження (день, місяць, рік)</span>
+                                      </div>
+                                  </label>
+                                  <button type="button" id="submit-privacy" class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg interactive-button" onclick="handleSubmitPrivacy(1)">Підтвердити Вибір</button>
+                              </form>
+                          </div>`,
+                address: "https://wikigeroiv.ua/profil"
+            },
+            // --- 3. ПРИВАТНІСТЬ (Крок 2/2) ---
+            {
+                helper: "Ти зберіг свої основні дані. А тепер уяви: ти їдеш на відпочинок і хочеш похвалитися квитком на поїзд. На ньому видно твоє ім'я, маршрут і дату. Чи варто публікувати це фото?",
+                browser: `<div class="p-8 bg-yellow-50 border-4 border-yellow-600 rounded-xl max-w-md mx-auto shadow-2xl text-center">
+                              <i data-lucide="train" class="w-10 h-10 mx-auto text-yellow-700 mb-4"></i>
+                              <h2 class="text-3xl font-extrabold text-gray-800 mb-4">ФОТО ПОЇЗДКИ</h2>
+                              <p class="text-lg text-gray-600 mb-6">Ти сфотографував свій квиток на поїзд, щоб показати друзям. На ньому видно твоє повне ім'я та деталі маршруту (маршрут і дата).</p>
+                              
+                              <div class="flex flex-col space-y-3">
+                                  <button class="bg-yellow-600 hover:bg-yellow-700 text-gray-900 font-bold py-2 px-6 rounded-lg interactive-button" data-correct="false" onclick="handleBinaryChoice(this, false, 'privacy-ticket')">Так, я закрию деякі цифри пальцем.</button>
+                                  <button class="bg-yellow-600 hover:bg-yellow-700 text-gray-900 font-bold py-2 px-6 rounded-lg interactive-button" data-correct="true" onclick="handleBinaryChoice(this, true, 'privacy-ticket')">Ні, краще розмити всі особисті дані або не публікувати це фото.</button>
+                              </div>
+                          </div>`,
+                address: "https://social-network.com/post"
+            },
+            // --- 4. МАЛВАРА (Крок 1/2) ---
+            {
+                helper: "Чудово! Пам'ятай про небезпечні завантаження (МАЛВАРА). На ігровому форумі тобі пропонують завантажити 'Супер-Чіт'.",
+                browser: `<div class="p-8 bg-gray-800 border-4 border-yellow-500 rounded-xl max-w-md mx-auto shadow-2xl text-center">
+                              <i data-lucide="alert-triangle" class="w-10 h-10 mx-auto text-yellow-400 mb-4 animate-bounce"></i>
+                              <h2 class="text-3xl font-extrabold text-white mb-4">ВІКНО ЗАВАНТАЖЕННЯ</h2>
+                              <p class="text-lg text-gray-300 mb-6 font-mono break-all">файл: Super-Cheat-v2.1.exe</p>
+                              <p class="text-xl font-bold text-yellow-400 mb-4">Чи варто це завантажувати?</p>
+                              <div class="flex flex-col space-y-3">
+                                  <button class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-6 rounded-lg interactive-button" data-correct="false" onclick="handleBinaryChoice(this, false, 'malware-cheat')">Так, це ж чіт!</button>
+                                  <button class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-6 rounded-lg interactive-button" data-correct="true" onclick="handleBinaryChoice(this, true, 'malware-cheat')">Ні, я скасую завантаження</button>
+                              </div>
+                          </div>`,
+                address: "https://igry-forumi.net/chity"
+            },
+            // --- 4. МАЛВАРА (Крок 2/2) ---
+            {
+                helper: "Ти врятував свій комп'ютер від вірусу! А тепер про ще одну хитру пастку: фальшиве повідомлення про те, що твій комп'ютер 'заражений'.",
+                browser: `<div class="p-8 bg-red-600 border-4 border-red-900 rounded-xl max-w-md mx-auto shadow-2xl text-center animate-pulse">
+                              <i data-lucide="bug" class="w-12 h-12 mx-auto text-white mb-4"></i>
+                              <h2 class="text-4xl font-extrabold text-yellow-200 mb-4">УВАГА! ВАШ ПК ІНФІКОВАНО!</h2>
+                              <p class="text-xl text-white mb-6 font-bold">Система виявила 500 вірусів! Негайно натисніть 'Очистити', щоб уникнути втрати даних.</p>
+                              
+                              <div class="flex flex-col space-y-3">
+                                  <button class="bg-green-400 hover:bg-green-500 text-red-900 font-bold py-3 px-6 rounded-lg interactive-button" data-correct="false" onclick="handleBinaryChoice(this, false, 'malware-scare')">ОЧИСТИТИ ЗАРАЗ</button>
+                                  <button class="bg-red-300 hover:bg-red-400 text-gray-900 font-bold py-2 px-6 rounded-lg interactive-button" data-correct="true" onclick="handleBinaryChoice(this, true, 'malware-scare')">Закрити вікно та перевірити справжнім антивірусом</button>
+                              </div>
+                          </div>`,
+                address: "http://fakeshield.com/scam"
+            },
+            // --- 5. КІБЕРБУЛІНГ (Крок 1/2) ---
+            {
+                helper: "Гарна робота! Пам'ятай: справжній захист — це твій розум, а не фальшивий антивірус. Тепер про ЕТИКУ та кібербулінг. Подивись на цей агресивний чат:",
+                browser: `<div class="p-6 max-w-lg w-full mx-auto bg-gray-100 rounded-xl shadow-xl border-t-4 border-indigo-500 flex flex-col h-96 overflow-y-auto">
+                              <div class="chat-message chat-user-1">
+                                  <span class="font-bold text-green-700">Профі_2010:</span> Ей, **Ти_Супер**, ти знову заважаєш! Тобі тут не місце.
+                              </div>
+                              <div class="chat-message chat-user-2 ml-auto">
+                                  <span class="font-bold text-blue-700">Ти_Супер:</span> Вибачте, я намагаюся грати краще.
+                              </div>
+                              <div class="chat-message chat-user-1">
+                                  <span class="font-bold text-green-700">Профі_2010:</span> Ти найгірший гравець на сервері! **Всі** тут згодні, що ти маєш піти. Якщо не вийдеш, ми тебе заблокуємо!
+                              </div>
+                              
+                              <p class="text-lg font-bold text-gray-700 mt-6 mb-4">Яка твоя реакція на образу іншого гравця?</p>
+                              
+                              <div class="flex flex-col space-y-3">
+                                  <button class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg interactive-button" data-action="join" onclick="handleBullying(this, 'join')">Почати теж його ображати</button>
+                                  <button class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg interactive-button" data-action="report" onclick="handleBullying(this, 'report')">Заблокувати агресора / повідомити адміністратору</button>
+                              </div>
+                          </div>`,
+                address: "https://igry-chatu.com/main"
+            },
+            // --- 5. КІБЕРБУЛІНГ (Крок 2/2) ---
+            {
+                helper: "Пам'ятай, ніхто не має права тебе ображати! А що робити, якщо ти бачиш, що ображають іншого, а не тебе?",
+                browser: `<div class="p-6 max-w-lg w-full mx-auto bg-gray-100 rounded-xl shadow-xl border-t-4 border-indigo-500 flex flex-col h-96 overflow-y-auto">
+                              <div class="chat-message chat-user-1">
+                                  <span class="font-bold text-green-700">Профі_2010:</span> Ха-ха, **Новачок_2025** зробив помилку, він нуб! Подивіться на його одяг, він смішний!
+                              </div>
+                              <div class="chat-message chat-user-2 ml-auto">
+                                  <span class="font-bold text-blue-700">Новачок_2025:</span> *Мовчить*
+                              </div>
+                              <div class="chat-message chat-user-1">
+                                  <span class="font-bold text-green-700">Профі_2010:</span> Що, не можеш відповісти? Так і думав! Йди геть!
+                              </div>
+                              
+                              <p class="text-lg font-bold text-gray-700 mt-6 mb-4">Ти бачиш, що ображають іншого гравця. Що ти зробиш?</p>
+                              
+                              <div class="flex flex-col space-y-3">
+                                  <button class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg interactive-button" data-action="ignore" onclick="handleBullyingBystander(this, 'ignore')">Промовчати, це не моя справа.</button>
+                                  <button class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg interactive-button" data-action="defend" onclick="handleBullyingBystander(this, 'defend')">Написати 'Припиніть ображати' та повідомити про це.</button>
+                              </div>
+                          </div>`,
+                address: "https://igry-chatu.com/side-chat"
+            },
+            // --- 6. ДОЗВОЛИ (Крок 1/2) ---
+            {
+                helper: "Ти правильно вчинив! Справжній Кібер-Герой захищає не лише себе, але й інших. Тепер — про ДОЗВОЛИ додатків. Ти встановлюєш нову гру. Вона просить багато дозволів. Що ти зробиш?",
+                browser: `<div class="p-8 bg-white border-4 border-purple-500 rounded-xl max-w-md mx-auto shadow-2xl">
+                              <i data-lucide="smartphone" class="w-10 h-10 mx-auto text-purple-600 mb-4"></i>
+                              <h2 class="text-3xl font-extrabold text-gray-800 mb-4">НОВА ГРА: ДОЗВОЛИ</h2>
+                              <p class="text-xl text-gray-600 mb-6">Гра запитує доступ до:</p>
+                              
+                              <ul class="text-left text-lg font-medium space-y-2 mb-6">
+                                  <li class="flex items-center text-red-600"><i data-lucide="camera" class="w-5 h-5 mr-2"></i> Камера (Чому?)</li>
+                                  <li class="flex items-center text-red-600"><i data-lucide="mic" class="w-5 h-5 mr-2"></i> Мікрофон (Чому?)</li>
+                                  <li class="flex items-center text-green-600"><i data-lucide="monitor" class="w-5 h-5 mr-2"></i> Пам'ять для збережень (Потрібно)</li>
+                                  <li class="flex items-center text-red-600"><i data-lucide="contact" class="w-5 h-5 mr-2"></i> Список контактів (Чому?)</li>
+                              </ul>
+                              
+                              <div class="flex flex-col space-y-3">
+                                  <button class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-lg interactive-button" data-correct="false" onclick="handleBinaryChoice(this, false, 'permission-game')">Дозволити УСЕ одразу</button>
+                                  <button class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-lg interactive-button" data-correct="true" onclick="handleBinaryChoice(this, true, 'permission-game')">Дозволити ЛИШЕ необхідне</button>
+                              </div>
+                          </div>`,
+                address: "https://app-store.com/newgame"
+            },
+            // --- 6. ДОЗВОЛИ (Крок 2/2) ---
+            {
+                helper: "Ти правильно обрав! Завжди думай, чи потрібен додатку той чи інший дозвіл. Наприклад, ти завантажуєш додаток 'Ліхтарик'. Які дозволи тут зайві?",
+                browser: `<div class="p-8 bg-white border-4 border-purple-500 rounded-xl max-w-md mx-auto shadow-2xl">
+                              <i data-lucide="flashlight" class="w-10 h-10 mx-auto text-purple-600 mb-4"></i>
+                              <h2 class="text-3xl font-extrabold text-gray-800 mb-4">ЛІХТАРИК: ДОЗВОЛИ</h2>
+                              <p class="text-xl text-gray-600 mb-6">Додаток-ліхтарик запитує доступ до:</p>
+                              
+                              <ul class="text-left text-lg font-medium space-y-2 mb-6">
+                                  <li class="flex items-center text-green-600"><i data-lucide="camera" class="w-5 h-5 mr-2"></i> Камера (Для спалаху)</li>
+                                  <li class="flex items-center text-red-600"><i data-lucide="map-pin" class="w-5 h-5 mr-2"></i> Геолокація (Чому?)</li>
+                              </ul>
+                              
+                              <div class="flex flex-col space-y-3">
+                                  <button class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-lg interactive-button" data-correct="false" onclick="handleBinaryChoice(this, false, 'permission-torch')">Дозволити геолокацію, це безпечно.</button>
+                                  <button class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-lg interactive-button" data-correct="true" onclick="handleBinaryChoice(this, true, 'permission-torch')">Не дозволяти геолокацію, це не потрібно для ліхтарика.</button>
+                              </div>
+                          </div>`,
+                address: "https://app-store.com/flashlight"
+            },
+            // --- 7. ВИСНОВОК (Крок 13) ---
+            {
+                helper: "Вітаю! Ти пройшов мій повний курс кібербезпеки і став справжнім Кібер-Героєм! Ти засвоїв 12 правил. До зустрічі в безпечному Інтернеті!",
+                browser: `<div class="p-8 bg-green-50 border-4 border-green-500 rounded-xl max-w-lg mx-auto shadow-2xl">
+                              <h2 class="text-4xl font-extrabold text-green-700 mb-4 flex items-center justify-center">
+                                  <i data-lucide="trophy" class="w-10 h-10 mr-3"></i> ТИ — КІБЕР-ГЕРОЙ!
+                              </h2>
+                              <p class="text-xl font-extrabold text-blue-700 mb-6">Твій Фінальний Рахунок: <span id="final-score-display" class="text-4xl">0</span></p>
+                              <p class="text-xl text-gray-800 mb-6">Ти успішно засвоїв 12 основ безпеки:</p>
+                              <ul class="list-disc list-inside text-left text-lg space-y-2">
+                                  <li>🔐 Складні паролі (2 сценарії)</li>
+                                  <li>🛑 Фішинг (2 сценарії)</li>
+                                  <li>👤 Захист приватних даних (2 сценарії)</li>
+                                  <li>🦠 Небезпечні завантаження (Малвара) (2 сценарії)</li>
+                                  <li>💙 Етика в мережі (Кібербулінг) (2 сценарії)</li>
+                                  <li>⚙️ Дозволи додатків (2 сценарії)</li>
+                              </ul>
+                              <p class="mt-6 text-gray-600">Натисни кнопку, щоб завершити урок.</p>
+                          </div>`,
+                address: "https://cyberstart.ua/finished"
+            }
+        ];
+
+        // --- Основні функції логіки ---
+
+        // Функція для оновлення рахунку з анімацією
+        function updateScore(points) {
+            score += points;
+            scoreDisplay.textContent = score;
+
+            // Невелика анімація для підтвердження нарахування балів
+            scoreDisplay.classList.add('text-yellow-300', 'scale-125');
+            setTimeout(() => {
+                scoreDisplay.classList.remove('text-yellow-300', 'scale-125');
+            }, 500);
+        }
+
+        // 1. Запуск уроку
+        startButton.addEventListener('click', () => {
+            startScreen.classList.add('fade-out');
+            startScreen.style.opacity = 0;
+            
+            setTimeout(() => {
+                startScreen.classList.add('hidden');
+                lessonScreen.classList.remove('hidden'); 
+                lessonScreen.classList.add('fade-in'); 
+                nextStep();
+            }, 500);
+        });
+
+        // 2. Перехід до наступного кроку
+        function nextStep() {
+            if (currentStep >= lessonSteps.length) {
+                return; 
+            }
+
+            const step = lessonSteps[currentStep];
+
+            addressBar.textContent = step.address;
+            browserContent.innerHTML = step.browser;
+            helperText.textContent = step.helper;
+
+            lucide.createIcons();
+            
+            // Якщо це фінальний крок, немає автоматичного переходу, чекаємо на натискання кнопки
+            if (currentStep === lessonSteps.length - 1) {
+                // Встановлення фінального рахунку
+                const finalScoreElement = browserContent.querySelector('#final-score-display');
+                if (finalScoreElement) {
+                    finalScoreElement.textContent = score;
+                }
+                
+                const finalButton = document.createElement('button');
+                finalButton.className = 'mt-6 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg interactive-button';
+                finalButton.textContent = 'Завершити Урок';
+                finalButton.onclick = () => {
+                    // Використовуємо кастомне повідомлення замість alert()
+                    const messageBox = document.createElement('div');
+                    messageBox.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50';
+                    messageBox.innerHTML = `
+                        <div class="bg-white p-8 rounded-xl shadow-2xl text-center max-w-sm">
+                            <i data-lucide="sparkles" class="w-10 h-10 mx-auto text-yellow-500 mb-4"></i>
+                            <h3 class="text-2xl font-bold text-gray-800 mb-3">Урок завершено!</h3>
+                            <p class="text-gray-600 mb-6">Твій фінальний рахунок: <span class="font-extrabold text-blue-600">${score}</span>. Ти став справжнім Кібер-Героєм! Твої знання захистять тебе в Інтернеті.</p>
+                            <button onclick="this.closest('.fixed').remove()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">Закрити</button>
+                        </div>
+                    `;
+                    document.body.appendChild(messageBox);
+                    lucide.createIcons();
+                };
+                browserContent.lastElementChild.appendChild(finalButton);
+            }
+        }
+
+        // 3. Універсальна функція для обробки бінарного вибору (Correct/Incorrect)
+        function handleBinaryChoice(clickedButton, isCorrect, scenarioId) {
+            const buttons = document.querySelectorAll('.interactive-button');
+            buttons.forEach(btn => btn.disabled = true);
+            
+            if (isCorrect) {
+                updateScore(100); // НАРАХУВАННЯ БАЛІВ
+            }
+
+            // Зміна стилів кнопок
+            buttons.forEach(btn => {
+                btn.classList.remove('bg-indigo-500', 'hover:bg-indigo-600', 'bg-blue-500', 'hover:bg-blue-600', 'bg-yellow-600', 'hover:bg-yellow-700', 'bg-red-300', 'hover:bg-red-400', 'bg-purple-600', 'hover:bg-purple-700', 'bg-green-400', 'hover:bg-green-500');
+
+                if (btn.getAttribute('data-correct') === 'true') {
+                    btn.classList.add('bg-green-600', 'text-white', 'border-2', 'border-green-400');
+                } else {
+                    btn.classList.add('bg-red-600', 'text-white', 'border-2', 'border-red-400');
+                }
+            });
+
+            // Визначення тексту помічника
+            switch (scenarioId) {
+                case 'pass-save':
+                    helperText.textContent = isCorrect 
+                        ? "Правильно! Якщо твоїм комп'ютером скористається хтось інший, він легко зможе увійти в твої акаунти. Краще запам'ятати або використати спеціальний менеджер паролів." 
+                        : "Помилка! Зберігати паролі в браузері небезпечно, особливо якщо комп'ютером користуєшся не лише ти. Краще використовувати менеджер паролів.";
+                    break;
+                case 'phish-pop':
+                    helperText.textContent = isCorrect 
+                        ? "Фантастично! Ти впізнав пастку. Ніколи не натискай на підозрілі посилання та не вводь дані, якщо не впевнений у сайті. Це захист від ФІШИНГУ." 
+                        : "О ні! Це була пастка. Шахраї часто обіцяють призи, щоб вкрасти твої дані. Завжди ЗАКРИВАЙ такі вікна.";
+                    break;
+                case 'phish-friend':
+                    helperText.textContent = isCorrect 
+                        ? "Так! Акаунт твого друга могли зламати. Завжди перепитай друга іншим способом (по телефону, в іншому месенджері), чи це справді його посилання." 
+                        : "Обережно! Хоча це і друг, його акаунт могли зламати. Це поширений тип фішингу. Ти ризикуєш зламати свій акаунт.";
+                    break;
+                case 'privacy-ticket':
+                    helperText.textContent = isCorrect 
+                        ? "Ти абсолютно правий! На квитках є важливі дані: повне ім'я, дата, а головне — інформація про те, коли тебе НЕ буде вдома. Це велика загроза для приватності." 
+                        : "Ні! Це пастка! Квитки та посвідчення містять забагато інформації. Шахраї можуть використати твоє ім'я або навіть знати, що твій дім буде порожнім. Завжди приховуй важливі документи.";
+                    break;
+                case 'malware-cheat':
+                    helperText.textContent = isCorrect 
+                        ? "Ти прийняв правильне рішення. Завантажувати можна лише з офіційних, перевірених сайтів. Ти врятував свій комп'ютер від вірусу!" 
+                        : "Обережно! Файли з невідомих джерел можуть бути ВІРУСАМИ (малварою). Вони можуть пошкодити твій комп'ютер або вкрасти твої дані.";
+                    break;
+                case 'malware-scare':
+                    helperText.textContent = isCorrect 
+                        ? "Правильно! Це фальшива тривога! Справжній антивірус ніколи не змушує тебе клікати на такі кричущі вікна. Завжди використовуй перевірений антивірус, а не підозрілі поп-апи." 
+                        : "Це пастка! Шахраї використовують страх, щоб змусити тебе натиснути. Після натискання вони можуть встановити справжній вірус або вимагати гроші.";
+                    break;
+                case 'permission-game':
+                    helperText.textContent = isCorrect 
+                        ? "Фантастика! Ти перевірив дозволи! Чому грі потрібен доступ до контактів? Дозволяй лише те, що ДІЙСНО необхідне." 
+                        : "Обережно! Додатки часто просять більше, ніж їм потрібно. Навіщо грі доступ до твоїх контактів чи камери? Це небезпечно для твоєї приватності.";
+                    break;
+                case 'permission-torch':
+                    helperText.textContent = isCorrect 
+                        ? "Правильно! Ліхтарику потрібен лише доступ до спалаху (камери). Геолокація — зайва. Завжди дозволяй лише мінімальні дозволи!" 
+                        : "Неправильно! Ліхтарику не потрібна твоя локація. Це спосіб збору даних про тебе. Будь обережним із дозволами, які не мають сенсу.";
+                    break;
+                default:
+                    helperText.textContent = isCorrect ? "Молодець! Правильна відповідь!" : "Не зовсім так. Спробуй ще раз, запам'ятай правило.";
+            }
+
+            // Перехід до наступного кроку
+            setTimeout(() => {
+                currentStep++;
+                nextStep();
+            }, 4000);
+        }
+
+        // 4. Обробка вибору пароля (Крок 0)
+        function handlePasswordStrength(clickedButton) {
+            const isCorrectChoice = clickedButton.getAttribute('data-correct') === 'true';
+            const buttons = document.querySelectorAll('.password-option');
+            
+            const baseClasses = ['bg-gray-800', 'text-gray-200', 'border-indigo-600', 'hover:bg-indigo-800', 'shadow-lg'];
+            
+            if (isCorrectChoice) {
+                helperText.textContent = "Вірно! Пароль повинен бути складним, містити літери, цифри та символи. Завжди захищай свої облікові записи такими 'фортецями'!";
+                updateScore(100); // НАРАХУВАННЯ БАЛІВ
+            } else {
+                helperText.textContent = "Не зовсім так! Пароль має бути довгим і містити великі, малі літери, цифри та символи. Це робить його майже неможливим для вгадування.";
+            }
+
+            buttons.forEach(btn => {
+                btn.disabled = true; 
+                btn.classList.remove(...baseClasses);
+                
+                if (btn.getAttribute('data-correct') === 'true') {
+                    btn.classList.add('bg-green-600', 'border-4', 'border-green-400', 'text-white', 'shadow-xl');
+                } else {
+                     btn.classList.add('bg-red-600', 'border-4', 'border-red-400', 'text-white');
+                }
+            });
+            
+            setTimeout(() => {
+                currentStep++;
+                nextStep();
+            }, 4000);
+        }
+
+
+        // 5. Обробка приватності (Крок 4)
+        function handleSubmitPrivacy(formId) {
+            const form = document.getElementById(`privacy-form-${formId}`);
+            const selectedInput = form.querySelector('input[name="data-choice"]:checked');
+            const submitButton = form.querySelector(`#submit-privacy`);
+            const cards = form.querySelectorAll('.privacy-card');
+
+            if (!selectedInput) {
+                helperText.textContent = "Будь ласка, оберіть один варіант, перш ніж підтвердити.";
+                return; 
+            }
+            
+            submitButton.disabled = true; 
+
+            const isCorrect = selectedInput.value === 'safe';
+            const selectedLabel = selectedInput.getAttribute('data-label');
+            
+            cards.forEach(card => card.classList.add('pointer-events-none'));
+
+            cards.forEach(card => {
+                const input = card.querySelector('input');
+                const icon = card.querySelector('[data-lucide]');
+                
+                card.classList.remove('bg-gray-50', 'hover:bg-yellow-100', 'hover:bg-red-100', 'border-gray-300', 'border-blue-500', 'bg-blue-50', 'shadow-md');
+                
+                if (input.value === 'safe') {
+                    card.classList.add('border-green-600', 'bg-green-100');
+                    icon.setAttribute('data-lucide', 'check-circle');
+                    icon.classList.remove('text-blue-500', 'text-red-500', 'text-gray-500');
+                    icon.classList.add('text-green-600');
+                } else if (input === selectedInput) {
+                    card.classList.add('border-red-600', 'bg-red-100');
+                    icon.setAttribute('data-lucide', 'x-circle');
+                    icon.classList.remove('text-blue-500', 'text-red-500', 'text-gray-500');
+                    icon.classList.add('text-red-600');
+                } else {
+                    card.classList.add('border-gray-400', 'bg-gray-200');
+                    if (input.value === 'safe') {
+                        icon.setAttribute('data-lucide', 'check-circle');
+                        icon.classList.remove('text-blue-500', 'text-red-500', 'text-gray-500');
+                        icon.classList.add('text-green-600');
+                    } else {
+                        icon.classList.remove('text-blue-500', 'text-red-500');
+                        icon.classList.add('text-gray-500');
+                    }
+                }
+            });
+
+            if (isCorrect) {
+                helperText.textContent = `Ти обрав '${selectedLabel}'. Це ПРАВИЛЬНО! Хобі — це не особиста інформація. Справжній герой захищає свої приватні дані.`;
+                submitButton.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-red-600');
+                submitButton.classList.add('bg-green-600');
+                submitButton.textContent = 'Правильно! Перехід...';
+                updateScore(100); // НАРАХУВАННЯ БАЛІВ
+                
+                setTimeout(() => {
+                    currentStep++;
+                    nextStep();
+                }, 4000);
+                
+            } else {
+                helperText.textContent = `Помилка! Ти обрав приватні дані: '${selectedLabel}'. Пам'ятай: особисту інформацію не можна розголошувати. Правильна відповідь підсвічена зеленим.`;
+                submitButton.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-green-600');
+                submitButton.classList.add('bg-red-600');
+                submitButton.textContent = 'Спробуй ще раз';
+                
+                submitButton.onclick = () => {
+                    // Перезавантажуємо крок
+                    nextStep();      
+                };
+                submitButton.disabled = false; 
+            }
+            
+            lucide.createIcons();
+        }
+
+        // 6. Обробка кібербулінгу (Крок 8)
+        function handleBullying(button, action) {
+            const buttons = document.querySelectorAll('.interactive-button');
+            buttons.forEach(btn => btn.disabled = true);
+
+            buttons.forEach(btn => btn.classList.remove('bg-indigo-500', 'hover:bg-indigo-600'));
+            
+            const isCorrect = action === 'report';
+
+            if (isCorrect) {
+                button.classList.add('bg-green-600', 'shadow-xl', 'scale-105');
+                helperText.textContent = "Ти справжній герой! Заблокувати агресора і повідомити про кібербулінг — це найважливіше правило. Будь завжди добрим!";
+                updateScore(100); // НАРАХУВАННЯ БАЛІВ
+            } else {
+                button.classList.add('bg-red-600', 'shadow-xl', 'scale-105');
+                const correctButton = document.querySelector('button[data-action="report"]');
+                correctButton.classList.add('bg-green-600');
+                
+                helperText.textContent = "Ні, так не можна. Кібербулінг — це зло. Ти повинен заблокувати або сказати дорослим чи адміністратору, а не відповідати образою.";
+            }
+
+            setTimeout(() => {
+                currentStep++;
+                nextStep();
+            }, 4000);
+        }
+        
+        // 7. Обробка кібербулінгу як свідка (Крок 9)
+        function handleBullyingBystander(button, action) {
+            const buttons = document.querySelectorAll('.interactive-button');
+            buttons.forEach(btn => btn.disabled = true);
+
+            buttons.forEach(btn => btn.classList.remove('bg-indigo-500', 'hover:bg-indigo-600'));
+            
+            const isCorrect = action === 'defend';
+
+            if (isCorrect) {
+                button.classList.add('bg-green-600', 'shadow-xl', 'scale-105');
+                helperText.textContent = "Відмінно! Справжній герой не мовчить. Якщо ти бачиш, що ображають іншого, ти повинен заступитися або повідомити про це. Це називається 'проактивний свідок'.";
+                updateScore(100); // НАРАХУВАННЯ БАЛІВ
+            } else {
+                button.classList.add('bg-red-600', 'shadow-xl', 'scale-105');
+                const correctButton = document.querySelector('button[data-action="defend"]');
+                correctButton.classList.add('bg-green-600');
+                
+                helperText.textContent = "Помилка! Мовчання означає підтримку агресора. Якщо не можеш заступитися, ти повинен хоча б повідомити про це дорослим чи адміністратору.";
+            }
+
+            setTimeout(() => {
+                currentStep++;
+                nextStep();
+            }, 4000);
+        }
+
+        // При першому завантаженні - створюємо іконки для стартового екрану
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+
+    </script>
+</body>
+</html>
