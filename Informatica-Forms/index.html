@@ -1,0 +1,313 @@
+﻿<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тестування</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+        .loader {
+            border-top-color: #4F46E5;
+            -webkit-animation: spinner 1.5s linear infinite;
+            animation: spinner 1.5s linear infinite;
+        }
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen py-8 px-4">
+
+    <div id="app" class="max-w-3xl mx-auto">
+        <!-- Content will be injected here by JavaScript -->
+    </div>
+
+    <script>
+        // --- STATE MANAGEMENT ---
+        const state = {
+            view: 'loading', // loading, quiz, result, error
+            quizData: null,
+            userAnswers: {},
+            error: ''
+        };
+
+        // --- UTILITIES ---
+        function validateJsonStructure(data) {
+            if (!data || typeof data !== 'object') return false;
+            if (!data.quizTitle || typeof data.quizTitle !== 'string') return false;
+            if (!data.questions || !Array.isArray(data.questions)) return false;
+            
+            if (data.questions.length > 0) {
+                const q = data.questions[0];
+                if (!q.question || !q.options || !q.correctOption) return false;
+            }
+            return true;
+        }
+
+        function getUrlFromParams() {
+            // Отримуємо рядок запиту (все після ?)
+            let queryString = window.location.search.substring(1); 
+            
+            if (!queryString) return null;
+
+            // Якщо починається з =, видаляємо його (для формату ?=https://...)
+            if (queryString.startsWith('=')) {
+                queryString = queryString.substring(1);
+            }
+
+            // Декодуємо URL, якщо він був закодований браузером
+            return decodeURIComponent(queryString);
+        }
+
+        // --- CONTROLLER FUNCTIONS ---
+
+        async function init() {
+            const jsonUrl = getUrlFromParams();
+
+            if (!jsonUrl) {
+                state.error = 'Не вказано посилання на JSON файл у URL (використовуйте формат ?=https://...)';
+                setView('error');
+                return;
+            }
+
+            try {
+                const response = await fetch(jsonUrl);
+                if (!response.ok) throw new Error(`HTTP помилка! Статус: ${response.status}`);
+                const data = await response.json();
+                
+                if (validateJsonStructure(data)) {
+                    state.quizData = data;
+                    setView('quiz');
+                } else {
+                    state.error = 'Структура JSON некоректна. Перевірте наявність полів quizTitle та questions.';
+                    setView('error');
+                }
+            } catch (err) {
+                state.error = `Не вдалося завантажити тест: ${err.message}. Перевірте URL та налаштування CORS на сервері.`;
+                setView('error');
+            }
+        }
+
+        function setView(viewName) {
+            state.view = viewName;
+            render();
+            window.scrollTo(0, 0);
+        }
+
+        function handleAnswer(qIndex, option) {
+            state.userAnswers[qIndex] = option;
+            render(); 
+        }
+
+        function finishQuiz() {
+            setView('result');
+        }
+
+        function restartQuiz() {
+            // Перезавантажуємо сторінку, щоб почати знову з тим самим URL
+            window.location.reload();
+        }
+
+        // --- VIEW RENDERERS ---
+
+        function renderLoading() {
+            return `
+                <div class="flex flex-col items-center justify-center h-[50vh]">
+                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4"></div>
+                    <h2 class="text-xl font-semibold text-slate-700">Завантаження тесту...</h2>
+                </div>
+            `;
+        }
+
+        function renderError() {
+            return `
+                <div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-lg border-l-4 border-red-500">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="bg-red-100 p-3 rounded-full">
+                            <i data-lucide="alert-triangle" class="w-8 h-8 text-red-600"></i>
+                        </div>
+                        <h1 class="text-2xl font-bold text-slate-800">Виникла помилка</h1>
+                    </div>
+                    <p class="text-slate-600 text-lg mb-6">${state.error}</p>
+                    <div class="bg-slate-100 p-4 rounded-lg text-sm text-slate-500 font-mono break-all">
+                        URL: ${getUrlFromParams() || 'порожньо'}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderQuiz() {
+            const answeredCount = Object.keys(state.userAnswers).length;
+            const totalQuestions = state.quizData.questions.length;
+            const isAllAnswered = answeredCount === totalQuestions;
+
+            const questionsHtml = state.quizData.questions.map((q, idx) => {
+                const optionsHtml = q.options.map((opt, optIdx) => {
+                    const isSelected = state.userAnswers[idx] === opt;
+                    const borderClass = isSelected ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50';
+                    
+                    return `
+                        <label class="flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${borderClass}">
+                            <div class="pt-0.5">
+                                <input
+                                    type="radio"
+                                    name="question-${idx}"
+                                    value="${opt.replace(/"/g, '&quot;')}" 
+                                    ${isSelected ? 'checked' : ''}
+                                    onchange="handleAnswer(${idx}, this.value)"
+                                    class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                                />
+                            </div>
+                            <span class="text-slate-700 text-sm md:text-base leading-relaxed">${opt}</span>
+                        </label>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 mb-6">
+                        <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                            <span class="text-slate-400 mr-2">${idx + 1}.</span>
+                            ${q.question}
+                        </h3>
+                        <div class="space-y-3">
+                            ${optionsHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            return `
+                <div class="max-w-3xl mx-auto">
+                    <div class="bg-white p-6 rounded-xl shadow-md border-b-4 border-indigo-500 mb-6 sticky top-4 z-10">
+                        <div class="flex justify-between items-center">
+                            <h1 class="text-xl font-bold text-slate-800">${state.quizData.quizTitle}</h1>
+                            <span class="text-sm bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full font-medium">
+                                ${answeredCount} / ${totalQuestions}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        ${questionsHtml}
+                    </div>
+
+                    <div class="mt-8 mb-12 flex justify-end">
+                        <button
+                            onclick="finishQuiz()"
+                            ${!isAllAnswered ? 'disabled' : ''}
+                            class="py-3 px-8 rounded-lg font-bold text-lg shadow-lg transition-all flex items-center gap-2 ${isAllAnswered ? 'bg-green-600 hover:bg-green-700 text-white transform hover:-translate-y-1' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}"
+                        >
+                            Завершити тест
+                            <i data-lucide="check-circle" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderResult() {
+            let score = 0;
+            const resultsHtml = state.quizData.questions.map((q, idx) => {
+                const userAnswer = state.userAnswers[idx];
+                const isCorrect = userAnswer?.trim() === q.correctOption?.trim();
+                
+                if (isCorrect) score++;
+
+                const borderColor = isCorrect ? 'border-green-500' : 'border-red-500';
+                const numberColor = isCorrect ? 'text-green-600' : 'text-red-600';
+                const answerBg = isCorrect ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800';
+                const icon = isCorrect ? 'check-circle' : 'x-circle';
+
+                return `
+                    <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 ${borderColor} mb-6">
+                        <div class="flex gap-3 mb-3">
+                            <span class="font-bold text-lg ${numberColor}">${idx + 1}.</span>
+                            <h4 class="text-lg font-medium text-slate-800">${q.question}</h4>
+                        </div>
+
+                        <div class="pl-8 space-y-3">
+                            <div class="p-3 rounded-lg flex items-start gap-2 ${answerBg}">
+                                <i data-lucide="${icon}" class="w-5 h-5 flex-shrink-0 mt-0.5"></i>
+                                <div>
+                                    <span class="text-xs font-bold uppercase block opacity-70 mb-1">Ваша відповідь:</span>
+                                    ${userAnswer || 'Немає відповіді'}
+                                </div>
+                            </div>
+
+                            ${!isCorrect ? `
+                                <div class="p-3 rounded-lg bg-slate-50 text-slate-700 flex items-start gap-2 border border-slate-200">
+                                    <i data-lucide="check-circle" class="w-5 h-5 flex-shrink-0 mt-0.5 text-green-600"></i>
+                                    <div>
+                                        <span class="text-xs font-bold uppercase block opacity-70 mb-1 text-slate-500">Правильна відповідь:</span>
+                                        ${q.correctOption}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const percentage = Math.round((score / state.quizData.questions.length) * 100);
+            let scoreColor = 'text-red-500';
+            let message = 'Спробуйте ще раз!';
+            if (percentage >= 50) { scoreColor = 'text-yellow-500'; message = 'Непогано!'; }
+            if (percentage >= 80) { scoreColor = 'text-green-500'; message = 'Чудовий результат!'; }
+
+            return `
+                <div class="max-w-3xl mx-auto pb-12">
+                    <div class="bg-white p-8 rounded-xl shadow-lg border-t-4 border-indigo-500 text-center mb-8">
+                        <div class="flex justify-center mb-4">
+                            <i data-lucide="award" class="w-16 h-16 ${scoreColor}"></i>
+                        </div>
+                        <h2 class="text-3xl font-bold text-slate-800 mb-2">Ваш результат</h2>
+                        <div class="text-5xl font-extrabold ${scoreColor} mb-2">${percentage}%</div>
+                        <p class="text-slate-500 text-lg mb-6">
+                            Ви відповіли правильно на <span class="font-bold text-slate-800">${score}</span> з ${state.quizData.questions.length} запитань. ${message}
+                        </p>
+                        <button
+                            onclick="restartQuiz()"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors flex items-center gap-2 mx-auto"
+                        >
+                            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                            Пройти ще раз
+                        </button>
+                    </div>
+
+                    <h3 class="text-xl font-bold text-slate-700 mb-4 px-2">Детальний розбір:</h3>
+                    
+                    ${resultsHtml}
+                </div>
+            `;
+        }
+
+        // --- MAIN RENDER LOOP ---
+        function render() {
+            const app = document.getElementById('app');
+            
+            if (state.view === 'loading') {
+                app.innerHTML = renderLoading();
+            } else if (state.view === 'error') {
+                app.innerHTML = renderError();
+            } else if (state.view === 'quiz') {
+                app.innerHTML = renderQuiz();
+            } else if (state.view === 'result') {
+                app.innerHTML = renderResult();
+            }
+            
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }
+
+        // Start App
+        init();
+
+    </script>
+</body>
+</html>
