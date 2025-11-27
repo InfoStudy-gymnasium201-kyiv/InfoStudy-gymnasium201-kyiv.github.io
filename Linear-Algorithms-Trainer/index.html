@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Алгоритмічні Блоки</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .bg-grid-pattern {
+            background-image: radial-gradient(#4f46e5 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .slot-active {
+            background-color: #e0e7ff;
+            border-color: #6366f1;
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .7; }
+        }
+        .dragging {
+            opacity: 0.5;
+        }
+        /* Loader styles */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4f46e5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen font-sans text-slate-800 flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm p-4 sticky top-0 z-10">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-indigo-900 flex items-center gap-2">
+                    <span class="bg-indigo-100 p-2 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    </span>
+                    Алгоритмічні Блоки
+                </h1>
+            </div>
+            <div id="level-indicator" class="text-sm md:text-base font-medium text-slate-500">
+                Завантаження...
+            </div>
+        </div>
+    </header>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="flex-grow flex flex-col items-center justify-center p-10">
+        <div class="loader mb-4"></div>
+        <p class="text-slate-600 font-medium">Отримання завдань із сервера...</p>
+    </div>
+
+    <!-- Error Screen (Hidden by default) -->
+    <div id="error-screen" class="hidden flex-grow flex flex-col items-center justify-center p-10 text-center">
+        <div class="bg-red-100 p-4 rounded-full mb-4 text-red-600">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        </div>
+        <h2 class="text-xl font-bold text-slate-800 mb-2">Помилка завантаження</h2>
+        <p id="error-message" class="text-slate-600 max-w-md">Не вдалося отримати дані.</p>
+        <button onclick="location.reload()" class="mt-6 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">Спробувати ще раз</button>
+    </div>
+
+    <!-- Main Game Area (Hidden until loaded) -->
+    <main id="game-screen" class="hidden flex-grow flex flex-col md:flex-row max-w-6xl mx-auto w-full p-4 gap-6">
+        
+        <!-- Center: Flowchart -->
+        <div class="flex-grow flex flex-col items-center justify-center bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-10 relative overflow-hidden min-h-[500px]">
+            <div class="absolute inset-0 opacity-5 pointer-events-none bg-grid-pattern"></div>
+
+            <h2 id="level-title" class="text-xl font-semibold mb-6 text-center z-10">...</h2>
+            
+            <div class="flex flex-col items-center gap-2 z-10 w-full max-w-md" id="flowchart-container">
+                <!-- Start Node -->
+                <div id="start-node" class="bg-green-100 border-2 border-green-500 text-green-900 px-8 py-3 rounded-full font-bold shadow-sm w-48 text-center text-sm md:text-base mb-2">
+                    Початок
+                </div>
+
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+
+                <!-- Slot 1 -->
+                <div class="slot w-64 h-20 md:w-72 md:h-24 border-2 border-dashed border-slate-300 bg-slate-50 rounded-lg flex items-center justify-center transition-all cursor-pointer relative group hover:border-indigo-300" data-index="0">
+                    <span class="placeholder text-slate-400 text-sm flex flex-col items-center gap-1">
+                        <span class="slot-number">1</span>
+                        <span class="slot-text">Дія</span>
+                    </span>
+                </div>
+
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+
+                <!-- Slot 2 -->
+                <div class="slot w-64 h-20 md:w-72 md:h-24 border-2 border-dashed border-slate-300 bg-slate-50 rounded-lg flex items-center justify-center transition-all cursor-pointer relative group hover:border-indigo-300" data-index="1">
+                    <span class="placeholder text-slate-400 text-sm flex flex-col items-center gap-1">
+                        <span class="slot-number">2</span>
+                        <span class="slot-text">Дія</span>
+                    </span>
+                </div>
+
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+
+                <!-- Slot 3 -->
+                <div class="slot w-64 h-20 md:w-72 md:h-24 border-2 border-dashed border-slate-300 bg-slate-50 rounded-lg flex items-center justify-center transition-all cursor-pointer relative group hover:border-indigo-300" data-index="2">
+                    <span class="placeholder text-slate-400 text-sm flex flex-col items-center gap-1">
+                        <span class="slot-number">3</span>
+                        <span class="slot-text">Дія</span>
+                    </span>
+                </div>
+
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+
+                <!-- End Node -->
+                <div id="end-node" class="bg-red-100 border-2 border-red-500 text-red-900 px-8 py-3 rounded-full font-bold shadow-sm w-48 text-center text-sm md:text-base mt-2">
+                    Кінець
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Sidebar -->
+        <div class="w-full md:w-80 flex flex-col gap-4">
+            
+            <!-- Instructions -->
+            <div class="bg-indigo-900 text-white p-6 rounded-2xl shadow-lg">
+                <h3 class="font-bold mb-2 flex items-center gap-2">
+                    <span class="bg-white/20 px-2 py-0.5 rounded text-sm">?</span> Завдання
+                </h3>
+                <p id="level-description" class="text-indigo-100 text-sm leading-relaxed">
+                    Розставте блоки у правильному порядку.
+                </p>
+            </div>
+
+            <!-- Options Pool -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex-grow flex flex-col">
+                <h3 class="font-bold text-slate-700 mb-4 text-sm uppercase tracking-wide">Варіанти дій:</h3>
+                
+                <div id="options-container" class="flex flex-col gap-3 flex-grow"></div>
+                
+                <div id="empty-pool-message" class="hidden text-center text-slate-400 text-sm italic py-8 border-2 border-dashed border-slate-100 rounded-lg">
+                    Всі блоки розміщено. <br/> Перевірте результат!
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div id="controls-area" class="grid grid-cols-2 gap-3">
+                <button onclick="resetCurrentLevel()" class="px-4 py-3 rounded-xl bg-slate-200 text-slate-700 font-semibold hover:bg-slate-300 transition flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74-2.74L3 12"></path><path d="M3 3v9h9"></path></svg> 
+                    Скинути
+                </button>
+                <button onclick="checkAnswer()" class="px-4 py-3 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 shadow-md hover:shadow-lg transition flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    Перевірити
+                </button>
+            </div>
+
+            <!-- Result Message Area -->
+            <div id="result-area" class="hidden col-span-2 p-4 rounded-xl flex flex-col items-center gap-3">
+                <div id="result-title" class="font-bold text-lg flex items-center gap-2"></div>
+                <div id="result-message" class="text-sm text-center"></div>
+                <button id="next-level-btn" onclick="nextLevel()" class="hidden w-full mt-2 bg-green-600 text-white py-2 rounded-lg font-bold hover:bg-green-700 transition flex items-center justify-center gap-2">
+                    Наступний рівень 
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </button>
+                <button id="retry-btn" onclick="resetCurrentLevel()" class="hidden w-full mt-2 bg-white border border-red-200 py-2 rounded-lg font-semibold hover:bg-red-50 transition text-red-700">
+                    Спробувати знову
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Victory Screen -->
+    <div id="victory-screen" class="hidden fixed inset-0 bg-slate-50 z-50 flex items-center justify-center p-4 font-sans text-slate-800">
+        <div class="bg-white p-8 rounded-2xl shadow-xl max-w-lg w-full text-center">
+            <div class="flex justify-center mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2h-4a4 4 0 0 0-4 4v3a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V6a4 4 0 0 0-4-4Z"></path></svg>
+            </div>
+            <h1 class="text-3xl font-bold mb-4 text-slate-900">Вітаємо!</h1>
+            <p class="text-lg text-slate-600 mb-8">Ви пройшли всі 5 випадкових рівнів!</p>
+            <button onclick="location.reload()" class="bg-indigo-600 text-white px-6 py-3 rounded-full font-bold hover:bg-indigo-700 transition flex items-center justify-center mx-auto gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></button>
+                Грати з новими питаннями
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript Game Logic -->
+    <script>
+        // --- CONFIGURATION ---
+        
+        // Тут ми створюємо DATA URI, щоб емулювати URL з JSON даними.
+        // У реальному проекті замініть DATA_URL на: 'https://example.com/api/questions.json'
+        const MOCK_DATA = {
+            "questions": [
+                {
+                    "task_name": "Приготування чаю",
+                    "start_block": "Хочу чаю",
+                    "action1": "Закип'ятити воду",
+                    "action2": "Покласти пакетик у чашку",
+                    "action3": "Залити окропом",
+                    "end_block": "Чай готовий"
+                },
+                {
+                    "task_name": "Посадка дерева",
+                    "start_block": "Є саджанець",
+                    "action1": "Викопати яму",
+                    "action2": "Поставити дерево в яму",
+                    "action3": "Засипати землею і полити",
+                    "end_block": "Дерево росте"
+                },
+                {
+                    "task_name": "Перехід дороги",
+                    "start_block": "Біля переходу",
+                    "action1": "Подивитися ліворуч",
+                    "action2": "Подивитися праворуч",
+                    "action3": "Йти, якщо машин немає",
+                    "end_block": "На іншому боці"
+                },
+                {
+                    "task_name": "Цикл програми",
+                    "start_block": "Start Loop",
+                    "action1": "Ініціалізувати лічильник",
+                    "action2": "Перевірити умову",
+                    "action3": "Виконати дію",
+                    "end_block": "End Loop"
+                },
+                {
+                    "task_name": "Приготування бутерброда",
+                    "start_block": "Голодний",
+                    "action1": "Взяти шматок хліба",
+                    "action2": "Намазати масло",
+                    "action3": "Покласти сир",
+                    "end_block": "Сито"
+                },
+                {
+                    "task_name": "Чищення зубів",
+                    "start_block": "Ранок",
+                    "action1": "Нанести пасту на щітку",
+                    "action2": "Почистити зуби",
+                    "action3": "Прополоскати рот",
+                    "end_block": "Свіжий подих"
+                },
+                {
+                    "task_name": "Відправка листа",
+                    "start_block": "Є лист",
+                    "action1": "Покласти лист у конверт",
+                    "action2": "Наклеїти марку",
+                    "action3": "Кинути в скриньку",
+                    "end_block": "Лист відправлено"
+                }
+            ]
+        };
+
+        // Створюємо Blob URL для імітації зовнішнього посилання
+        const jsonString = JSON.stringify(MOCK_DATA);
+        const blob = new Blob([jsonString], {type: "application/json"});
+        const DATA_URL = URL.createObjectURL(blob); 
+        // АБО встановіть сюди реальний URL: 
+        // const DATA_URL = "https://your-server.com/questions.json";
+
+        // --- STATE ---
+        let levelsData = []; // Завантажені рівні
+        let currentLevelIndex = 0;
+        let placedItems = [null, null, null];
+        let availableOptions = [];
+        let gameState = 'loading'; // loading, playing, correct, wrong, finished, error
+        let selectedOptionId = null;
+
+        // --- DOM ELEMENTS ---
+        const loadingScreen = document.getElementById('loading-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const errorScreen = document.getElementById('error-screen');
+        const errorMessage = document.getElementById('error-message');
+        const victoryScreen = document.getElementById('victory-screen');
+        
+        const levelTitleEl = document.getElementById('level-title');
+        const levelDescEl = document.getElementById('level-description');
+        const levelIndicatorEl = document.getElementById('level-indicator');
+        const startNodeEl = document.getElementById('start-node');
+        const endNodeEl = document.getElementById('end-node');
+        const slots = document.querySelectorAll('.slot');
+        const optionsContainer = document.getElementById('options-container');
+        const emptyPoolMsg = document.getElementById('empty-pool-message');
+        const controlsArea = document.getElementById('controls-area');
+        const resultArea = document.getElementById('result-area');
+        const resultTitle = document.getElementById('result-title');
+        const resultMessage = document.getElementById('result-message');
+        const nextLevelBtn = document.getElementById('next-level-btn');
+        const retryBtn = document.getElementById('retry-btn');
+
+        // --- INITIALIZATION ---
+        async function initGame() {
+            try {
+                // Fetch data
+                const response = await fetch(DATA_URL);
+                if (!response.ok) throw new Error(`HTTP помилка! Статус: ${response.status}`);
+                const data = await response.json();
+
+                if (!data.questions || !Array.isArray(data.questions)) {
+                    throw new Error("Невірний формат JSON: відсутній масив 'questions'");
+                }
+
+                // Prepare Game Data: Select 5 random unique questions
+                processGameData(data.questions);
+
+                // Start
+                loadingScreen.classList.add('hidden');
+                gameScreen.classList.remove('hidden');
+                loadLevel(0);
+                setupEventListeners();
+
+            } catch (error) {
+                console.error(error);
+                loadingScreen.classList.add('hidden');
+                errorScreen.classList.remove('hidden');
+                errorMessage.textContent = `Деталі: ${error.message}. Перевірте URL або структуру JSON.`;
+            }
+        }
+
+        function processGameData(questions) {
+            // Shuffle full array
+            const shuffled = [...questions].sort(() => 0.5 - Math.random());
+            
+            // Take first 5 (or fewer if not enough data)
+            const selected = shuffled.slice(0, 5);
+
+            // Map to internal format
+            levelsData = selected.map((q, index) => ({
+                id: index + 1,
+                title: q.task_name,
+                description: `Складіть алгоритм для завдання: "${q.task_name}"`,
+                startNode: q.start_block,
+                endNode: q.end_block,
+                correctOrder: [
+                    { id: `q${index}_a1`, text: q.action1 },
+                    { id: `q${index}_a2`, text: q.action2 },
+                    { id: `q${index}_a3`, text: q.action3 }
+                ]
+            }));
+        }
+
+        function setupEventListeners() {
+            slots.forEach(slot => {
+                slot.addEventListener('dragover', handleDragOver);
+                slot.addEventListener('drop', handleDrop);
+                slot.addEventListener('click', () => handleSlotClick(parseInt(slot.dataset.index)));
+            });
+        }
+
+        // --- GAME LOGIC ---
+
+        function loadLevel(index) {
+            currentLevelIndex = index;
+            const level = levelsData[currentLevelIndex];
+
+            // Update Text
+            levelTitleEl.textContent = `Завдання ${index + 1}: ${level.title}`;
+            levelDescEl.textContent = level.description;
+            levelIndicatorEl.textContent = `Питання ${index + 1} з ${levelsData.length}`;
+            startNodeEl.textContent = level.startNode;
+            endNodeEl.textContent = level.endNode;
+
+            // Reset State
+            placedItems = [null, null, null];
+            gameState = 'playing';
+            selectedOptionId = null;
+
+            // Shuffle Options for display
+            availableOptions = [...level.correctOrder].sort(() => Math.random() - 0.5);
+
+            // Update UI
+            renderSlots();
+            renderOptions();
+            updateUIState();
+        }
+
+        function resetCurrentLevel() {
+            loadLevel(currentLevelIndex);
+        }
+
+        function renderOptions() {
+            optionsContainer.innerHTML = '';
+            
+            if (availableOptions.length === 0) {
+                emptyPoolMsg.classList.remove('hidden');
+            } else {
+                emptyPoolMsg.classList.add('hidden');
+                availableOptions.forEach(item => {
+                    const el = document.createElement('div');
+                    el.className = `p-4 rounded-lg border-2 shadow-sm cursor-grab active:cursor-grabbing transition-all transform select-none ${selectedOptionId === item.id ? 'bg-indigo-100 border-indigo-500 scale-105 ring-2 ring-indigo-200' : 'bg-white border-slate-200 hover:border-indigo-300 hover:shadow-md'}`;
+                    el.draggable = true;
+                    el.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="w-2 h-2 rounded-full bg-indigo-400"></div>
+                            <span class="font-medium text-slate-700 text-sm md:text-base pointer-events-none">${item.text}</span>
+                        </div>
+                    `;
+                    el.addEventListener('dragstart', (e) => handleDragStart(e, item.id));
+                    el.addEventListener('click', () => handleOptionClick(item.id));
+                    optionsContainer.appendChild(el);
+                });
+            }
+        }
+
+        function renderSlots() {
+            slots.forEach((slot, index) => {
+                const item = placedItems[index];
+                slot.innerHTML = '';
+                slot.className = `slot w-64 h-20 md:w-72 md:h-24 border-2 border-dashed rounded-lg flex items-center justify-center transition-all cursor-pointer relative group`;
+
+                if (item) {
+                    if (gameState === 'correct') slot.classList.add('bg-green-50', 'border-green-500');
+                    else if (gameState === 'wrong') slot.classList.add('bg-red-50', 'border-red-500');
+                    else slot.classList.add('bg-indigo-50', 'border-indigo-300');
+
+                    const contentDiv = document.createElement('div');
+                    contentDiv.className = "w-full h-full bg-white border border-indigo-200 shadow-sm rounded flex items-center justify-center p-2 text-center font-medium text-sm md:text-base text-indigo-900 relative";
+                    contentDiv.draggable = gameState === 'playing';
+                    contentDiv.textContent = item.text;
+                    
+                    if(gameState === 'playing') {
+                        contentDiv.addEventListener('dragstart', (e) => handleDragStart(e, item.id));
+                        const deleteIcon = document.createElement('div');
+                        deleteIcon.className = "absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 text-white rounded-full p-1 shadow-md cursor-pointer z-20";
+                        deleteIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+                        deleteIcon.onclick = (e) => {
+                             e.stopPropagation();
+                             removeItemFromSlot(index);
+                        };
+                        contentDiv.appendChild(deleteIcon);
+                    }
+                    slot.appendChild(contentDiv);
+                } else {
+                    if (selectedOptionId) slot.classList.add('bg-indigo-50', 'border-indigo-400', 'animate-pulse');
+                    else slot.classList.add('bg-slate-50', 'border-slate-300', 'hover:border-indigo-300');
+
+                    slot.innerHTML = `
+                        <span class="placeholder text-slate-400 text-sm flex flex-col items-center gap-1 pointer-events-none">
+                            <span class="slot-number">${selectedOptionId ? '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"></path><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"></path><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"></path><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"></path></svg>' : index + 1}</span>
+                            <span class="slot-text">${selectedOptionId ? "Натисніть сюди" : "Дія"}</span>
+                        </span>
+                    `;
+                }
+            });
+        }
+
+        function updateUIState() {
+            if (gameState === 'playing') {
+                controlsArea.classList.remove('hidden');
+                resultArea.classList.add('hidden');
+            } else {
+                controlsArea.classList.add('hidden');
+                resultArea.classList.remove('hidden');
+                resultArea.className = `col-span-2 p-4 rounded-xl flex flex-col items-center gap-3 ${gameState === 'correct' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
+                
+                if (gameState === 'correct') {
+                    resultTitle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Чудово!`;
+                    resultMessage.textContent = "Алгоритм складено вірно.";
+                    nextLevelBtn.classList.remove('hidden');
+                    retryBtn.classList.add('hidden');
+                } else {
+                    resultTitle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> Помилка`;
+                    resultMessage.textContent = "Порядок дій неправильний. Спробуй ще раз!";
+                    nextLevelBtn.classList.add('hidden');
+                    retryBtn.classList.remove('hidden');
+                }
+            }
+        }
+
+        // --- INTERACTION ---
+
+        function handleDragStart(e, itemId) {
+            if (gameState !== 'playing') { e.preventDefault(); return; }
+            e.dataTransfer.setData("text/plain", itemId);
+            e.target.classList.add('dragging');
+        }
+        function handleDragOver(e) { e.preventDefault(); }
+        function handleDrop(e) {
+            e.preventDefault();
+            const itemId = e.dataTransfer.getData("text/plain");
+            const slot = e.target.closest('.slot');
+            if (slot) placeItemInSlot(itemId, parseInt(slot.dataset.index));
+            document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
+        }
+        function handleOptionClick(itemId) {
+            if (gameState !== 'playing') return;
+            selectedOptionId = (selectedOptionId === itemId) ? null : itemId;
+            renderOptions(); renderSlots();
+        }
+        function handleSlotClick(slotIndex) {
+            if (gameState !== 'playing') return;
+            if (selectedOptionId) {
+                placeItemInSlot(selectedOptionId, slotIndex);
+                selectedOptionId = null;
+                renderOptions();
+            } else if (placedItems[slotIndex]) {
+                removeItemFromSlot(slotIndex);
+            }
+        }
+        function placeItemInSlot(itemId, slotIndex) {
+            const itemFromPool = availableOptions.find(opt => opt.id === itemId);
+            const itemFromSlot = placedItems.find(opt => opt && opt.id === itemId);
+            const item = itemFromPool || itemFromSlot;
+            if (!item) return;
+            
+            const oldSlotIndex = placedItems.findIndex(opt => opt && opt.id === itemId);
+            if (oldSlotIndex !== -1) placedItems[oldSlotIndex] = null;
+            if (itemFromPool) availableOptions = availableOptions.filter(opt => opt.id !== itemId);
+            if (placedItems[slotIndex]) availableOptions.push(placedItems[slotIndex]);
+            
+            placedItems[slotIndex] = item;
+            renderSlots(); renderOptions();
+        }
+        function removeItemFromSlot(index) {
+            const item = placedItems[index];
+            if (!item) return;
+            placedItems[index] = null;
+            availableOptions.push(item);
+            renderSlots(); renderOptions();
+        }
+
+        function checkAnswer() {
+            if (placedItems.some(item => item === null)) {
+                alert("Будь ласка, заповніть усі блоки перед перевіркою!");
+                return;
+            }
+            const currentLevel = levelsData[currentLevelIndex];
+            const isCorrect = placedItems.every((item, index) => item.id === currentLevel.correctOrder[index].id);
+            gameState = isCorrect ? 'correct' : 'wrong';
+            renderSlots(); updateUIState();
+        }
+
+        function nextLevel() {
+            if (currentLevelIndex < levelsData.length - 1) {
+                loadLevel(currentLevelIndex + 1);
+            } else {
+                gameScreen.classList.add('hidden');
+                victoryScreen.classList.remove('hidden');
+            }
+        }
+
+        // Run
+        initGame();
+
+    </script>
+</body>
+</html>
