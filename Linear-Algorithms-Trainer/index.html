@@ -261,11 +261,11 @@
         };
 
         // Створюємо Blob URL для імітації зовнішнього посилання
-        const jsonString = JSON.stringify(MOCK_DATA);
-        const blob = new Blob([jsonString], {type: "application/json"});
-        const DATA_URL = URL.createObjectURL(blob); 
+        //const jsonString = JSON.stringify(MOCK_DATA);
+        //const blob = new Blob([jsonString], {type: "application/json"});
+        //const DATA_URL = URL.createObjectURL(blob); 
         // АБО встановіть сюди реальний URL: 
-        // const DATA_URL = "https://your-server.com/questions.json";
+         const DATA_URL = "https://raw.githubusercontent.com/InfoStudy-gymnasium201-kyiv/InfoStudy-gymnasium201-kyiv.github.io/refs/heads/main/Extra/Linear-Algorithms-Trainer-Data/questions.json";
 
         // --- STATE ---
         let levelsData = []; // Завантажені рівні
