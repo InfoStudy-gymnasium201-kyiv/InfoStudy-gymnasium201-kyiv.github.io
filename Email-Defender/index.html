@@ -11,7 +11,7 @@
     <style>
         /* Анімації для карток */
         @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-20px) scale(0.9); }
+            from { opacity: 0; transform: translateY(20px) scale(0.9); }
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
         @keyframes popOut {
@@ -120,8 +120,8 @@
         </div>
     </div>
 
-    <!-- ЕКРАН ПРОГРАШУ -->
-    <div id="gameover-screen" class="w-full max-w-md p-6 flex-col items-center text-center hidden absolute inset-0 bg-slate-100/90 backdrop-blur-sm z-50 flex justify-center">
+    <!-- ЕКРАН ПРОГРАШУ (Виправлено центрування) -->
+    <div id="gameover-screen" class="w-full max-w-md p-6 flex-col items-center justify-center text-center hidden absolute inset-0 bg-slate-100/90 backdrop-blur-sm z-50 flex">
         <div class="bg-white p-8 rounded-2xl shadow-xl w-full border-t-8 border-red-500 animate-[slideIn_0.3s_ease-out]">
             <div class="flex justify-center mb-4 text-red-500">
                 <i data-lucide="x" width="64"></i>
@@ -292,13 +292,13 @@
 
         function addEmail() {
             const email = generateEmail();
+            // Додаємо в кінець масиву, це буде "найглибший/нижній" лист
             state.emails.push(email);
             renderEmails();
             updateStats();
         }
 
         function renderEmails() {
-            // Очищаємо контейнер (крім Empty State, хоча ми можемо просто все перемалювати)
             els.emailsContainer.innerHTML = '';
 
             if (state.emails.length === 0) {
@@ -306,33 +306,40 @@
                 return;
             }
 
-            // Рендеримо листи. Останній в масиві - це "верхній" лист, який бачить гравець
-            // Для візуального стеку ми використовуємо absolute позиціонування або трансформації
-            
-            // Щоб створити ефект стопки, ми проходимося по масиву
-            // Верхній лист (останній індекс) має бути z-index найвищий і scale 1
-            // Попередні листи мають бути нижче і менші
+            // Рендеримо листи. 
+            // Індекс 0 - це найстаріший лист, він має бути ЗВЕРХУ (Front).
+            // Останній індекс - найновіший, він має бути ЗНИЗУ (Back).
             
             state.emails.forEach((email, index) => {
-                // Відстань від кінця масиву (0 = верхній лист)
-                const reverseIndex = state.emails.length - 1 - index;
-                
-                // Якщо лист дуже глибоко, не рендеримо його або ховаємо
-                if (reverseIndex > 4) return; 
+                // Якщо лист дуже глибоко (далеко в черзі), не рендеримо його або ховаємо
+                if (index > 4) return; 
 
                 const el = document.createElement('div');
+                
+                // Z-index: Перший елемент (0) має найбільший z-index
+                const zIndex = 20 - index;
+                
+                // Scale та Opacity зменшуються для елементів, що стоять у черзі
+                const scale = 1 - (index * 0.05);
+                const opacity = 100 - (index * 20);
+                const translateY = index * 15; // Зсув вниз для ефекту стопки
+
                 el.className = `
                     absolute top-0 left-0 w-full bg-white rounded-xl shadow-md p-4 border-l-4 border-gray-200 
                     transition-all duration-300 email-enter
-                    ${reverseIndex === 0 ? 'z-20 scale-100 opacity-100 ring-4 ring-blue-50/50' : `z-${10-reverseIndex} scale-${95 - (reverseIndex*5)} opacity-${100 - (reverseIndex*20)}`}
+                    z-[${zIndex}]
                 `;
-                // Зсув для ефекту стопки
-                el.style.transform = `translateY(${reverseIndex * 15}px) scale(${1 - (reverseIndex * 0.05)})`;
-                // Нейтральний колір при наведенні
-                if (reverseIndex === 0) {
-                    el.classList.add('hover:border-blue-300', 'cursor-pointer');
+                
+                // Використовуємо інлайн стилі для точного керування трансформаціями
+                el.style.zIndex = zIndex;
+                el.style.transform = `translateY(${translateY}px) scale(${scale})`;
+                el.style.opacity = `${opacity}%`;
+
+                // Активний тільки верхній лист (index 0)
+                if (index === 0) {
+                    el.classList.add('hover:border-blue-300', 'cursor-pointer', 'ring-4', 'ring-blue-50/50');
                 } else {
-                    el.classList.add('pointer-events-none'); // Не можна клікати на нижні
+                    el.classList.add('pointer-events-none'); 
                 }
 
                 el.innerHTML = `
@@ -351,8 +358,8 @@
         function handleAction(action) {
             if (state.emails.length === 0 || !state.isPlaying) return;
 
-            // Беремо верхній лист (останній в масиві)
-            const currentEmail = state.emails[state.emails.length - 1];
+            // Беремо перший лист (index 0) - найстаріший, який зараз зверху
+            const currentEmail = state.emails[0];
             
             let isCorrect = false;
             if (action === 'spam' && currentEmail.isSpam) isCorrect = true;
@@ -364,16 +371,15 @@
                 removeTopEmail();
             } else {
                 loseLife('Помилка!');
-                removeTopEmail(); // Видаляємо навіть при помилці, щоб гра йшла далі
+                removeTopEmail();
             }
 
             updateStats();
         }
 
         function removeTopEmail() {
-            // Анімація видалення (опціонально)
-            // Просто видаляємо з масиву
-            state.emails.pop();
+            // Видаляємо перший елемент масиву (той, що був зверху)
+            state.emails.shift();
             renderEmails();
         }
 
@@ -381,7 +387,6 @@
             state.lives--;
             showFeedback('error', reason);
             
-            // Візуальний ефект тряски екрану абощо
             document.body.classList.add('bg-red-50');
             setTimeout(() => document.body.classList.remove('bg-red-50'), 200);
 
@@ -410,12 +415,12 @@
             els.livesContainer.innerHTML = '';
             for (let i = 0; i < 3; i++) {
                 const heart = document.createElement('i');
-                heart.setAttribute('data-lucide', 'alert-triangle'); // Трикутник як в React версії
+                heart.setAttribute('data-lucide', 'alert-triangle');
                 heart.className = i < state.lives ? 'text-red-500 transition-all' : 'text-gray-200 transition-all';
                 heart.setAttribute('width', '24');
                 els.livesContainer.appendChild(heart);
             }
-            lucide.createIcons(); // Оновити іконки після зміни DOM
+            lucide.createIcons(); 
 
             // Попередження
             if (state.emails.length >= 4) {
@@ -431,7 +436,6 @@
                 type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
             }`;
 
-            // Скидання через час
             setTimeout(() => {
                 els.feedback.classList.add('opacity-0', '-translate-y-2');
             }, 800);
