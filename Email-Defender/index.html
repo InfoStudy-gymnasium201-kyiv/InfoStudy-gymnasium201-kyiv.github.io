@@ -1,311 +1,380 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Mail, Trash2, CheckCircle, AlertTriangle, Play, RefreshCw, Trophy, Clock, X } from 'lucide-react';
-
- --- ДАНІ ДЛЯ ГЕНЕРАЦІЇ ЛИСТІВ ---
-
-const sendersSpam = [
-  Принц Нігерії, Банк Приват (Fake), Виграш Лотерея, Збільшення..., 
-  Інвестиції Крипто, Служба безпеки, Ілон Маск Giveaway, Адвокат Джонсон
-];
-const subjectsSpam = [
-  ТЕРМІНОВО Ваш рахунок заблоковано!, Ви виграли $1,000,000!, 
-  Секретний метод заробітку, Перейдіть за посиланням, 
-  Лише сьогодні знижка 99%, Ваш родич залишив спадок
-];
-const bodiesSpam = [
-  Натисніть сюди терміново, щоб забрати гроші., 
-  Ми виявили підозрілу активність. Надішліть пароль., 
-  Це не жарт! Ви стали мільйонером. Сплатіть податок 50 грн.,
-  Унікальна пропозиція. Купіть біткоїн за 1 долар.,
-  Вітаємо! Ваша адреса обрана випадковим чином.
-];
-
-const sendersReal = [
-  Бос (Олег Петрович), Бухгалтерія, Мама, Служба доставки, 
-  HR відділ, Клієнт (ТОВ Ромашка), Підтримка Google, Amazon Orders
-];
-const subjectsReal = [
-  Звіт за квартал, Запрошення на нараду, Як справи, 
-  Ваше замовлення доставлено, Графік відпусток, Правки до макету, 
-  Рахунок за інтернет, Зміни в політиці конфіденційності
-];
-const bodiesReal = [
-  Привіт, переглянь вкладений файл до наради.,
-  Нагадуємо, що завтра вихідний день.,
-  Ваша посилка чекає у поштоматі №42.,
-  Будь ласка, підпишіть документи до кінця дня.,
-  Дякуємо за використання нашого сервісу.
-];
-
- --- КОМПОНЕНТИ ---
-
-const generateEmail = () = {
-  const isSpam = Math.random()  0.5;
-  
-  if (isSpam) {
-    return {
-      id Date.now() + Math.random(),
-      sender sendersSpam[Math.floor(Math.random()  sendersSpam.length)],
-      subject subjectsSpam[Math.floor(Math.random()  subjectsSpam.length)],
-      body bodiesSpam[Math.floor(Math.random()  bodiesSpam.length)],
-      isSpam true,
-      timestamp new Date().toLocaleTimeString([], { hour '2-digit', minute '2-digit' })
-    };
-  } else {
-    return {
-      id Date.now() + Math.random(),
-      sender sendersReal[Math.floor(Math.random()  sendersReal.length)],
-      subject subjectsReal[Math.floor(Math.random()  subjectsReal.length)],
-      body bodiesReal[Math.floor(Math.random()  bodiesReal.length)],
-      isSpam false,
-      timestamp new Date().toLocaleTimeString([], { hour '2-digit', minute '2-digit' })
-    };
-  }
-};
-
-export default function EmailDefenderGame() {
-  const [gameState, setGameState] = useState('menu');  menu, playing, gameover
-  const [emails, setEmails] = useState([]);
-  const [score, setScore] = useState(0);
-  const [lives, setLives] = useState(3);
-  const [feedback, setFeedback] = useState(null);  { type 'success'  'error', text string }
-  const [difficulty, setDifficulty] = useState(1);
-  
-   Функція початку гри
-  const startGame = () = {
-    setGameState('playing');
-    setScore(0);
-    setLives(3);
-    setDifficulty(1);
-    setEmails([generateEmail()]);  Почати з одного листа
-    setFeedback(null);
-  };
-
-   Таймер для спавну нових листів
-  useEffect(() = {
-    if (gameState !== 'playing') return;
-
-     Базова швидкість 3 секунди, зменшується зі складністю
-    const spawnRate = Math.max(800, 3000 - (score  50)); 
-
-    const spawner = setInterval(() = {
-      setEmails(prev = {
-        if (prev.length = 6) {
-           Якщо листів забагато - втрачаємо життя
-          setLives(l = l - 1);
-          setFeedback({ type 'error', text 'Переповнення пошти!' });
-          return prev; 
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Симулятор Пошти (JS Edition)</title>
+    <!-- Підключення Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Підключення іконок Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Додаткові анімації, яких немає в дефолтному Tailwind */
+        @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        return [generateEmail(), ...prev];
-      });
-    }, spawnRate);
+        .animate-fade-in-up {
+            animation: fade-in-up 0.5s ease-out forwards;
+        }
+        .card-stack-item {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-800 font-sans flex flex-col items-center justify-center p-4 overflow-hidden">
 
-    return () = clearInterval(spawner);
-  }, [gameState, score]);
+    <!-- Контейнер гри (сюди буде рендеритись різний контент) -->
+    <div id="app" class="w-full max-w-md relative"></div>
 
-   Перевірка програшу
-  useEffect(() = {
-    if (lives = 0) {
-      setGameState('gameover');
-    }
-  }, [lives]);
+    <script>
+        // --- ДАНІ ---
+        const sendersSpam = [
+            "Принц Нігерії", "Банк Приват (Fake)", "Виграш Лотерея", "Збільшення...", 
+            "Інвестиції Крипто", "Служба безпеки", "Ілон Маск Giveaway", "Адвокат Джонсон"
+        ];
+        const subjectsSpam = [
+            "ТЕРМІНОВО: Ваш рахунок заблоковано!", "Ви виграли $1,000,000!", 
+            "Секретний метод заробітку", "Перейдіть за посиланням", 
+            "Лише сьогодні: знижка 99%", "Ваш родич залишив спадок"
+        ];
+        const bodiesSpam = [
+            "Натисніть сюди терміново, щоб забрати гроші.", 
+            "Ми виявили підозрілу активність. Надішліть пароль.", 
+            "Це не жарт! Ви стали мільйонером. Сплатіть податок 50 грн.",
+            "Унікальна пропозиція. Купіть біткоїн за 1 долар.",
+            "Вітаємо! Ваша адреса обрана випадковим чином."
+        ];
 
-   Обробка дій користувача
-  const handleAction = (emailId, action) = {
-    const emailIndex = emails.findIndex(e = e.id === emailId);
-    if (emailIndex === -1) return;
-    
-    const email = emails[emailIndex];
-    let isCorrect = false;
+        const sendersReal = [
+            "Бос (Олег Петрович)", "Бухгалтерія", "Мама", "Служба доставки", 
+            "HR відділ", "Клієнт (ТОВ Ромашка)", "Підтримка Google", "Amazon Orders"
+        ];
+        const subjectsReal = [
+            "Звіт за квартал", "Запрошення на нараду", "Як справи?", 
+            "Ваше замовлення доставлено", "Графік відпусток", "Правки до макету", 
+            "Рахунок за інтернет", "Зміни в політиці конфіденційності"
+        ];
+        const bodiesReal = [
+            "Привіт, переглянь вкладений файл до наради.",
+            "Нагадуємо, що завтра вихідний день.",
+            "Ваша посилка чекає у поштоматі №42.",
+            "Будь ласка, підпишіть документи до кінця дня.",
+            "Дякуємо за використання нашого сервісу."
+        ];
 
-    if (action === 'spam') {
-      isCorrect = email.isSpam;
-    } else if (action === 'important') {
-      isCorrect = !email.isSpam;
-    }
+        // --- СТАН ГРИ ---
+        let gameState = 'menu'; // menu, playing, gameover
+        let emails = [];
+        let score = 0;
+        let lives = 3;
+        let spawnInterval = null;
+        let appContainer = document.getElementById('app');
 
-    if (isCorrect) {
-      setScore(s = s + 10);
-      setFeedback({ type 'success', text '+10 Очок' });
-       Видаляємо оброблений лист
-      setEmails(prev = prev.filter(e = e.id !== emailId));
-    } else {
-      setLives(l = l - 1);
-      setFeedback({ type 'error', text 'Помилка! -1 Життя' });
-       Не видаляємо лист одразу, або видаляємо Давайте видаляти, щоб не застрягав
-      setEmails(prev = prev.filter(e = e.id !== emailId));
-    }
+        // --- ЛОГІКА ---
 
-     Скидання фідбеку через короткий час
-    setTimeout(() = setFeedback(null), 1000);
-  };
+        function generateEmail() {
+            const isSpam = Math.random() > 0.5;
+            const id = Date.now() + Math.random();
+            const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-   Компонент одного листа
-  const EmailCard = ({ email, isTop }) = (
-    div 
-      className={`
-        relative bg-white rounded-xl shadow-md p-4 mb-3 border-l-4 transition-all duration-300
-        ${isTop  'scale-100 opacity-100 z-10 ring-2 ring-blue-200'  'scale-95 opacity-60 z-0'}
-        hoverborder-blue-300
-        border-gray-200
-      `}
-    
-      div className=flex justify-between items-start mb-2
-        div className=font-bold text-gray-800 truncate pr-2{email.sender}div
-        div className=text-xs text-gray-400{email.timestamp}div
-      div
-      div className=font-semibold text-sm text-gray-700 mb-1{email.subject}div
-      div className=text-sm text-gray-500 line-clamp-2{email.body}div
-      
-      { Кнопки дій, доступні лише для верхнього листа }
-      {isTop && (
-        div className=flex gap-2 mt-4
-          button 
-            onClick={() = handleAction(email.id, 'spam')}
-            className=flex-1 bg-red-100 hoverbg-red-200 text-red-700 font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors activescale-95
-          
-            Trash2 size={18} 
-            Спам
-          button
-          button 
-            onClick={() = handleAction(email.id, 'important')}
-            className=flex-1 bg-green-100 hoverbg-green-200 text-green-700 font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors activescale-95
-          
-            CheckCircle size={18} 
-            Важливе
-          button
-        div
-      )}
-    div
-  );
+            if (isSpam) {
+                return {
+                    id, isSpam: true, timestamp,
+                    sender: sendersSpam[Math.floor(Math.random() * sendersSpam.length)],
+                    subject: subjectsSpam[Math.floor(Math.random() * subjectsSpam.length)],
+                    body: bodiesSpam[Math.floor(Math.random() * bodiesSpam.length)],
+                };
+            } else {
+                return {
+                    id, isSpam: false, timestamp,
+                    sender: sendersReal[Math.floor(Math.random() * sendersReal.length)],
+                    subject: subjectsReal[Math.floor(Math.random() * subjectsReal.length)],
+                    body: bodiesReal[Math.floor(Math.random() * bodiesReal.length)],
+                };
+            }
+        }
 
-  return (
-    div className=min-h-screen bg-slate-100 text-slate-800 font-sans flex flex-col items-center justify-center p-4
-      
-      { --- МЕНЮ --- }
-      {gameState === 'menu' && (
-        div className=bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full animate-in fade-in zoom-in duration-300
-          div className=flex justify-center mb-4 text-blue-600
-            Mail size={64} 
-          div
-          h1 className=text-3xl font-bold mb-2 text-slate-800Симулятор Поштиh1
-          p className=text-slate-500 mb-6Ти - новий офіс-менеджер. Твоя мета сортувати пошту і не пропустити важливі листи, викидаючи спам.p
-          
-          div className=space-y-4 text-left bg-slate-50 p-4 rounded-lg mb-6 text-sm
-            div className=flex items-center gap-2
-              span className=bg-green-100 text-green-700 p-1 roundedCheckCircle size={16}span 
-              spanПереміщуй bнормальніb листи у Важливе.span
-            div
-            div className=flex items-center gap-2
-              span className=bg-red-100 text-red-700 p-1 roundedTrash2 size={16}span
-              spanПереміщуй bпідозріліb листи у Спам.span
-            div
-            div className=flex items-center gap-2
-              span className=bg-yellow-100 text-yellow-700 p-1 roundedClock size={16}span
-              spanНе дай скринці переповнитись!span
-            div
-          div
-
-          button 
-            onClick={startGame}
-            className=w-full bg-blue-600 hoverbg-blue-700 text-white text-xl font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-all hoverscale-105 shadow-lg shadow-blue-200
-          
-            Play size={24} 
-            Почати роботу
-          button
-        div
-      )}
-
-      { --- ГРА --- }
-      {gameState === 'playing' && (
-        div className=w-full max-w-md h-[80vh] flex flex-col
-          { Header }
-          div className=bg-white p-4 rounded-xl shadow-sm mb-4 flex justify-between items-center z-20
-            div className=flex items-center gap-2
-              div className=bg-blue-100 p-2 rounded-lg text-blue-600
-                Trophy size={20} 
-              div
-              div
-                div className=text-xs text-gray-400Рахунокdiv
-                div className=font-bold text-xl{score}div
-              div
-            div
+        function startGame() {
+            gameState = 'playing';
+            score = 0;
+            lives = 3;
+            emails = [generateEmail()];
+            renderGame();
             
-            { Feedback Message }
-            {feedback && (
-              div className={`absolute left-12 -translate-x-12 top-20 px-4 py-1 rounded-full text-sm font-bold shadow-md animate-bounce
-                ${feedback.type === 'success'  'bg-green-500 text-white'  'bg-red-500 text-white'}
-              `}
-                {feedback.text}
-              div
-            )}
+            // Запуск таймера спавну
+            clearInterval(spawnInterval);
+            gameLoop();
+        }
 
-            div className=flex items-center gap-1
-              {[...Array(3)].map((_, i) = (
-                div key={i} className={`transition-all duration-300 ${i  lives  'text-red-500'  'text-gray-200'}`}
-                  AlertTriangle fill={i  lives  currentColor  none} size={24} 
-                div
-              ))}
-            div
-          div
+        function gameLoop() {
+            if (gameState !== 'playing') return;
 
-          { Inbox Area }
-          div className=flex-1 bg-slate-200 rounded-2xl p-4 relative overflow-hidden shadow-inner flex flex-col
-            div className=flex justify-between items-center mb-4 text-slate-500 text-sm font-medium uppercase tracking-wider
-              spanВхідні ({emails.length})span
-              {emails.length = 4 && span className=text-red-500 animate-pulseУвага! Завал!span}
-            div
+            // Швидкість появи листів залежить від рахунку
+            const spawnRate = Math.max(800, 3000 - (score * 50));
+
+            spawnInterval = setTimeout(() => {
+                if (gameState !== 'playing') return;
+
+                if (emails.length >= 6) {
+                    lives -= 1;
+                    showFeedback('error', 'Переповнення пошти!');
+                    updateStats();
+                    checkGameOver();
+                } else {
+                    emails.unshift(generateEmail()); // Додаємо на початок масиву (в UI це буде низ стеку)
+                    renderEmails();
+                    updateStats(); // Оновити лічильник вхідних
+                }
+                
+                gameLoop(); // Рекурсивний виклик для зміни швидкості
+            }, spawnRate);
+        }
+
+        function checkGameOver() {
+            if (lives <= 0) {
+                gameState = 'gameover';
+                clearTimeout(spawnInterval);
+                renderGameOver();
+            }
+        }
+
+        function handleAction(action) {
+            if (emails.length === 0) return;
+
+            // Активний лист - останній у масиві (бо ми рендеримо стек знизу вгору, верхній елемент - останній в масиві для зручності відображення)
+            // АЛЕ в логіці додавання: unshift. Тому верхній елемент візуально має бути останнім доданим? 
+            // Давайте слідувати логіці React-коду:
+            // React: emails.reverse().map... isTop={index === emails.length - 1}
+            // Це означає, що "верхній" лист - це перший елемент оригінального масиву (останній у реверсі), або навпаки?
+            // React: generateEmail(), ...prev. Нові додаються на початок.
+            // React Render: [...emails].reverse(). Останній елемент реверсу - це найперший (найстаріший) елемент масиву `emails`.
+            // Тобто ми розбираємо завали: спочатку старі листи.
             
-            div className=flex-1 relative
-              {emails.length === 0  (
-                div className=absolute inset-0 flex flex-col items-center justify-center text-gray-400
-                  RefreshCw className=animate-spin mb-2 
-                  pОчікуємо листи...p
-                div
-              )  (
-                div className=space-y-[-80px] 
-                  { Stack Effect We map reversed to show stacking order correctly, but logic targets the LAST element as Top visually }
-                   {[...emails].reverse().map((email, index) = (
-                    EmailCard 
-                      key={email.id} 
-                      email={email} 
-                      isTop={index === emails.length - 1}  Останній в реверс масиві = перший в реальному
+            const currentEmailIndex = emails.length - 1; // Найстаріший лист (внизу масиву, зверху стеку візуально)
+            const email = emails[currentEmailIndex];
+
+            let isCorrect = false;
+            if (action === 'spam' && email.isSpam) isCorrect = true;
+            if (action === 'important' && !email.isSpam) isCorrect = true;
+
+            if (isCorrect) {
+                score += 10;
+                showFeedback('success', '+10 Очок');
+            } else {
+                lives -= 1;
+                showFeedback('error', 'Помилка! -1 Життя');
+            }
+
+            // Видаляємо оброблений лист (це останній елемент масиву)
+            emails.pop();
+            
+            updateStats();
+            renderEmails();
+            checkGameOver();
+        }
+
+        function showFeedback(type, text) {
+            const feedbackEl = document.createElement('div');
+            const bgClass = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+            feedbackEl.className = `absolute left-1/2 -translate-x-1/2 top-24 px-4 py-1 rounded-full text-sm font-bold shadow-md animate-bounce text-white ${bgClass} z-50 transition-opacity`;
+            feedbackEl.innerText = text;
+            
+            appContainer.appendChild(feedbackEl);
+
+            setTimeout(() => {
+                feedbackEl.style.opacity = '0';
+                setTimeout(() => feedbackEl.remove(), 300);
+            }, 1000);
+        }
+
+        // --- РЕНДЕРИНГ ---
+
+        function renderMenu() {
+            appContainer.innerHTML = `
+                <div class="bg-white p-8 rounded-2xl shadow-xl text-center animate-fade-in-up">
+                    <div class="flex justify-center mb-4 text-blue-600">
+                        <i data-lucide="mail" width="64" height="64"></i>
+                    </div>
+                    <h1 class="text-3xl font-bold mb-2 text-slate-800">Симулятор Пошти</h1>
+                    <p class="text-slate-500 mb-6">Ти - новий офіс-менеджер. Твоя мета: сортувати пошту і не пропустити важливі листи, викидаючи спам.</p>
                     
-                  ))}
-                div
-              )}
-            div
-          div
-          
-          div className=text-center mt-2 text-xs text-slate-400
-            Аналізуй Від кого, Тема, Зміст
-          div
-        div
-      )}
+                    <div class="space-y-4 text-left bg-slate-50 p-4 rounded-lg mb-6 text-sm">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-green-100 text-green-700 p-1 rounded"><i data-lucide="check-circle" width="16"></i></span> 
+                            <span>Переміщуй <b>нормальні</b> листи у "Важливе".</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="bg-red-100 text-red-700 p-1 rounded"><i data-lucide="trash-2" width="16"></i></span>
+                            <span>Переміщуй <b>підозрілі</b> листи у "Спам".</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="bg-yellow-100 text-yellow-700 p-1 rounded"><i data-lucide="clock" width="16"></i></span>
+                            <span>Не дай скринці переповнитись!</span>
+                        </div>
+                    </div>
 
-      { --- GAME OVER --- }
-      {gameState === 'gameover' && (
-        div className=bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full animate-in zoom-in duration-300 border-t-8 border-red-500
-          div className=flex justify-center mb-4 text-red-500
-            X size={64} 
-          div
-          h2 className=text-3xl font-bold mb-2 text-slate-800Вас звільнено!h2
-          p className=text-slate-500 mb-6Ви припустилися занадто багато помилок або ігнорували листи.p
-          
-          div className=bg-slate-100 p-4 rounded-xl mb-6
-            div className=text-sm text-gray-500 uppercase tracking-wideФінальний рахунокdiv
-            div className=text-4xl font-black text-blue-600{score}div
-          div
+                    <button onclick="startGame()" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xl font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-105 shadow-lg shadow-blue-200">
+                        <i data-lucide="play" width="24"></i> Почати роботу
+                    </button>
+                </div>
+            `;
+            lucide.createIcons();
+        }
 
-          button 
-            onClick={startGame}
-            className=w-full bg-slate-800 hoverbg-slate-900 text-white text-xl font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-all hoverscale-105
-          
-            RefreshCw size={24} 
-            Спробувати ще раз
-          button
-        div
-      )}
-    div
-  );
-}
+        function renderGame() {
+            appContainer.innerHTML = `
+                <div class="h-[80vh] flex flex-col w-full">
+                    <!-- Header -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm mb-4 flex justify-between items-center z-20">
+                        <div class="flex items-center gap-2">
+                            <div class="bg-blue-100 p-2 rounded-lg text-blue-600">
+                                <i data-lucide="trophy" width="20"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs text-gray-400">Рахунок</div>
+                                <div id="score-display" class="font-bold text-xl">0</div>
+                            </div>
+                        </div>
+                        
+                        <div id="lives-display" class="flex items-center gap-1">
+                            <!-- Серця рендеряться динамічно -->
+                        </div>
+                    </div>
+
+                    <!-- Inbox Area -->
+                    <div class="flex-1 bg-slate-200 rounded-2xl p-4 relative overflow-hidden shadow-inner flex flex-col">
+                        <div class="flex justify-between items-center mb-4 text-slate-500 text-sm font-medium uppercase tracking-wider">
+                            <span id="inbox-count">Вхідні (0)</span>
+                            <span id="warning-msg" class="text-red-500 animate-pulse hidden">Увага! Завал!</span>
+                        </div>
+                        
+                        <div id="emails-container" class="flex-1 relative mt-10">
+                            <!-- Листи -->
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-2 text-xs text-slate-400">
+                        Аналізуй: Від кого, Тема, Зміст
+                    </div>
+                </div>
+            `;
+            updateStats();
+            renderEmails();
+            lucide.createIcons();
+        }
+
+        function updateStats() {
+            if (gameState !== 'playing') return;
+            
+            // Рахунок
+            document.getElementById('score-display').innerText = score;
+            
+            // Життя
+            const livesContainer = document.getElementById('lives-display');
+            livesContainer.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                const colorClass = i < lives ? 'text-red-500' : 'text-gray-200';
+                const fill = i < lives ? 'currentColor' : 'none';
+                livesContainer.innerHTML += `<div class="transition-all duration-300 ${colorClass}"><i data-lucide="alert-triangle" fill="${fill}" width="24"></i></div>`;
+            }
+            lucide.createIcons();
+
+            // Лічильник
+            document.getElementById('inbox-count').innerText = `Вхідні (${emails.length})`;
+            
+            // Попередження
+            const warningEl = document.getElementById('warning-msg');
+            if (emails.length >= 4) warningEl.classList.remove('hidden');
+            else warningEl.classList.add('hidden');
+        }
+
+        function renderEmails() {
+            const container = document.getElementById('emails-container');
+            if (!container) return;
+
+            if (emails.length === 0) {
+                container.innerHTML = `
+                    <div class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 space-y-[-50px]">
+                        <i data-lucide="refresh-cw" class="animate-spin mb-2"></i>
+                        <p>Очікуємо листи...</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            // Рендеримо масив у зворотньому порядку для візуального стеку
+            // Але пам'ятаємо: останній елемент масиву `emails` - це той, що ми обробляємо зараз (найстаріший)
+            // Тому у DOM він має бути "зверху" (останнім дитиною з високим z-index)
+            
+            // Щоб візуально це виглядало як стопка, де нові листи знизу, а старі зверху:
+            // Ми пройдемося по масиву emails. i=0 (новий) -> i=length-1 (старий/активний).
+            // Стилі будемо накладати відповідно.
+            
+            let html = '<div class="space-y-[-80px]">';
+            
+            emails.forEach((email, index) => {
+                const isTop = index === emails.length - 1;
+                
+                // Стилі для "верхнього" (активного) vs "фонових" листів
+                const cardStyles = isTop 
+                    ? 'scale-100 opacity-100 z-10 ring-2 ring-blue-200 cursor-default' 
+                    : 'scale-95 opacity-60 z-0';
+
+                html += `
+                <div class="card-stack-item relative bg-white rounded-xl shadow-md p-4 mb-3 border-l-4 border-gray-200 transition-all duration-300 hover:border-blue-300 ${cardStyles}">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="font-bold text-gray-800 truncate pr-2 w-2/3">${email.sender}</div>
+                        <div class="text-xs text-gray-400">${email.timestamp}</div>
+                    </div>
+                    <div class="font-semibold text-sm text-gray-700 mb-1 truncate">${email.subject}</div>
+                    <div class="text-sm text-gray-500 line-clamp-2 h-10">${email.body}</div>
+                    
+                    ${isTop ? `
+                    <div class="flex gap-2 mt-4">
+                        <button onclick="handleAction('spam')" class="flex-1 bg-red-100 hover:bg-red-200 text-red-700 font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors active:scale-95">
+                            <i data-lucide="trash-2" width="18"></i> Спам
+                        </button>
+                        <button onclick="handleAction('important')" class="flex-1 bg-green-100 hover:bg-green-200 text-green-700 font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors active:scale-95">
+                            <i data-lucide="check-circle" width="18"></i> Важливе
+                        </button>
+                    </div>
+                    ` : ''}
+                </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        function renderGameOver() {
+            appContainer.innerHTML = `
+                <div class="bg-white p-8 rounded-2xl shadow-xl text-center animate-fade-in-up border-t-8 border-red-500">
+                    <div class="flex justify-center mb-4 text-red-500">
+                        <i data-lucide="x" width="64" height="64"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold mb-2 text-slate-800">Вас звільнено!</h2>
+                    <p class="text-slate-500 mb-6">Ви припустилися занадто багато помилок або ігнорували листи.</p>
+                    
+                    <div class="bg-slate-100 p-4 rounded-xl mb-6">
+                        <div class="text-sm text-gray-500 uppercase tracking-wide">Фінальний рахунок</div>
+                        <div class="text-4xl font-black text-blue-600">${score}</div>
+                    </div>
+
+                    <button onclick="startGame()" class="w-full bg-slate-800 hover:bg-slate-900 text-white text-xl font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-105">
+                        <i data-lucide="refresh-cw" width="24"></i> Спробувати ще раз
+                    </button>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        // Ініціалізація
+        renderMenu();
+
+    </script>
+</body>
+</html>
