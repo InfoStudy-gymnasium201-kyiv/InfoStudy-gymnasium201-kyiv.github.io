@@ -1,449 +1,311 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Defender - Симулятор Пошти</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        /* Анімації для карток */
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(20px) scale(0.9); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        @keyframes popOut {
-            to { opacity: 0; transform: translateX(100px) scale(0.8); }
-        }
-        .email-enter {
-            animation: slideIn 0.4s ease-out forwards;
-        }
-        .email-exit {
-            animation: popOut 0.3s ease-in forwards;
-        }
-        /* Прибираємо скролбар для чистоти інтерфейсу */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-    </style>
-</head>
-<body class="bg-slate-100 text-slate-800 font-sans h-screen overflow-hidden flex flex-col items-center justify-center select-none">
+import React, { useState, useEffect, useCallback } from 'react';
+import { Mail, Trash2, CheckCircle, AlertTriangle, Play, RefreshCw, Trophy, Clock, X } from 'lucide-react';
 
-    <!-- ЕКРАН МЕНЮ -->
-    <div id="menu-screen" class="w-full max-w-md p-6 flex flex-col items-center text-center transition-all duration-300">
-        <div class="bg-white p-8 rounded-2xl shadow-xl w-full">
-            <div class="flex justify-center mb-4 text-blue-600">
-                <i data-lucide="mail" width="64" height="64"></i>
-            </div>
-            <h1 class="text-3xl font-bold mb-2 text-slate-800">Симулятор Пошти</h1>
-            <p class="text-slate-500 mb-6">Сортуй пошту: важливе до важливих, сміття до спаму. Не дай пошті завалити тебе!</p>
+ --- ДАНІ ДЛЯ ГЕНЕРАЦІЇ ЛИСТІВ ---
+
+const sendersSpam = [
+  Принц Нігерії, Банк Приват (Fake), Виграш Лотерея, Збільшення..., 
+  Інвестиції Крипто, Служба безпеки, Ілон Маск Giveaway, Адвокат Джонсон
+];
+const subjectsSpam = [
+  ТЕРМІНОВО Ваш рахунок заблоковано!, Ви виграли $1,000,000!, 
+  Секретний метод заробітку, Перейдіть за посиланням, 
+  Лише сьогодні знижка 99%, Ваш родич залишив спадок
+];
+const bodiesSpam = [
+  Натисніть сюди терміново, щоб забрати гроші., 
+  Ми виявили підозрілу активність. Надішліть пароль., 
+  Це не жарт! Ви стали мільйонером. Сплатіть податок 50 грн.,
+  Унікальна пропозиція. Купіть біткоїн за 1 долар.,
+  Вітаємо! Ваша адреса обрана випадковим чином.
+];
+
+const sendersReal = [
+  Бос (Олег Петрович), Бухгалтерія, Мама, Служба доставки, 
+  HR відділ, Клієнт (ТОВ Ромашка), Підтримка Google, Amazon Orders
+];
+const subjectsReal = [
+  Звіт за квартал, Запрошення на нараду, Як справи, 
+  Ваше замовлення доставлено, Графік відпусток, Правки до макету, 
+  Рахунок за інтернет, Зміни в політиці конфіденційності
+];
+const bodiesReal = [
+  Привіт, переглянь вкладений файл до наради.,
+  Нагадуємо, що завтра вихідний день.,
+  Ваша посилка чекає у поштоматі №42.,
+  Будь ласка, підпишіть документи до кінця дня.,
+  Дякуємо за використання нашого сервісу.
+];
+
+ --- КОМПОНЕНТИ ---
+
+const generateEmail = () = {
+  const isSpam = Math.random()  0.5;
+  
+  if (isSpam) {
+    return {
+      id Date.now() + Math.random(),
+      sender sendersSpam[Math.floor(Math.random()  sendersSpam.length)],
+      subject subjectsSpam[Math.floor(Math.random()  subjectsSpam.length)],
+      body bodiesSpam[Math.floor(Math.random()  bodiesSpam.length)],
+      isSpam true,
+      timestamp new Date().toLocaleTimeString([], { hour '2-digit', minute '2-digit' })
+    };
+  } else {
+    return {
+      id Date.now() + Math.random(),
+      sender sendersReal[Math.floor(Math.random()  sendersReal.length)],
+      subject subjectsReal[Math.floor(Math.random()  subjectsReal.length)],
+      body bodiesReal[Math.floor(Math.random()  bodiesReal.length)],
+      isSpam false,
+      timestamp new Date().toLocaleTimeString([], { hour '2-digit', minute '2-digit' })
+    };
+  }
+};
+
+export default function EmailDefenderGame() {
+  const [gameState, setGameState] = useState('menu');  menu, playing, gameover
+  const [emails, setEmails] = useState([]);
+  const [score, setScore] = useState(0);
+  const [lives, setLives] = useState(3);
+  const [feedback, setFeedback] = useState(null);  { type 'success'  'error', text string }
+  const [difficulty, setDifficulty] = useState(1);
+  
+   Функція початку гри
+  const startGame = () = {
+    setGameState('playing');
+    setScore(0);
+    setLives(3);
+    setDifficulty(1);
+    setEmails([generateEmail()]);  Почати з одного листа
+    setFeedback(null);
+  };
+
+   Таймер для спавну нових листів
+  useEffect(() = {
+    if (gameState !== 'playing') return;
+
+     Базова швидкість 3 секунди, зменшується зі складністю
+    const spawnRate = Math.max(800, 3000 - (score  50)); 
+
+    const spawner = setInterval(() = {
+      setEmails(prev = {
+        if (prev.length = 6) {
+           Якщо листів забагато - втрачаємо життя
+          setLives(l = l - 1);
+          setFeedback({ type 'error', text 'Переповнення пошти!' });
+          return prev; 
+        }
+        return [generateEmail(), ...prev];
+      });
+    }, spawnRate);
+
+    return () = clearInterval(spawner);
+  }, [gameState, score]);
+
+   Перевірка програшу
+  useEffect(() = {
+    if (lives = 0) {
+      setGameState('gameover');
+    }
+  }, [lives]);
+
+   Обробка дій користувача
+  const handleAction = (emailId, action) = {
+    const emailIndex = emails.findIndex(e = e.id === emailId);
+    if (emailIndex === -1) return;
+    
+    const email = emails[emailIndex];
+    let isCorrect = false;
+
+    if (action === 'spam') {
+      isCorrect = email.isSpam;
+    } else if (action === 'important') {
+      isCorrect = !email.isSpam;
+    }
+
+    if (isCorrect) {
+      setScore(s = s + 10);
+      setFeedback({ type 'success', text '+10 Очок' });
+       Видаляємо оброблений лист
+      setEmails(prev = prev.filter(e = e.id !== emailId));
+    } else {
+      setLives(l = l - 1);
+      setFeedback({ type 'error', text 'Помилка! -1 Життя' });
+       Не видаляємо лист одразу, або видаляємо Давайте видаляти, щоб не застрягав
+      setEmails(prev = prev.filter(e = e.id !== emailId));
+    }
+
+     Скидання фідбеку через короткий час
+    setTimeout(() = setFeedback(null), 1000);
+  };
+
+   Компонент одного листа
+  const EmailCard = ({ email, isTop }) = (
+    div 
+      className={`
+        relative bg-white rounded-xl shadow-md p-4 mb-3 border-l-4 transition-all duration-300
+        ${isTop  'scale-100 opacity-100 z-10 ring-2 ring-blue-200'  'scale-95 opacity-60 z-0'}
+        hoverborder-blue-300
+        border-gray-200
+      `}
+    
+      div className=flex justify-between items-start mb-2
+        div className=font-bold text-gray-800 truncate pr-2{email.sender}div
+        div className=text-xs text-gray-400{email.timestamp}div
+      div
+      div className=font-semibold text-sm text-gray-700 mb-1{email.subject}div
+      div className=text-sm text-gray-500 line-clamp-2{email.body}div
+      
+      { Кнопки дій, доступні лише для верхнього листа }
+      {isTop && (
+        div className=flex gap-2 mt-4
+          button 
+            onClick={() = handleAction(email.id, 'spam')}
+            className=flex-1 bg-red-100 hoverbg-red-200 text-red-700 font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors activescale-95
+          
+            Trash2 size={18} 
+            Спам
+          button
+          button 
+            onClick={() = handleAction(email.id, 'important')}
+            className=flex-1 bg-green-100 hoverbg-green-200 text-green-700 font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors activescale-95
+          
+            CheckCircle size={18} 
+            Важливе
+          button
+        div
+      )}
+    div
+  );
+
+  return (
+    div className=min-h-screen bg-slate-100 text-slate-800 font-sans flex flex-col items-center justify-center p-4
+      
+      { --- МЕНЮ --- }
+      {gameState === 'menu' && (
+        div className=bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full animate-in fade-in zoom-in duration-300
+          div className=flex justify-center mb-4 text-blue-600
+            Mail size={64} 
+          div
+          h1 className=text-3xl font-bold mb-2 text-slate-800Симулятор Поштиh1
+          p className=text-slate-500 mb-6Ти - новий офіс-менеджер. Твоя мета сортувати пошту і не пропустити важливі листи, викидаючи спам.p
+          
+          div className=space-y-4 text-left bg-slate-50 p-4 rounded-lg mb-6 text-sm
+            div className=flex items-center gap-2
+              span className=bg-green-100 text-green-700 p-1 roundedCheckCircle size={16}span 
+              spanПереміщуй bнормальніb листи у Важливе.span
+            div
+            div className=flex items-center gap-2
+              span className=bg-red-100 text-red-700 p-1 roundedTrash2 size={16}span
+              spanПереміщуй bпідозріліb листи у Спам.span
+            div
+            div className=flex items-center gap-2
+              span className=bg-yellow-100 text-yellow-700 p-1 roundedClock size={16}span
+              spanНе дай скринці переповнитись!span
+            div
+          div
+
+          button 
+            onClick={startGame}
+            className=w-full bg-blue-600 hoverbg-blue-700 text-white text-xl font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-all hoverscale-105 shadow-lg shadow-blue-200
+          
+            Play size={24} 
+            Почати роботу
+          button
+        div
+      )}
+
+      { --- ГРА --- }
+      {gameState === 'playing' && (
+        div className=w-full max-w-md h-[80vh] flex flex-col
+          { Header }
+          div className=bg-white p-4 rounded-xl shadow-sm mb-4 flex justify-between items-center z-20
+            div className=flex items-center gap-2
+              div className=bg-blue-100 p-2 rounded-lg text-blue-600
+                Trophy size={20} 
+              div
+              div
+                div className=text-xs text-gray-400Рахунокdiv
+                div className=font-bold text-xl{score}div
+              div
+            div
             
-            <div class="space-y-4 text-left bg-slate-50 p-4 rounded-lg mb-6 text-sm">
-                <div class="flex items-center gap-2">
-                    <span class="bg-green-100 text-green-700 p-1 rounded"><i data-lucide="check-circle" width="16"></i></span> 
-                    <span>Нормальні листи &rarr; <b>Важливе</b></span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="bg-red-100 text-red-700 p-1 rounded"><i data-lucide="trash-2" width="16"></i></span>
-                    <span>Підозрілі листи &rarr; <b>Спам</b></span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="bg-yellow-100 text-yellow-700 p-1 rounded"><i data-lucide="clock" width="16"></i></span>
-                    <span>Максимум 6 листів у скриньці!</span>
-                </div>
-            </div>
+            { Feedback Message }
+            {feedback && (
+              div className={`absolute left-12 -translate-x-12 top-20 px-4 py-1 rounded-full text-sm font-bold shadow-md animate-bounce
+                ${feedback.type === 'success'  'bg-green-500 text-white'  'bg-red-500 text-white'}
+              `}
+                {feedback.text}
+              div
+            )}
 
-            <button id="start-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xl font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-105 shadow-lg shadow-blue-200">
-                <i data-lucide="play" width="24"></i>
-                Почати роботу
-            </button>
-        </div>
-    </div>
+            div className=flex items-center gap-1
+              {[...Array(3)].map((_, i) = (
+                div key={i} className={`transition-all duration-300 ${i  lives  'text-red-500'  'text-gray-200'}`}
+                  AlertTriangle fill={i  lives  currentColor  none} size={24} 
+                div
+              ))}
+            div
+          div
 
-    <!-- ЕКРАН ГРИ -->
-    <div id="game-screen" class="w-full max-w-md h-[90vh] flex-col hidden relative">
-        
-        <!-- Верхня панель -->
-        <div class="bg-white p-4 rounded-xl shadow-sm mb-4 flex justify-between items-center z-30 relative">
-            <div class="flex items-center gap-2">
-                <div class="bg-blue-100 p-2 rounded-lg text-blue-600">
-                    <i data-lucide="trophy" width="20"></i>
-                </div>
-                <div>
-                    <div class="text-xs text-gray-400">Рахунок</div>
-                    <div id="score-display" class="font-bold text-xl">0</div>
-                </div>
-            </div>
+          { Inbox Area }
+          div className=flex-1 bg-slate-200 rounded-2xl p-4 relative overflow-hidden shadow-inner flex flex-col
+            div className=flex justify-between items-center mb-4 text-slate-500 text-sm font-medium uppercase tracking-wider
+              spanВхідні ({emails.length})span
+              {emails.length = 4 && span className=text-red-500 animate-pulseУвага! Завал!span}
+            div
             
-            <div id="lives-display" class="flex items-center gap-1">
-                <!-- Життя генеруються JS -->
-            </div>
-        </div>
+            div className=flex-1 relative
+              {emails.length === 0  (
+                div className=absolute inset-0 flex flex-col items-center justify-center text-gray-400
+                  RefreshCw className=animate-spin mb-2 
+                  pОчікуємо листи...p
+                div
+              )  (
+                div className=space-y-[-80px] 
+                  { Stack Effect We map reversed to show stacking order correctly, but logic targets the LAST element as Top visually }
+                   {[...emails].reverse().map((email, index) = (
+                    EmailCard 
+                      key={email.id} 
+                      email={email} 
+                      isTop={index === emails.length - 1}  Останній в реверс масиві = перший в реальному
+                    
+                  ))}
+                div
+              )}
+            div
+          div
+          
+          div className=text-center mt-2 text-xs text-slate-400
+            Аналізуй Від кого, Тема, Зміст
+          div
+        div
+      )}
 
-        <!-- Повідомлення про результат дії (Feedback) -->
-        <div id="feedback-msg" class="absolute left-1/2 -translate-x-1/2 top-24 z-50 px-4 py-2 rounded-full text-sm font-bold shadow-md opacity-0 transition-opacity duration-300 pointer-events-none">
-            Результат
-        </div>
+      { --- GAME OVER --- }
+      {gameState === 'gameover' && (
+        div className=bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full animate-in zoom-in duration-300 border-t-8 border-red-500
+          div className=flex justify-center mb-4 text-red-500
+            X size={64} 
+          div
+          h2 className=text-3xl font-bold mb-2 text-slate-800Вас звільнено!h2
+          p className=text-slate-500 mb-6Ви припустилися занадто багато помилок або ігнорували листи.p
+          
+          div className=bg-slate-100 p-4 rounded-xl mb-6
+            div className=text-sm text-gray-500 uppercase tracking-wideФінальний рахунокdiv
+            div className=text-4xl font-black text-blue-600{score}div
+          div
 
-        <!-- Контейнер листів -->
-        <div class="flex-1 bg-slate-200 rounded-2xl p-4 relative overflow-hidden shadow-inner flex flex-col">
-            <div class="flex justify-between items-center mb-4 text-slate-500 text-sm font-medium uppercase tracking-wider z-20 relative">
-                <span id="inbox-count">Вхідні (0)</span>
-                <span id="warning-msg" class="text-red-500 animate-pulse hidden">Завал!</span>
-            </div>
-            
-            <!-- Тут будуть листи -->
-            <div id="emails-container" class="flex-1 relative z-10 w-full mt-4">
-                <div id="empty-state" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
-                    <i data-lucide="refresh-cw" class="animate-spin mb-2"></i>
-                    <p>Очікуємо листи...</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Кнопки керування (фіксовані знизу для зручності) -->
-        <div class="mt-4 grid grid-cols-2 gap-4">
-            <button id="btn-spam" class="bg-red-100 hover:bg-red-200 text-red-700 font-bold py-4 px-4 rounded-xl flex items-center justify-center gap-2 transition-transform active:scale-95 shadow-sm border border-red-200">
-                <i data-lucide="trash-2" width="24"></i>
-                Спам
-            </button>
-            <button id="btn-important" class="bg-green-100 hover:bg-green-200 text-green-700 font-bold py-4 px-4 rounded-xl flex items-center justify-center gap-2 transition-transform active:scale-95 shadow-sm border border-green-200">
-                <i data-lucide="check-circle" width="24"></i>
-                Важливе
-            </button>
-        </div>
-    </div>
-
-    <!-- ЕКРАН ПРОГРАШУ (Виправлено центрування) -->
-    <div id="gameover-screen" class="w-full max-w-md p-6 flex-col items-center justify-center text-center hidden absolute inset-0 bg-slate-100/90 backdrop-blur-sm z-50 flex">
-        <div class="bg-white p-8 rounded-2xl shadow-xl w-full border-t-8 border-red-500 animate-[slideIn_0.3s_ease-out]">
-            <div class="flex justify-center mb-4 text-red-500">
-                <i data-lucide="x" width="64"></i>
-            </div>
-            <h2 class="text-3xl font-bold mb-2 text-slate-800">Вас звільнено!</h2>
-            <p class="text-slate-500 mb-6">На жаль, ви не впоралися з потоком листів або припустилися помилок.</p>
-            
-            <div class="bg-slate-100 p-4 rounded-xl mb-6">
-                <div class="text-sm text-gray-500 uppercase tracking-wide">Фінальний рахунок</div>
-                <div id="final-score" class="text-4xl font-black text-blue-600">0</div>
-            </div>
-
-            <button id="restart-btn" class="w-full bg-slate-800 hover:bg-slate-900 text-white text-xl font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-105">
-                <i data-lucide="refresh-cw" width="24"></i>
-                Спробувати ще раз
-            </button>
-        </div>
-    </div>
-
-    <!-- СКРИПТ ЛОГІКИ ГРИ -->
-    <script>
-        // --- ДАНІ ---
-        const sendersSpam = [
-            "Принц Нігерії", "Банк Приват (Fake)", "Виграш Лотерея", "Збільшення...", 
-            "Інвестиції Крипто", "Служба безпеки", "Ілон Маск Giveaway", "Адвокат Джонсон"
-        ];
-        const subjectsSpam = [
-            "ТЕРМІНОВО: Ваш рахунок заблоковано!", "Ви виграли $1,000,000!", 
-            "Секретний метод заробітку", "Перейдіть за посиланням", 
-            "Лише сьогодні: знижка 99%", "Ваш родич залишив спадок"
-        ];
-        const bodiesSpam = [
-            "Натисніть сюди терміново, щоб забрати гроші.", 
-            "Ми виявили підозрілу активність. Надішліть пароль.", 
-            "Це не жарт! Ви стали мільйонером. Сплатіть податок 50 грн.",
-            "Унікальна пропозиція. Купіть біткоїн за 1 долар.",
-            "Вітаємо! Ваша адреса обрана випадковим чином."
-        ];
-
-        const sendersReal = [
-            "Бос (Олег Петрович)", "Бухгалтерія", "Мама", "Служба доставки", 
-            "HR відділ", "Клієнт (ТОВ Ромашка)", "Підтримка Google", "Amazon Orders"
-        ];
-        const subjectsReal = [
-            "Звіт за квартал", "Запрошення на нараду", "Як справи?", 
-            "Ваше замовлення доставлено", "Графік відпусток", "Правки до макету", 
-            "Рахунок за інтернет", "Зміни в політиці конфіденційності"
-        ];
-        const bodiesReal = [
-            "Привіт, переглянь вкладений файл до наради.",
-            "Нагадуємо, що завтра вихідний день.",
-            "Ваша посилка чекає у поштоматі №42.",
-            "Будь ласка, підпишіть документи до кінця дня.",
-            "Дякуємо за використання нашого сервісу."
-        ];
-
-        // --- СТАН ГРИ ---
-        let state = {
-            isPlaying: false,
-            score: 0,
-            lives: 3,
-            emails: [], // масив об'єктів
-            spawnTimer: null
-        };
-
-        // --- DOM ЕЛЕМЕНТИ ---
-        const screens = {
-            menu: document.getElementById('menu-screen'),
-            game: document.getElementById('game-screen'),
-            gameover: document.getElementById('gameover-screen')
-        };
-        const els = {
-            score: document.getElementById('score-display'),
-            finalScore: document.getElementById('final-score'),
-            livesContainer: document.getElementById('lives-display'),
-            emailsContainer: document.getElementById('emails-container'),
-            emptyState: document.getElementById('empty-state'),
-            feedback: document.getElementById('feedback-msg'),
-            inboxCount: document.getElementById('inbox-count'),
-            warningMsg: document.getElementById('warning-msg'),
-            btnSpam: document.getElementById('btn-spam'),
-            btnImportant: document.getElementById('btn-important')
-        };
-
-        // --- ІНІЦІАЛІЗАЦІЯ ---
-        function init() {
-            lucide.createIcons();
-            document.getElementById('start-btn').addEventListener('click', startGame);
-            document.getElementById('restart-btn').addEventListener('click', startGame);
-            
-            els.btnSpam.addEventListener('click', () => handleAction('spam'));
-            els.btnImportant.addEventListener('click', () => handleAction('important'));
-
-            // Підтримка клавіатури
-            document.addEventListener('keydown', (e) => {
-                if (!state.isPlaying) return;
-                if (e.key === 'ArrowLeft') handleAction('spam');
-                if (e.key === 'ArrowRight') handleAction('important');
-            });
-        }
-
-        // --- ЛОГІКА ГРИ ---
-
-        function generateEmail() {
-            const isSpam = Math.random() > 0.5;
-            const id = Date.now() + Math.random();
-            const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-            if (isSpam) {
-                return {
-                    id, isSpam, timestamp,
-                    sender: sendersSpam[Math.floor(Math.random() * sendersSpam.length)],
-                    subject: subjectsSpam[Math.floor(Math.random() * subjectsSpam.length)],
-                    body: bodiesSpam[Math.floor(Math.random() * bodiesSpam.length)],
-                };
-            } else {
-                return {
-                    id, isSpam, timestamp,
-                    sender: sendersReal[Math.floor(Math.random() * sendersReal.length)],
-                    subject: subjectsReal[Math.floor(Math.random() * subjectsReal.length)],
-                    body: bodiesReal[Math.floor(Math.random() * bodiesReal.length)],
-                };
-            }
-        }
-
-        function startGame() {
-            state.score = 0;
-            state.lives = 3;
-            state.emails = [];
-            state.isPlaying = true;
-
-            // Скидання UI
-            screens.menu.classList.add('hidden');
-            screens.gameover.classList.add('hidden');
-            screens.game.classList.remove('hidden');
-            screens.game.classList.add('flex'); // Повернути flex, бо hidden його прибирає
-            
-            els.emailsContainer.innerHTML = '';
-            els.emailsContainer.appendChild(els.emptyState);
-            
-            updateStats();
-            
-            // Перший лист
-            addEmail();
-            
-            // Запуск циклу спавну
-            scheduleNextSpawn();
-        }
-
-        function scheduleNextSpawn() {
-            if (!state.isPlaying) return;
-
-            // Швидкість зростає з рахунком (мінімум 800мс)
-            const delay = Math.max(800, 3000 - (state.score * 50));
-            
-            clearTimeout(state.spawnTimer);
-            state.spawnTimer = setTimeout(() => {
-                if (!state.isPlaying) return;
-                
-                if (state.emails.length >= 6) {
-                    loseLife('Переповнення!');
-                } else {
-                    addEmail();
-                }
-                scheduleNextSpawn();
-            }, delay);
-        }
-
-        function addEmail() {
-            const email = generateEmail();
-            // Додаємо в кінець масиву, це буде "найглибший/нижній" лист
-            state.emails.push(email);
-            renderEmails();
-            updateStats();
-        }
-
-        function renderEmails() {
-            els.emailsContainer.innerHTML = '';
-
-            if (state.emails.length === 0) {
-                els.emailsContainer.appendChild(els.emptyState);
-                return;
-            }
-
-            // Рендеримо листи. 
-            // Індекс 0 - це найстаріший лист, він має бути ЗВЕРХУ (Front).
-            // Останній індекс - найновіший, він має бути ЗНИЗУ (Back).
-            
-            state.emails.forEach((email, index) => {
-                // Якщо лист дуже глибоко (далеко в черзі), не рендеримо його або ховаємо
-                if (index > 4) return; 
-
-                const el = document.createElement('div');
-                
-                // Z-index: Перший елемент (0) має найбільший z-index
-                const zIndex = 20 - index;
-                
-                // Scale та Opacity зменшуються для елементів, що стоять у черзі
-                const scale = 1 - (index * 0.05);
-                const opacity = 100 - (index * 20);
-                const translateY = index * 15; // Зсув вниз для ефекту стопки
-
-                el.className = `
-                    absolute top-0 left-0 w-full bg-white rounded-xl shadow-md p-4 border-l-4 border-gray-200 
-                    transition-all duration-300 email-enter
-                    z-[${zIndex}]
-                `;
-                
-                // Використовуємо інлайн стилі для точного керування трансформаціями
-                el.style.zIndex = zIndex;
-                el.style.transform = `translateY(${translateY}px) scale(${scale})`;
-                el.style.opacity = `${opacity}%`;
-
-                // Активний тільки верхній лист (index 0)
-                if (index === 0) {
-                    el.classList.add('hover:border-blue-300', 'cursor-pointer', 'ring-4', 'ring-blue-50/50');
-                } else {
-                    el.classList.add('pointer-events-none'); 
-                }
-
-                el.innerHTML = `
-                    <div class="flex justify-between items-start mb-2 pointer-events-none">
-                        <div class="font-bold text-gray-800 truncate pr-2">${email.sender}</div>
-                        <div class="text-xs text-gray-400">${email.timestamp}</div>
-                    </div>
-                    <div class="font-semibold text-sm text-gray-700 mb-1 pointer-events-none">${email.subject}</div>
-                    <div class="text-sm text-gray-500 line-clamp-2 pointer-events-none">${email.body}</div>
-                `;
-
-                els.emailsContainer.appendChild(el);
-            });
-        }
-
-        function handleAction(action) {
-            if (state.emails.length === 0 || !state.isPlaying) return;
-
-            // Беремо перший лист (index 0) - найстаріший, який зараз зверху
-            const currentEmail = state.emails[0];
-            
-            let isCorrect = false;
-            if (action === 'spam' && currentEmail.isSpam) isCorrect = true;
-            if (action === 'important' && !currentEmail.isSpam) isCorrect = true;
-
-            if (isCorrect) {
-                state.score += 10;
-                showFeedback('success', '+10 Очок');
-                removeTopEmail();
-            } else {
-                loseLife('Помилка!');
-                removeTopEmail();
-            }
-
-            updateStats();
-        }
-
-        function removeTopEmail() {
-            // Видаляємо перший елемент масиву (той, що був зверху)
-            state.emails.shift();
-            renderEmails();
-        }
-
-        function loseLife(reason) {
-            state.lives--;
-            showFeedback('error', reason);
-            
-            document.body.classList.add('bg-red-50');
-            setTimeout(() => document.body.classList.remove('bg-red-50'), 200);
-
-            if (state.lives <= 0) {
-                gameOver();
-            }
-        }
-
-        function gameOver() {
-            state.isPlaying = false;
-            clearTimeout(state.spawnTimer);
-            
-            els.finalScore.textContent = state.score;
-            
-            screens.game.classList.add('hidden');
-            screens.game.classList.remove('flex');
-            screens.gameover.classList.remove('hidden');
-            screens.gameover.classList.add('flex');
-        }
-
-        function updateStats() {
-            els.score.textContent = state.score;
-            els.inboxCount.textContent = `Вхідні (${state.emails.length})`;
-            
-            // Оновлення сердець
-            els.livesContainer.innerHTML = '';
-            for (let i = 0; i < 3; i++) {
-                const heart = document.createElement('i');
-                heart.setAttribute('data-lucide', 'alert-triangle');
-                heart.className = i < state.lives ? 'text-red-500 transition-all' : 'text-gray-200 transition-all';
-                heart.setAttribute('width', '24');
-                els.livesContainer.appendChild(heart);
-            }
-            lucide.createIcons(); 
-
-            // Попередження
-            if (state.emails.length >= 4) {
-                els.warningMsg.classList.remove('hidden');
-            } else {
-                els.warningMsg.classList.add('hidden');
-            }
-        }
-
-        function showFeedback(type, text) {
-            els.feedback.textContent = text;
-            els.feedback.className = `absolute left-1/2 -translate-x-1/2 top-24 z-50 px-4 py-2 rounded-full text-sm font-bold shadow-md transition-all duration-300 transform -translate-y-2 opacity-100 ${
-                type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-            }`;
-
-            setTimeout(() => {
-                els.feedback.classList.add('opacity-0', '-translate-y-2');
-            }, 800);
-        }
-
-        // Запуск
-        init();
-
-    </script>
-</body>
-</html>
+          button 
+            onClick={startGame}
+            className=w-full bg-slate-800 hoverbg-slate-900 text-white text-xl font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-all hoverscale-105
+          
+            RefreshCw size={24} 
+            Спробувати ще раз
+          button
+        div
+      )}
+    div
+  );
+}
