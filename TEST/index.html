@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Алгоритмічна Гра: Збирач Кристалів</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Стиль скролбару для списку команд */
+        .program-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        .program-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .program-list::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .program-list::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Ефект підсвічування активної команди */
+        .active-command {
+            border-left: 4px solid #3b82f6;
+            background-color: #eff6ff;
+        }
+
+        /* Анімація появи кристалів */
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .crystal-anim {
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 h-screen flex flex-col font-sans text-slate-800">
+
+    <!-- Заголовок -->
+    <header class="bg-white shadow-sm p-4 flex justify-between items-center z-10">
+        <div class="flex items-center gap-3">
+            <div class="bg-indigo-600 text-white p-2 rounded-lg">
+                <i class="fa-solid fa-robot text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-slate-800">RoboCode: Збирач Кристалів</h1>
+                <p class="text-xs text-slate-500">Склади алгоритм, щоб зібрати всі кристали</p>
+            </div>
+        </div>
+        <div class="flex gap-4 items-center">
+            <span id="level-display" class="font-semibold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Рівень 1</span>
+            <button onclick="game.resetLevel()" class="text-slate-500 hover:text-red-500 transition">
+                <i class="fa-solid fa-rotate-right"></i> Скинути
+            </button>
+        </div>
+    </header>
+
+    <!-- Головна область -->
+    <main class="flex-1 flex flex-col md:flex-row overflow-hidden">
+        
+        <!-- Ліва частина: Ігрове поле -->
+        <section class="flex-1 p-6 flex flex-col items-center justify-center bg-slate-200 overflow-y-auto">
+            <div class="relative bg-white p-2 rounded-xl shadow-lg border-4 border-slate-300">
+                <!-- Сітка 6x6 (relative для позиціонування героя) -->
+                <div id="game-grid" class="relative grid grid-cols-6 grid-rows-6 gap-1 w-[300px] h-[300px] sm:w-[400px] sm:h-[400px]">
+                    <!-- Клітинки генеруються JS -->
+                    
+                    <!-- ГЕРОЙ: Окремий елемент поверх сітки -->
+                    <div id="hero-marker" class="absolute z-20 transition-all duration-300 ease-in-out flex items-center justify-center pointer-events-none top-0 left-0 hidden">
+                        <i class="fa-solid fa-robot text-indigo-600 text-3xl sm:text-4xl drop-shadow-lg filter"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Статус -->
+            <div class="mt-6 flex gap-8">
+                <div class="bg-white px-4 py-2 rounded-lg shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-gem text-blue-400"></i>
+                    <span class="font-bold text-slate-700">Залишилось: <span id="crystals-count">0</span></span>
+                </div>
+                <div id="status-message" class="hidden px-4 py-2 rounded-lg font-bold text-white text-sm animate-pulse">
+                    <!-- Повідомлення про успіх/помилку -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Права частина: Панель керування -->
+        <section class="w-full md:w-[400px] bg-white border-l border-slate-200 flex flex-col h-[50vh] md:h-auto shadow-xl z-10">
+            
+            <!-- Тулбар дій -->
+            <div class="p-4 border-b border-slate-100 bg-slate-50">
+                <h2 class="text-sm font-bold uppercase text-slate-400 mb-3 tracking-wider">Блоки дій</h2>
+                <div class="grid grid-cols-4 gap-2 mb-2">
+                    <button onclick="game.addCommand('up')" class="btn-action bg-blue-100 text-blue-700 hover:bg-blue-200 p-2 rounded-lg shadow-sm active:scale-95 transition" title="Вгору">
+                        <i class="fa-solid fa-arrow-up"></i>
+                    </button>
+                    <button onclick="game.addCommand('down')" class="btn-action bg-blue-100 text-blue-700 hover:bg-blue-200 p-2 rounded-lg shadow-sm active:scale-95 transition" title="Вниз">
+                        <i class="fa-solid fa-arrow-down"></i>
+                    </button>
+                    <button onclick="game.addCommand('left')" class="btn-action bg-blue-100 text-blue-700 hover:bg-blue-200 p-2 rounded-lg shadow-sm active:scale-95 transition" title="Вліво">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <button onclick="game.addCommand('right')" class="btn-action bg-blue-100 text-blue-700 hover:bg-blue-200 p-2 rounded-lg shadow-sm active:scale-95 transition" title="Вправо">
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="game.addCommand('collect')" class="btn-action bg-yellow-100 text-yellow-700 hover:bg-yellow-200 p-2 rounded-lg shadow-sm active:scale-95 transition flex items-center justify-center gap-2 font-semibold text-sm">
+                        <i class="fa-regular fa-hand-point-down"></i> Зібрати
+                    </button>
+                    <button onclick="game.addLoop()" class="btn-action bg-purple-100 text-purple-700 hover:bg-purple-200 p-2 rounded-lg shadow-sm active:scale-95 transition flex items-center justify-center gap-2 font-semibold text-sm">
+                        <i class="fa-solid fa-rotate"></i> Повтор
+                    </button>
+                </div>
+            </div>
+
+            <!-- Редактор програми -->
+            <div class="flex-1 flex flex-col p-4 overflow-hidden bg-slate-50">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="text-sm font-bold uppercase text-slate-400 tracking-wider">Ваш алгоритм</h2>
+                    <button onclick="game.clearProgram()" class="text-xs text-red-500 hover:text-red-700 font-semibold">Очистити все</button>
+                </div>
+                
+                <div class="flex-1 bg-white border border-slate-200 rounded-lg p-2 overflow-y-auto program-list" id="program-container">
+                    <div class="text-center text-slate-400 text-sm mt-10 italic" id="empty-msg">
+                        Додайте блоки дій сюди...
+                    </div>
+                    <ul id="program-list" class="space-y-1">
+                        <!-- Команди будуть тут -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Кнопки запуску -->
+            <div class="p-4 border-t border-slate-200 bg-white">
+                <button id="run-btn" onclick="game.runProgram()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-green-500/30 active:translate-y-1 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-play"></i> ЗАПУСТИТИ ПРОГРАМУ
+                </button>
+                <button id="next-level-btn" onclick="game.nextLevel()" class="hidden w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-indigo-600/30 active:translate-y-1 transition items-center justify-center gap-2 mt-2">
+                    Наступний рівень <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Модальне вікно для циклу -->
+    <div id="loop-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 backdrop-blur-sm">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl w-80 transform transition-all scale-100">
+            <h3 class="text-lg font-bold mb-4 text-center">Налаштування циклу</h3>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Кількість повторів:</label>
+                <input type="number" id="loop-count" min="2" max="10" value="3" class="w-full border border-gray-300 rounded-lg p-2 text-center text-xl font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
+            </div>
+            <p class="text-xs text-slate-500 mb-4 text-center">Дії, додані після "Початок", будуть всередині циклу. Не забудьте додати "Кінець циклу".</p>
+            <div class="flex gap-2">
+                <button onclick="ui.closeLoopModal()" class="flex-1 py-2 text-slate-500 hover:bg-slate-100 rounded-lg">Скасувати</button>
+                <button onclick="game.confirmLoop()" class="flex-1 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold">Додати</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- ДАНІ РІВНІВ ---
+        const levels = [
+            {
+                id: 1,
+                hero: { x: 0, y: 0 },
+                crystals: [
+                    { x: 2, y: 0 },
+                    { x: 4, y: 0 }
+                ],
+                walls: []
+            },
+            {
+                id: 2,
+                hero: { x: 0, y: 0 },
+                crystals: [
+                    { x: 0, y: 5 },
+                    { x: 5, y: 5 }
+                ],
+                walls: [
+                    { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 }
+                ]
+            },
+            {
+                id: 3,
+                hero: { x: 2, y: 2 },
+                crystals: [
+                    { x: 2, y: 0 },
+                    { x: 5, y: 2 },
+                    { x: 2, y: 5 },
+                    { x: 0, y: 2 }
+                ],
+                walls: []
+            }
+        ];
+
+        // --- КОНСТАНТИ ---
+        const GRID_SIZE = 6;
+        const ICONS = {
+            crystal: '<i class="fa-solid fa-gem text-blue-400 text-lg md:text-xl crystal-anim"></i>',
+            wall: '<div class="w-full h-full bg-slate-600 rounded-sm border-b-4 border-slate-800 shadow-inner"></div>',
+            actions: {
+                up: '<i class="fa-solid fa-arrow-up"></i> Вгору',
+                down: '<i class="fa-solid fa-arrow-down"></i> Вниз',
+                left: '<i class="fa-solid fa-arrow-left"></i> Вліво',
+                right: '<i class="fa-solid fa-arrow-right"></i> Вправо',
+                collect: '<i class="fa-regular fa-hand-point-down"></i> Зібрати',
+                loopStart: '<i class="fa-solid fa-rotate"></i> Початок (xWAIT)',
+                loopEnd: '<i class="fa-solid fa-stop"></i> Кінець циклу'
+            }
+        };
+
+        // --- ЛОГІКА ГРИ ---
+        const game = {
+            currentLevelIndex: 0,
+            program: [],
+            state: { 
+                hero: { x: 0, y: 0 },
+                crystals: [],
+                walls: [],
+                isRunning: false
+            },
+
+            init: function() {
+                // Додаємо слухач зміни розміру вікна, щоб герой не з'їжджав
+                window.addEventListener('resize', () => {
+                    ui.updateHeroPosition(true); // true = миттєво без анімації при ресайзі
+                });
+                this.loadLevel(0);
+                ui.renderProgramList();
+            },
+
+            loadLevel: function(index) {
+                if (index >= levels.length) {
+                    alert("Вітаємо! Ви пройшли всі рівні!");
+                    index = 0;
+                }
+                this.currentLevelIndex = index;
+                const levelData = levels[index];
+
+                this.state.hero = { ...levelData.hero };
+                this.state.crystals = levelData.crystals.map(c => ({ ...c }));
+                this.state.walls = levelData.walls ? levelData.walls.map(w => ({ ...w })) : [];
+                this.state.isRunning = false;
+
+                ui.updateLevelDisplay(index + 1);
+                ui.renderGrid(); // Малює поле (без героя)
+                ui.updateHeroPosition(true); // Ставить героя на старт миттєво
+                ui.updateStats();
+                ui.resetStatus();
+            },
+
+            resetLevel: function() {
+                this.state.isRunning = false;
+                this.loadLevel(this.currentLevelIndex);
+            },
+
+            nextLevel: function() {
+                this.program = [];
+                ui.renderProgramList();
+                this.loadLevel(this.currentLevelIndex + 1);
+                document.getElementById('next-level-btn').classList.add('hidden');
+                document.getElementById('run-btn').classList.remove('hidden');
+            },
+
+            addCommand: function(type) {
+                if (this.state.isRunning) return;
+                this.program.push({ type: type, id: Date.now() + Math.random() });
+                ui.renderProgramList();
+            },
+
+            addLoop: function() {
+                if (this.state.isRunning) return;
+                ui.openLoopModal();
+            },
+
+            confirmLoop: function() {
+                const count = parseInt(document.getElementById('loop-count').value);
+                this.program.push({ type: 'loopStart', count: count, id: Date.now() });
+                ui.closeLoopModal();
+                ui.renderProgramList();
+            },
+
+            addLoopEnd: function() {
+                if (this.state.isRunning) return;
+                this.program.push({ type: 'loopEnd', id: Date.now() });
+                ui.renderProgramList();
+            },
+
+            removeCommand: function(index) {
+                if (this.state.isRunning) return;
+                this.program.splice(index, 1);
+                ui.renderProgramList();
+            },
+
+            clearProgram: function() {
+                if (this.state.isRunning) return;
+                this.program = [];
+                ui.renderProgramList();
+            },
+
+            runProgram: async function() {
+                if (this.state.isRunning) return;
+                
+                this.loadLevel(this.currentLevelIndex);
+                this.state.isRunning = true;
+                ui.toggleControls(false);
+
+                let instructions = [];
+                try {
+                    instructions = this.compileProgram(this.program);
+                } catch (e) {
+                    ui.showStatus(e.message, 'error');
+                    this.state.isRunning = false;
+                    ui.toggleControls(true);
+                    return;
+                }
+
+                if (instructions.length === 0) {
+                    ui.showStatus("Програма порожня!", 'error');
+                    this.state.isRunning = false;
+                    ui.toggleControls(true);
+                    return;
+                }
+
+                for (let i = 0; i < instructions.length; i++) {
+                    if (!this.state.isRunning) break;
+                    
+                    // Затримка перед виконанням (щоб учень бачив початок)
+                    if (i === 0) await new Promise(r => setTimeout(r, 300));
+
+                    const cmd = instructions[i];
+                    await this.executeStep(cmd);
+                    
+                    if (!this.state.isRunning) return;
+                }
+
+                if (this.state.crystals.length === 0) {
+                    ui.showStatus("Успіх! Рівень пройдено!", 'success');
+                    document.getElementById('run-btn').classList.add('hidden');
+                    document.getElementById('next-level-btn').classList.remove('hidden');
+                } else {
+                    ui.showStatus("Не всі кристали зібрано.", 'error');
+                }
+                
+                this.state.isRunning = false;
+                ui.toggleControls(true);
+            },
+
+            compileProgram: function(prog) {
+                let compiled = [];
+                let i = 0;
+                
+                while (i < prog.length) {
+                    const cmd = prog[i];
+                    if (cmd.type === 'loopStart') {
+                        let balance = 1;
+                        let j = i + 1;
+                        let loopBody = [];
+                        while (j < prog.length && balance > 0) {
+                            if (prog[j].type === 'loopStart') balance++;
+                            if (prog[j].type === 'loopEnd') balance--;
+                            if (balance > 0) loopBody.push(prog[j]);
+                            j++;
+                        }
+                        if (balance > 0) throw new Error("Помилка: Незакртий цикл!");
+                        const compiledBody = this.compileProgram(loopBody);
+                        for (let r = 0; r < cmd.count; r++) {
+                            compiled = compiled.concat(compiledBody);
+                        }
+                        i = j;
+                    } else if (cmd.type === 'loopEnd') {
+                        throw new Error("Помилка: Зайвий 'Кінець циклу'!");
+                    } else {
+                        compiled.push(cmd);
+                        i++;
+                    }
+                }
+                return compiled;
+            },
+
+            executeStep: async function(cmd) {
+                const { x, y } = this.state.hero;
+                let nextX = x;
+                let nextY = y;
+
+                // Затримка між кроками для сприйняття анімації
+                await new Promise(r => setTimeout(r, 600));
+
+                switch(cmd.type) {
+                    case 'up': nextY--; break;
+                    case 'down': nextY++; break;
+                    case 'left': nextX--; break;
+                    case 'right': nextX++; break;
+                    case 'collect':
+                        this.tryCollect();
+                        return;
+                }
+
+                if (nextX < 0 || nextX >= GRID_SIZE || nextY < 0 || nextY >= GRID_SIZE) {
+                    this.fail("Обережно! Вихід за межі поля.");
+                    return;
+                }
+
+                const isWall = this.state.walls.some(w => w.x === nextX && w.y === nextY);
+                if (isWall) {
+                    this.fail("Бабах! Ви врізалися в стіну.");
+                    return;
+                }
+
+                this.state.hero = { x: nextX, y: nextY };
+                // Оновлюємо тільки позицію героя, не перемальовуємо сітку
+                ui.updateHeroPosition(); 
+            },
+
+            tryCollect: function() {
+                const { x, y } = this.state.hero;
+                const index = this.state.crystals.findIndex(c => c.x === x && c.y === y);
+                
+                if (index !== -1) {
+                    this.state.crystals.splice(index, 1);
+                    ui.renderGrid(); // Тут треба перемалювати, щоб прибрати кристал
+                    // Але герой не зникне, бо він в окремому шарі, а функція updateHeroPosition збереже його місце
+                    ui.updateHeroPosition(true); // Оновити позицію без анімації (щоб не стрибав)
+                    ui.updateStats();
+                } else {
+                    this.fail("Тут немає кристала!");
+                }
+            },
+
+            fail: function(msg) {
+                ui.showStatus(msg, 'error');
+                this.state.isRunning = false;
+            }
+        };
+
+        // --- UI ---
+        const ui = {
+            gridEl: document.getElementById('game-grid'),
+            programListEl: document.getElementById('program-list'),
+            heroEl: document.getElementById('hero-marker'),
+            
+            renderGrid: function() {
+                // Зберігаємо героя, щоб не видалити його при очищенні
+                // Але в нас герой винесений окремо в HTML, тож просто чистимо клітинки
+                // АЛЕ: gridEl містить і клітинки, і #hero-marker.
+                // Треба чистити тільки клітинки, або відновлювати героя.
+                // Найпростіше: видаляти все, крім hero-marker.
+                
+                const children = Array.from(this.gridEl.children);
+                children.forEach(child => {
+                    if (child.id !== 'hero-marker') {
+                        child.remove();
+                    }
+                });
+                
+                for (let y = 0; y < GRID_SIZE; y++) {
+                    for (let x = 0; x < GRID_SIZE; x++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'w-full h-full bg-slate-50 border border-slate-200 rounded flex items-center justify-center relative overflow-hidden';
+                        cell.dataset.x = x;
+                        cell.dataset.y = y;
+
+                        // Стіни
+                        const isWall = game.state.walls && game.state.walls.some(w => w.x === x && w.y === y);
+                        if (isWall) {
+                            cell.innerHTML = ICONS.wall;
+                        }
+
+                        // Кристали
+                        const hasCrystal = game.state.crystals.some(c => c.x === x && c.y === y);
+                        if (hasCrystal) {
+                            const crystalDiv = document.createElement('div');
+                            crystalDiv.innerHTML = ICONS.crystal;
+                            cell.appendChild(crystalDiv);
+                        }
+
+                        // Ми БІЛЬШЕ НЕ малюємо героя тут всередині клітинки
+                        this.gridEl.appendChild(cell);
+                    }
+                }
+            },
+
+            updateHeroPosition: function(instant = false) {
+                const { x, y } = game.state.hero;
+                const targetCell = document.querySelector(`[data-x="${x}"][data-y="${y}"]`);
+                
+                if (targetCell) {
+                    const width = targetCell.offsetWidth;
+                    const height = targetCell.offsetHeight;
+                    const top = targetCell.offsetTop;
+                    const left = targetCell.offsetLeft;
+
+                    this.heroEl.style.width = width + 'px';
+                    this.heroEl.style.height = height + 'px';
+                    this.heroEl.style.top = top + 'px';
+                    this.heroEl.style.left = left + 'px';
+                    
+                    this.heroEl.classList.remove('hidden');
+
+                    if (instant) {
+                        this.heroEl.classList.remove('duration-300');
+                        this.heroEl.style.transition = 'none';
+                        // Force reflow
+                        void this.heroEl.offsetWidth;
+                        this.heroEl.style.transition = '';
+                        this.heroEl.classList.add('duration-300');
+                    }
+                }
+            },
+
+            renderProgramList: function() {
+                this.programListEl.innerHTML = '';
+                const emptyMsg = document.getElementById('empty-msg');
+                
+                if (game.program.length === 0) {
+                    emptyMsg.style.display = 'block';
+                    return;
+                }
+                emptyMsg.style.display = 'none';
+
+                let indentLevel = 0;
+
+                game.program.forEach((cmd, index) => {
+                    const li = document.createElement('li');
+                    if (cmd.type === 'loopEnd') indentLevel = Math.max(0, indentLevel - 1);
+                    
+                    const baseClasses = "p-2 rounded flex justify-between items-center text-sm font-medium border cursor-pointer select-none hover:bg-slate-50 transition group";
+                    let colorClass = "bg-white border-slate-200 text-slate-700";
+                    
+                    let label = "";
+                    if (cmd.type === 'loopStart') {
+                        colorClass = "bg-purple-50 border-purple-200 text-purple-700 ml-0 border-l-4 border-l-purple-500";
+                        label = ICONS.actions.loopStart.replace('WAIT', cmd.count);
+                    } else if (cmd.type === 'loopEnd') {
+                        colorClass = "bg-purple-50 border-purple-200 text-purple-700 ml-0 opacity-75";
+                        label = ICONS.actions.loopEnd;
+                    } else if (cmd.type === 'collect') {
+                        colorClass = "bg-yellow-50 border-yellow-200 text-yellow-800";
+                        label = ICONS.actions[cmd.type];
+                    } else {
+                        label = ICONS.actions[cmd.type];
+                    }
+
+                    li.style.marginLeft = (indentLevel * 16) + 'px';
+                    li.className = `${baseClasses} ${colorClass}`;
+                    
+                    li.innerHTML = `
+                        <div class="flex items-center gap-2">${label}</div>
+                        <button onclick="game.removeCommand(${index})" class="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition px-2">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    `;
+
+                    this.programListEl.appendChild(li);
+                    if (cmd.type === 'loopStart') indentLevel++;
+                });
+
+                if (indentLevel > 0) {
+                     const endLoopBtn = document.createElement('button');
+                     endLoopBtn.className = "w-full mt-2 text-xs border border-dashed border-purple-300 text-purple-600 p-1 rounded hover:bg-purple-50 transition";
+                     endLoopBtn.innerHTML = "+ Додати кінець циклу";
+                     endLoopBtn.onclick = () => game.addLoopEnd();
+                     this.programListEl.appendChild(endLoopBtn);
+                }
+            },
+
+            updateStats: function() {
+                document.getElementById('crystals-count').innerText = game.state.crystals.length;
+            },
+
+            updateLevelDisplay: function(num) {
+                document.getElementById('level-display').innerText = `Рівень ${num}`;
+            },
+
+            showStatus: function(msg, type) {
+                const el = document.getElementById('status-message');
+                el.innerText = msg;
+                el.classList.remove('hidden', 'bg-red-500', 'bg-green-500');
+                if (type === 'error') el.classList.add('bg-red-500');
+                else el.classList.add('bg-green-500');
+                el.classList.remove('hidden');
+            },
+
+            resetStatus: function() {
+                const el = document.getElementById('status-message');
+                el.classList.add('hidden');
+            },
+
+            toggleControls: function(enabled) {
+                const btns = document.querySelectorAll('.btn-action, .fa-trash');
+                btns.forEach(b => {
+                    if (b.tagName === 'BUTTON' || b.parentElement.tagName === 'BUTTON') {
+                        const btn = b.tagName === 'BUTTON' ? b : b.parentElement;
+                        btn.disabled = !enabled;
+                        btn.classList.toggle('opacity-50', !enabled);
+                        btn.classList.toggle('cursor-not-allowed', !enabled);
+                    }
+                });
+            },
+
+            openLoopModal: function() {
+                document.getElementById('loop-modal').classList.remove('hidden');
+            },
+
+            closeLoopModal: function() {
+                document.getElementById('loop-modal').classList.add('hidden');
+            }
+        };
+
+        game.init();
+
+    </script>
+</body>
+</html>
