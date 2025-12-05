@@ -28,6 +28,12 @@
             background-color: #eff6ff;
         }
 
+        /* Безпечна зона для мобільних (щоб не перекривало кнопки знизу) */
+        .safe-area-bottom {
+            padding-bottom: constant(safe-area-inset-bottom); /* iOS 11.0 */
+            padding-bottom: env(safe-area-inset-bottom); /* iOS 11.2+ */
+        }
+
         /* Анімація появи кристалів */
         @keyframes popIn {
             0% { transform: scale(0); opacity: 0; }
@@ -39,17 +45,17 @@
         }
     </style>
 </head>
-<body class="bg-slate-100 h-screen h-[100dvh] flex flex-col font-sans text-slate-800 overflow-hidden">
+<!-- fixed inset-0 гарантує, що боді займає рівно розмір в'юпорта і не скролиться -->
+<body class="bg-slate-100 fixed inset-0 flex flex-col font-sans text-slate-800 overflow-hidden">
 
     <!-- Заголовок (Компактний для мобільних) -->
-    <header class="bg-white shadow-sm p-2 md:p-4 flex justify-between items-center z-10 shrink-0 h-14 md:h-auto">
+    <header class="bg-white shadow-sm p-2 md:p-4 flex justify-between items-center z-10 shrink-0 h-12 md:h-auto">
         <div class="flex items-center gap-2 md:gap-3">
             <div class="bg-indigo-600 text-white p-1.5 md:p-2 rounded-lg">
                 <i class="fa-solid fa-robot text-lg md:text-xl"></i>
             </div>
             <div>
                 <h1 class="text-sm md:text-xl font-bold text-slate-800 leading-tight">RoboCode<span class="hidden sm:inline">: Збирач</span></h1>
-                <p class="text-[10px] md:text-xs text-slate-500 hidden md:block">Склади алгоритм</p>
             </div>
         </div>
         <div class="flex gap-2 md:gap-4 items-center">
@@ -64,12 +70,12 @@
     <main class="flex-1 flex flex-col md:flex-row overflow-hidden relative min-h-0">
         
         <!-- Ліва частина: Ігрове поле -->
-        <!-- ЗМІНЕНО: прибрано shrink-0, додано min-h-0 -->
-        <section class="flex-1 p-2 md:p-6 flex flex-col items-center justify-center bg-slate-200 overflow-hidden relative min-h-0">
+        <!-- h-[55%] для мобільних, щоб залишити місце для кнопок -->
+        <section class="h-[55%] md:h-auto md:flex-1 p-1 md:p-6 flex flex-col items-center justify-center bg-slate-200 overflow-hidden relative min-h-0 shrink-0 md:shrink">
             <!-- Контейнер для центрування -->
-            <div class="flex flex-col items-center w-full max-h-full overflow-y-auto py-2">
-                <div class="relative bg-white p-1 md:p-2 rounded-xl shadow-lg border-4 border-slate-300 shrink-0">
-                    <!-- Сітка 6x6. Адаптивний розмір для мобільних -->
+            <div class="flex flex-col items-center justify-center w-full h-full overflow-y-auto py-1">
+                <div class="relative bg-white p-1 md:p-2 rounded-xl shadow-lg border-4 border-slate-300 shrink-0 scale-90 sm:scale-100 origin-center">
+                    <!-- Сітка 6x6. Адаптивний розмір -->
                     <div id="game-grid" class="relative grid grid-cols-6 grid-rows-6 gap-1 w-[280px] h-[280px] sm:w-[400px] sm:h-[400px]">
                         <!-- Клітинки генеруються JS -->
                         
@@ -82,11 +88,11 @@
                 
                 <!-- Статус -->
                 <div class="mt-2 md:mt-6 flex gap-4 w-full justify-center shrink-0">
-                    <div class="bg-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg shadow-sm flex items-center gap-2 text-sm md:text-base">
+                    <div class="bg-white px-3 py-1 md:px-4 md:py-2 rounded-lg shadow-sm flex items-center gap-2 text-xs md:text-base">
                         <i class="fa-solid fa-gem text-blue-400"></i>
                         <span class="font-bold text-slate-700">Залишилось: <span id="crystals-count">0</span></span>
                     </div>
-                    <div id="status-message" class="hidden px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-bold text-white text-xs md:text-sm animate-pulse">
+                    <div id="status-message" class="hidden px-3 py-1 md:px-4 md:py-2 rounded-lg font-bold text-white text-xs md:text-sm animate-pulse">
                         <!-- Повідомлення -->
                     </div>
                 </div>
@@ -94,12 +100,12 @@
         </section>
 
         <!-- Права частина: Панель керування -->
-        <!-- ЗМІНЕНО: додано shrink-0, щоб не зникала -->
-        <section class="w-full md:w-[400px] bg-white border-l border-slate-200 flex flex-col h-[45vh] md:h-auto shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] md:shadow-xl z-20 shrink-0">
+        <!-- h-[45%] для мобільних. shrink-0, щоб не стискалась -->
+        <section class="h-[45%] md:h-auto w-full md:w-[400px] bg-white border-l border-slate-200 flex flex-col shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] md:shadow-xl z-20 shrink-0">
             
             <!-- Тулбар дій -->
             <div class="p-2 md:p-4 border-b border-slate-100 bg-slate-50 shrink-0">
-                <div class="grid grid-cols-4 gap-1.5 md:gap-2 mb-1.5 md:mb-2">
+                <div class="grid grid-cols-4 gap-1 md:gap-2 mb-1 md:mb-2">
                     <button onclick="game.addCommand('up')" class="btn-action bg-blue-100 text-blue-700 hover:bg-blue-200 p-2 md:p-2 rounded-lg shadow-sm active:scale-95 transition" title="Вгору">
                         <i class="fa-solid fa-arrow-up"></i>
                     </button>
@@ -113,7 +119,7 @@
                         <i class="fa-solid fa-arrow-right"></i>
                     </button>
                 </div>
-                <div class="grid grid-cols-2 gap-1.5 md:gap-2">
+                <div class="grid grid-cols-2 gap-1 md:gap-2">
                     <button onclick="game.addCommand('collect')" class="btn-action bg-yellow-100 text-yellow-700 hover:bg-yellow-200 p-2 rounded-lg shadow-sm active:scale-95 transition flex items-center justify-center gap-2 font-semibold text-xs md:text-sm">
                         <i class="fa-regular fa-hand-point-down"></i> <span class="hidden xs:inline">Зібрати</span>
                     </button>
@@ -134,18 +140,19 @@
                     <div class="text-center text-slate-400 text-xs md:text-sm mt-4 md:mt-10 italic" id="empty-msg">
                         Додайте дії...
                     </div>
-                    <ul id="program-list" class="space-y-1 pb-8">
+                    <ul id="program-list" class="space-y-1 pb-4">
                         <!-- Команди будуть тут -->
                     </ul>
                 </div>
             </div>
 
             <!-- Кнопки запуску -->
-            <div class="p-2 md:p-4 border-t border-slate-200 bg-white shrink-0 safe-area-bottom">
-                <button id="run-btn" onclick="game.runProgram()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 md:py-3 px-4 rounded-xl shadow-lg shadow-green-500/30 active:translate-y-1 transition flex items-center justify-center gap-2 text-sm md:text-base">
+            <!-- pb-8 піднімає кнопки вище на телефонах -->
+            <div class="p-2 md:p-4 border-t border-slate-200 bg-white shrink-0 safe-area-bottom pb-8 md:pb-4">
+                <button id="run-btn" onclick="game.runProgram()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 md:py-3 px-4 rounded-xl shadow-lg shadow-green-500/30 active:translate-y-1 transition flex items-center justify-center gap-2 text-sm md:text-base">
                     <i class="fa-solid fa-play"></i> ЗАПУСТИТИ
                 </button>
-                <button id="next-level-btn" onclick="game.nextLevel()" class="hidden w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 md:py-3 px-4 rounded-xl shadow-lg shadow-indigo-600/30 active:translate-y-1 transition items-center justify-center gap-2 mt-2 text-sm md:text-base">
+                <button id="next-level-btn" onclick="game.nextLevel()" class="hidden w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 md:py-3 px-4 rounded-xl shadow-lg shadow-indigo-600/30 active:translate-y-1 transition items-center justify-center gap-2 mt-2 text-sm md:text-base">
                     Далі <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </div>
