@@ -39,7 +39,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-100 h-screen flex flex-col font-sans text-slate-800 overflow-hidden">
+<body class="bg-slate-100 h-screen h-[100dvh] flex flex-col font-sans text-slate-800 overflow-hidden">
 
     <!-- Заголовок (Компактний для мобільних) -->
     <header class="bg-white shadow-sm p-2 md:p-4 flex justify-between items-center z-10 shrink-0 h-14 md:h-auto">
@@ -61,10 +61,11 @@
     </header>
 
     <!-- Головна область -->
-    <main class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+    <main class="flex-1 flex flex-col md:flex-row overflow-hidden relative min-h-0">
         
         <!-- Ліва частина: Ігрове поле -->
-        <section class="flex-1 p-2 md:p-6 flex flex-col items-center justify-center bg-slate-200 overflow-hidden relative shrink-0">
+        <!-- ЗМІНЕНО: прибрано shrink-0, додано min-h-0 -->
+        <section class="flex-1 p-2 md:p-6 flex flex-col items-center justify-center bg-slate-200 overflow-hidden relative min-h-0">
             <!-- Контейнер для центрування -->
             <div class="flex flex-col items-center w-full max-h-full overflow-y-auto py-2">
                 <div class="relative bg-white p-1 md:p-2 rounded-xl shadow-lg border-4 border-slate-300 shrink-0">
@@ -93,8 +94,8 @@
         </section>
 
         <!-- Права частина: Панель керування -->
-        <!-- На мобільному займає фіксовану частину екрану знизу або flex -->
-        <section class="w-full md:w-[400px] bg-white border-l border-slate-200 flex flex-col h-[45vh] md:h-auto shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] md:shadow-xl z-20">
+        <!-- ЗМІНЕНО: додано shrink-0, щоб не зникала -->
+        <section class="w-full md:w-[400px] bg-white border-l border-slate-200 flex flex-col h-[45vh] md:h-auto shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] md:shadow-xl z-20 shrink-0">
             
             <!-- Тулбар дій -->
             <div class="p-2 md:p-4 border-b border-slate-100 bg-slate-50 shrink-0">
@@ -123,8 +124,8 @@
             </div>
 
             <!-- Редактор програми -->
-            <div class="flex-1 flex flex-col p-2 md:p-4 overflow-hidden bg-slate-50">
-                <div class="flex justify-between items-center mb-1">
+            <div class="flex-1 flex flex-col p-2 md:p-4 overflow-hidden bg-slate-50 min-h-0">
+                <div class="flex justify-between items-center mb-1 shrink-0">
                     <h2 class="text-xs md:text-sm font-bold uppercase text-slate-400 tracking-wider">Алгоритм</h2>
                     <button onclick="game.clearProgram()" class="text-[10px] md:text-xs text-red-500 hover:text-red-700 font-semibold p-1">Очистити</button>
                 </div>
@@ -140,7 +141,7 @@
             </div>
 
             <!-- Кнопки запуску -->
-            <div class="p-2 md:p-4 border-t border-slate-200 bg-white shrink-0">
+            <div class="p-2 md:p-4 border-t border-slate-200 bg-white shrink-0 safe-area-bottom">
                 <button id="run-btn" onclick="game.runProgram()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 md:py-3 px-4 rounded-xl shadow-lg shadow-green-500/30 active:translate-y-1 transition flex items-center justify-center gap-2 text-sm md:text-base">
                     <i class="fa-solid fa-play"></i> ЗАПУСТИТИ
                 </button>
