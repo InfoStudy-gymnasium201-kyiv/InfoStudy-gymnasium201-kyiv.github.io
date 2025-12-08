@@ -7,11 +7,6 @@
       "correctOption": "=="
     },
     {
-      "question": "Що виведе цей код:\n\nx = 10\nif x > 5:\n    print('Більше')\nelse:\n    print('Менше')",
-      "options": ["Менше", "Більше", "Нічого не виведе", "Помилка"],
-      "correctOption": "Більше"
-    },
-    {
       "question": "Яке ключове слово використовується для перевірки додаткової умови, якщо попередня умова 'if' виявилася хибною?",
       "options": ["else if", "elseif", "elif", "other"],
       "correctOption": "elif"
@@ -27,11 +22,6 @@
       "correctOption": ": (двокрапка)"
     },
     {
-      "question": "Що виведе цей код:\n\na = 5\nb = 10\nif a > 0 or b < 0:\n    print('Так')\nelse:\n    print('Ні')",
-      "options": ["Ні", "Так", "Помилка", "True"],
-      "correctOption": "Так"
-    },
-    {
       "question": "Як позначається логічне заперечення ('не') в Python?",
       "options": ["!", "no", "not", "~"],
       "correctOption": "not"
@@ -45,11 +35,6 @@
       "question": "Який оператор перевіряє, що два значення НЕ рівні?",
       "options": ["!=", "<>", "not =", "><"],
       "correctOption": "!="
-    },
-    {
-      "question": "Проаналізуйте код:\n\nscore = 85\nif score >= 90:\n    print('A')\nelif score >= 80:\n    print('B')\nelse:\n    print('C')",
-      "options": ["A", "B", "C", "B і C"],
-      "correctOption": "B"
     },
     {
       "question": "Який результат виразу: not (5 > 10)?",
