@@ -1,0 +1,65 @@
+{
+  "quizTitle": "Python. Логічні оператори if else",
+  "questions": [
+    {
+      "question": "Який оператор використовується в Python для перевірки рівності двох значень?",
+      "options": ["=", "==", "<>", "equals"],
+      "correctOption": "=="
+    },
+    {
+      "question": "Що виведе цей код:\n\nx = 10\nif x > 5:\n    print('Більше')\nelse:\n    print('Менше')",
+      "options": ["Менше", "Більше", "Нічого не виведе", "Помилка"],
+      "correctOption": "Більше"
+    },
+    {
+      "question": "Яке ключове слово використовується для перевірки додаткової умови, якщо попередня умова 'if' виявилася хибною?",
+      "options": ["else if", "elseif", "elif", "other"],
+      "correctOption": "elif"
+    },
+    {
+      "question": "Який результат виконання операції: True and False?",
+      "options": ["True", "False", "None", "Error"],
+      "correctOption": "False"
+    },
+    {
+      "question": "Який символ обов'язково ставиться в кінці рядка з інструкцією if, elif або else?",
+      "options": ["; (крапка з комою)", ". (крапка)", ": (двокрапка)", "{} (фігурні дужки)"],
+      "correctOption": ": (двокрапка)"
+    },
+    {
+      "question": "Що виведе цей код:\n\na = 5\nb = 10\nif a > 0 or b < 0:\n    print('Так')\nelse:\n    print('Ні')",
+      "options": ["Ні", "Так", "Помилка", "True"],
+      "correctOption": "Так"
+    },
+    {
+      "question": "Як позначається логічне заперечення ('не') в Python?",
+      "options": ["!", "no", "not", "~"],
+      "correctOption": "not"
+    },
+    {
+      "question": "Що означає помилка 'IndentationError' при написанні умовних конструкцій?",
+      "options": ["Забули поставити двокрапку", "Неправильні відступи в коді", "Неправильне ім'я змінної", "Ділення на нуль"],
+      "correctOption": "Неправильні відступи в коді"
+    },
+    {
+      "question": "Який оператор перевіряє, що два значення НЕ рівні?",
+      "options": ["!=", "<>", "not =", "><"],
+      "correctOption": "!="
+    },
+    {
+      "question": "Проаналізуйте код:\n\nscore = 85\nif score >= 90:\n    print('A')\nelif score >= 80:\n    print('B')\nelse:\n    print('C')",
+      "options": ["A", "B", "C", "B і C"],
+      "correctOption": "B"
+    },
+    {
+      "question": "Який результат виразу: not (5 > 10)?",
+      "options": ["False", "True", "Error", "None"],
+      "correctOption": "True"
+    },
+    {
+      "question": "Чи можна вкладати одну конструкцію if в іншу (nested if)?",
+      "options": ["Ні, це викличе помилку", "Тільки один раз", "Так, використовуючи правильні відступи", "Так, але тільки всередині else"],
+      "correctOption": "Так, використовуючи правильні відступи"
+    }
+  ]
+}
