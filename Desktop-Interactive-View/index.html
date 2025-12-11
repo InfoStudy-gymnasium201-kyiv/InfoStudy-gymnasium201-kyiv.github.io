@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Операційна система та Інтерфейс (5 клас)</title>
+    <!-- Завантаження Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Налаштування шрифту Inter та конфігурація Tailwind -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        /* Стилі для підсвічування елементів */
+        .highlight {
+            box-shadow: 0 0 0 4px #3b82f6; /* Синє кільце */
+            z-index: 100; /* Переконаємося, що підсвічування поверх інших елементів */
+            position: relative;
+            transition: box-shadow 0.3s ease-in-out;
+        }
+
+        /* Стилі для симуляції вікна */
+        .window-sim {
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 lg:p-8 flex items-center justify-center">
+
+    <div id="app-container" class="w-full max-w-7xl">
+        
+        <!-- 1. Початковий екран (На початку видимий) -->
+        <div id="start-screen" class="flex flex-col items-center justify-center text-center p-8 bg-white rounded-xl shadow-2xl transition-opacity duration-1000">
+            <h1 class="text-4xl lg:text-5xl font-extrabold text-indigo-700 mb-4">Операційна система та її інтерфейс</h1>
+            <p class="text-xl text-gray-600 mb-8">Інтерактивний урок</p>
+            <button id="start-button" class="px-8 py-4 bg-green-500 text-white font-bold rounded-full shadow-lg hover:bg-green-600 transition duration-300 transform hover:scale-105">
+                Розпочати Урок!
+            </button>
+        </div>
+
+        <!-- 2. Контейнер уроку (Симуляція робочого столу + Помічник) -->
+        <div id="lesson-container" class="hidden opacity-0 transition-opacity duration-1000 w-full flex flex-col lg:flex-row">
+            
+            <!-- 3. Симуляція робочого столу (Desktop Simulation) -->
+            <div id="desktop-simulation" class="flex-grow bg-blue-700 border-4 border-gray-800 rounded-lg shadow-2xl p-2 lg:p-4 h-[60vh] lg:h-[70vh] relative overflow-hidden">
+                
+                <!-- Анімація завантаження (сховати після старту) -->
+                <div id="loading-animation" class="absolute inset-0 bg-gray-900 flex flex-col items-center justify-center text-white z-[200]">
+                    <div class="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-indigo-500 mb-4"></div>
+                    <p class="text-lg">Завантаження операційної системи...</p>
+                </div>
+
+                <!-- Робочий стіл: Іконки -->
+                <div id="desktop-area" class="flex flex-col flex-wrap h-full w-40 p-4">
+                    <div id="icon-computer" class="desktop-icon flex flex-col items-center p-1 rounded-lg hover:bg-blue-600 cursor-pointer mb-4">
+                        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9.25 21H14.75L14.25 17M12 4C8.68629 4 6 6.68629 6 10V17H18V10C18 6.68629 15.3137 4 12 4Z"></path></svg>
+                        <span class="text-xs text-white text-center">Мій Комп'ютер</span>
+                    </div>
+                    <div id="icon-recycle" class="desktop-icon flex flex-col items-center p-1 rounded-lg hover:bg-blue-600 cursor-pointer mb-4">
+                        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        <span class="text-xs text-white text-center">Кошик</span>
+                    </div>
+                    <div id="icon-file" class="desktop-icon flex flex-col items-center p-1 rounded-lg hover:bg-blue-600 cursor-pointer">
+                        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <span class="text-xs text-white text-center">Важливий файл</span>
+                    </div>
+                </div>
+                
+                <!-- Робочий стіл: Панель Пуск (Start Menu Simulation) -->
+                <!-- Позиціонується над Панеллю завдань -->
+                <div id="start-menu-sim" class="absolute bottom-10 left-0 w-64 h-80 bg-gray-100 border border-gray-400 shadow-xl rounded-t-lg hidden flex-col z-50">
+                    <!-- Верхня панель (Користувач) -->
+                    <div class="bg-indigo-600 text-white p-2 text-sm font-semibold rounded-t-lg flex justify-between items-center">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+                        Учень 5-го класу
+                    </div>
+                    <!-- Список програм -->
+                    <ul class="p-2 flex-grow overflow-y-auto text-sm">
+                        <p class="text-gray-500 mb-1 font-semibold border-b pb-1">Найчастіше використовувані:</p>
+                        <li class="p-1 hover:bg-indigo-100 cursor-pointer flex items-center rounded-md">
+                            <span class="w-4 h-4 bg-yellow-500 mr-2 rounded"></span> Браузер (Інтернет)
+                        </li>
+                        <li class="p-1 hover:bg-indigo-100 cursor-pointer flex items-center rounded-md">
+                            <span class="w-4 h-4 bg-green-500 mr-2 rounded"></span> Текстовий редактор
+                        </li>
+                        <p class="text-gray-500 my-1 font-semibold border-b pb-1 mt-3">Папки:</p>
+                        <li class="p-1 hover:bg-indigo-100 cursor-pointer flex items-center rounded-md">
+                            <span class="w-4 h-4 bg-blue-500 mr-2 rounded"></span> Документи
+                        </li>
+                        <li class="p-1 hover:bg-indigo-100 cursor-pointer flex items-center rounded-md">
+                            <span class="w-4 h-4 bg-red-500 mr-2 rounded"></span> Налаштування
+                        </li>
+                    </ul>
+                    <!-- Кнопка Вимкнення -->
+                    <div class="p-2 border-t bg-gray-200">
+                        <button class="w-full text-center bg-red-600 text-white p-1 rounded hover:bg-red-700 transition duration-150 text-sm font-medium flex items-center justify-center">
+                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13 3h-2v10h2V3zm4.83 1.94l-1.42 1.42C17.9 7.94 19 9.8 19 12c0 3.86-3.14 7-7 7s-7-3.14-7-7c0-2.2.9-4.06 2.39-5.46L6.17 4.94C4.65 6.43 3.5 9.1 3.5 12c0 4.69 3.81 8.5 8.5 8.5s8.5-3.81 8.5-8.5c0-2.9-1.57-5.58-4.17-7.06z"></path></svg>
+                            Вимкнути
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Робочий стіл: Симуляція вікна Папки (Folder Window Simulation) -->
+                <div id="folder-window-sim" class="window-sim absolute top-10 left-1/2 -translate-x-1/2 w-4/5 md:w-3/5 lg:w-3/5 h-4/5 hidden flex-col z-40">
+                    <!-- Title Bar -->
+                    <div class="flex justify-between items-center bg-gray-300 p-2 border-b border-gray-400">
+                        <span class="text-sm font-semibold text-gray-800 flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-yellow-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"></path></svg>
+                            Документи
+                        </span>
+                        <div class="flex space-x-1">
+                            <button class="w-4 h-4 bg-yellow-500 rounded-full" title="Згорнути"></button>
+                            <button class="w-4 h-4 bg-green-500 rounded-full" title="Розгорнути"></button>
+                            <button class="w-4 h-4 bg-red-500 rounded-full" title="Закрити"></button>
+                        </div>
+                    </div>
+                    <!-- Menu/Ribbon (Simplified) -->
+                    <div id="folder-ribbon" class="bg-gray-200 p-1 border-b border-gray-300 flex space-x-3 text-xs text-gray-700 font-medium">
+                        <span class="p-1 rounded hover:bg-gray-300 cursor-pointer">Файл</span>
+                        <span class="p-1 rounded hover:bg-gray-300 cursor-pointer">Перегляд</span>
+                        <span class="p-1 rounded hover:bg-gray-300 cursor-pointer">Домашня сторінка</span>
+                    </div>
+
+                    <div class="flex flex-grow h-full overflow-hidden">
+                        <!-- Navigation Pane (Ліва панель) -->
+                        <div id="folder-navigation" class="w-1/4 bg-gray-200 p-3 text-sm border-r border-gray-300">
+                            <p class="font-bold mb-2 text-gray-800">Навігація</p>
+                            <ul class="space-y-1">
+                                <li class="flex items-center text-blue-600 font-semibold">
+                                    <span class="mr-1">📁</span> Документи
+                                </li>
+                                <li class="flex items-center hover:text-blue-600 cursor-pointer">
+                                    <span class="mr-1">🖼️</span> Зображення
+                                </li>
+                                <li class="flex items-center hover:text-blue-600 cursor-pointer">
+                                    <span class="mr-1">⬇️</span> Завантаження
+                                </li>
+                            </ul>
+                        </div>
+                        <!-- Content Area (Права панель) -->
+                        <div id="folder-content" class="w-3/4 bg-white p-3 overflow-y-auto">
+                            <div class="text-sm text-gray-600 mb-2">Шлях: C:\Users\Учень\Документи</div>
+                            <div class="grid grid-cols-3 gap-3">
+                                <div class="text-center p-2 rounded hover:bg-blue-100 cursor-pointer">
+                                    <span class="text-3xl">📁</span>
+                                    <p class="text-xs">Урок Інформатики</p>
+                                </div>
+                                <div class="text-center p-2 rounded hover:bg-blue-100 cursor-pointer">
+                                    <span class="text-3xl">📄</span>
+                                    <p class="text-xs">Звіт.docx</p>
+                                </div>
+                                <div class="text-center p-2 rounded hover:bg-blue-100 cursor-pointer">
+                                    <span class="text-3xl">📸</span>
+                                    <p class="text-xs">Фото_кота.jpg</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Робочий стіл: Симуляція вікна Налаштувань (Settings Window Simulation) -->
+                <div id="settings-window-sim" class="window-sim absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 md:w-3/5 lg:w-3/5 h-4/5 hidden flex-col z-40">
+                    <!-- Title Bar -->
+                    <div class="flex justify-between items-center bg-indigo-500 p-2 border-b border-indigo-600">
+                        <span class="text-sm font-semibold text-white flex items-center">
+                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.4-1.09-.76-1.71-1.04L13.12 3.44c-.09-.24-.31-.41-.56-.41h-4c-.25 0-.47.17-.56.41L7.26 6.1c-.62.28-1.19.64-1.71 1.04l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.12.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.31.61.22l2.49-1c.52.4 1.09.76 1.71 1.04l.36 2.76c.09.24.31.41.56.41h4c.25 0 .47-.17.56-.41l.36-2.76c.62-.28 1.19-.64 1.71-1.04l2.49 1c.22.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zm-7.43 3.68c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+                            Налаштування системи
+                        </span>
+                        <div class="flex space-x-1">
+                            <button class="w-4 h-4 bg-yellow-500 rounded-full" title="Згорнути"></button>
+                            <button class="w-4 h-4 bg-green-500 rounded-full" title="Розгорнути"></button>
+                            <button class="w-4 h-4 bg-red-500 rounded-full" title="Закрити"></button>
+                        </div>
+                    </div>
+                    <!-- Settings Content -->
+                    <div id="settings-content" class="p-4 flex flex-col flex-grow bg-white overflow-y-auto">
+                        <div class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Категорії Налаштувань</div>
+                        
+                        <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Картка: Система -->
+                            <div class="p-4 bg-gray-100 rounded-lg shadow hover:shadow-lg transition duration-200 cursor-pointer text-center">
+                                <span class="text-3xl mb-1 block">💻</span>
+                                <p class="text-sm font-medium">Система</p>
+                                <p class="text-xs text-gray-500">Дисплей, звук, живлення</p>
+                            </div>
+                            <!-- Картка: Пристрої -->
+                            <div class="p-4 bg-gray-100 rounded-lg shadow hover:shadow-lg transition duration-200 cursor-pointer text-center">
+                                <span class="text-3xl mb-1 block">🖱️</span>
+                                <p class="text-sm font-medium">Пристрої</p>
+                                <p class="text-xs text-gray-500">Миша, клавіатура, принтери</p>
+                            </div>
+                            <!-- Картка: Мережа -->
+                            <div class="p-4 bg-gray-100 rounded-lg shadow hover:shadow-lg transition duration-200 cursor-pointer text-center">
+                                <span class="text-3xl mb-1 block">🌐</span>
+                                <p class="text-sm font-medium">Мережа та Інтернет</p>
+                                <p class="text-xs text-gray-500">Wi-Fi, Ethernet</p>
+                            </div>
+                            <!-- Картка: Персоналізація -->
+                            <div class="p-4 bg-gray-100 rounded-lg shadow hover:shadow-lg transition duration-200 cursor-pointer text-center">
+                                <span class="text-3xl mb-1 block">🎨</span>
+                                <p class="text-sm font-medium">Персоналізація</p>
+                                <p class="text-xs text-gray-500">Фон, кольори</p>
+                            </div>
+                            <!-- Картка: Програми -->
+                            <div class="p-4 bg-gray-100 rounded-lg shadow hover:shadow-lg transition duration-200 cursor-pointer text-center">
+                                <span class="text-3xl mb-1 block">⚙️</span>
+                                <p class="text-sm font-medium">Програми</p>
+                                <p class="text-xs text-gray-500">Встановлення, видалення</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <!-- Робочий стіл: Панель задач (Taskbar) -->
+                <div id="taskbar" class="absolute bottom-0 left-0 right-0 h-10 bg-gray-700 flex items-center justify-between px-2 shadow-inner z-10">
+                    
+                    <!-- Кнопка "Пуск" -->
+                    <div id="start-button-sim" class="flex items-center bg-gray-500 hover:bg-gray-400 p-1 rounded cursor-pointer transition duration-150">
+                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 3h7v7H3zM3 14h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7z"></path></svg>
+                        <span class="text-sm text-white ml-1 font-semibold hidden md:inline">Пуск</span>
+                    </div>
+
+                    <!-- Закріплені програми -->
+                    <div class="flex space-x-2 ml-4">
+                        <div class="w-8 h-8 bg-blue-500 rounded hover:bg-blue-400 transition cursor-pointer" title="Браузер"></div>
+                        <div class="w-8 h-8 bg-green-500 rounded hover:bg-green-400 transition cursor-pointer" title="Документи"></div>
+                        <div class="w-8 h-8 bg-red-500 rounded hover:bg-red-400 transition cursor-pointer" title="Музика"></div>
+                    </div>
+
+                    <!-- Системний лоток (Notification Area) -->
+                    <div id="system-tray" class="flex items-center space-x-2 text-white text-sm">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zM11 7h2v6h-2zm0 8h2v2h-2z"></path></svg>
+                        <span>18:30</span>
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M16 12H8l4-4zM8 12h8l-4 4z"></path></svg>
+                    </div>
+
+                </div>
+                
+                <!-- Інтерактивне вікно для відображення поточної теми -->
+                <div id="info-window" class="window-sim absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 md:w-1/2 lg:w-1/3 p-6 hidden">
+                    <div class="flex justify-between items-center border-b pb-2 mb-4 bg-indigo-500 p-2 -m-2 rounded-t-lg">
+                        <span class="text-white font-semibold ml-2" id="window-title"></span>
+                        <div class="flex space-x-1">
+                            <button class="w-4 h-4 bg-yellow-500 rounded-full" title="Згорнути"></button>
+                            <button class="w-4 h-4 bg-green-500 rounded-full" title="Розгорнути"></button>
+                            <button class="w-4 h-4 bg-red-500 rounded-full" title="Закрити"></button>
+                        </div>
+                    </div>
+                    <p id="window-content" class="text-gray-700 text-base"></p>
+                    <button id="window-next-button" class="mt-4 px-4 py-2 bg-indigo-500 text-white font-semibold rounded-lg hover:bg-indigo-600 transition duration-150 w-full hidden">
+                        Далі
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- 2. Контейнер Помічника (тепер завжди видимий) -->
+            <!-- Mobile: займає всю ширину, по центру. Desktop: розташований справа. -->
+            <div id="helper-container" class="w-full mt-8 lg:mt-0 lg:ml-8 lg:w-72 flex flex-col items-center lg:items-start">
+                <div id="helper-bubble" class="bg-yellow-200 border border-yellow-400 p-4 rounded-xl relative mb-4 w-full max-w-xs lg:w-auto lg:max-w-none">
+                    <!-- Трикутник, що вказує на зображення помічника -->
+                    <div class="absolute bottom-[-10px] left-1/2 transform -translate-x-1/2 lg:left-4 lg:translate-x-0 w-0 h-0 border-l-[10px] border-r-[10px] border-t-[10px] border-t-yellow-400 border-l-transparent border-r-transparent"></div>
+                    <p id="helper-text" class="text-sm text-gray-800 font-medium leading-relaxed">Натисніть "Розпочати Урок!", щоб познайомитися з основами!</p>
+                </div>
+                <!-- Зображення персонажа-помічника (заглушка) -->
+                <img id="helper-image" src="https://github.com/InfoStudy-gymnasium201-kyiv/InfoStudy-gymnasium201-kyiv.github.io/blob/main/Extra/Cyber-Bunny-look-left.png?raw=true" alt="Зображення помічника" class="w-28 h-28 mx-auto object-cover">
+                
+                <!-- Кнопка "Далі" для Помічника -->
+                <button id="helper-next-button" class="mt-4 px-6 py-2 bg-indigo-500 text-white font-semibold rounded-full shadow-md hover:bg-indigo-600 transition duration-150 hidden">
+                    Продовжити
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Глобальні змінні для елементів
+        const startScreen = document.getElementById('start-screen');
+        const startButton = document.getElementById('start-button');
+        const lessonContainer = document.getElementById('lesson-container');
+        const loadingAnimation = document.getElementById('loading-animation');
+        
+        const helperText = document.getElementById('helper-text');
+        const helperNextButton = document.getElementById('helper-next-button');
+
+        const desktopArea = document.getElementById('desktop-area');
+        const taskbar = document.getElementById('taskbar');
+        const startButtonSim = document.getElementById('start-button-sim');
+        const iconComputer = document.getElementById('icon-computer');
+        const systemTray = document.getElementById('system-tray');
+        // Елемент: Симуляція Панелі Пуск
+        const startMenuSim = document.getElementById('start-menu-sim');
+        // НОВИЙ елемент: Симуляція вікна Папки
+        const folderWindowSim = document.getElementById('folder-window-sim');
+        // НОВИЙ елемент: Симуляція вікна Налаштувань
+        const settingsWindowSim = document.getElementById('settings-window-sim');
+
+
+        // Стан уроку
+        let currentStep = 0;
+
+        // Визначення кроків уроку
+        // { text: текст помічника, highlightElement: елемент для підсвічування, action: функція для виконання після кроку }
+        const lessonSteps = [
+            { 
+                text: "Привіт! Я твій помічник у світі комп'ютерів. Сьогодні ми дізнаємося, що таке 'Операційна система' і як працювати з її інтерфейсом.", 
+                highlightElement: null, 
+                action: () => helperNextButton.classList.remove('hidden')
+            },
+            { 
+                text: "Операційна система (ОС) — це головна програма комп'ютера. Вона керує всім: від клавіатури до екрана. Найвідоміші ОС — це Windows, macOS, Linux. Уяви, що це 'мозок' комп'ютера! ", 
+                highlightElement: lessonContainer, 
+                action: () => {}
+            },
+            { 
+                text: "А це — Робочий стіл (Desktop)! Це головний екран, куди ми потрапляємо після запуску ОС. Тут розташовані всі інструменти для роботи.", 
+                highlightElement: desktopArea, 
+                action: () => {}
+            },
+            { 
+                text: "Поглянь на нижню панель. Це Панель завдань (Taskbar). Вона завжди на видноті і допомагає нам запускати програми та перемикатися між ними.", 
+                highlightElement: taskbar, 
+                action: () => {}
+            },
+            { 
+                text: "Ось найважливіша частина Панелі завдань — Кнопка «Пуск» (Start Button). Це двері до всіх програм і налаштувань твого комп'ютера.", 
+                highlightElement: startButtonSim, 
+                action: () => {}
+            },
+            // Крок: Пояснення Панелі Пуск
+            {
+                text: "Якщо ми натиснемо на кнопку «Пуск», відкриється ось така **Панель Пуск (Start Menu)**. Вона показує список усіх програм, папок користувача та кнопки для вимкнення чи перезавантаження комп'ютера.",
+                highlightElement: startMenuSim, 
+                action: () => {
+                    startMenuSim.classList.remove('hidden');
+                    startMenuSim.classList.add('flex'); // Відображаємо меню
+                }
+            },
+            { 
+                text: "Тепер розглянемо Іконки (Icons). Вони знаходяться на Робочому столі. Це маленькі малюнки, які є швидкими ярликами до програм або файлів.", 
+                highlightElement: iconComputer, 
+                action: () => {
+                    startMenuSim.classList.add('hidden');
+                    startMenuSim.classList.remove('flex'); // Ховаємо меню
+                }
+            },
+            // КРОК: Пояснення Вікна Папки
+            {
+                text: "Коли ти двічі натискаєш на іконку папки, відкривається ось таке Вікно Папки. У ньому є: панель навігації (ліворуч) та область вмісту (праворуч), де лежать твої файли та інші папки.",
+                highlightElement: folderWindowSim, 
+                action: () => {
+                    folderWindowSim.classList.remove('hidden');
+                    folderWindowSim.classList.add('flex'); // Відображаємо вікно папки
+                }
+            },
+            // КРОК: Системний лоток
+            { 
+                text: "Праворуч на Панелі завдань знаходиться Системний лоток (System Tray). Тут ти бачиш годинник, налаштування звуку, мови, Wi-Fi та повідомлення від програм.", 
+                highlightElement: systemTray, 
+                action: () => {
+                    folderWindowSim.classList.add('hidden');
+                    folderWindowSim.classList.remove('flex'); // Ховаємо вікно папки
+                }
+            },
+            // НОВИЙ КРОК: Панель налаштувань
+            { 
+                text: "А якщо потрібно змінити вигляд або роботу комп'ютера, ми відкриваємо Панель налаштувань (Settings). Це місце, де ти можеш змінити фон, підключити мишу або Wi-Fi. ", 
+                highlightElement: settingsWindowSim, 
+                action: () => {
+                    settingsWindowSim.classList.remove('hidden');
+                    settingsWindowSim.classList.add('flex'); // Відображаємо вікно налаштувань
+                }
+            },
+            // КРОК: Висновок
+            { 
+                text: "Чудова робота! Ти успішно вивчив(-ла) основні частини інтерфейсу операційної системи. Тепер ти справжній знавець! На цьому наш урок завершується. Успіхів!", 
+                highlightElement: null, 
+                action: () => {
+                    settingsWindowSim.classList.add('hidden');
+                    settingsWindowSim.classList.remove('flex'); // Ховаємо вікно налаштувань
+                    helperNextButton.classList.add('hidden');
+                }
+            }
+        ];
+
+        // Функція для додавання/видалення підсвічування
+        function updateHighlight(element) {
+            // 1. Видалити підсвічування з усіх елементів
+            document.querySelectorAll('.highlight').forEach(el => {
+                el.classList.remove('highlight', 'ring-blue-500', 'ring-4', 'ring-offset-2', 'ring-offset-gray-800', 'ring-offset-blue-700');
+            });
+
+            // 2. Додати підсвічування до поточного елемента
+            if (element) {
+                element.classList.add('highlight', 'ring-blue-500', 'ring-4', 'ring-offset-2');
+                
+                // Особливе підсвічування для елементів всередині робочого столу
+                if (element.id === 'taskbar' || element.id === 'start-button-sim' || element.id === 'system-tray' || element.id === 'start-menu-sim' || element.id === 'folder-window-sim' || element.id === 'settings-window-sim') {
+                    // Використовуємо інший офсет для елементів на панелі завдань/меню Пуск
+                    element.classList.add('ring-offset-gray-700');
+                } else {
+                    element.classList.add('ring-offset-blue-700'); 
+                }
+                
+                // Прокрутка до елемента, якщо він невидимий
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        // Функція переходу до наступного кроку
+        function nextStep() {
+            if (currentStep < lessonSteps.length) {
+                const step = lessonSteps[currentStep];
+                
+                // Оновлення тексту помічника
+                helperText.innerHTML = step.text;
+                
+                // Оновлення підсвічування
+                updateHighlight(step.highlightElement);
+
+                // Виконання додаткової дії
+                if (step.action) {
+                    step.action();
+                }
+
+                currentStep++;
+            } else {
+                // Кінець уроку
+                helperNextButton.classList.add('hidden');
+            }
+        }
+
+        // Функція запуску уроку з анімацією
+        function startLesson() {
+            // Анімація: ховаємо початковий екран
+            startScreen.style.opacity = '0';
+            
+            setTimeout(() => {
+                startScreen.classList.add('hidden');
+                lessonContainer.classList.remove('hidden');
+                
+                // Анімація завантаження ОС
+                setTimeout(() => {
+                    loadingAnimation.style.opacity = '0';
+                    lessonContainer.style.opacity = '1';
+                    
+                    // Розпочинаємо перший крок після анімації завантаження
+                    setTimeout(() => {
+                        loadingAnimation.classList.add('hidden');
+                        nextStep();
+                    }, 500); // Час зникнення анімації завантаження
+                    
+                }, 1500); // Тривалість анімації завантаження
+
+            }, 500); // Час зникнення початкового екрана
+        }
+
+        // 1. Додавання обробника на кнопку "Розпочати Урок!"
+        startButton.addEventListener('click', startLesson);
+
+        // 2. Додавання обробника на кнопку "Продовжити" помічника
+        helperNextButton.addEventListener('click', nextStep);
+
+    </script>
+</body>
+</html>
