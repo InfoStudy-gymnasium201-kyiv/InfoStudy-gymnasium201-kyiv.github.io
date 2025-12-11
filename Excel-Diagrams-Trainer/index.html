@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Майстер Діаграм Excel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen p-4 md:p-8">
+
+    <div id="app" class="max-w-4xl mx-auto">
+        <!-- Вміст буде згенеровано через JS -->
+    </div>
+
+    <script>
+        // --- 1. ДАНІ ТА КОНФІГУРАЦІЯ ---
+        
+        // Іконки (SVG рядки)
+        const icons = {
+            line: `<svg viewBox="0 0 100 100" class="w-12 h-12 text-blue-500 mx-auto"><path d="M10 90 L10 10 L10 90 L90 90" fill="none" stroke="currentColor" stroke-width="4" /><path d="M10 80 L30 50 L50 70 L70 30 L90 40" fill="none" stroke="currentColor" stroke-width="4" /></svg>`,
+            bar: `<svg viewBox="0 0 100 100" class="w-12 h-12 text-green-500 mx-auto"><path d="M10 90 L10 10 L10 90 L90 90" fill="none" stroke="currentColor" stroke-width="4" /><rect x="20" y="40" width="15" height="50" fill="currentColor" opacity="0.8" /><rect x="45" y="20" width="15" height="70" fill="currentColor" opacity="0.8" /><rect x="70" y="50" width="15" height="40" fill="currentColor" opacity="0.8" /></svg>`,
+            pie: `<svg viewBox="0 0 100 100" class="w-12 h-12 text-orange-500 mx-auto"><circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="4" /><path d="M50 50 L50 10 A40 40 0 0 1 90 50 Z" fill="currentColor" opacity="0.8" /><path d="M50 50 L90 50 A40 40 0 0 1 50 90 Z" fill="currentColor" opacity="0.4" /><path d="M50 50 L50 90 A40 40 0 0 1 10 50 A40 40 0 0 1 50 10 Z" fill="currentColor" opacity="0.2" /></svg>`,
+            check: `<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`,
+            x: `<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`,
+            trophy: `<svg xmlns="http://www.w3.org/2000/svg" class="w-20 h-20 text-yellow-500 mx-auto mb-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M12 2v20"></path><path d="M8 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"></path></svg>`,
+            refresh: `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6"></path><path d="M2.5 22v-6h6"></path><path d="M2 11.5a10 10 0 0 1 18.8-4.3L21.5 8"></path><path d="M22 12.5a10 10 0 0 1-18.8 4.3L2.5 16"></path></svg>`,
+            activity: `<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>`,
+            chevronRight: `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`
+        };
+
+        // Сценарії (Рівні)
+        const scenarios = [
+            {
+                id: 1,
+                title: "Температура за тиждень",
+                description: "Вам потрібно показати, як змінювалася температура протягом тижня. Ми хочемо побачити тренд (тенденцію).",
+                tableData: {
+                    headers: ["День", "Температура (°C)"],
+                    rows: [["Пн", "15"], ["Вт", "17"], ["Ср", "14"], ["Чт", "19"], ["Пт", "21"]]
+                },
+                options: [
+                    { id: 'pie', label: 'Секторна діаграма', iconType: 'pie', correct: false, reason: "Секторна діаграма показує частки від цілого (%), а не зміни в часі." },
+                    { id: 'line', label: 'Лінійний графік', iconType: 'line', correct: true, reason: "Чудово! Лінійний графік найкраще підходить для відображення змін та трендів у часі." },
+                    { id: 'bar', label: 'Стовпчикова діаграма', iconType: 'bar', correct: false, reason: "Стовпчики можна використати, але для неперервного часу (дні тижня) лінія краще показує динаміку." },
+                ]
+            },
+            {
+                id: 2,
+                title: "Розподіл сімейного бюджету",
+                description: "У нас є загальний дохід, і ми хочемо показати, яку частку займають різні витрати (їжа, оренда, розваги).",
+                tableData: {
+                    headers: ["Категорія", "Сума (грн)"],
+                    rows: [["Оренда", "10 000"], ["Їжа", "6 000"], ["Розваги", "2 000"], ["Транспорт", "2 000"]]
+                },
+                options: [
+                    { id: 'line', label: 'Лінійний графік', iconType: 'line', correct: false, reason: "Лінія показує послідовність, а тут у нас категорії, які складають одне ціле." },
+                    { id: 'pie', label: 'Секторна діаграма', iconType: 'pie', correct: true, reason: "Правильно! Секторна діаграма ідеальна для показу часток від цілого (100%)." },
+                    { id: 'bar', label: 'Гістограма', iconType: 'bar', correct: false, reason: "Гістограма підходить для порівняння значень, але менш наочна для показу 'шматків пирога'." },
+                ]
+            },
+            {
+                id: 3,
+                title: "Продажі менеджерів за місяць",
+                description: "Потрібно порівняти результати роботи трьох менеджерів. Хто продав більше, а хто менше?",
+                tableData: {
+                    headers: ["Менеджер", "Продажі (шт)"],
+                    rows: [["Олег", "120"], ["Марія", "155"], ["Андрій", "90"]]
+                },
+                options: [
+                    { id: 'pie', label: 'Секторна діаграма', iconType: 'pie', correct: false, reason: "Можна використати, але важко порівняти близькі значення (наприклад, 120 і 130) на око." },
+                    { id: 'line', label: 'Лінійний графік', iconType: 'line', correct: false, reason: "Лінія передбачає зв'язок між точками. Між Олегом та Марією немає часового зв'язку." },
+                    { id: 'bar', label: 'Стовпчикова діаграма', iconType: 'bar', correct: true, reason: "Точно! Стовпчики дозволяють легко порівняти висоту (кількість) для різних категорій людей." },
+                ]
+            },
+            {
+                id: 4,
+                title: "Частка ринку смартфонів",
+                description: "Ми хочемо показати, який відсоток ринку займає кожен виробник. Важливо побачити структуру ринку в цілому.",
+                tableData: {
+                    headers: ["Бренд", "Частка (%)"],
+                    rows: [["Samsung", "35%"], ["Apple", "30%"], ["Xiaomi", "20%"], ["Інші", "15%"]]
+                },
+                options: [
+                    { id: 'line', label: 'Лінійний графік', iconType: 'line', correct: false, reason: "Лінія показує динаміку, а тут у нас статичний зріз даних на один момент часу." },
+                    { id: 'bar', label: 'Стовпчикова діаграма', iconType: 'bar', correct: false, reason: "Можна порівняти бренди стовпчиками, але секторна діаграма краще акцентує увагу на частках від 100%." },
+                    { id: 'pie', label: 'Секторна діаграма', iconType: 'pie', correct: true, reason: "Саме так! Коли ми говоримо про частки ринку або відсотки від цілого, 'пиріг' — найкращий вибір." },
+                ]
+            },
+            {
+                id: 5,
+                title: "Курс валют за рік",
+                description: "Як змінювався курс долара протягом року? Нам важливо побачити коливання та загальний напрямок руху (зростання чи падіння).",
+                tableData: {
+                    headers: ["Місяць", "Курс (грн)"],
+                    rows: [["Січень", "38.2"], ["Квітень", "39.5"], ["Липень", "41.0"], ["Жовтень", "41.5"]]
+                },
+                options: [
+                    { id: 'bar', label: 'Стовпчикова діаграма', iconType: 'bar', correct: false, reason: "Стовпчики займають багато місця і гірше передають плавність змін та загальний тренд, ніж лінія." },
+                    { id: 'line', label: 'Лінійний графік', iconType: 'line', correct: true, reason: "Правильно! Для відображення неперервних змін у часі (динаміки) лінійний графік підходить ідеально." },
+                    { id: 'pie', label: 'Секторна діаграма', iconType: 'pie', correct: false, reason: "Курс валют у різні місяці не є частинами одного цілого, тому секторна діаграма тут не має сенсу." },
+                ]
+            },
+            {
+                id: 6,
+                title: "Середній бал по класах",
+                description: "Директор хоче порівняти успішність учнів у трьох паралельних класах. Треба просто побачити, де середній бал вищий.",
+                tableData: {
+                    headers: ["Клас", "Середній бал"],
+                    rows: [["5-А", "8.5"], ["5-Б", "9.2"], ["5-В", "7.8"]]
+                },
+                options: [
+                    { id: 'line', label: 'Лінійний графік', iconType: 'line', correct: false, reason: "Класи не йдуть один за одним у часі, це окремі групи, тому лінія тут недоречна." },
+                    { id: 'pie', label: 'Секторна діаграма', iconType: 'pie', correct: false, reason: "Середні бали не складаються в суму 100%, тому 'пиріг' тут буде помилкою." },
+                    { id: 'bar', label: 'Стовпчикова діаграма', iconType: 'bar', correct: true, reason: "Вірно! Стовпчики дозволяють миттєво порівняти величини між незалежними групами (класами)." },
+                ]
+            }
+        ];
+
+        // --- 2. СТАН ДОДАТКУ ---
+        let state = {
+            currentLevel: 0,
+            score: 0,
+            showFeedback: false,
+            selectedOptionId: null,
+            gameFinished: false
+        };
+
+        // --- 3. ЛОГІКА ТА ФУНКЦІЇ ---
+
+        function handleOptionClick(option) {
+            if (state.showFeedback) return;
+
+            state.selectedOptionId = option.id;
+            state.showFeedback = true;
+            
+            if (option.correct) {
+                state.score++;
+            }
+            render();
+        }
+
+        function nextLevel() {
+            if (state.currentLevel + 1 < scenarios.length) {
+                state.currentLevel++;
+                state.showFeedback = false;
+                state.selectedOptionId = null;
+            } else {
+                state.gameFinished = true;
+            }
+            render();
+        }
+
+        function restartGame() {
+            state.currentLevel = 0;
+            state.score = 0;
+            state.gameFinished = false;
+            state.showFeedback = false;
+            state.selectedOptionId = null;
+            render();
+        }
+
+        // --- 4. РЕНДЕРИНГ (VIEW) ---
+
+        function renderGameFinished() {
+            return `
+                <div class="min-h-screen bg-gray-100 flex items-center justify-center -m-4 md:-m-8">
+                    <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full text-center border-t-8 border-green-600 fade-in">
+                        ${icons.trophy}
+                        <h2 class="text-3xl font-bold text-gray-800 mb-4">Гру завершено!</h2>
+                        <p class="text-xl text-gray-600 mb-8">
+                            Твій результат: <span class="font-bold text-green-600 text-2xl">${state.score}</span> з ${scenarios.length}
+                        </p>
+                        <button onclick="restartGame()" class="flex items-center justify-center w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors cursor-pointer">
+                            ${icons.refresh} Спробувати ще раз
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderHeader() {
+            return `
+                <header class="flex justify-between items-center mb-8 bg-white p-4 rounded-lg shadow-sm border-l-4 border-green-600">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                            ${icons.activity}
+                            Майстер Діаграм
+                        </h1>
+                        <p class="text-sm text-gray-500">Рівень ${state.currentLevel + 1} з ${scenarios.length}</p>
+                    </div>
+                    <div class="bg-gray-100 px-4 py-2 rounded-full font-bold text-green-700">
+                        Рахунок: ${state.score}
+                    </div>
+                </header>
+            `;
+        }
+
+        function renderTable(scenario) {
+            const headerHtml = `
+                <div class="flex border-b border-gray-300 bg-green-50">
+                    <div class="w-10 py-2 text-center border-r border-gray-300 bg-gray-100 text-gray-500 font-mono text-xs flex items-center justify-center">1</div>
+                    ${scenario.tableData.headers.map((h, i) => 
+                        `<div class="flex-1 p-2 font-bold text-sm text-green-900 ${i === 0 ? 'border-r border-gray-300' : ''}">${h}</div>`
+                    ).join('')}
+                </div>`;
+
+            const rowsHtml = scenario.tableData.rows.map((row, rIdx) => `
+                <div class="flex border-b border-gray-300 last:border-b-0 hover:bg-blue-50 transition-colors">
+                    <div class="w-10 py-2 text-center border-r border-gray-300 bg-gray-100 text-gray-500 font-mono text-xs flex items-center justify-center">${rIdx + 2}</div>
+                    ${row.map((cell, cIdx) => 
+                        `<div class="flex-1 p-2 text-sm ${cIdx === 0 ? 'border-r border-gray-300 font-medium' : 'text-right'}">${cell}</div>`
+                    ).join('')}
+                </div>
+            `).join('');
+
+            return `
+                <div class="space-y-6">
+                    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+                        <h2 class="text-xl font-bold mb-2 text-gray-800">${scenario.title}</h2>
+                        <p class="text-gray-600 mb-6 text-sm">${scenario.description}</p>
+                        
+                        <div class="border border-gray-300 rounded overflow-hidden select-none">
+                            <div class="bg-gray-100 border-b border-gray-300 flex text-xs text-gray-500 font-bold uppercase tracking-wider">
+                                <div class="w-10 py-1 text-center border-r border-gray-300 bg-gray-200"></div>
+                                <div class="flex-1 py-1 text-center border-r border-gray-300">A</div>
+                                <div class="flex-1 py-1 text-center">B</div>
+                            </div>
+                            ${headerHtml}
+                            ${rowsHtml}
+                        </div>
+                        <div class="mt-2 text-xs text-gray-400 text-center italic">Дані для аналізу</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderOptions(scenario) {
+            const optionsHtml = scenario.options.map((option, idx) => {
+                let cardClass = "bg-white p-4 rounded-xl shadow-sm border-2 transition-all duration-200 flex items-center gap-4 group cursor-pointer";
+                let statusIcon = "";
+                let statusText = "";
+
+                if (state.showFeedback) {
+                    // Logic for card coloring
+                    if (option.id === state.selectedOptionId) {
+                        cardClass += option.correct 
+                            ? " bg-green-50 border-green-500 ring-2 ring-green-200" 
+                            : " bg-red-50 border-red-500 ring-2 ring-red-200";
+                        
+                        statusText = `<span class="text-sm font-semibold ${option.correct ? 'text-green-600' : 'text-red-600'}">${option.correct ? "Правильний вибір!" : "Не найкращий варіант."}</span>`;
+                        statusIcon = option.correct ? icons.check : icons.x;
+
+                    } else if (option.correct && state.selectedOptionId !== option.id) {
+                        cardClass += " bg-white border-green-300 opacity-60"; // Show correct if missed
+                    } else {
+                        cardClass += " bg-gray-50 border-gray-200 opacity-40 grayscale"; // Dim others
+                    }
+                } else {
+                    cardClass += " border-transparent hover:border-green-400 hover:shadow-md";
+                }
+
+                // Make unclickable if feedback shown
+                const clickHandler = state.showFeedback ? '' : `onclick="selectOption(${idx})"`;
+
+                return `
+                    <div ${clickHandler} class="${cardClass}">
+                        <div class="flex-shrink-0 bg-gray-50 p-2 rounded-lg group-hover:bg-white transition-colors">
+                            ${icons[option.iconType]}
+                        </div>
+                        <div class="flex-grow">
+                            <span class="font-bold text-gray-800 text-lg block">${option.label}</span>
+                            ${statusText}
+                        </div>
+                        ${statusIcon}
+                    </div>
+                `;
+            }).join('');
+
+            // Feedback Section
+            let feedbackHtml = '';
+            if (state.showFeedback) {
+                const selected = scenario.options.find(o => o.id === state.selectedOptionId);
+                const isCorrect = selected.correct;
+                const feedbackClass = isCorrect ? 'bg-green-100 border-green-500 text-green-800' : 'bg-orange-100 border-orange-500 text-orange-800';
+                
+                feedbackHtml = `
+                    <div class="mt-6 fade-in">
+                        <div class="p-4 rounded-lg border-l-4 mb-4 ${feedbackClass}">
+                            <h4 class="font-bold mb-1">Пояснення:</h4>
+                            <p>${selected.reason}</p>
+                        </div>
+                        
+                        <button onclick="nextLevel()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-transform active:scale-95 shadow-lg cursor-pointer">
+                            ${state.currentLevel < scenarios.length - 1 ? "Наступне завдання" : "Завершити гру"}
+                            ${icons.chevronRight}
+                        </button>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Яку діаграму обрати?</h3>
+                    <div class="grid gap-4">
+                        ${optionsHtml}
+                    </div>
+                    ${feedbackHtml}
+                </div>
+            `;
+        }
+
+        // Головна функція рендеру
+        function render() {
+            const app = document.getElementById('app');
+
+            if (state.gameFinished) {
+                app.innerHTML = renderGameFinished();
+                return;
+            }
+
+            const currentScenario = scenarios[state.currentLevel];
+
+            app.innerHTML = `
+                ${renderHeader()}
+                <div class="grid md:grid-cols-2 gap-8">
+                    ${renderTable(currentScenario)}
+                    ${renderOptions(currentScenario)}
+                </div>
+            `;
+        }
+
+        // Допоміжна функція для кліку (щоб передати індекс із HTML рядка)
+        window.selectOption = (idx) => {
+            const currentScenario = scenarios[state.currentLevel];
+            handleOptionClick(currentScenario.options[idx]);
+        };
+
+        // Запуск
+        render();
+
+    </script>
+</body>
+</html>
