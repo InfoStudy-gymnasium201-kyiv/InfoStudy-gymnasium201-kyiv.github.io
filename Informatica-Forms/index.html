@@ -53,6 +53,13 @@
             return true;
         }
 
+        // Функція для форматування тексту з переносами рядків
+        function formatText(text) {
+            if (!text) return '';
+            // Замінюємо буквальний /n на символ нового рядка \n, якщо він зустрічається
+            return text.replace(/\/n/g, '\n');
+        }
+
         function getUrlFromParams() {
             let queryString = window.location.search.substring(1); 
             if (!queryString) return null;
@@ -60,6 +67,7 @@
                 queryString = queryString.substring(1);
             }
             return "https://raw.githubusercontent.com/InfoStudy-gymnasium201-kyiv/InfoStudy-gymnasium201-kyiv.github.io/refs/heads/main/Extra/TestsJSONs/" + decodeURIComponent(queryString) + ".json";
+
         }
 
         // --- CONTROLLER FUNCTIONS ---
@@ -294,17 +302,14 @@
                                     class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
                                 />
                             </div>
-                            <span class="text-slate-700 text-sm md:text-base leading-relaxed">${opt}</span>
+                            <span class="text-slate-700 text-sm md:text-base leading-relaxed whitespace-pre-wrap">${formatText(opt)}</span>
                         </label>
                     `;
                 }).join('');
 
                 return `
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 mb-6">
-                        <h3 class="text-lg font-semibold text-slate-800 mb-4">
-                            <span class="text-slate-400 mr-2">${idx + 1}.</span>
-                            ${q.question}
-                        </h3>
+                        <h3 class="text-lg font-semibold text-slate-800 mb-4 whitespace-pre-wrap"><span class="text-slate-400 mr-2 select-none">${idx + 1}.</span>${formatText(q.question)}</h3>
                         <div class="space-y-3">
                             ${optionsHtml}
                         </div>
@@ -358,7 +363,7 @@
                     <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 ${borderColor} mb-6">
                         <div class="flex gap-3 mb-3">
                             <span class="font-bold text-lg ${numberColor}">${idx + 1}.</span>
-                            <h4 class="text-lg font-medium text-slate-800">${q.question}</h4>
+                            <h4 class="text-lg font-medium text-slate-800 whitespace-pre-wrap">${formatText(q.question)}</h4>
                         </div>
 
                         <div class="pl-8 space-y-3">
@@ -366,7 +371,7 @@
                                 <i data-lucide="${icon}" class="w-5 h-5 flex-shrink-0 mt-0.5"></i>
                                 <div>
                                     <span class="text-xs font-bold uppercase block opacity-70 mb-1">Ваша відповідь:</span>
-                                    ${userAnswer || 'Немає відповіді'}
+                                    <span class="whitespace-pre-wrap">${formatText(userAnswer || 'Немає відповіді')}</span>
                                 </div>
                             </div>
 
@@ -375,7 +380,7 @@
                                     <i data-lucide="check-circle" class="w-5 h-5 flex-shrink-0 mt-0.5 text-green-600"></i>
                                     <div>
                                         <span class="text-xs font-bold uppercase block opacity-70 mb-1 text-slate-500">Правильна відповідь:</span>
-                                        ${q.correctOption}
+                                        <span class="whitespace-pre-wrap">${formatText(q.correctOption)}</span>
                                     </div>
                                 </div>
                             ` : ''}
