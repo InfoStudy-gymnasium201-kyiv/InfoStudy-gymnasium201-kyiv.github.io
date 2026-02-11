@@ -1,6 +1,6 @@
 {
-  "id": "demo",
-  "question": "Що виведе цей код: print(2 ** 3)?",
+  "id": "ev1",
+  "question": "Що виведе цей код: print(2 * 3)?",
   "options": [
     "6",
     "8",
