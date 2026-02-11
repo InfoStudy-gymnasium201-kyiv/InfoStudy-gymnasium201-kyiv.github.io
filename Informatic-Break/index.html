@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тиждень Інформатики - Тестування</title>
+    
+    <!-- Підключення Tailwind CSS для стилів -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Підключення Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Підключення іконок FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            color: #ffffff;
+        }
+        
+        /* Анімація появи */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Ефект натискання на мобільному */
+        .tap-highlight-transparent {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Кастомний скролбар */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b; 
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4 selection:bg-blue-500 selection:text-white">
+
+    <div class="w-full max-w-lg relative">
+        
+        <!-- Header / Logo -->
+        <div class="text-center mb-8 fade-in">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl shadow-lg mb-4 transform rotate-3 hover:rotate-0 transition-all duration-300">
+                <i class="fa-solid fa-code text-2xl text-white"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
+                Тиждень Інформатики
+            </h1>
+            <p class="text-slate-400 text-sm mt-1">Експрес-тестування</p>
+        </div>
+
+        <!-- Main Card Container -->
+        <div class="bg-slate-800/80 backdrop-blur-md border border-slate-700 rounded-3xl shadow-2xl overflow-hidden p-6 md:p-8 fade-in relative min-h-[300px]">
+            
+            <!-- Loading State -->
+            <div id="loader" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-800 z-50 rounded-3xl">
+                <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p class="text-blue-400 font-medium animate-pulse">Завантаження питання...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="error-screen" class="hidden flex-col items-center justify-center text-center h-full py-10">
+                <div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-4">
+                    <i class="fa-solid fa-triangle-exclamation text-red-500 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Помилка</h3>
+                <p id="error-message" class="text-slate-400 mb-6">Не вдалося завантажити питання.</p>
+                <a href="?question=demo" class="px-6 py-2 bg-slate-700 hover:bg-slate-600 rounded-full text-sm transition-colors">
+                    Спробувати демо-режим
+                </a>
+            </div>
+
+            <!-- Quiz Content -->
+            <div id="quiz-content" class="hidden">
+                <!-- Question Section -->
+                <div class="mb-8">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="px-3 py-1 bg-blue-500/10 text-blue-400 text-xs font-bold rounded-full uppercase tracking-wider border border-blue-500/20">
+                            Питання
+                        </span>
+                        <span id="question-id-display" class="text-slate-500 text-xs font-mono">ID: ---</span>
+                    </div>
+                    <h2 id="question-text" class="text-xl md:text-2xl font-semibold leading-relaxed text-white">
+                        <!-- Question goes here -->
+                    </h2>
+                </div>
+
+                <!-- Options Grid -->
+                <div id="options-container" class="grid gap-3">
+                    <!-- Buttons will be injected here via JS -->
+                </div>
+
+                <!-- Feedback / Result Section (Hidden initially) -->
+                <div id="feedback-section" class="hidden mt-6 pt-6 border-t border-slate-700 fade-in">
+                    <div id="feedback-alert" class="rounded-xl p-4 flex items-start gap-3 mb-4">
+                        <i id="feedback-icon" class="fa-solid mt-1"></i>
+                        <div>
+                            <h4 id="feedback-title" class="font-bold"></h4>
+                            <p id="feedback-explanation" class="text-sm mt-1 opacity-90 leading-relaxed"></p>
+                        </div>
+                    </div>
+                    
+                    <!-- Only shows if next logical step exists, otherwise just shows result -->
+                    <button onclick="window.location.reload()" class="w-full py-3 bg-slate-700 hover:bg-slate-600 rounded-xl font-medium transition-all text-sm">
+                        Спробувати ще раз (Перезавантажити)
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="mt-8 text-center">
+            <p class="text-xs text-slate-600">
+                Gymnasium #201 &copy; <span id="year"></span> | Code & Logic
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // --- КОНФІГУРАЦІЯ ---
+        
+        // Вставте сюди базове посилання на ваш RAW GitHub контент.
+        // Приклад: 'https://raw.githubusercontent.com/username/repo/main/questions/'
+        // Важливо: має закінчуватися слешем "/"
+        const REPO_BASE_URL = 'https://raw.githubusercontent.com/infostudy-gymnasium201-kyiv/Informatic-Break/main/questions/';
+        
+        // Демо-дані для перевірки роботи без підключення до GitHub
+        const DEMO_DATA = {
+            id: "demo",
+            question: "Що виведе цей код: print(2 ** 3)?",
+            options: [
+                "6",
+                "8",
+                "9",
+                "Помилка SyntaxError"
+            ],
+            correctIndex: 1, // Індексація з 0 (тобто правильна відповідь "8")
+            explanation: "У Python оператор ** відповідає за піднесення до степеня. 2 у 3-му степені дорівнює 8."
+        };
+
+        // --- ЛОГІКА ---
+
+        const dom = {
+            loader: document.getElementById('loader'),
+            errorScreen: document.getElementById('error-screen'),
+            errorMessage: document.getElementById('error-message'),
+            quizContent: document.getElementById('quiz-content'),
+            questionText: document.getElementById('question-text'),
+            questionIdDisplay: document.getElementById('question-id-display'),
+            optionsContainer: document.getElementById('options-container'),
+            feedbackSection: document.getElementById('feedback-section'),
+            feedbackAlert: document.getElementById('feedback-alert'),
+            feedbackTitle: document.getElementById('feedback-title'),
+            feedbackExplanation: document.getElementById('feedback-explanation'),
+            feedbackIcon: document.getElementById('feedback-icon'),
+            year: document.getElementById('year')
+        };
+
+        dom.year.textContent = new Date().getFullYear();
+
+        // Отримуємо параметр питання з URL
+        const params = new URLSearchParams(window.location.search);
+        const questionId = params.get('question');
+
+        async function init() {
+            if (!questionId) {
+                // Якщо ID не вказано, показуємо помилку з пропозицією демо
+                showError("Параметр 'question' не знайдено в URL. Спробуйте додати ?question=demo");
+                return;
+            }
+
+            let data;
+
+            try {
+                if (questionId === 'demo') {
+                    // Симуляція затримки мережі для демо
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                    data = DEMO_DATA;
+                } else {
+                    // Реальний запит до GitHub
+                    const response = await fetch(`${REPO_BASE_URL}${questionId}.json`);
+                    
+                    if (!response.ok) {
+                        if (response.status === 404) throw new Error("Файл питання не знайдено.");
+                        throw new Error("Помилка мережі.");
+                    }
+                    data = await response.json();
+                }
+
+                validateAndRender(data);
+
+            } catch (err) {
+                console.error(err);
+                showError(err.message || "Сталася невідома помилка.");
+            }
+        }
+
+        function validateAndRender(data) {
+            // Базова валідація JSON
+            if (!data.question || !Array.isArray(data.options) || typeof data.correctIndex === 'undefined') {
+                showError("Некоректний формат JSON файлу.");
+                return;
+            }
+
+            // Рендер даних
+            dom.questionIdDisplay.textContent = `ID: ${questionId}`;
+            dom.questionText.textContent = data.question;
+            
+            dom.optionsContainer.innerHTML = '';
+            
+            data.options.forEach((optionText, index) => {
+                const btn = document.createElement('button');
+                btn.className = `
+                    w-full text-left p-4 rounded-xl border border-slate-600 bg-slate-700/50 
+                    hover:bg-blue-600/20 hover:border-blue-500/50 hover:text-white
+                    transition-all duration-200 tap-highlight-transparent group flex items-center
+                `;
+                
+                // Літера варіанту (A, B, C, D)
+                const letter = String.fromCharCode(65 + index); // 65 is 'A'
+                
+                btn.innerHTML = `
+                    <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-slate-600 group-hover:bg-blue-500 text-xs font-bold mr-3 transition-colors">
+                        ${letter}
+                    </span>
+                    <span class="text-slate-200 group-hover:text-white font-medium text-sm md:text-base">${optionText}</span>
+                `;
+
+                btn.onclick = () => handleAnswer(index, data, btn);
+                dom.optionsContainer.appendChild(btn);
+            });
+
+            // Показати контент
+            dom.loader.classList.add('hidden');
+            dom.quizContent.classList.remove('hidden');
+            dom.quizContent.classList.add('fade-in');
+        }
+
+        function handleAnswer(selectedIndex, data, clickedBtn) {
+            // Блокуємо всі кнопки
+            const allBtns = dom.optionsContainer.querySelectorAll('button');
+            allBtns.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+            });
+
+            clickedBtn.classList.remove('opacity-50'); // Обрана кнопка залишається яскравою
+
+            const isCorrect = selectedIndex === data.correctIndex;
+
+            // Стилізація обраної кнопки
+            if (isCorrect) {
+                clickedBtn.classList.remove('bg-slate-700/50', 'border-slate-600');
+                clickedBtn.classList.add('bg-emerald-500/20', 'border-emerald-500', 'text-emerald-100');
+                clickedBtn.querySelector('span:first-child').classList.replace('bg-slate-600', 'bg-emerald-500');
+            } else {
+                clickedBtn.classList.remove('bg-slate-700/50', 'border-slate-600');
+                clickedBtn.classList.add('bg-red-500/20', 'border-red-500', 'text-red-100');
+                clickedBtn.querySelector('span:first-child').classList.replace('bg-slate-600', 'bg-red-500');
+                
+                // Підсвітити правильну, якщо помилився
+                const correctBtn = allBtns[data.correctIndex];
+                if (correctBtn) {
+                    correctBtn.classList.remove('opacity-50');
+                    correctBtn.classList.add('ring-2', 'ring-emerald-500', 'ring-offset-2', 'ring-offset-slate-800');
+                }
+            }
+
+            showFeedback(isCorrect, data.explanation);
+        }
+
+        function showFeedback(isCorrect, explanation) {
+            dom.feedbackSection.classList.remove('hidden');
+            
+            if (isCorrect) {
+                dom.feedbackAlert.className = "rounded-xl p-4 flex items-start gap-3 mb-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-200";
+                dom.feedbackIcon.className = "fa-solid fa-circle-check text-xl text-emerald-400 mt-0.5";
+                dom.feedbackTitle.textContent = "Чудово! Це правильна відповідь.";
+            } else {
+                dom.feedbackAlert.className = "rounded-xl p-4 flex items-start gap-3 mb-4 bg-red-500/10 border border-red-500/20 text-red-200";
+                dom.feedbackIcon.className = "fa-solid fa-circle-xmark text-xl text-red-400 mt-0.5";
+                dom.feedbackTitle.textContent = "На жаль, це невірно.";
+            }
+
+            dom.feedbackExplanation.textContent = explanation || "";
+            
+            // Скрол до результату на мобільних
+            setTimeout(() => {
+                dom.feedbackSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+
+        function showError(msg) {
+            dom.loader.classList.add('hidden');
+            dom.errorScreen.classList.remove('hidden');
+            dom.errorScreen.classList.add('fade-in');
+            dom.errorMessage.textContent = msg;
+        }
+
+        // Запуск
+        window.addEventListener('load', init);
+
+    </script>
+</body>
+</html>
