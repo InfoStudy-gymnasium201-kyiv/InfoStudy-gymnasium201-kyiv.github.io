@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лінійні рівняння та цілі вирази | Математика 8 клас</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Конфігурація MathJax для ідеального відображення формул -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                enableMenu: false
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .math-block { 
+            background: #f8fafc; 
+            border-left: 4px solid #3b82f6; 
+            padding: 1.5rem; 
+            margin: 1.5rem 0;
+            border-radius: 0 0.75rem 0.75rem 0;
+        }
+        .highlight-blue {
+            background: #eff6ff;
+            border-left: 4px solid #2563eb;
+        }
+        .highlight-yellow {
+            background: #fefce8;
+            border-left: 4px solid #eab308;
+        }
+        mjx-container {
+            font-size: 1.1em !important;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 leading-relaxed">
+
+    <!-- Навігація -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i data-lucide="book-open" class="text-blue-600"></i>
+                <span class="font-bold text-xl tracking-tight">Алгебра<span class="text-blue-600">8</span></span>
+            </div>
+            <div class="flex gap-6 text-sm font-medium text-slate-600">
+                <a href="#order" class="hover:text-blue-600 transition">Порядок дій</a>
+                <a href="#expressions" class="hover:text-blue-600 transition">Вирази</a>
+                <a href="#equations" class="hover:text-blue-600 transition">Рівняння</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Основний контент -->
+    <main class="max-w-4xl mx-auto px-6 py-12">
+        <article class="bg-white rounded-3xl shadow-xl overflow-hidden">
+            <!-- Обкладинка -->
+            <div class="bg-gradient-to-r from-blue-700 to-indigo-800 p-10 md:p-16 text-white text-center">
+                <p class="text-blue-100 uppercase tracking-widest text-sm font-bold mb-4">Теоретичний курс</p>
+                <h1 class="text-3xl md:text-5xl font-extrabold leading-tight mb-6">Математична логіка: Від виразів до рівнянь</h1>
+                <div class="w-20 h-1 bg-white/30 mx-auto rounded-full"></div>
+            </div>
+
+            <div class="p-8 md:p-16 space-y-12 text-lg text-slate-700">
+                
+                <!-- Новий розділ про порядок дій -->
+                <section id="order" class="highlight-blue p-8 rounded-2xl">
+                    <h2 class="text-2xl font-bold text-blue-900 mb-4 flex items-center gap-3">
+                        <i data-lucide="list-ordered" class="text-blue-600"></i> Пріоритет операцій: Чому додавання — це важливо?
+                    </h2>
+                    <p class="mb-4">
+                        У математиці порядок дій визначає правильність результату. Ми завжди пам'ятаємо про дужки та степінь, але часто забуваємо про раціональне групування.
+                    </p>
+                    <div class="bg-white p-4 rounded-xl border border-blue-100 shadow-sm">
+                        <p class="text-sm font-bold text-blue-800 mb-2 uppercase italic">Золоте правило спрощення:</p>
+                        <p>Щоб уникнути помилок зі знаками, спочатку рекомендується <strong>зібрати та додати всі позитивні доданки</strong>, а вже потім виконувати віднімання.</p>
+                    </div>
+                </section>
+
+                <!-- Розділ 1: Цілі вирази -->
+                <section id="expressions">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+                        <i data-lucide="layers" class="text-blue-600"></i> 1. Класифікація виразів
+                    </h2>
+                    <p class="mb-4">
+                        Цілі вирази — це база. Вони дозволяють нам оперувати величинами без ризику отримати нуль у знаменнику.
+                    </p>
+                    
+                    <div class="grid md:grid-cols-2 gap-8 my-8">
+                        <div class="bg-green-50 p-6 rounded-2xl border border-green-100">
+                            <h3 class="font-bold text-green-800 mb-3">Цілі вирази</h3>
+                            <p class="text-sm text-green-700 mb-4">Тільки "безпечні" дії: додавання, множення, степінь.</p>
+                            <div class="text-xl font-mono text-center py-4 bg-white rounded-xl shadow-sm text-slate-800">
+                                $5a^2 + 2b - \frac{c}{10}$
+                            </div>
+                        </div>
+                        <div class="bg-red-50 p-6 rounded-2xl border border-red-100">
+                            <h3 class="font-bold text-red-800 mb-3">Дробові вирази</h3>
+                            <p class="text-sm text-red-700 mb-4">Містять небезпеку — ділення на змінну (букву).</p>
+                            <div class="text-xl font-mono text-center py-4 bg-white rounded-xl shadow-sm text-slate-800">
+                                $\frac{x+1}{x-1}$
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Розділ 2: Спрощення -->
+                <section>
+                    <h2 class="text-3xl font-bold text-slate-900 mb-6">2. Техніки спрощення</h2>
+                    
+                    <h3 class="text-xl font-bold text-slate-800 mb-4">Групування та додавання подібних</h3>
+                    <p class="mb-4">При спрощенні виразів з багатьма доданками, ми "поважаємо" додавання, групуючи члени з однаковими знаками.</p>
+                    
+                    <div class="math-block">
+                        <p class="font-semibold text-blue-900 mb-2 italic">Приклад (правильний підхід):</p>
+                        <p class="mb-2">Маємо вираз: $7a - 3a + a$</p>
+                        <p class="mb-2">1. Спочатку збираємо все, що додається: $(7a + a) - 3a$</p>
+                        <p class="text-xl">2. Виконуємо додавання: $8a - 3a = 5a$</p>
+                    </div>
+
+                    <div class="math-block">
+                        <p class="font-semibold text-blue-900 mb-2 italic">Приклад із двома змінними:</p>
+                        $$5x + 2y - 3x + y = (5x - 3x) + (2y + y) = 2x + 3y$$
+                        <p class="text-sm text-slate-500 mt-2">Тут ми чітко бачимо, як додавання $2y + y$ формує новий коефіцієнт.</p>
+                    </div>
+
+                    <h3 class="text-xl font-bold text-slate-800 mb-4 mt-8">Розподільний закон (Розкриття дужок)</h3>
+                    <div class="math-block">
+                        $$3(x - 4) = 3 \cdot x + 3 \cdot (-4) = 3x - 12$$
+                    </div>
+                </section>
+
+                <!-- Розділ 3: Тотожність -->
+                <section id="identities">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+                        <i data-lucide="shield-check" class="text-indigo-600"></i> 3. Тотожності: Вічні істини
+                    </h2>
+                    <p class="mb-6">
+                        Тотожність — це рівність, яка ніколи не підведе. Вона працює при будь-яких числах.
+                    </p>
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <div class="p-4 bg-indigo-50 rounded-xl text-center border border-indigo-100">
+                            <p class="text-xs text-indigo-400 font-bold mb-1 uppercase">Додавання</p>
+                            <p class="font-bold">$a+b = b+a$</p>
+                        </div>
+                        <div class="p-4 bg-indigo-50 rounded-xl text-center border border-indigo-100">
+                            <p class="text-xs text-indigo-400 font-bold mb-1 uppercase">Множення</p>
+                            <p class="font-bold">$a \cdot b = b \cdot a$</p>
+                        </div>
+                        <div class="p-4 bg-indigo-50 rounded-xl text-center border border-indigo-100">
+                            <p class="text-xs text-indigo-400 font-bold mb-1 uppercase">Дужки</p>
+                            <p class="font-bold">$a(b+c) = ab+ac$</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Розділ 4: Рівняння -->
+                <section id="equations">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+                        <i data-lucide="target" class="text-red-600"></i> 4. Алгоритм розв'язання рівнянь
+                    </h2>
+                    <p class="mb-6">Лінійне рівняння $ax = b$ — це пошук балансу. Ми переносимо доданки, щоб ізолювати невідоме.</p>
+                    
+                    <div class="space-y-4">
+                        <div class="p-6 bg-slate-50 rounded-2xl border-l-4 border-blue-500">
+                            <div class="grid md:grid-cols-2 gap-8">
+                                <div>
+                                    <h4 class="font-bold mb-2">Крок 1: Перенесення</h4>
+                                    <p class="text-sm">$2x - 4 = 0$</p>
+                                    <p class="text-sm font-bold text-blue-600">$2x = 4$</p>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold mb-2">Крок 2: Ділення</h4>
+                                    <p class="text-sm">$x = 4 : 2$</p>
+                                    <p class="text-sm font-bold text-green-600">$x = 2$</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="math-block highlight-yellow">
+                            <h4 class="font-bold text-yellow-900 mb-2">Коли рівняння "ламається"?</h4>
+                            <p class="text-sm mb-2">Якщо після спрощення ви отримали $0 \cdot x = 7$, то <strong>коренів немає</strong>. Ви не можете додати нуль стільки разів, щоб отримати сім.</p>
+                            <p class="text-sm">Якщо $0 \cdot x = 0$, то коренів — <strong>безліч</strong>.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <hr class="border-slate-100">
+
+                <section class="text-center bg-slate-50 p-8 rounded-3xl border border-dashed border-slate-200">
+                    <h3 class="font-bold mb-2 italic">Пам'ятайте про головне:</h3>
+                    <p class="text-slate-500 max-w-2xl mx-auto">Спочатку додавайте позитивне, групуйте подібне та поважайте математичні закони — тоді кожне рівняння підкориться вам!</p>
+                </section>
+
+            </div>
+        </article>
+    </main>
+
+    <footer class="max-w-4xl mx-auto px-6 py-12 text-center text-slate-400 text-sm">
+        <p>© 2024 MathStudy Platform. Всі формули та закони наведено згідно з програмою 8 класу.</p>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
