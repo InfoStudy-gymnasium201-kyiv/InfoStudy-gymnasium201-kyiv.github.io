@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Презентація: Пошук значень у таблиці</title>
+    <title>Презентація: Усі професії важливі</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5;
+            background-color: #f0f4f8;
             overflow: hidden;
+            transition: background-color 0.3s;
         }
 
         .slide {
             display: none;
-            min-height: 500px;
-            animation: fadeIn 0.4s ease-in-out;
+            height: 70vh;
+            animation: fadeIn 0.6s ease-out;
         }
 
         .slide.active {
@@ -26,24 +27,13 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.98); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        .code-block {
-            background-color: #1e1e1e;
-            color: #d4d4d4;
-            padding: 1.25rem;
-            border-radius: 0.75rem;
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 0.95rem;
-            line-height: 1.5;
-            border: 1px solid #333;
+            from { opacity: 0; transform: scale(0.98) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
         }
 
         .progress-bar {
             height: 6px;
-            background-color: #e5e7eb;
+            background-color: #e2e8f0;
             width: 100%;
             position: absolute;
             bottom: 0;
@@ -55,282 +45,284 @@
             transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .highlight {
-            color: #2563eb;
-            font-weight: 600;
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        :fullscreen body {
+            background-color: #0f172a;
+        }
+        :fullscreen .main-container {
+            max-width: 100%;
+            height: 100vh;
+            border-radius: 0;
+            justify-content: center;
         }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
 
-<div id="mainContainer" class="bg-white w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden relative flex flex-col min-h-[680px] transition-all">
-    
+<div id="mainContainer" class="main-container bg-white w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden relative flex flex-col min-h-[650px] transition-all border border-gray-100">
+
     <!-- Кнопка повного екрану -->
-    <button id="fullscreenBtn" class="absolute top-6 right-6 z-50 p-2 bg-gray-50 hover:bg-gray-200 rounded-xl transition-all" title="Повний екран">
-        <svg id="fullscreenIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <button id="fullscreenBtn" class="absolute top-6 right-6 z-50 p-3 bg-white/80 backdrop-blur shadow-sm hover:bg-blue-50 rounded-2xl transition-all group" title="Повний екран (F)">
+        <svg id="fullscreenIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
         </svg>
     </button>
 
-    <div id="slides-container" class="flex-grow p-10 md:p-16 overflow-y-auto">
+    <!-- Контент слайдів -->
+    <div id="slides-container" class="flex-grow p-8 md:p-16 flex flex-col justify-center">
 
         <!-- Слайд 1: Титульний -->
         <div class="slide active" data-index="1">
             <div class="flex flex-col items-center justify-center h-full text-center">
-                <span class="px-4 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-bold tracking-widest uppercase mb-6">Урок Інформатики</span>
-                <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-8 leading-tight">Складання і виконання алгоритму пошуку значень таблиці</h1>
-                <p class="text-xl text-gray-600 max-w-3xl leading-relaxed">
-                    Навчимося знаходити потрібні дані у списках Python, використовувати цикли та умови для ефективного аналізу табличних величин.
+                <div class="mb-6 inline-block px-4 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-bold tracking-wider uppercase">
+                    Світ праці
+                </div>
+                <h1 class="text-4xl md:text-6xl font-black text-slate-900 mb-8 leading-tight">
+                    Усі професії важливі.<br><span class="text-blue-600">Усі професії необхідні.</span>
+                </h1>
+                <p class="text-xl text-slate-500 max-w-2xl leading-relaxed">
+                    Подорож у світ професійної майстерності та розуміння того, як праця кожної людини робить наш світ кращим.
                 </p>
-                <div class="mt-12 flex gap-4">
-                    <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                        <span class="block font-bold text-gray-800">Мова:</span>
-                        <span class="text-blue-600">Python 3.x</span>
-                    </div>
-                    <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                        <span class="block font-bold text-gray-800">Об'єкт:</span>
-                        <span class="text-blue-600">Список (list)</span>
+                <div class="mt-12 flex space-x-4">
+                    <div class="flex items-center space-x-2 text-slate-400">
+                        <span class="w-10 h-[2px] bg-blue-200"></span>
+                        <span class="text-sm italic">Презентація для учнів та дорослих</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Слайд 2: Списки в Python -->
+        <!-- Слайд 2: Що таке професія? -->
         <div class="slide" data-index="2">
-            <h2 class="text-3xl font-bold text-gray-800 mb-8">1. Табличні дані в Python</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
+            <h2 class="text-3xl font-bold text-slate-800 mb-8 flex items-center">
+                <span class="bg-blue-600 text-white w-10 h-10 rounded-lg flex items-center justify-center mr-4 text-xl">?</span>
+                Що таке професія?
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
                 <div class="space-y-6">
-                    <p class="text-lg text-gray-700">
-                        Для представлення таблиці (одновимірного масиву) в Python використовують тип даних <span class="highlight">Список (list)</span>.
-                    </p>
-                    <div class="bg-blue-50 p-6 rounded-2xl border-l-4 border-blue-500">
-                        <h4 class="font-bold text-blue-800 mb-2">Важливо знати:</h4>
-                        <ul class="space-y-3 text-gray-700">
-                            <li class="flex items-start"><span class="text-blue-500 mr-2">●</span> Індексація починається з <strong>нуля</strong>.</li>
-                            <li class="flex items-start"><span class="text-blue-500 mr-2">●</span> Щоб звернутися до <strong>третього</strong> елемента списку <code>a</code>, пишемо <code>a[2]</code>.</li>
-                        </ul>
+                    <div class="p-5 bg-blue-50 border-l-4 border-blue-500 rounded-r-xl">
+                        <p class="text-lg text-slate-700 leading-relaxed">
+                            <strong>Професія</strong> — це вид трудової діяльності, який вимагає певних знань, умінь, навичок та спеціальної підготовки.
+                        </p>
                     </div>
-                </div>
-                <div class="bg-gray-800 p-6 rounded-2xl shadow-inner">
-                    <p class="text-blue-400 font-mono text-sm mb-4"># Створення списку</p>
-                    <code class="text-white font-mono">
-                        a = [10, 20, <span class="text-yellow-400">30</span>, 40]<br>
-                        print(a[2]) <span class="text-gray-400"># Виведе 30</span>
-                    </code>
-                    <div class="mt-6 text-red-400 text-sm italic">
-                        Увага! Якщо вказати індекс, що перевищує довжину списку, виникне помилка <span class="underline">IndexError</span>.
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Слайд 3: Лінійний пошук -->
-        <div class="slide" data-index="3">
-            <h2 class="text-3xl font-bold text-gray-800 mb-8">2. Що таке лінійний пошук?</h2>
-            <div class="space-y-8">
-                <p class="text-xl text-gray-700 leading-relaxed">
-                    <span class="highlight">Лінійний пошук</span> — це найпростіший алгоритм, який полягає у <strong>послідовному перегляді кожного елемента</strong> таблиці від першого до останнього.
-                </p>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="p-6 bg-white border-2 border-gray-100 rounded-2xl text-center">
-                        <div class="text-3xl mb-2">🔍</div>
-                        <p class="text-sm font-semibold uppercase text-gray-500 tracking-wider">Крок 1</p>
-                        <p class="text-gray-800">Взяти перший елемент</p>
-                    </div>
-                    <div class="p-6 bg-white border-2 border-gray-100 rounded-2xl text-center">
-                        <div class="text-3xl mb-2">⚙️</div>
-                        <p class="text-sm font-semibold uppercase text-gray-500 tracking-wider">Крок 2</p>
-                        <p class="text-gray-800">Перевірити умову</p>
-                    </div>
-                    <div class="p-6 bg-white border-2 border-gray-100 rounded-2xl text-center">
-                        <div class="text-3xl mb-2">➡️</div>
-                        <p class="text-sm font-semibold uppercase text-gray-500 tracking-wider">Крок 3</p>
-                        <p class="text-gray-800">Перейти до наступного</p>
-                    </div>
-                </div>
-                <p class="text-gray-600 italic border-t pt-4">Для дізнання кількості елементів у списку використовують функцію <code>len(a)</code>.</p>
-            </div>
-        </div>
-
-        <!-- Слайд 4: Цикл For -->
-        <div class="slide" data-index="4">
-            <h2 class="text-3xl font-bold text-gray-800 mb-8">3. Перебір елементів: Цикл FOR</h2>
-            <div class="flex flex-col md:flex-row gap-10">
-                <div class="flex-1">
-                    <p class="text-lg text-gray-700 mb-6">
-                        Для послідовного перегляду всіх елементів таблиці найчастіше використовують <span class="highlight">цикл for</span>.
-                    </p>
                     <ul class="space-y-4">
-                        <li class="p-4 bg-green-50 rounded-xl border border-green-200">
-                            <strong>Через елементи:</strong><br>
-                            <code>for x in a:</code> (бере саме значення)
+                        <li class="flex items-start">
+                            <div class="mt-1 bg-green-100 p-1 rounded-full mr-3 text-green-600">✓</div>
+                            <span class="text-slate-600">Спеціальна освіта та навчання</span>
                         </li>
-                        <li class="p-4 bg-purple-50 rounded-xl border border-purple-200">
-                            <strong>Через індекси:</strong><br>
-                            <code>for i in range(len(a)):</code> (бере номер місця)
+                        <li class="flex items-start">
+                            <div class="mt-1 bg-green-100 p-1 rounded-full mr-3 text-green-600">✓</div>
+                            <span class="text-slate-600">Користь для суспільства</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="mt-1 bg-green-100 p-1 rounded-full mr-3 text-green-600">✓</div>
+                            <span class="text-slate-600">Джерело доходу та розвитку особистості</span>
                         </li>
                     </ul>
                 </div>
-                <div class="flex-1 code-block">
-<pre class="text-blue-300"># Приклад перебору
-a = [5, 12, 7, 21]
-
-for x in a:
-    if x > 10:
-        print("Знайдено:", x)
-</pre>
+                <div class="bg-slate-50 p-8 rounded-3xl border border-dashed border-slate-300 flex flex-col items-center text-center">
+                    <div class="text-6xl mb-4">🧭</div>
+                    <p class="text-slate-500 italic">Світ налічує понад 40 000 різних професій!</p>
                 </div>
             </div>
         </div>
 
-        <!-- Слайд 5: Умови та фільтрація -->
-        <div class="slide" data-index="5">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6">4. Пошук за умовою</h2>
-            <p class="text-gray-700 mb-8 text-lg">Для знаходження значень, що відповідають критеріям, використовують команду <code>if</code> всередині циклу.</p>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-gray-50 p-6 rounded-2xl">
-                    <h4 class="font-bold mb-4 text-blue-700">Одна умова:</h4>
-                    <p class="font-mono bg-white p-3 rounded border mb-2">if a[i] > 10:</p>
-                    <p class="text-sm text-gray-600">Знайде всі числа, більші за 10.</p>
+        <!-- Слайд 3: Рятівники життя -->
+        <div class="slide" data-index="3">
+            <h2 class="text-3xl font-bold text-slate-800 mb-8">Рятівники людського життя</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-red-50 p-6 rounded-2xl border border-red-100 transition-hover hover:shadow-lg">
+                    <div class="text-4xl mb-4">🩺</div>
+                    <h3 class="font-bold text-red-900 mb-2">Лікарі</h3>
+                    <p class="text-sm text-red-700">Лікують хвороби, проводять операції та піклуються про здоров'я кожного з нас.</p>
                 </div>
-                <div class="bg-gray-50 p-6 rounded-2xl">
-                    <h4 class="font-bold mb-4 text-blue-700">Дві умови (одночасно):</h4>
-                    <p class="font-mono bg-white p-3 rounded border mb-2">if x > 0 <span class="text-red-500 font-bold">and</span> x < 100:</p>
-                    <p class="text-sm text-gray-600">Оператор <span class="font-bold">and</span> вимагає виконання обох умов.</p>
+                <div class="bg-orange-50 p-6 rounded-2xl border border-orange-100 transition-hover hover:shadow-lg">
+                    <div class="text-4xl mb-4">🚒</div>
+                    <h3 class="font-bold text-orange-900 mb-2">Рятувальники</h3>
+                    <p class="text-sm text-orange-700">Першими приходять на допомогу під час пожеж, аварій та стихійних лих.</p>
+                </div>
+                <div class="bg-blue-50 p-6 rounded-2xl border border-blue-100 transition-hover hover:shadow-lg">
+                    <div class="text-4xl mb-4">🚓</div>
+                    <h3 class="font-bold text-blue-900 mb-2">Поліція</h3>
+                    <p class="text-sm text-blue-700">Забезпечують порядок на вулицях та захищають наші права і безпеку.</p>
                 </div>
             </div>
         </div>
 
-        <!-- Слайд 6: Пошук максимуму -->
-        <div class="slide" data-index="6">
-            <h2 class="text-3xl font-bold text-gray-800 mb-8">5. Пошук найбільшого (MAX)</h2>
-            <div class="space-y-6">
-                <p class="text-lg text-gray-700">
-                    При пошуку найбільшого елемента в таблиці, важливо правильно обрати початкове значення для змінної-результату.
-                </p>
-                <div class="p-8 bg-yellow-50 border-2 border-yellow-200 rounded-3xl">
-                    <p class="text-xl font-bold text-yellow-800 mb-4">Золоте правило:</p>
-                    <p class="text-lg">
-                        Змінній <code>max</code> (або <code>m</code>) перед початком пошуку доцільно присвоїти <span class="text-blue-700 font-bold">значення першого елемента таблиці (a[0])</span>.
-                    </p>
-                </div>
-                <p class="text-gray-500 text-center italic">Це гарантує, що ми порівнюємо дані саме з тієї таблиці, яку опрацьовуємо.</p>
-            </div>
-        </div>
-
-        <!-- Слайд 7: Лічильники та суми -->
-        <div class="slide" data-index="7">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6">6. Накопичення результату</h2>
+        <!-- Слайд 4: Творці майбутнього -->
+        <div class="slide" data-index="4">
+            <h2 class="text-3xl font-bold text-slate-800 mb-8">Творці майбутнього</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="p-6 bg-blue-600 text-white rounded-3xl shadow-xl shadow-blue-200">
-                    <h3 class="text-2xl font-bold mb-4">Лічильник (Кількість)</h3>
-                    <p class="mb-4 opacity-90">Рахуємо, скільки разів трапився елемент.</p>
-                    <div class="bg-blue-800 p-4 rounded-xl font-mono">
-                        k = 0 # старт<br>
-                        k = <span class="text-yellow-400">k + 1</span> # крок
+                <div class="flex items-center p-6 bg-indigo-50 rounded-2xl">
+                    <div class="text-5xl mr-6">🏫</div>
+                    <div>
+                        <h3 class="text-xl font-bold text-indigo-900">Вчителі</h3>
+                        <p class="text-indigo-700 mt-2">Передають знання новим поколінням, відкриваючи двері у світ науки та культури.</p>
                     </div>
                 </div>
-                <div class="p-6 bg-indigo-600 text-white rounded-3xl shadow-xl shadow-indigo-200">
-                    <h3 class="text-2xl font-bold mb-4">Суматор (Сума)</h3>
-                    <p class="mb-4 opacity-90">Додаємо значення до загального кошика.</p>
-                    <div class="bg-indigo-800 p-4 rounded-xl font-mono text-sm">
-                        s = 0 # старт<br>
-                        for x in a:<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;s = <span class="text-yellow-400">s + x</span>
+                <div class="flex items-center p-6 bg-emerald-50 rounded-2xl">
+                    <div class="text-5xl mr-6">🔬</div>
+                    <div>
+                        <h3 class="text-xl font-bold text-emerald-900">Науковці</h3>
+                        <p class="text-emerald-700 mt-2">Досліджують невідоме, створюють ліки та винаходи, що змінюють цивілізацію.</p>
                     </div>
+                </div>
+            </div>
+            <p class="mt-10 text-center text-slate-400 font-medium italic">"Без освіти немає прогресу, без прогресу немає майбутнього."</p>
+        </div>
+
+        <!-- Слайд 5: Ті, хто годують світ -->
+        <div class="slide" data-index="5">
+            <h2 class="text-3xl font-bold text-slate-800 mb-8 text-center">Ті, хто годують та будують</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="p-8 bg-amber-50 rounded-3xl relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 text-8xl opacity-10">🚜</div>
+                    <h3 class="text-2xl font-bold text-amber-900 mb-4">Аграрії та фермери</h3>
+                    <p class="text-amber-800 leading-relaxed">
+                        Завдяки їм у нас на столі завжди є хліб, овочі та фрукти. Це важка праця від світанку до заходу сонця.
+                    </p>
+                </div>
+                <div class="p-8 bg-stone-50 rounded-3xl relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 text-8xl opacity-10">🏗️</div>
+                    <h3 class="text-2xl font-bold text-stone-900 mb-4">Будівельники</h3>
+                    <p class="text-stone-800 leading-relaxed">
+                        Зводять будинки, школи, мости та заводи. Кожна цеглина — це частина нашого затишку.
+                    </p>
                 </div>
             </div>
         </div>
 
-        <!-- Слайд 8: Команда Break -->
+        <!-- Слайд 6: Світ технологій -->
+        <div class="slide" data-index="6">
+            <h2 class="text-3xl font-bold text-slate-800 mb-6">Цифрова ера та інновації</h2>
+            <div class="bg-slate-900 p-8 rounded-2xl text-white shadow-xl">
+                <div class="flex flex-col md:flex-row justify-around items-center gap-8">
+                    <div class="text-center">
+                        <div class="text-5xl mb-3">💻</div>
+                        <h4 class="font-bold text-blue-400">IT-спеціалісти</h4>
+                        <p class="text-xs text-slate-400 mt-2">Створюють софт та інтернет</p>
+                    </div>
+                    <div class="hidden md:block h-20 w-[1px] bg-slate-700"></div>
+                    <div class="text-center">
+                        <div class="text-5xl mb-3">🤖</div>
+                        <h4 class="font-bold text-purple-400">Інженери робототехніки</h4>
+                        <p class="text-xs text-slate-400 mt-2">Проектують майбутнє</p>
+                    </div>
+                    <div class="hidden md:block h-20 w-[1px] bg-slate-700"></div>
+                    <div class="text-center">
+                        <div class="text-5xl mb-3">🎨</div>
+                        <h4 class="font-bold text-pink-400">Дизайнери</h4>
+                        <p class="text-xs text-slate-400 mt-2">Робимо світ красивим</p>
+                    </div>
+                </div>
+            </div>
+            <p class="mt-8 text-slate-600 leading-relaxed">Сучасний світ неможливий без цифрових технологій, але вони працюють лише завдяки таланту людей.</p>
+        </div>
+
+        <!-- Слайд 7: Професії сфери послуг -->
+        <div class="slide" data-index="7">
+            <h2 class="text-3xl font-bold text-slate-800 mb-6">Невидимі герої комфорту</h2>
+            <p class="text-lg text-slate-600 mb-8">Ми часто не помічаємо їхньої роботи, поки вона не перестане виконуватися:</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="p-4 text-center bg-gray-50 rounded-xl hover:bg-white hover:shadow-md transition-all">
+                    <div class="text-3xl mb-2">🧹</div>
+                    <p class="text-sm font-semibold">Прибиральники</p>
+                </div>
+                <div class="p-4 text-center bg-gray-50 rounded-xl hover:bg-white hover:shadow-md transition-all">
+                    <div class="text-3xl mb-2">📦</div>
+                    <p class="text-sm font-semibold">Кур'єри</p>
+                </div>
+                <div class="p-4 text-center bg-gray-50 rounded-xl hover:bg-white hover:shadow-md transition-all">
+                    <div class="text-3xl mb-2">🍳</div>
+                    <p class="text-sm font-semibold">Кухарі</p>
+                </div>
+                <div class="p-4 text-center bg-gray-50 rounded-xl hover:bg-white hover:shadow-md transition-all">
+                    <div class="text-3xl mb-2">🚌</div>
+                    <p class="text-sm font-semibold">Водії</p>
+                </div>
+            </div>
+            <div class="mt-8 p-4 bg-green-50 text-green-800 rounded-xl text-center border border-green-100">
+                Кожна чиста вулиця та вчасно доставлений пакунок — це результат чиєїсь сумлінної праці.
+            </div>
+        </div>
+
+        <!-- Слайд 8: Аналогія з годинником -->
         <div class="slide" data-index="8">
-            <h2 class="text-3xl font-bold text-gray-800 mb-8">7. Оптимізація: Команда BREAK</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-                <div class="space-y-6">
-                    <p class="text-lg text-gray-700 leading-relaxed">
-                        Команда <span class="highlight">break</span> використовується для <strong>дострокового виходу з циклу</strong>.
+            <h2 class="text-3xl font-bold text-slate-800 mb-8">Принцип годинникового механізму</h2>
+            <div class="flex flex-col md:flex-row items-center gap-10">
+                <div class="flex-1">
+                    <p class="text-lg text-slate-700 leading-relaxed">
+                        Уявіть світ як великий годинник. У ньому є великі шестерні, а є зовсім маленькі гвинтики.
                     </p>
-                    <p class="text-gray-600">
-                        Це корисно, коли нам потрібно лише знайти, чи є в списку хоча б одне таке значення. Як тільки ми його знайшли — далі шукати немає сенсу.
-                    </p>
+                    <div class="mt-6 p-6 bg-blue-600 text-white rounded-2xl shadow-xl">
+                        Якщо прибрати хоча б один гвинтик — <strong>механізм зупиниться.</strong>
+                    </div>
                 </div>
-                <div class="bg-gray-100 p-6 rounded-2xl border-dashed border-2 border-gray-300">
-                    <code class="text-gray-800 font-mono text-sm">
-                        for x in students:<br>
-                        &nbsp;&nbsp;if x == "Ivan":<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;print("Є!")<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-red-600 font-bold">break</span> # зупинка
-                    </code>
+                <div class="flex-1 bg-slate-100 p-8 rounded-full border-8 border-white shadow-inner flex items-center justify-center animate-pulse">
+                    <span class="text-8xl">⚙️</span>
                 </div>
             </div>
         </div>
 
-        <!-- Слайд 9: Помилки та Індекси -->
+        <!-- Слайд 9: Як обрати професію? -->
         <div class="slide" data-index="9">
-            <h2 class="text-3xl font-bold text-gray-800 mb-8">8. Пастки та помилки</h2>
-            <div class="space-y-6">
-                <div class="flex gap-4 p-6 bg-red-50 rounded-2xl border border-red-100">
-                    <div class="text-red-500 text-2xl font-bold">!</div>
-                    <div>
-                        <h4 class="font-bold text-red-800">IndexError</h4>
-                        <p class="text-red-700">Виникає, якщо ви намагаєтеся отримати елемент за індексом, якого не існує (наприклад, <code>a[10]</code> у списку з 5 елементів).</p>
-                    </div>
+            <h2 class="text-3xl font-bold text-slate-800 mb-8">Як знайти свій шлях?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
+                <div class="bg-white p-6 rounded-2xl border-2 border-blue-500 shadow-lg flex flex-col justify-between">
+                    <h4 class="font-bold text-blue-600 uppercase text-xs tracking-widest mb-2">Крок 1</h4>
+                    <p class="text-slate-800 font-semibold mb-4">Слухайте своє серце: що вам подобається робити?</p>
+                    <span class="text-3xl">❤️</span>
                 </div>
-                <div class="flex gap-4 p-6 bg-orange-50 rounded-2xl border border-orange-100">
-                    <div class="text-orange-500 text-2xl font-bold">?</div>
-                    <div>
-                        <h4 class="font-bold text-orange-800">Складні умови</h4>
-                        <p class="text-orange-700">Завжди перевіряйте, чи правильно ви вказали індекси в <code>if a[i] > 10:</code>. Помилка <code>if a > 10:</code> (порівняння списку з числом) призведе до збою програми.</p>
-                    </div>
+                <div class="bg-white p-6 rounded-2xl border-2 border-purple-500 shadow-lg flex flex-col justify-between">
+                    <h4 class="font-bold text-purple-600 uppercase text-xs tracking-widest mb-2">Крок 2</h4>
+                    <p class="text-slate-800 font-semibold mb-4">Вивчайте світ: які навички зараз актуальні?</p>
+                    <span class="text-3xl">📚</span>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border-2 border-emerald-500 shadow-lg flex flex-col justify-between">
+                    <h4 class="font-bold text-emerald-600 uppercase text-xs tracking-widest mb-2">Крок 3</h4>
+                    <p class="text-slate-800 font-semibold mb-4">Не бійтеся помилок: професіоналами не народжуються.</p>
+                    <span class="text-3xl">🚀</span>
                 </div>
             </div>
         </div>
 
-        <!-- Слайд 10: Підсумок -->
+        <!-- Слайд 10: Фінал -->
         <div class="slide" data-index="10">
             <div class="flex flex-col items-center justify-center h-full text-center">
-                <h2 class="text-4xl font-bold text-gray-900 mb-10">Готові до тесту?</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full text-left max-w-4xl">
-                    <div class="p-6 bg-blue-50 rounded-2xl">
-                        <h4 class="font-bold text-blue-800 mb-3">Короткий чек-лист:</h4>
-                        <ul class="text-sm space-y-2 text-blue-900">
-                            <li>✅ Таблиця = <strong>list</strong></li>
-                            <li>✅ Цикл перегляду = <strong>for</strong></li>
-                            <li>✅ Розмір списку = <strong>len(a)</strong></li>
-                            <li>✅ Дострокова зупинка = <strong>break</strong></li>
-                        </ul>
-                    </div>
-                    <div class="p-6 bg-green-50 rounded-2xl">
-                        <h4 class="font-bold text-green-800 mb-3">Алгоритм пошуку:</h4>
-                        <ul class="text-sm space-y-2 text-green-900">
-                            <li>1. Почати з першого елемента (індекс 0).</li>
-                            <li>2. Переглянути лінійно (for).</li>
-                            <li>3. Перевірити умову (if).</li>
-                            <li>4. Змінити результат (k = k + 1 або s = s + x).</li>
-                        </ul>
-                    </div>
+                <h2 class="text-5xl font-black text-slate-900 mb-6">Пам'ятайте!</h2>
+                <div class="text-3xl text-blue-600 font-bold mb-8">
+                    Будь-яка професія — це почесно.
                 </div>
-                <p class="mt-12 text-2xl font-bold text-blue-600 animate-bounce">Успіхів у тестуванні!</p>
+                <p class="text-xl text-slate-500 max-w-2xl italic mb-12">
+                    "Найкраща професія — та, яку ти любиш і яка приносить користь іншим."
+                </p>
+                <div class="grid grid-cols-5 gap-4 mb-12 opacity-50">
+                    <span>👩‍⚕️</span><span>👨‍🏫</span><span>👩‍🌾</span><span>👨‍🔧</span><span>👩‍💻</span>
+                </div>
+                <p class="text-2xl font-bold text-slate-800">Дякую за увагу!</p>
             </div>
         </div>
 
     </div>
 
     <!-- Навігація -->
-    <div class="p-8 bg-white flex items-center justify-between border-t border-gray-100">
-        <button id="prevBtn" class="group flex items-center px-8 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-gray-700 hover:bg-gray-100 transition-all disabled:opacity-20">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <div class="p-6 bg-gray-50/80 backdrop-blur flex items-center justify-between border-t border-gray-100 z-40">
+        <button id="prevBtn" class="group flex items-center px-6 py-3 bg-white border border-slate-200 rounded-2xl text-slate-700 hover:bg-slate-50 transition-all disabled:opacity-30 disabled:pointer-events-none shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
-            Назад
+            <span class="font-semibold">Назад</span>
         </button>
 
-        <div id="slideNumber" class="text-gray-400 font-bold text-sm tracking-tighter">СЛАЙД 01 / 10</div>
+        <div id="slideNumber" class="text-slate-400 font-bold tracking-widest text-sm bg-slate-200/50 px-4 py-1 rounded-full">1 / 10</div>
 
-        <button id="nextBtn" class="group flex items-center px-8 py-3 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all disabled:opacity-20 shadow-xl shadow-blue-100">
-            Далі
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-3 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <button id="nextBtn" class="group flex items-center px-8 py-3 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all disabled:opacity-30 disabled:pointer-events-none shadow-lg shadow-blue-200">
+            <span class="font-semibold">Далі</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
         </button>
@@ -349,6 +341,7 @@ for x in a:
     const progressFill = document.getElementById('progressFill');
     const fullscreenBtn = document.getElementById('fullscreenBtn');
     const fullscreenIcon = document.getElementById('fullscreenIcon');
+    const mainContainer = document.getElementById('mainContainer');
 
     let currentSlide = 1;
     const totalSlides = slides.length;
@@ -361,30 +354,37 @@ for x in a:
             }
         });
 
-        slideNumberText.innerText = `СЛАЙД ${currentSlide.toString().padStart(2, '0')} / ${totalSlides}`;
-        progressFill.style.width = `${(currentSlide / totalSlides) * 100}%`;
+        slideNumberText.innerText = `${currentSlide} / ${totalSlides}`;
+        const progressPercentage = (currentSlide / totalSlides) * 100;
+        progressFill.style.width = `${progressPercentage}%`;
 
         prevBtn.disabled = (currentSlide === 1);
         nextBtn.disabled = (currentSlide === totalSlides);
     }
 
-    prevBtn.addEventListener('click', () => {
-        if (currentSlide > 1) {
-            currentSlide--;
-            updateUI();
-        }
-    });
-
-    nextBtn.addEventListener('click', () => {
+    function nextSlide() {
         if (currentSlide < totalSlides) {
             currentSlide++;
             updateUI();
         }
-    });
+    }
 
+    function prevSlide() {
+        if (currentSlide > 1) {
+            currentSlide--;
+            updateUI();
+        }
+    }
+
+    prevBtn.addEventListener('click', prevSlide);
+    nextBtn.addEventListener('click', nextSlide);
+
+    // Повний екран
     fullscreenBtn.addEventListener('click', () => {
         if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
+            document.documentElement.requestFullscreen().catch(err => {
+                console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+            });
         } else {
             document.exitFullscreen();
         }
@@ -399,11 +399,29 @@ for x in a:
     });
 
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowRight' || e.key === ' ') {
-            if (currentSlide < totalSlides) { currentSlide++; updateUI(); }
-        } else if (e.key === 'ArrowLeft') {
-            if (currentSlide > 1) { currentSlide--; updateUI(); }
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+            nextSlide();
+        } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+            prevSlide();
+        } else if (e.key === 'f' || e.key === 'F') {
+            fullscreenBtn.click();
+        } else if (e.key === 'Escape' && document.fullscreenElement) {
+            document.exitFullscreen();
         }
+    });
+
+    // Touch swipe support (simple)
+    let touchstartX = 0;
+    let touchendX = 0;
+    
+    document.addEventListener('touchstart', e => {
+        touchstartX = e.changedTouches[0].screenX;
+    });
+
+    document.addEventListener('touchend', e => {
+        touchendX = e.changedTouches[0].screenX;
+        if (touchstartX - touchendX > 50) nextSlide();
+        if (touchendX - touchstartX > 50) prevSlide();
     });
 
     updateUI();
