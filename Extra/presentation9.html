@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Презентація: Пошук значень у таблицях</title>
+    <title>Презентація: Алгоритми опрацювання таблиць</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-
+        
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5;
+            background-color: #f3f4f6;
             overflow: hidden;
             transition: background-color 0.3s;
         }
@@ -18,7 +18,7 @@
         .slide {
             display: none;
             height: 70vh;
-            animation: fadeIn 0.4s ease-out;
+            animation: fadeIn 0.5s ease-in-out;
         }
 
         .slide.active {
@@ -27,23 +27,22 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.98); }
-            to { opacity: 1; transform: scale(1); }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .code-block {
-            background-color: #1e1e2e;
-            color: #eff1f5;
-            padding: 1.25rem;
-            border-radius: 0.75rem;
-            font-family: 'Fira Code', 'Courier New', monospace;
-            font-size: 0.95rem;
-            line-height: 1.5;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
         }
 
         .progress-bar {
-            height: 6px;
+            height: 4px;
             background-color: #e5e7eb;
             width: 100%;
             position: absolute;
@@ -52,360 +51,353 @@
 
         .progress-fill {
             height: 100%;
-            background-color: #2563eb;
-            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: #3b82f6;
+            transition: width 0.3s ease;
         }
 
-        .main-container {
-            transition: all 0.3s ease;
+        /* Стиль для повноекранного режиму */
+        :fullscreen body {
+            background-color: #000;
         }
-
         :fullscreen .main-container {
             max-width: 100%;
             height: 100vh;
             border-radius: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
         }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
 
-<div id="mainContainer" class="main-container bg-white w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden relative flex flex-col min-h-[680px]">
+    <div id="mainContainer" class="main-container bg-white w-full max-w-5xl rounded-2xl shadow-2xl overflow-hidden relative flex flex-col min-h-[650px] transition-all">
+        
+        <!-- Кнопка повного екрану -->
+        <button id="fullscreenBtn" class="absolute top-4 right-4 z-50 p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors" title="Повний екран">
+            <svg id="fullscreenIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+            </svg>
+        </button>
 
-    <!-- Кнопка повного екрану -->
-    <button id="fullscreenBtn" class="absolute top-6 right-6 z-50 p-3 bg-gray-50 hover:bg-gray-200 rounded-xl transition-all shadow-sm" title="Повний екран">
-        <svg id="fullscreenIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-        </svg>
-    </button>
-
-    <!-- Контент слайдів -->
-    <div id="slides-container" class="flex-grow p-10 md:p-16 overflow-y-auto">
-
-        <!-- Слайд 1: Титульний -->
-        <div class="slide active" data-index="1">
-            <div class="flex flex-col items-center justify-center h-full text-center">
-                <span class="px-4 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-bold tracking-widest uppercase mb-6">Тема 32</span>
-                <h1 class="text-4xl md:text-6xl font-black text-gray-900 mb-8 leading-tight">Пошук значень у табличних величинах</h1>
-                <p class="text-xl text-gray-600 max-w-3xl leading-relaxed">
-                    Складання та виконання алгоритмів пошуку в навчальному середовищі програмування
-                </p>
-                <div class="mt-16 flex items-center gap-4 text-gray-500">
-                    <div class="h-px w-12 bg-gray-300"></div>
-                    <span>Інформатика 9 клас</span>
-                    <div class="h-px w-12 bg-gray-300"></div>
+        <!-- Контент слайдів -->
+        <div id="slides-container" class="flex-grow p-8 md:p-12 overflow-y-auto">
+            
+            <!-- Слайд 1 -->
+            <div class="slide active" data-index="1">
+                <div class="flex flex-col items-center justify-center h-full text-center">
+                    <span class="text-blue-600 font-bold tracking-widest uppercase mb-4">Тема 31</span>
+                    <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6">Алгоритми опрацювання табличних величин</h1>
+                    <p class="text-xl text-gray-600 max-w-2xl leading-relaxed">
+                        Знаходження суми значень елементів; суми або кількості елементів, що задовольняють заданим умовам.
+                    </p>
+                    <div class="mt-12 p-4 bg-blue-50 border-l-4 border-blue-500 text-blue-700 italic">
+                        Інформатика, 9 клас
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Слайд 2: Поняття пошуку -->
-        <div class="slide" data-index="2">
-            <h2 class="text-3xl font-bold text-gray-800 mb-8 border-b pb-4">Завдання пошуку</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-                <div class="space-y-6">
-                    <p class="text-lg text-gray-700 leading-relaxed">
-                        <strong>Пошук у масиві</strong> — це процес знаходження елементів, що мають певну властивість або дорівнюють заданому значенню.
-                    </p>
-                    <div class="bg-blue-50 p-6 rounded-2xl border-l-4 border-blue-500">
-                        <h4 class="font-bold text-blue-900 mb-2">Основні типи задач:</h4>
-                        <ul class="space-y-2 text-blue-800">
-                            <li class="flex items-center">✓ Знаходження конкретного значення</li>
-                            <li class="flex items-center">✓ Пошук найбільшого/найменшого (Min/Max)</li>
-                            <li class="flex items-center">✓ Знаходження індексу елемента</li>
+            <!-- Слайд 2 -->
+            <div class="slide" data-index="2">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Що таке табличні величини?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <p class="text-lg text-gray-700 mb-4">
+                            <strong>Таблична величина (масив)</strong> — це впорядкована сукупність фіксованої кількості значень одного типу, що мають спільне ім'я.
+                        </p>
+                        <ul class="space-y-3 text-gray-600">
+                            <li class="flex items-center"><span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span> Кожен елемент має свій індекс (номер).</li>
+                            <li class="flex items-center"><span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span> Доступ до значення здійснюється через ім'я та індекс: <code>A[i]</code>.</li>
                         </ul>
                     </div>
-                </div>
-                <div class="flex items-center justify-center">
-                    <div class="p-8 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200 text-center">
-                        <span class="text-6xl mb-4 block">🔍</span>
-                        <p class="text-sm text-gray-500 italic">Алгоритм має перевірити кожен елемент, доки не знайде потрібний або не дійде до кінця.</p>
+                    <div class="bg-gray-100 p-6 rounded-xl border border-gray-200">
+                        <p class="text-sm font-mono text-gray-500 mb-2">Приклад масиву A:</p>
+                        <table class="w-full text-center border-collapse">
+                            <tr>
+                                <td class="border p-2 bg-blue-100 font-bold">Індекс</td>
+                                <td class="border p-2">0</td>
+                                <td class="border p-2">1</td>
+                                <td class="border p-2">2</td>
+                                <td class="border p-2">3</td>
+                            </tr>
+                            <tr>
+                                <td class="border p-2 bg-blue-50 font-bold">Значення</td>
+                                <td class="border p-2 text-blue-600">10</td>
+                                <td class="border p-2 text-blue-600">-5</td>
+                                <td class="border p-2 text-blue-600">22</td>
+                                <td class="border p-2 text-blue-600">14</td>
+                            </tr>
+                        </table>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Слайд 3: Лінійний пошук -->
-        <div class="slide" data-index="3">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6">Лінійний пошук (Linear Search)</h2>
-            <p class="text-lg text-gray-700 mb-6">Це найпростіший метод, де ми послідовно порівнюємо кожен елемент масиву з шуканим значенням (ключем).</p>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="p-5 bg-white shadow-md border rounded-xl text-center">
-                    <div class="text-2xl font-bold text-blue-600 mb-2">1</div>
-                    <p class="text-sm">Беремо перший елемент</p>
-                </div>
-                <div class="p-5 bg-white shadow-md border rounded-xl text-center">
-                    <div class="text-2xl font-bold text-blue-600 mb-2">2</div>
-                    <p class="text-sm">Порівнюємо з ключем</p>
-                </div>
-                <div class="p-5 bg-white shadow-md border rounded-xl text-center">
-                    <div class="text-2xl font-bold text-blue-600 mb-2">3</div>
-                    <p class="text-sm">Повторюємо для наступного</p>
+            <!-- Слайд 3 -->
+            <div class="slide" data-index="3">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Алгоритм знаходження суми</h2>
+                <div class="space-y-4">
+                    <p class="text-lg text-gray-700">
+                        Для обчислення суми всіх елементів масиву використовується змінна-накопичувач (наприклад, <code>S</code>).
+                    </p>
+                    <div class="bg-green-50 p-6 rounded-lg border-l-4 border-green-500">
+                        <h4 class="font-bold text-green-800 mb-2">Основні кроки:</h4>
+                        <ol class="list-decimal ml-6 space-y-2 text-green-900">
+                            <li>Надати змінній <code>S</code> початкове значення 0.</li>
+                            <li>Використати цикл для перебору всіх елементів масиву.</li>
+                            <li>На кожному кроці додавати поточний елемент до суми: <code>S := S + A[i]</code>.</li>
+                        </ol>
+                    </div>
                 </div>
             </div>
-            <div class="mt-8 p-4 bg-yellow-50 rounded-xl border border-yellow-200 text-yellow-800 text-sm">
-                <strong>Важливо:</strong> Якщо ми знайшли елемент, ми можемо зупинити цикл (використати <code>break</code>), щоб зберегти час.
-            </div>
-        </div>
 
-        <!-- Слайд 4: Код пошуку -->
-        <div class="slide" data-index="4">
-            <h2 class="text-3xl font-bold text-gray-800 mb-4">Реалізація на Python</h2>
-            <div class="code-block">
+            <!-- Слайд 4 -->
+            <div class="slide" data-index="4">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Приклад коду: Сума (Python)</h2>
+                <div class="code-block">
 <pre>
-data = [12, 45, 7, 23, 56, 10]
-key = 23 # Що ми шукаємо
-found = False
+# Початкові дані
+numbers = [10, 15, 20, 5, 30]
+s = 0 # Змінна для суми
 
-for i in range(len(data)):
-    if data[i] == key:
-        print(f"Знайдено на позиції: {i}")
-        found = True
-        break
+# Цикл для накопичення результату
+for x in numbers:
+    s = s + x
 
-if not found:
-    print("Елемент не знайдено")
+print("Сума елементів:", s)
+# Результат: 80
 </pre>
-            </div>
-            <p class="mt-4 text-gray-500 text-sm">У цьому прикладі ми використовуємо <code>found</code> як "прапорець" (flag).</p>
-        </div>
-
-        <!-- Слайд 5: Пошук Min/Max -->
-        <div class="slide" data-index="5">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6">Пошук екстремальних значень</h2>
-            <div class="flex flex-col md:flex-row gap-8">
-                <div class="flex-1 space-y-4 text-gray-700">
-                    <p>Для пошуку <strong>максимуму</strong> або <strong>мінімуму</strong>:</p>
-                    <ol class="list-decimal ml-6 space-y-3">
-                        <li>Припускаємо, що <strong>перший</strong> елемент (індекс 0) і є шуканим.</li>
-                        <li>Порівнюємо його з усіма іншими.</li>
-                        <li>Якщо знаходимо більший (для Max) — оновлюємо значення.</li>
-                    </ol>
                 </div>
-                <div class="flex-1">
-                    <div class="bg-indigo-900 text-white p-6 rounded-2xl shadow-xl">
-                        <h4 class="font-mono text-indigo-300 mb-4">Логіка Max:</h4>
-                        <div class="font-mono space-y-2">
-                            <p>max_val = A[0]</p>
-                            <p>якщо A[i] > max_val:</p>
-                            <p class="ml-4">max_val = A[i]</p>
+                <p class="mt-4 text-gray-500 text-sm italic">
+                    Зауважте: у Python також можна просто використати вбудовану функцію sum(numbers).
+                </p>
+            </div>
+
+            <!-- Слайд 5 -->
+            <div class="slide" data-index="5">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Сума елементів за умовою</h2>
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="flex-1">
+                        <p class="text-gray-700 mb-4">
+                            Часто потрібно знайти суму не всіх елементів, а лише тих, що задовольняють певній логічній умові (наприклад, лише додатні або лише парні).
+                        </p>
+                        <div class="bg-yellow-50 p-4 border border-yellow-200 rounded-lg">
+                            <p class="font-semibold text-yellow-800">Логіка:</p>
+                            <code class="text-sm">ЯКЩО (умова справджується) ТО (додати до суми)</code>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Слайд 6: Код Min/Max -->
-        <div class="slide" data-index="6">
-            <h2 class="text-3xl font-bold text-gray-800 mb-4">Приклад: Пошук максимуму</h2>
-            <div class="code-block">
-<pre>
-numbers = [3, 18, 42, 5, 29, 11]
-
-# 1. Початкове припущення
-max_value = numbers[0]
-
-# 2. Перебір решти елементів
-for x in numbers:
-    if x > max_value:
-        max_value = x
-
-print("Найбільше число:", max_value)
-# Результат: 42
-</pre>
-            </div>
-            <p class="mt-4 text-gray-500 text-sm italic">
-                Аналогічно працює пошук мінімуму, тільки знак порівняння змінюється на <code>&lt;</code>.
-            </p>
-        </div>
-
-        <!-- Слайд 7: Пошук за умовою -->
-        <div class="slide" data-index="7">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6">Пошук за складною умовою</h2>
-            <p class="text-gray-700 mb-6">Інколи потрібно знайти перший елемент, що відповідає певним критеріям. Наприклад, перше від'ємне число.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-green-50 p-6 rounded-xl border border-green-200">
-                    <h4 class="font-bold text-green-800 mb-3">Завдання:</h4>
-                    <p class="text-sm">Знайти індекс першого парного числа, яке більше за 10.</p>
-                </div>
-                <div class="bg-gray-100 p-6 rounded-xl border border-gray-300">
-                    <h4 class="font-bold text-gray-800 mb-3">Код умови:</h4>
-                    <code class="text-blue-600">if x % 2 == 0 and x > 10:</code>
-                </div>
-            </div>
-            <div class="mt-6 p-6 bg-red-50 rounded-xl text-red-800 border-l-4 border-red-500">
-                <strong>Помилка:</strong> Не забувайте перевіряти, чи взагалі існує такий елемент у таблиці, щоб програма не виводила пустий результат.
-            </div>
-        </div>
-
-        <!-- Слайд 8: Індекси -->
-        <div class="slide" data-index="8">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6">Знаходження позиції (індексу)</h2>
-            <p class="text-gray-700 mb-4">Часто значення саме по собі менш важливе, ніж його місце в таблиці.</p>
-            <div class="code-block">
-<pre>
-temps = [20, 22, 25, 19, 21]
-max_t = temps[0]
-pos = 0
-
-for i in range(len(temps)):
-    if temps[i] > max_t:
-        max_t = temps[i]
-        pos = i # Запам'ятовуємо індекс
-
-print(f"Макс. температура {max_t} була в день №{pos+1}")
-</pre>
-            </div>
-        </div>
-
-        <!-- Слайд 9: Поради -->
-        <div class="slide" data-index="9">
-            <h2 class="text-3xl font-bold text-gray-800 mb-8 underline decoration-blue-500 decoration-4">Поради для розробника</h2>
-            <div class="space-y-4">
-                <div class="flex gap-4 items-start">
-                    <div class="bg-blue-600 text-white p-2 rounded-lg">01</div>
-                    <p class="text-gray-700">Використовуйте зрозумілі назви змінних: <code>found_index</code> замість <code>k</code>.</p>
-                </div>
-                <div class="flex gap-4 items-start">
-                    <div class="bg-blue-600 text-white p-2 rounded-lg">02</div>
-                    <p class="text-gray-700">Для великих масивів завжди використовуйте <code>break</code> після знаходження результату.</p>
-                </div>
-                <div class="flex gap-4 items-start">
-                    <div class="bg-blue-600 text-white p-2 rounded-lg">03</div>
-                    <p class="text-gray-700">Пам'ятайте, що в більшості мов (Python, C++, JS) індексація починається з <strong>0</strong>.</p>
-                </div>
-                <div class="flex gap-4 items-start">
-                    <div class="bg-blue-600 text-white p-2 rounded-lg">04</div>
-                    <p class="text-gray-700">Використовуйте вбудовані функції мови для простих задач (наприклад, <code>max(A)</code> у Python).</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Слайд 10: Фінал -->
-        <div class="slide" data-index="10">
-            <div class="flex flex-col items-center justify-center h-full text-center">
-                <h2 class="text-4xl font-bold text-gray-800 mb-8">Підсумок та самоперевірка</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
-                    <div class="p-6 bg-green-50 rounded-2xl border border-green-200 text-left">
-                        <h4 class="font-bold text-green-800 mb-4">Питання:</h4>
-                        <ul class="text-sm space-y-3">
-                            <li>• Чим відрізняється пошук від фільтрації?</li>
-                            <li>• Навіщо ініціалізувати Max першим елементом?</li>
-                            <li>• Що робить оператор <code>break</code> у циклі?</li>
+                    <div class="flex-1 bg-gray-50 p-4 rounded-lg border">
+                        <p class="font-bold mb-2">Приклади умов:</p>
+                        <ul class="text-sm space-y-2">
+                            <li><code>A[i] > 0</code> — додатні</li>
+                            <li><code>A[i] < 0</code> — від'ємні</li>
+                            <li><code>A[i] % 2 == 0</code> — парні</li>
+                            <li><code>A[i] > 100</code> — більші за 100</li>
                         </ul>
                     </div>
-                    <div class="p-6 bg-blue-50 rounded-2xl border border-blue-200 text-left">
-                        <h4 class="font-bold text-blue-800 mb-4">Завдання:</h4>
-                        <p class="text-sm">Спробуйте написати код, який знаходить індекс останнього від'ємного елемента в масиві.</p>
+                </div>
+            </div>
+
+            <!-- Слайд 6 -->
+            <div class="slide" data-index="6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Приклад: Сума додатних чисел</h2>
+                <div class="code-block">
+<pre>
+A = [5, -3, 10, -2, 8, 0]
+s_pos = 0
+
+for i in range(len(A)):
+    if A[i] > 0: # Перевірка умови
+        s_pos = s_pos + A[i]
+
+print("Сума додатних елементів:", s_pos)
+# Результат: 23 (5 + 10 + 8)
+</pre>
+                </div>
+            </div>
+
+            <!-- Слайд 7 -->
+            <div class="slide" data-index="7">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Знаходження кількості елементів</h2>
+                <p class="text-lg text-gray-700 mb-6">
+                    Алгоритм підрахунку кількості (лічильник) схожий на знаходження суми, але замість значення елемента ми додаємо <strong>1</strong>.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-6 bg-purple-50 rounded-xl border border-purple-200">
+                        <h4 class="font-bold text-purple-800 mb-2 underline">Сума</h4>
+                        <p class="font-mono text-sm">S = S + A[i]</p>
+                        <p class="text-xs mt-2 text-purple-600">Додаємо вміст "коробки"</p>
+                    </div>
+                    <div class="p-6 bg-indigo-50 rounded-xl border border-indigo-200">
+                        <h4 class="font-bold text-indigo-800 mb-2 underline">Кількість</h4>
+                        <p class="font-mono text-sm">K = K + 1</p>
+                        <p class="text-xs mt-2 text-indigo-600">Рахуємо саму "коробку"</p>
                     </div>
                 </div>
-                <p class="mt-12 text-3xl font-extrabold text-blue-600">Успіхів у програмуванні!</p>
             </div>
+
+            <!-- Слайд 8 -->
+            <div class="slide" data-index="8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Приклад: Кількість парних елементів</h2>
+                <div class="code-block">
+<pre>
+array = [12, 7, 24, 11, 8, 3]
+count = 0
+
+for x in array:
+    if x % 2 == 0: # Якщо ділиться на 2 без остачі
+        count = count + 1
+
+print("Кількість парних чисел:", count)
+# Результат: 3 (12, 24, 8)
+</pre>
+                </div>
+            </div>
+
+            <!-- Слайд 9 -->
+            <div class="slide" data-index="9">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Складні умови</h2>
+                <p class="text-gray-700 mb-4">Елементи можуть фільтруватися за декількома критеріями одночасно за допомогою операторів <strong>AND</strong> (та) або <strong>OR</strong> (або).</p>
+                <div class="bg-gray-800 text-white p-6 rounded-lg">
+                    <p class="text-blue-300 font-mono mb-2"># Приклад: Сума елементів в діапазоні [10, 50]</p>
+                    <p class="font-mono">if A[i] >= 10 <span class="text-red-400">and</span> A[i] <= 50:</p>
+                    <p class="font-mono ml-4">S = S + A[i]</p>
+                </div>
+                <div class="mt-6 flex gap-4">
+                    <div class="flex-1 p-4 bg-orange-50 border rounded text-sm">
+                        <strong>Порада:</strong> Завжди ініціалізуйте змінні (S=0, K=0) ПЕРЕД циклом, інакше програма видасть помилку.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Слайд 10 -->
+            <div class="slide" data-index="10">
+                <div class="flex flex-col items-center justify-center h-full text-center">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Висновки та перевірка</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full text-left">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h4 class="font-bold mb-2">Запам'ятайте:</h4>
+                            <ul class="text-sm list-disc ml-4 space-y-1">
+                                <li>Сума: <code>S = S + елемент</code></li>
+                                <li>Кількість: <code>K = K + 1</code></li>
+                                <li>Умова: використовуємо <code>if</code> всередині циклу</li>
+                            </ul>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h4 class="font-bold mb-2">Питання для самоконтролю:</h4>
+                            <ol class="text-sm list-decimal ml-4 space-y-1">
+                                <li>Чому дорівнює початкове значення суми?</li>
+                                <li>Як порахувати кількість тільки від'ємних чисел?</li>
+                                <li>Яка різниця між алгоритмом суми та кількості?</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <p class="mt-10 text-2xl font-bold text-blue-600">Дякую за увагу!</p>
+                </div>
+            </div>
+
         </div>
 
+        <!-- Навігація -->
+        <div class="p-6 bg-gray-50 flex items-center justify-between border-t border-gray-200">
+            <button id="prevBtn" class="flex items-center px-6 py-2 bg-white border border-gray-300 rounded-full text-gray-700 hover:bg-gray-100 transition-all disabled:opacity-30">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Назад
+            </button>
+            
+            <div id="slideNumber" class="text-gray-500 font-medium">Слайд 1 / 10</div>
+            
+            <button id="nextBtn" class="flex items-center px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all disabled:opacity-30 shadow-lg shadow-blue-200">
+                Далі
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="progress-bar">
+            <div id="progressFill" class="progress-fill" style="width: 10%;"></div>
+        </div>
     </div>
 
-    <!-- Навігація -->
-    <div class="p-8 bg-gray-50 flex items-center justify-between border-t border-gray-100">
-        <button id="prevBtn" class="flex items-center px-8 py-3 bg-white border border-gray-200 rounded-2xl text-gray-700 hover:bg-gray-100 transition-all hover:shadow-md disabled:opacity-30 disabled:cursor-not-allowed">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-            Назад
-        </button>
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const slideNumberText = document.getElementById('slideNumber');
+        const progressFill = document.getElementById('progressFill');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const fullscreenIcon = document.getElementById('fullscreenIcon');
+        const mainContainer = document.getElementById('mainContainer');
+        
+        let currentSlide = 1;
+        const totalSlides = slides.length;
 
-        <div id="slideNumber" class="text-gray-400 font-bold tracking-widest text-sm uppercase">Слайд 1 / 10</div>
+        function updateUI() {
+            slides.forEach(slide => {
+                slide.classList.remove('active');
+                if (parseInt(slide.dataset.index) === currentSlide) {
+                    slide.classList.add('active');
+                }
+            });
 
-        <button id="nextBtn" class="flex items-center px-8 py-3 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 disabled:opacity-30 disabled:cursor-not-allowed">
-            Далі
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-        </button>
-    </div>
+            slideNumberText.innerText = `Слайд ${currentSlide} / ${totalSlides}`;
+            progressFill.style.width = `${(currentSlide / totalSlides) * 100}%`;
 
-    <div class="progress-bar">
-        <div id="progressFill" class="progress-fill" style="width: 10%;"></div>
-    </div>
-</div>
+            prevBtn.disabled = (currentSlide === 1);
+            nextBtn.disabled = (currentSlide === totalSlides);
+        }
 
-<script>
-    const slides = document.querySelectorAll('.slide');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const slideNumberText = document.getElementById('slideNumber');
-    const progressFill = document.getElementById('progressFill');
-    const fullscreenBtn = document.getElementById('fullscreenBtn');
-    const fullscreenIcon = document.getElementById('fullscreenIcon');
-    const mainContainer = document.getElementById('mainContainer');
-
-    let currentSlide = 1;
-    const totalSlides = slides.length;
-
-    function updateUI() {
-        slides.forEach(slide => {
-            slide.classList.remove('active');
-            if (parseInt(slide.dataset.index) === currentSlide) {
-                slide.classList.add('active');
+        prevBtn.addEventListener('click', () => {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateUI();
             }
         });
 
-        slideNumberText.innerText = `Слайд ${currentSlide} / ${totalSlides}`;
-        progressFill.style.width = `${(currentSlide / totalSlides) * 100}%`;
+        nextBtn.addEventListener('click', () => {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updateUI();
+            }
+        });
 
-        prevBtn.disabled = (currentSlide === 1);
-        nextBtn.disabled = (currentSlide === totalSlides);
-    }
+        // Повний екран
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        });
 
-    function goToNext() {
-        if (currentSlide < totalSlides) {
-            currentSlide++;
-            updateUI();
-        }
-    }
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                // Іконка "Вихід з повного екрану"
+                fullscreenIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />';
+            } else {
+                // Іконка "Повний екран"
+                fullscreenIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />';
+            }
+        });
 
-    function goToPrev() {
-        if (currentSlide > 1) {
-            currentSlide--;
-            updateUI();
-        }
-    }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                if (currentSlide < totalSlides) {
+                    currentSlide++;
+                    updateUI();
+                }
+            } else if (e.key === 'ArrowLeft') {
+                if (currentSlide > 1) {
+                    currentSlide--;
+                    updateUI();
+                }
+            } else if (e.key === 'f' || e.key === 'F') {
+                fullscreenBtn.click();
+            }
+        });
 
-    prevBtn.addEventListener('click', goToPrev);
-    nextBtn.addEventListener('click', goToNext);
-
-    // Повний екран
-    fullscreenBtn.addEventListener('click', () => {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => {
-                console.error(`Error attempting to enable full-screen mode: ${err.message}`);
-            });
-        } else {
-            document.exitFullscreen();
-        }
-    });
-
-    document.addEventListener('fullscreenchange', () => {
-        if (document.fullscreenElement) {
-            fullscreenIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />';
-        } else {
-            fullscreenIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />';
-        }
-    });
-
-    // Керування клавіатурою
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
-            goToNext();
-        } else if (e.key === 'ArrowLeft') {
-            goToPrev();
-        } else if (e.key === 'f' || e.key === 'F') {
-            fullscreenBtn.click();
-        }
-    });
-
-    updateUI();
-</script>
+        updateUI();
+    </script>
 </body>
 </html>
