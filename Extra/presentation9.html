@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Презентація: Усі професії важливі</title>
+    <title>Презентація: Що таке Scratch? (3 клас)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8;
+            font-family: 'Nunito', sans-serif;
+            background-color: #e0f2fe;
             overflow: hidden;
             transition: background-color 0.3s;
         }
@@ -18,7 +18,7 @@
         .slide {
             display: none;
             height: 70vh;
-            animation: fadeIn 0.6s ease-out;
+            animation: fadeIn 0.5s ease-in-out;
         }
 
         .slide.active {
@@ -27,13 +27,17 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.98) translateY(10px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
 
+        .block-yellow { background-color: #FFBF00; color: white; border-radius: 8px; padding: 10px; margin: 5px; font-weight: bold; border: 2px solid #E6AC00; }
+        .block-blue { background-color: #4C97FF; color: white; border-radius: 8px; padding: 10px; margin: 5px; font-weight: bold; border: 2px solid #3373CC; }
+        .block-purple { background-color: #9966FF; color: white; border-radius: 8px; padding: 10px; margin: 5px; font-weight: bold; border: 2px solid #774DCB; }
+
         .progress-bar {
-            height: 6px;
-            background-color: #e2e8f0;
+            height: 8px;
+            background-color: #f1f5f9;
             width: 100%;
             position: absolute;
             bottom: 0;
@@ -41,289 +45,223 @@
 
         .progress-fill {
             height: 100%;
-            background-color: #2563eb;
-            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: #f59e0b;
+            transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .card-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
+        .main-container {
+            border: 8px solid #bae6fd;
         }
 
-        :fullscreen body {
-            background-color: #0f172a;
-        }
-        :fullscreen .main-container {
-            max-width: 100%;
-            height: 100vh;
-            border-radius: 0;
-            justify-content: center;
-        }
+        :fullscreen body { background-color: #0c4a6e; }
+        :fullscreen .main-container { max-width: 100%; height: 100vh; border-radius: 0; border: none; }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
 
-<div id="mainContainer" class="main-container bg-white w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden relative flex flex-col min-h-[650px] transition-all border border-gray-100">
+<div id="mainContainer" class="main-container bg-white w-full max-w-5xl rounded-[2rem] shadow-2xl overflow-hidden relative flex flex-col min-h-[650px] transition-all">
 
     <!-- Кнопка повного екрану -->
-    <button id="fullscreenBtn" class="absolute top-6 right-6 z-50 p-3 bg-white/80 backdrop-blur shadow-sm hover:bg-blue-50 rounded-2xl transition-all group" title="Повний екран (F)">
-        <svg id="fullscreenIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <button id="fullscreenBtn" class="absolute top-6 right-6 z-50 p-3 bg-orange-100 hover:bg-orange-200 rounded-full transition-colors text-orange-600 shadow-sm" title="Повний екран">
+        <svg id="fullscreenIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
         </svg>
     </button>
 
     <!-- Контент слайдів -->
-    <div id="slides-container" class="flex-grow p-8 md:p-16 flex flex-col justify-center">
+    <div id="slides-container" class="flex-grow p-8 md:p-12 overflow-y-auto">
 
         <!-- Слайд 1: Титульний -->
         <div class="slide active" data-index="1">
             <div class="flex flex-col items-center justify-center h-full text-center">
-                <div class="mb-6 inline-block px-4 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-bold tracking-wider uppercase">
-                    Світ праці
+                <div class="mb-6 bg-orange-100 p-4 rounded-2xl">
+                    <span class="text-orange-600 text-6xl">🐱</span>
                 </div>
-                <h1 class="text-4xl md:text-6xl font-black text-slate-900 mb-8 leading-tight">
-                    Усі професії важливі.<br><span class="text-blue-600">Усі професії необхідні.</span>
-                </h1>
-                <p class="text-xl text-slate-500 max-w-2xl leading-relaxed">
-                    Подорож у світ професійної майстерності та розуміння того, як праця кожної людини робить наш світ кращим.
-                </p>
-                <div class="mt-12 flex space-x-4">
-                    <div class="flex items-center space-x-2 text-slate-400">
-                        <span class="w-10 h-[2px] bg-blue-200"></span>
-                        <span class="text-sm italic">Презентація для учнів та дорослих</span>
-                    </div>
+                <h1 class="text-5xl md:text-6xl font-black text-blue-600 mb-4">Що таке Scratch?</h1>
+                <p class="text-2xl text-gray-600 font-semibold mb-8">Магічний світ програмування для 3 класу</p>
+                <div class="bg-yellow-100 text-yellow-700 px-8 py-3 rounded-full font-bold text-lg animate-bounce">
+                    Давай створювати дива! ✨
                 </div>
             </div>
         </div>
 
-        <!-- Слайд 2: Що таке професія? -->
+        <!-- Слайд 2: Що таке програмування? -->
         <div class="slide" data-index="2">
-            <h2 class="text-3xl font-bold text-slate-800 mb-8 flex items-center">
-                <span class="bg-blue-600 text-white w-10 h-10 rounded-lg flex items-center justify-center mr-4 text-xl">?</span>
-                Що таке професія?
+            <h2 class="text-3xl font-extrabold text-blue-600 mb-8 flex items-center">
+                <span class="bg-blue-100 p-2 rounded-lg mr-4">🤖</span> Що таке програмування?
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
                 <div class="space-y-6">
-                    <div class="p-5 bg-blue-50 border-l-4 border-blue-500 rounded-r-xl">
-                        <p class="text-lg text-slate-700 leading-relaxed">
-                            <strong>Професія</strong> — це вид трудової діяльності, який вимагає певних знань, умінь, навичок та спеціальної підготовки.
-                        </p>
+                    <p class="text-xl text-gray-700 leading-relaxed">
+                        Уяви, що комп'ютер — це дуже розумний, але слухняний робот. Він робить тільки те, що ти йому накажеш.
+                    </p>
+                    <div class="bg-green-50 p-5 rounded-2xl border-2 border-green-200">
+                        <p class="text-green-800 font-bold">Програма — це чітка інструкція для комп'ютера.</p>
                     </div>
-                    <ul class="space-y-4">
-                        <li class="flex items-start">
-                            <div class="mt-1 bg-green-100 p-1 rounded-full mr-3 text-green-600">✓</div>
-                            <span class="text-slate-600">Спеціальна освіта та навчання</span>
-                        </li>
-                        <li class="flex items-start">
-                            <div class="mt-1 bg-green-100 p-1 rounded-full mr-3 text-green-600">✓</div>
-                            <span class="text-slate-600">Користь для суспільства</span>
-                        </li>
-                        <li class="flex items-start">
-                            <div class="mt-1 bg-green-100 p-1 rounded-full mr-3 text-green-600">✓</div>
-                            <span class="text-slate-600">Джерело доходу та розвитку особистості</span>
-                        </li>
-                    </ul>
                 </div>
-                <div class="bg-slate-50 p-8 rounded-3xl border border-dashed border-slate-300 flex flex-col items-center text-center">
-                    <div class="text-6xl mb-4">🧭</div>
-                    <p class="text-slate-500 italic">Світ налічує понад 40 000 різних професій!</p>
+                <div class="bg-gray-100 rounded-3xl p-8 flex items-center justify-center border-4 border-dashed border-gray-300">
+                    <p class="text-center italic text-gray-500"></p>
                 </div>
             </div>
         </div>
 
-        <!-- Слайд 3: Рятівники життя -->
+        <!-- Слайд 3: Знайомство зі Скретчем -->
         <div class="slide" data-index="3">
-            <h2 class="text-3xl font-bold text-slate-800 mb-8">Рятівники людського життя</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-red-50 p-6 rounded-2xl border border-red-100 transition-hover hover:shadow-lg">
-                    <div class="text-4xl mb-4">🩺</div>
-                    <h3 class="font-bold text-red-900 mb-2">Лікарі</h3>
-                    <p class="text-sm text-red-700">Лікують хвороби, проводять операції та піклуються про здоров'я кожного з нас.</p>
+            <h2 class="text-3xl font-extrabold text-orange-500 mb-8"> Scratch — це конструктор!</h2>
+            <div class="flex flex-col md:flex-row gap-8">
+                <div class="flex-1 bg-blue-50 p-6 rounded-3xl">
+                    <p class="text-lg mb-4 font-bold text-blue-700">Тут не треба писати складні слова на клавіатурі!</p>
+                    <p class="text-gray-700">Ми складаємо програму з кольорових блоків, як конструктор LEGO.</p>
                 </div>
-                <div class="bg-orange-50 p-6 rounded-2xl border border-orange-100 transition-hover hover:shadow-lg">
-                    <div class="text-4xl mb-4">🚒</div>
-                    <h3 class="font-bold text-orange-900 mb-2">Рятувальники</h3>
-                    <p class="text-sm text-orange-700">Першими приходять на допомогу під час пожеж, аварій та стихійних лих.</p>
-                </div>
-                <div class="bg-blue-50 p-6 rounded-2xl border border-blue-100 transition-hover hover:shadow-lg">
-                    <div class="text-4xl mb-4">🚓</div>
-                    <h3 class="font-bold text-blue-900 mb-2">Поліція</h3>
-                    <p class="text-sm text-blue-700">Забезпечують порядок на вулицях та захищають наші права і безпеку.</p>
+                <div class="flex-1 space-y-4">
+                    <div class="block-yellow text-center">Події</div>
+                    <div class="block-blue text-center">Рух</div>
+                    <div class="block-purple text-center">Вигляд</div>
                 </div>
             </div>
+            <p class="mt-8 text-center text-gray-400 font-medium">Кожен блок — це команда для героя.</p>
         </div>
 
-        <!-- Слайд 4: Творці майбутнього -->
+        <!-- Слайд 4: Головний герой -->
         <div class="slide" data-index="4">
-            <h2 class="text-3xl font-bold text-slate-800 mb-8">Творці майбутнього</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="flex items-center p-6 bg-indigo-50 rounded-2xl">
-                    <div class="text-5xl mr-6">🏫</div>
-                    <div>
-                        <h3 class="text-xl font-bold text-indigo-900">Вчителі</h3>
-                        <p class="text-indigo-700 mt-2">Передають знання новим поколінням, відкриваючи двері у світ науки та культури.</p>
-                    </div>
+            <h2 class="text-3xl font-extrabold text-gray-800 mb-8 text-center">Знайомся: Рудий Кіт!</h2>
+            <div class="flex flex-col items-center">
+                <div class="text-9xl mb-6">🐱</div>
+                <div class="bg-orange-500 text-white p-6 rounded-2xl shadow-lg max-w-md text-center">
+                    <p class="text-xl font-bold">Привіт! Мене звати Скретч-кіт. Я твій перший помічник.</p>
                 </div>
-                <div class="flex items-center p-6 bg-emerald-50 rounded-2xl">
-                    <div class="text-5xl mr-6">🔬</div>
-                    <div>
-                        <h3 class="text-xl font-bold text-emerald-900">Науковці</h3>
-                        <p class="text-emerald-700 mt-2">Досліджують невідоме, створюють ліки та винаходи, що змінюють цивілізацію.</p>
-                    </div>
-                </div>
+                <p class="mt-6 text-gray-600">В програмі таких героїв називають — <span class="font-bold text-orange-600 uppercase">Спрайти</span>.</p>
             </div>
-            <p class="mt-10 text-center text-slate-400 font-medium italic">"Без освіти немає прогресу, без прогресу немає майбутнього."</p>
         </div>
 
-        <!-- Слайд 5: Ті, хто годують світ -->
+        <!-- Слайд 5: Де все відбувається? -->
         <div class="slide" data-index="5">
-            <h2 class="text-3xl font-bold text-slate-800 mb-8 text-center">Ті, хто годують та будують</h2>
+            <h2 class="text-3xl font-extrabold text-blue-600 mb-6 italic">Де живуть герої?</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="p-8 bg-amber-50 rounded-3xl relative overflow-hidden">
-                    <div class="absolute -right-4 -bottom-4 text-8xl opacity-10">🚜</div>
-                    <h3 class="text-2xl font-bold text-amber-900 mb-4">Аграрії та фермери</h3>
-                    <p class="text-amber-800 leading-relaxed">
-                        Завдяки їм у нас на столі завжди є хліб, овочі та фрукти. Це важка праця від світанку до заходу сонця.
-                    </p>
+                <div class="border-4 border-blue-200 rounded-2xl p-4 bg-white shadow-inner">
+                    <h3 class="font-bold text-center mb-2">Сцена 🏞️</h3>
+                    <p class="text-sm text-gray-600 mb-4">Це місце, де Спрайт рухається, танцює та розмовляє.</p>
+                    <div class="h-32 bg-sky-100 rounded-lg flex items-center justify-center text-sky-400 font-mono">
+                        
+                    </div>
                 </div>
-                <div class="p-8 bg-stone-50 rounded-3xl relative overflow-hidden">
-                    <div class="absolute -right-4 -bottom-4 text-8xl opacity-10">🏗️</div>
-                    <h3 class="text-2xl font-bold text-stone-900 mb-4">Будівельники</h3>
-                    <p class="text-stone-800 leading-relaxed">
-                        Зводять будинки, школи, мости та заводи. Кожна цеглина — це частина нашого затишку.
-                    </p>
+                <div class="border-4 border-purple-200 rounded-2xl p-4 bg-white shadow-inner">
+                    <h3 class="font-bold text-center mb-2">Область скриптів 📜</h3>
+                    <p class="text-sm text-gray-600 mb-4">Сюди ми перетягуємо блоки, щоб скласти код.</p>
+                    <div class="h-32 bg-purple-50 rounded-lg flex items-center justify-center text-purple-300 font-mono">
+                         
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Слайд 6: Світ технологій -->
+        <!-- Слайд 6: Команди Руху -->
         <div class="slide" data-index="6">
-            <h2 class="text-3xl font-bold text-slate-800 mb-6">Цифрова ера та інновації</h2>
-            <div class="bg-slate-900 p-8 rounded-2xl text-white shadow-xl">
-                <div class="flex flex-col md:flex-row justify-around items-center gap-8">
-                    <div class="text-center">
-                        <div class="text-5xl mb-3">💻</div>
-                        <h4 class="font-bold text-blue-400">IT-спеціалісти</h4>
-                        <p class="text-xs text-slate-400 mt-2">Створюють софт та інтернет</p>
-                    </div>
-                    <div class="hidden md:block h-20 w-[1px] bg-slate-700"></div>
-                    <div class="text-center">
-                        <div class="text-5xl mb-3">🤖</div>
-                        <h4 class="font-bold text-purple-400">Інженери робототехніки</h4>
-                        <p class="text-xs text-slate-400 mt-2">Проектують майбутнє</p>
-                    </div>
-                    <div class="hidden md:block h-20 w-[1px] bg-slate-700"></div>
-                    <div class="text-center">
-                        <div class="text-5xl mb-3">🎨</div>
-                        <h4 class="font-bold text-pink-400">Дизайнери</h4>
-                        <p class="text-xs text-slate-400 mt-2">Робимо світ красивим</p>
-                    </div>
+            <h2 class="text-3xl font-extrabold text-blue-500 mb-6">Як змусити кота йти?</h2>
+            <p class="text-lg mb-6">Для цього нам потрібні сині блоки з розділу <span class="text-blue-600 font-bold">Рух</span>:</p>
+            <div class="space-y-4 max-w-md mx-auto">
+                <div class="block-blue flex items-center justify-between">
+                    <span>перемістити на 10 кроків</span>
+                    <span class="text-xs">➡️</span>
+                </div>
+                <div class="block-blue flex items-center justify-between">
+                    <span>повернути на 15 градусів</span>
+                    <span class="text-xs">🔄</span>
+                </div>
+                <div class="block-blue flex items-center justify-between">
+                    <span>ковзати 1 сек до...</span>
+                    <span class="text-xs">☁️</span>
                 </div>
             </div>
-            <p class="mt-8 text-slate-600 leading-relaxed">Сучасний світ неможливий без цифрових технологій, але вони працюють лише завдяки таланту людей.</p>
         </div>
 
-        <!-- Слайд 7: Професії сфери послуг -->
+        <!-- Слайд 7: Команди Вигляду -->
         <div class="slide" data-index="7">
-            <h2 class="text-3xl font-bold text-slate-800 mb-6">Невидимі герої комфорту</h2>
-            <p class="text-lg text-slate-600 mb-8">Ми часто не помічаємо їхньої роботи, поки вона не перестане виконуватися:</p>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="p-4 text-center bg-gray-50 rounded-xl hover:bg-white hover:shadow-md transition-all">
-                    <div class="text-3xl mb-2">🧹</div>
-                    <p class="text-sm font-semibold">Прибиральники</p>
+            <h2 class="text-3xl font-extrabold text-purple-600 mb-6">Кіт вміє розмовляти!</h2>
+            <p class="text-lg mb-6">Використовуй фіолетові блоки, щоб змінити вигляд або додати текст:</p>
+            <div class="flex justify-center items-start gap-10">
+                <div class="space-y-4">
+                    <div class="block-purple">говорити "Привіт!" 2 сек</div>
+                    <div class="block-purple">наступний образ</div>
+                    <div class="block-purple">змінити ефект колір на 25</div>
                 </div>
-                <div class="p-4 text-center bg-gray-50 rounded-xl hover:bg-white hover:shadow-md transition-all">
-                    <div class="text-3xl mb-2">📦</div>
-                    <p class="text-sm font-semibold">Кур'єри</p>
+                <div class="relative bg-white border-2 border-gray-200 p-4 rounded-xl shadow-md">
+                    <span class="absolute -top-3 left-4 text-4xl">💬</span>
+                    <p class="font-bold text-gray-800 italic">"Ура! Я змінюю колір!"</p>
                 </div>
-                <div class="p-4 text-center bg-gray-50 rounded-xl hover:bg-white hover:shadow-md transition-all">
-                    <div class="text-3xl mb-2">🍳</div>
-                    <p class="text-sm font-semibold">Кухарі</p>
-                </div>
-                <div class="p-4 text-center bg-gray-50 rounded-xl hover:bg-white hover:shadow-md transition-all">
-                    <div class="text-3xl mb-2">🚌</div>
-                    <p class="text-sm font-semibold">Водії</p>
-                </div>
-            </div>
-            <div class="mt-8 p-4 bg-green-50 text-green-800 rounded-xl text-center border border-green-100">
-                Кожна чиста вулиця та вчасно доставлений пакунок — це результат чиєїсь сумлінної праці.
             </div>
         </div>
 
-        <!-- Слайд 8: Аналогія з годинником -->
+        <!-- Слайд 8: Зелений прапорець -->
         <div class="slide" data-index="8">
-            <h2 class="text-3xl font-bold text-slate-800 mb-8">Принцип годинникового механізму</h2>
-            <div class="flex flex-col md:flex-row items-center gap-10">
-                <div class="flex-1">
-                    <p class="text-lg text-slate-700 leading-relaxed">
-                        Уявіть світ як великий годинник. У ньому є великі шестерні, а є зовсім маленькі гвинтики.
-                    </p>
-                    <div class="mt-6 p-6 bg-blue-600 text-white rounded-2xl shadow-xl">
-                        Якщо прибрати хоча б один гвинтик — <strong>механізм зупиниться.</strong>
+            <h2 class="text-3xl font-extrabold text-green-600 mb-8 text-center">Як запустити гру?</h2>
+            <div class="flex flex-col items-center">
+                <div class="flex gap-10 items-center mb-8">
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">🚩</div>
+                        <p class="font-bold text-green-600">СТАРТ</p>
+                    </div>
+                    <div class="text-4xl text-gray-300">➔</div>
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">🛑</div>
+                        <p class="font-bold text-red-500">СТОП</p>
                     </div>
                 </div>
-                <div class="flex-1 bg-slate-100 p-8 rounded-full border-8 border-white shadow-inner flex items-center justify-center animate-pulse">
-                    <span class="text-8xl">⚙️</span>
+                <div class="bg-yellow-100 p-6 rounded-2xl border-2 border-yellow-300 max-w-lg">
+                    <p class="text-yellow-800">Завжди починай свою програму з блока подій: <br> <b>"Коли прапорець натиснуто"</b>!</p>
                 </div>
             </div>
         </div>
 
-        <!-- Слайд 9: Як обрати професію? -->
+        <!-- Слайд 9: Що можна створити? -->
         <div class="slide" data-index="9">
-            <h2 class="text-3xl font-bold text-slate-800 mb-8">Як знайти свій шлях?</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
-                <div class="bg-white p-6 rounded-2xl border-2 border-blue-500 shadow-lg flex flex-col justify-between">
-                    <h4 class="font-bold text-blue-600 uppercase text-xs tracking-widest mb-2">Крок 1</h4>
-                    <p class="text-slate-800 font-semibold mb-4">Слухайте своє серце: що вам подобається робити?</p>
-                    <span class="text-3xl">❤️</span>
+            <h2 class="text-3xl font-extrabold text-gray-800 mb-8">Твої можливості в Scratch:</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="p-6 bg-pink-100 rounded-2xl text-center">
+                    <div class="text-4xl mb-2">🎮</div>
+                    <h4 class="font-bold">Власні ігри</h4>
                 </div>
-                <div class="bg-white p-6 rounded-2xl border-2 border-purple-500 shadow-lg flex flex-col justify-between">
-                    <h4 class="font-bold text-purple-600 uppercase text-xs tracking-widest mb-2">Крок 2</h4>
-                    <p class="text-slate-800 font-semibold mb-4">Вивчайте світ: які навички зараз актуальні?</p>
-                    <span class="text-3xl">📚</span>
+                <div class="p-6 bg-yellow-100 rounded-2xl text-center">
+                    <div class="text-4xl mb-2">🎬</div>
+                    <h4 class="font-bold">Мультфільми</h4>
                 </div>
-                <div class="bg-white p-6 rounded-2xl border-2 border-emerald-500 shadow-lg flex flex-col justify-between">
-                    <h4 class="font-bold text-emerald-600 uppercase text-xs tracking-widest mb-2">Крок 3</h4>
-                    <p class="text-slate-800 font-semibold mb-4">Не бійтеся помилок: професіоналами не народжуються.</p>
-                    <span class="text-3xl">🚀</span>
+                <div class="p-6 bg-blue-100 rounded-2xl text-center">
+                    <div class="text-4xl mb-2">🎵</div>
+                    <h4 class="font-bold">Музичні кліпи</h4>
                 </div>
             </div>
+            <p class="mt-10 text-xl text-center font-bold text-gray-600 animate-pulse">Ти обмежений тільки своєю уявою! 🚀</p>
         </div>
 
         <!-- Слайд 10: Фінал -->
         <div class="slide" data-index="10">
             <div class="flex flex-col items-center justify-center h-full text-center">
-                <h2 class="text-5xl font-black text-slate-900 mb-6">Пам'ятайте!</h2>
-                <div class="text-3xl text-blue-600 font-bold mb-8">
-                    Будь-яка професія — це почесно.
+                <h2 class="text-5xl font-black text-blue-600 mb-6">Готові до пригод?</h2>
+                <div class="text-8xl mb-6">👨‍💻👩‍💻</div>
+                <p class="text-2xl text-gray-600 mb-8">Сьогодні ми зробимо перший крок у світ програмування!</p>
+                <div class="bg-orange-500 text-white px-10 py-4 rounded-full text-2xl font-bold shadow-xl">
+                    До роботи в Scratch!
                 </div>
-                <p class="text-xl text-slate-500 max-w-2xl italic mb-12">
-                    "Найкраща професія — та, яку ти любиш і яка приносить користь іншим."
-                </p>
-                <div class="grid grid-cols-5 gap-4 mb-12 opacity-50">
-                    <span>👩‍⚕️</span><span>👨‍🏫</span><span>👩‍🌾</span><span>👨‍🔧</span><span>👩‍💻</span>
-                </div>
-                <p class="text-2xl font-bold text-slate-800">Дякую за увагу!</p>
             </div>
         </div>
 
     </div>
 
     <!-- Навігація -->
-    <div class="p-6 bg-gray-50/80 backdrop-blur flex items-center justify-between border-t border-gray-100 z-40">
-        <button id="prevBtn" class="group flex items-center px-6 py-3 bg-white border border-slate-200 rounded-2xl text-slate-700 hover:bg-slate-50 transition-all disabled:opacity-30 disabled:pointer-events-none shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+    <div class="p-6 bg-gray-50 flex items-center justify-between border-t border-gray-100">
+        <button id="prevBtn" class="group flex items-center px-8 py-3 bg-white border-2 border-gray-200 rounded-2xl text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-all disabled:opacity-20 shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
             </svg>
-            <span class="font-semibold">Назад</span>
+            <span class="font-bold">Назад</span>
         </button>
 
-        <div id="slideNumber" class="text-slate-400 font-bold tracking-widest text-sm bg-slate-200/50 px-4 py-1 rounded-full">1 / 10</div>
+        <div id="slideNumber" class="bg-gray-200 px-4 py-1 rounded-full text-gray-600 font-bold text-sm">Слайд 1 / 10</div>
 
-        <button id="nextBtn" class="group flex items-center px-8 py-3 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all disabled:opacity-30 disabled:pointer-events-none shadow-lg shadow-blue-200">
-            <span class="font-semibold">Далі</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        <button id="nextBtn" class="group flex items-center px-8 py-3 bg-blue-500 text-white rounded-2xl hover:bg-blue-600 transition-all disabled:opacity-20 shadow-lg shadow-blue-200">
+            <span class="font-bold">Далі</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-2 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" />
             </svg>
         </button>
     </div>
@@ -354,30 +292,26 @@
             }
         });
 
-        slideNumberText.innerText = `${currentSlide} / ${totalSlides}`;
-        const progressPercentage = (currentSlide / totalSlides) * 100;
-        progressFill.style.width = `${progressPercentage}%`;
+        slideNumberText.innerText = `Слайд ${currentSlide} / ${totalSlides}`;
+        progressFill.style.width = `${(currentSlide / totalSlides) * 100}%`;
 
         prevBtn.disabled = (currentSlide === 1);
         nextBtn.disabled = (currentSlide === totalSlides);
     }
 
-    function nextSlide() {
-        if (currentSlide < totalSlides) {
-            currentSlide++;
-            updateUI();
-        }
-    }
-
-    function prevSlide() {
+    prevBtn.addEventListener('click', () => {
         if (currentSlide > 1) {
             currentSlide--;
             updateUI();
         }
-    }
+    });
 
-    prevBtn.addEventListener('click', prevSlide);
-    nextBtn.addEventListener('click', nextSlide);
+    nextBtn.addEventListener('click', () => {
+        if (currentSlide < totalSlides) {
+            currentSlide++;
+            updateUI();
+        }
+    });
 
     // Повний екран
     fullscreenBtn.addEventListener('click', () => {
@@ -399,29 +333,19 @@
     });
 
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
-            nextSlide();
-        } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
-            prevSlide();
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updateUI();
+            }
+        } else if (e.key === 'ArrowLeft') {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateUI();
+            }
         } else if (e.key === 'f' || e.key === 'F') {
             fullscreenBtn.click();
-        } else if (e.key === 'Escape' && document.fullscreenElement) {
-            document.exitFullscreen();
         }
-    });
-
-    // Touch swipe support (simple)
-    let touchstartX = 0;
-    let touchendX = 0;
-    
-    document.addEventListener('touchstart', e => {
-        touchstartX = e.changedTouches[0].screenX;
-    });
-
-    document.addEventListener('touchend', e => {
-        touchendX = e.changedTouches[0].screenX;
-        if (touchstartX - touchendX > 50) nextSlide();
-        if (touchendX - touchstartX > 50) prevSlide();
     });
 
     updateUI();
