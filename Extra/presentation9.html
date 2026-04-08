@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Презентація: Що таке Scratch? (3 клас)</title>
+    <title>Презентація: Авторське право (5 клас)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
 
         body {
-            font-family: 'Nunito', sans-serif;
-            background-color: #e0f2fe;
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
             overflow: hidden;
             transition: background-color 0.3s;
         }
@@ -27,17 +27,13 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
+            from { opacity: 0; transform: scale(0.98); }
             to { opacity: 1; transform: scale(1); }
         }
 
-        .block-yellow { background-color: #FFBF00; color: white; border-radius: 8px; padding: 10px; margin: 5px; font-weight: bold; border: 2px solid #E6AC00; }
-        .block-blue { background-color: #4C97FF; color: white; border-radius: 8px; padding: 10px; margin: 5px; font-weight: bold; border: 2px solid #3373CC; }
-        .block-purple { background-color: #9966FF; color: white; border-radius: 8px; padding: 10px; margin: 5px; font-weight: bold; border: 2px solid #774DCB; }
-
         .progress-bar {
-            height: 8px;
-            background-color: #f1f5f9;
+            height: 6px;
+            background-color: #e5e7eb;
             width: 100%;
             position: absolute;
             bottom: 0;
@@ -45,203 +41,269 @@
 
         .progress-fill {
             height: 100%;
-            background-color: #f59e0b;
-            transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background-color: #4f46e5;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .main-container {
-            border: 8px solid #bae6fd;
+        .info-card {
+            background: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            padding: 1.5rem;
         }
 
-        :fullscreen body { background-color: #0c4a6e; }
-        :fullscreen .main-container { max-width: 100%; height: 100vh; border-radius: 0; border: none; }
+        :fullscreen body {
+            background-color: #111827;
+        }
+        :fullscreen .main-container {
+            max-width: 100%;
+            height: 100vh;
+            border-radius: 0;
+        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
 
-<div id="mainContainer" class="main-container bg-white w-full max-w-5xl rounded-[2rem] shadow-2xl overflow-hidden relative flex flex-col min-h-[650px] transition-all">
+<div id="mainContainer" class="main-container bg-white w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden relative flex flex-col min-h-[650px] transition-all">
 
     <!-- Кнопка повного екрану -->
-    <button id="fullscreenBtn" class="absolute top-6 right-6 z-50 p-3 bg-orange-100 hover:bg-orange-200 rounded-full transition-colors text-orange-600 shadow-sm" title="Повний екран">
-        <svg id="fullscreenIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <button id="fullscreenBtn" class="absolute top-6 right-6 z-50 p-2 bg-gray-50 hover:bg-indigo-100 rounded-xl transition-colors group" title="Повний екран">
+        <svg id="fullscreenIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
         </svg>
     </button>
 
     <!-- Контент слайдів -->
-    <div id="slides-container" class="flex-grow p-8 md:p-12 overflow-y-auto">
+    <div id="slides-container" class="flex-grow p-8 md:p-16 overflow-y-auto">
 
         <!-- Слайд 1: Титульний -->
         <div class="slide active" data-index="1">
             <div class="flex flex-col items-center justify-center h-full text-center">
-                <div class="mb-6 bg-orange-100 p-4 rounded-2xl">
-                    <span class="text-orange-600 text-6xl">🐱</span>
-                </div>
-                <h1 class="text-5xl md:text-6xl font-black text-blue-600 mb-4">Що таке Scratch?</h1>
-                <p class="text-2xl text-gray-600 font-semibold mb-8">Магічний світ програмування для 3 класу</p>
-                <div class="bg-yellow-100 text-yellow-700 px-8 py-3 rounded-full font-bold text-lg animate-bounce">
-                    Давай створювати дива! ✨
+                <div class="bg-indigo-100 text-indigo-700 px-4 py-1 rounded-full text-sm font-bold uppercase tracking-widest mb-6">Інформатика • 5 клас</div>
+                <h1 class="text-5xl md:text-6xl font-black text-gray-900 mb-8 leading-tight">Авторське право <br><span class="text-indigo-600">у цифровому світі</span></h1>
+                <p class="text-xl text-gray-600 max-w-2xl">
+                    Дізнаємося, як поважати чужу працю та захищати власну творчість в Інтернеті.
+                </p>
+                <div class="mt-12 flex space-x-4">
+                    <div class="p-3 bg-gray-50 rounded-lg text-2xl">🎨</div>
+                    <div class="p-3 bg-gray-50 rounded-lg text-2xl">📚</div>
+                    <div class="p-3 bg-gray-50 rounded-lg text-2xl">💻</div>
+                    <div class="p-3 bg-gray-50 rounded-lg text-2xl">🎵</div>
                 </div>
             </div>
         </div>
 
-        <!-- Слайд 2: Що таке програмування? -->
+        <!-- Слайд 2: Що це таке? -->
         <div class="slide" data-index="2">
-            <h2 class="text-3xl font-extrabold text-blue-600 mb-8 flex items-center">
-                <span class="bg-blue-100 p-2 rounded-lg mr-4">🤖</span> Що таке програмування?
+            <h2 class="text-3xl font-bold text-gray-800 mb-8 flex items-center">
+                <span class="bg-indigo-600 text-white w-10 h-10 rounded-lg flex items-center justify-center mr-4 text-xl">?</span>
+                Що таке авторське право?
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
                 <div class="space-y-6">
-                    <p class="text-xl text-gray-700 leading-relaxed">
-                        Уяви, що комп'ютер — це дуже розумний, але слухняний робот. Він робить тільки те, що ти йому накажеш.
+                    <p class="text-lg text-gray-700 leading-relaxed">
+                        Уявіть, що ви намалювали чудову картину або написали пісню. Це ваша інтелектуальна власність.
                     </p>
-                    <div class="bg-green-50 p-5 rounded-2xl border-2 border-green-200">
-                        <p class="text-green-800 font-bold">Програма — це чітка інструкція для комп'ютера.</p>
+                    <div class="info-card border-l-4 border-indigo-500 bg-indigo-50">
+                        <strong>Авторське право</strong> — це закон, який каже, що тільки ви (автор) маєте право вирішувати, як використовувати ваш твір.
                     </div>
                 </div>
-                <div class="bg-gray-100 rounded-3xl p-8 flex items-center justify-center border-4 border-dashed border-gray-300">
-                    <p class="text-center italic text-gray-500"></p>
+                <div class="bg-gray-100 p-8 rounded-2xl flex items-center justify-center border-2 border-dashed border-gray-300">
+                    <div class="text-center">
+                        <div class="text-7xl mb-4">🏠</div>
+                        <p class="text-gray-500 font-medium">Як власний будинок: <br>ні хто не може зайти без дозволу!</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Слайд 3: Знайомство зі Скретчем -->
+        <!-- Слайд 3: Хто такий автор? -->
         <div class="slide" data-index="3">
-            <h2 class="text-3xl font-extrabold text-orange-500 mb-8"> Scratch — це конструктор!</h2>
-            <div class="flex flex-col md:flex-row gap-8">
-                <div class="flex-1 bg-blue-50 p-6 rounded-3xl">
-                    <p class="text-lg mb-4 font-bold text-blue-700">Тут не треба писати складні слова на клавіатурі!</p>
-                    <p class="text-gray-700">Ми складаємо програму з кольорових блоків, як конструктор LEGO.</p>
+            <h2 class="text-3xl font-bold text-gray-800 mb-8">Хто може бути автором?</h2>
+            <p class="text-lg text-gray-600 mb-8">Автором стає людина, яка своєю творчою працею створила щось нове:</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="info-card text-center hover:shadow-lg transition-shadow">
+                    <div class="text-4xl mb-3">✍️</div>
+                    <p class="font-bold">Письменник</p>
                 </div>
-                <div class="flex-1 space-y-4">
-                    <div class="block-yellow text-center">Події</div>
-                    <div class="block-blue text-center">Рух</div>
-                    <div class="block-purple text-center">Вигляд</div>
+                <div class="info-card text-center hover:shadow-lg transition-shadow">
+                    <div class="text-4xl mb-3">📸</div>
+                    <p class="font-bold">Фотограф</p>
+                </div>
+                <div class="info-card text-center hover:shadow-lg transition-shadow">
+                    <div class="text-4xl mb-3">🎮</div>
+                    <p class="font-bold">Програміст</p>
+                </div>
+                <div class="info-card text-center hover:shadow-lg transition-shadow">
+                    <div class="text-4xl mb-3">🎬</div>
+                    <p class="font-bold">Блогер</p>
                 </div>
             </div>
-            <p class="mt-8 text-center text-gray-400 font-medium">Кожен блок — це команда для героя.</p>
+            <p class="mt-8 p-4 bg-yellow-50 text-yellow-800 rounded-xl text-center font-medium italic">
+                Навіть ви, коли робите домашнє завдання або малюєте в Paint — вже автори!
+            </p>
         </div>
 
-        <!-- Слайд 4: Головний герой -->
+        <!-- Слайд 4: Об'єкти захисту -->
         <div class="slide" data-index="4">
-            <h2 class="text-3xl font-extrabold text-gray-800 mb-8 text-center">Знайомся: Рудий Кіт!</h2>
-            <div class="flex flex-col items-center">
-                <div class="text-9xl mb-6">🐱</div>
-                <div class="bg-orange-500 text-white p-6 rounded-2xl shadow-lg max-w-md text-center">
-                    <p class="text-xl font-bold">Привіт! Мене звати Скретч-кіт. Я твій перший помічник.</p>
-                </div>
-                <p class="mt-6 text-gray-600">В програмі таких героїв називають — <span class="font-bold text-orange-600 uppercase">Спрайти</span>.</p>
-            </div>
-        </div>
-
-        <!-- Слайд 5: Де все відбувається? -->
-        <div class="slide" data-index="5">
-            <h2 class="text-3xl font-extrabold text-blue-600 mb-6 italic">Де живуть герої?</h2>
+            <h2 class="text-3xl font-bold text-gray-800 mb-8">Що захищає авторське право?</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="border-4 border-blue-200 rounded-2xl p-4 bg-white shadow-inner">
-                    <h3 class="font-bold text-center mb-2">Сцена 🏞️</h3>
-                    <p class="text-sm text-gray-600 mb-4">Це місце, де Спрайт рухається, танцює та розмовляє.</p>
-                    <div class="h-32 bg-sky-100 rounded-lg flex items-center justify-center text-sky-400 font-mono">
-                        
+                <div class="flex items-start p-4 bg-blue-50 rounded-xl">
+                    <div class="text-3xl mr-4">📖</div>
+                    <div>
+                        <h4 class="font-bold">Тексти</h4>
+                        <p class="text-sm text-gray-600">Книги, вірші, пости в Instagram, статті.</p>
                     </div>
                 </div>
-                <div class="border-4 border-purple-200 rounded-2xl p-4 bg-white shadow-inner">
-                    <h3 class="font-bold text-center mb-2">Область скриптів 📜</h3>
-                    <p class="text-sm text-gray-600 mb-4">Сюди ми перетягуємо блоки, щоб скласти код.</p>
-                    <div class="h-32 bg-purple-50 rounded-lg flex items-center justify-center text-purple-300 font-mono">
-                         
+                <div class="flex items-start p-4 bg-green-50 rounded-xl">
+                    <div class="text-3xl mr-4">🎵</div>
+                    <div>
+                        <h4 class="font-bold">Звуки</h4>
+                        <p class="text-sm text-gray-600">Пісні, мелодії, подкасти.</p>
+                    </div>
+                </div>
+                <div class="flex items-start p-4 bg-purple-50 rounded-xl">
+                    <div class="text-3xl mr-4">🖼️</div>
+                    <div>
+                        <h4 class="font-bold">Зображення</h4>
+                        <p class="text-sm text-gray-600">Малюнки, фотографії, ілюстрації.</p>
+                    </div>
+                </div>
+                <div class="flex items-start p-4 bg-red-50 rounded-xl">
+                    <div class="text-3xl mr-4">🚀</div>
+                    <div>
+                        <h4 class="font-bold">Програми</h4>
+                        <p class="text-sm text-gray-600">Комп'ютерні ігри та мобільні додатки.</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Слайд 6: Команди Руху -->
+        <!-- Слайд 5: Символ © -->
+        <div class="slide" data-index="5">
+            <div class="flex flex-col items-center justify-center h-full">
+                <div class="text-9xl font-serif text-indigo-600 mb-6 drop-shadow-lg">©</div>
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">Символ копірайту</h2>
+                <p class="text-xl text-gray-600 text-center max-w-xl">
+                    Це спеціальний знак, який попереджає: "Цей твір захищено законом".
+                </p>
+                <div class="mt-8 bg-gray-800 text-white p-4 rounded-lg font-mono text-lg">
+                    © 2024 Олена Петренко
+                </div>
+                <p class="mt-4 text-sm text-gray-400">Знак © + Рік + Ім'я автора</p>
+            </div>
+        </div>
+
+        <!-- Слайд 6: Права автора -->
         <div class="slide" data-index="6">
-            <h2 class="text-3xl font-extrabold text-blue-500 mb-6">Як змусити кота йти?</h2>
-            <p class="text-lg mb-6">Для цього нам потрібні сині блоки з розділу <span class="text-blue-600 font-bold">Рух</span>:</p>
-            <div class="space-y-4 max-w-md mx-auto">
-                <div class="block-blue flex items-center justify-between">
-                    <span>перемістити на 10 кроків</span>
-                    <span class="text-xs">➡️</span>
+            <h2 class="text-3xl font-bold text-gray-800 mb-8">Які права має автор?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="info-card bg-indigo-50 border-t-4 border-indigo-500">
+                    <h3 class="text-xl font-bold mb-3 text-indigo-700">Особисті права</h3>
+                    <ul class="space-y-2 list-disc ml-5 text-gray-700">
+                        <li>Називатися автором</li>
+                        <li>Вимагати згадки свого імені</li>
+                        <li>Забороняти псувати твір</li>
+                    </ul>
                 </div>
-                <div class="block-blue flex items-center justify-between">
-                    <span>повернути на 15 градусів</span>
-                    <span class="text-xs">🔄</span>
-                </div>
-                <div class="block-blue flex items-center justify-between">
-                    <span>ковзати 1 сек до...</span>
-                    <span class="text-xs">☁️</span>
+                <div class="info-card bg-emerald-50 border-t-4 border-emerald-500">
+                    <h3 class="text-xl font-bold mb-3 text-emerald-700">Майнові права</h3>
+                    <ul class="space-y-2 list-disc ml-5 text-gray-700">
+                        <li>Дозволяти копіювати твір</li>
+                        <li>Продавати свій твір</li>
+                        <li>Отримувати за це гроші</li>
+                    </ul>
                 </div>
             </div>
         </div>
 
-        <!-- Слайд 7: Команди Вигляду -->
+        <!-- Слайд 7: Плагіат -->
         <div class="slide" data-index="7">
-            <h2 class="text-3xl font-extrabold text-purple-600 mb-6">Кіт вміє розмовляти!</h2>
-            <p class="text-lg mb-6">Використовуй фіолетові блоки, щоб змінити вигляд або додати текст:</p>
-            <div class="flex justify-center items-start gap-10">
-                <div class="space-y-4">
-                    <div class="block-purple">говорити "Привіт!" 2 сек</div>
-                    <div class="block-purple">наступний образ</div>
-                    <div class="block-purple">змінити ефект колір на 25</div>
-                </div>
-                <div class="relative bg-white border-2 border-gray-200 p-4 rounded-xl shadow-md">
-                    <span class="absolute -top-3 left-4 text-4xl">💬</span>
-                    <p class="font-bold text-gray-800 italic">"Ура! Я змінюю колір!"</p>
+            <h2 class="text-3xl font-bold text-red-600 mb-8 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 15c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                Плагіат — це крадіжка!
+            </h2>
+            <div class="bg-red-50 p-6 rounded-2xl border-2 border-red-100">
+                <p class="text-xl text-red-800 font-semibold mb-4 text-center italic">
+                    "Видати чужу роботу за свою — це і є плагіат."
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <div class="bg-white p-4 rounded-xl shadow-sm">
+                        <span class="text-red-500 font-bold">❌ Погано:</span> Скопіювати реферат з Інтернету та підписати своїм ім'ям.
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm">
+                        <span class="text-green-500 font-bold">✅ Добре:</span> Прочитати інформацію, написати своїми словами та вказати посилання на джерело.
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Слайд 8: Зелений прапорець -->
+        <!-- Слайд 8: Як користуватися правильно -->
         <div class="slide" data-index="8">
-            <h2 class="text-3xl font-extrabold text-green-600 mb-8 text-center">Як запустити гру?</h2>
-            <div class="flex flex-col items-center">
-                <div class="flex gap-10 items-center mb-8">
-                    <div class="text-center">
-                        <div class="text-6xl mb-2">🚩</div>
-                        <p class="font-bold text-green-600">СТАРТ</p>
-                    </div>
-                    <div class="text-4xl text-gray-300">➔</div>
-                    <div class="text-center">
-                        <div class="text-6xl mb-2">🛑</div>
-                        <p class="font-bold text-red-500">СТОП</p>
-                    </div>
+            <h2 class="text-3xl font-bold text-gray-800 mb-8">Золоті правила користувача</h2>
+            <div class="space-y-4">
+                <div class="flex items-center p-5 bg-gray-50 rounded-2xl border border-gray-200">
+                    <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mr-6 text-2xl">🔗</div>
+                    <p class="text-lg">Завжди вказуй <strong>ім'я автора</strong> або посилання на сайт.</p>
                 </div>
-                <div class="bg-yellow-100 p-6 rounded-2xl border-2 border-yellow-300 max-w-lg">
-                    <p class="text-yellow-800">Завжди починай свою програму з блока подій: <br> <b>"Коли прапорець натиснуто"</b>!</p>
+                <div class="flex items-center p-5 bg-gray-50 rounded-2xl border border-gray-200">
+                    <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mr-6 text-2xl">💬</div>
+                    <p class="text-lg">Використовуй <strong>цитати</strong> (лапки), якщо копіюєш частину тексту.</p>
+                </div>
+                <div class="flex items-center p-5 bg-gray-50 rounded-2xl border border-gray-200">
+                    <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mr-6 text-2xl">🤝</div>
+                    <p class="text-lg">Запитай <strong>дозвіл</strong>, якщо хочеш використати роботу комерційно.</p>
                 </div>
             </div>
         </div>
 
-        <!-- Слайд 9: Що можна створити? -->
+        <!-- Слайд 9: Безкоштовні ресурси -->
         <div class="slide" data-index="9">
-            <h2 class="text-3xl font-extrabold text-gray-800 mb-8">Твої можливості в Scratch:</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="p-6 bg-pink-100 rounded-2xl text-center">
-                    <div class="text-4xl mb-2">🎮</div>
-                    <h4 class="font-bold">Власні ігри</h4>
+            <h2 class="text-3xl font-bold text-gray-800 mb-8">Де брати матеріали легально?</h2>
+            <p class="text-lg text-gray-600 mb-6">Існують сайти, де автори дозволяють брати їхні роботи безкоштовно:</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="p-6 bg-indigo-600 text-white rounded-2xl shadow-xl">
+                    <h4 class="font-bold text-xl mb-2">Pixabay / Unsplash</h4>
+                    <p class="opacity-90">Безкоштовні та якісні фотографії.</p>
                 </div>
-                <div class="p-6 bg-yellow-100 rounded-2xl text-center">
-                    <div class="text-4xl mb-2">🎬</div>
-                    <h4 class="font-bold">Мультфільми</h4>
+                <div class="p-6 bg-pink-600 text-white rounded-2xl shadow-xl">
+                    <h4 class="font-bold text-xl mb-2">Bensound</h4>
+                    <p class="opacity-90">Музика для ваших відео без порушення прав.</p>
                 </div>
-                <div class="p-6 bg-blue-100 rounded-2xl text-center">
-                    <div class="text-4xl mb-2">🎵</div>
-                    <h4 class="font-bold">Музичні кліпи</h4>
+                <div class="p-6 bg-orange-500 text-white rounded-2xl shadow-xl">
+                    <h4 class="font-bold text-xl mb-2">Wikipedia</h4>
+                    <p class="opacity-90">Вільна енциклопедія знань.</p>
+                </div>
+                <div class="p-6 bg-teal-500 text-white rounded-2xl shadow-xl">
+                    <h4 class="font-bold text-xl mb-2">Flaticon</h4>
+                    <p class="opacity-90">Набори іконок для презентацій.</p>
                 </div>
             </div>
-            <p class="mt-10 text-xl text-center font-bold text-gray-600 animate-pulse">Ти обмежений тільки своєю уявою! 🚀</p>
         </div>
 
         <!-- Слайд 10: Фінал -->
         <div class="slide" data-index="10">
             <div class="flex flex-col items-center justify-center h-full text-center">
-                <h2 class="text-5xl font-black text-blue-600 mb-6">Готові до пригод?</h2>
-                <div class="text-8xl mb-6">👨‍💻👩‍💻</div>
-                <p class="text-2xl text-gray-600 mb-8">Сьогодні ми зробимо перший крок у світ програмування!</p>
-                <div class="bg-orange-500 text-white px-10 py-4 rounded-full text-2xl font-bold shadow-xl">
-                    До роботи в Scratch!
+                <div class="text-6xl mb-6">🌟</div>
+                <h2 class="text-4xl font-bold text-gray-900 mb-6">Готові бути чесними авторами?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full text-left">
+                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                        <p class="text-sm font-bold text-blue-800 mb-2">Поважай</p>
+                        <p class="text-xs text-blue-600">Працю інших людей в мережі.</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-xl border border-green-100">
+                        <p class="text-sm font-bold text-green-800 mb-2">Створюй</p>
+                        <p class="text-xs text-green-600">Свій власний цікавий контент.</p>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-xl border border-purple-100">
+                        <p class="text-sm font-bold text-purple-800 mb-2">Захищай</p>
+                        <p class="text-xs text-purple-600">Став знак © на свої роботи.</p>
+                    </div>
                 </div>
+                <p class="mt-12 text-3xl font-black text-indigo-600 animate-pulse">Дякую за увагу!</p>
             </div>
         </div>
 
@@ -249,19 +311,19 @@
 
     <!-- Навігація -->
     <div class="p-6 bg-gray-50 flex items-center justify-between border-t border-gray-100">
-        <button id="prevBtn" class="group flex items-center px-8 py-3 bg-white border-2 border-gray-200 rounded-2xl text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-all disabled:opacity-20 shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+        <button id="prevBtn" class="flex items-center px-6 py-3 bg-white border border-gray-200 rounded-2xl text-gray-700 hover:bg-indigo-50 hover:border-indigo-200 transition-all disabled:opacity-30 disabled:hover:bg-white disabled:hover:border-gray-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
-            <span class="font-bold">Назад</span>
+            Назад
         </button>
 
-        <div id="slideNumber" class="bg-gray-200 px-4 py-1 rounded-full text-gray-600 font-bold text-sm">Слайд 1 / 10</div>
+        <div id="slideNumber" class="text-gray-400 font-bold text-sm tracking-widest uppercase">СЛАЙД 1 / 10</div>
 
-        <button id="nextBtn" class="group flex items-center px-8 py-3 bg-blue-500 text-white rounded-2xl hover:bg-blue-600 transition-all disabled:opacity-20 shadow-lg shadow-blue-200">
-            <span class="font-bold">Далі</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-2 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" />
+        <button id="nextBtn" class="flex items-center px-8 py-3 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 transition-all disabled:opacity-30 shadow-lg shadow-indigo-200 active:scale-95">
+            Далі
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
         </button>
     </div>
@@ -279,7 +341,6 @@
     const progressFill = document.getElementById('progressFill');
     const fullscreenBtn = document.getElementById('fullscreenBtn');
     const fullscreenIcon = document.getElementById('fullscreenIcon');
-    const mainContainer = document.getElementById('mainContainer');
 
     let currentSlide = 1;
     const totalSlides = slides.length;
@@ -292,59 +353,66 @@
             }
         });
 
-        slideNumberText.innerText = `Слайд ${currentSlide} / ${totalSlides}`;
+        slideNumberText.innerText = `СЛАЙД ${currentSlide} / ${totalSlides}`;
         progressFill.style.width = `${(currentSlide / totalSlides) * 100}%`;
 
         prevBtn.disabled = (currentSlide === 1);
-        nextBtn.disabled = (currentSlide === totalSlides);
+        
+        if (currentSlide === totalSlides) {
+            nextBtn.innerHTML = 'Завершити <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>';
+            nextBtn.classList.replace('bg-indigo-600', 'bg-green-600');
+        } else {
+            nextBtn.innerHTML = 'Далі <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>';
+            nextBtn.classList.replace('bg-green-600', 'bg-indigo-600');
+        }
     }
 
-    prevBtn.addEventListener('click', () => {
-        if (currentSlide > 1) {
-            currentSlide--;
-            updateUI();
-        }
-    });
-
-    nextBtn.addEventListener('click', () => {
+    function goToNext() {
         if (currentSlide < totalSlides) {
             currentSlide++;
             updateUI();
         }
+    }
+
+    function goToPrev() {
+        if (currentSlide > 1) {
+            currentSlide--;
+            updateUI();
+        }
+    }
+
+    prevBtn.addEventListener('click', goToPrev);
+    nextBtn.addEventListener('click', goToNext);
+
+    // Керування клавіатурою
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+            goToNext();
+        } else if (e.key === 'ArrowLeft') {
+            goToPrev();
+        } else if (e.key === 'f' || e.key === 'F') {
+            toggleFullscreen();
+        }
     });
 
     // Повний екран
-    fullscreenBtn.addEventListener('click', () => {
+    function toggleFullscreen() {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen().catch(err => {
-                console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+                console.error(`Помилка: ${err.message}`);
             });
         } else {
             document.exitFullscreen();
         }
-    });
+    }
+
+    fullscreenBtn.addEventListener('click', toggleFullscreen);
 
     document.addEventListener('fullscreenchange', () => {
         if (document.fullscreenElement) {
             fullscreenIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />';
         } else {
             fullscreenIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />';
-        }
-    });
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowRight' || e.key === ' ') {
-            if (currentSlide < totalSlides) {
-                currentSlide++;
-                updateUI();
-            }
-        } else if (e.key === 'ArrowLeft') {
-            if (currentSlide > 1) {
-                currentSlide--;
-                updateUI();
-            }
-        } else if (e.key === 'f' || e.key === 'F') {
-            fullscreenBtn.click();
         }
     });
 
