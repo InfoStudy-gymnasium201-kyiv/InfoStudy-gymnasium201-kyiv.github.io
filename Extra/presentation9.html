@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Презентація: Алгоритми опрацювання таблиць</title>
+    <title>Презентація: Авторське право (5 клас)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-        
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+            background-color: #f0f4f8;
             overflow: hidden;
             transition: background-color 0.3s;
         }
@@ -27,22 +27,12 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .code-block {
-            background-color: #1e1e1e;
-            color: #d4d4d4;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.9rem;
-            line-height: 1.4;
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         .progress-bar {
-            height: 4px;
+            height: 6px;
             background-color: #e5e7eb;
             width: 100%;
             position: absolute;
@@ -51,13 +41,20 @@
 
         .progress-fill {
             height: 100%;
-            background-color: #3b82f6;
-            transition: width 0.3s ease;
+            background-color: #4f46e5;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Стиль для повноекранного режиму */
+        .info-card {
+            background: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            padding: 1.5rem;
+        }
+
         :fullscreen body {
-            background-color: #000;
+            background-color: #111827;
         }
         :fullscreen .main-container {
             max-width: 100%;
@@ -68,336 +65,358 @@
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
 
-    <div id="mainContainer" class="main-container bg-white w-full max-w-5xl rounded-2xl shadow-2xl overflow-hidden relative flex flex-col min-h-[650px] transition-all">
-        
-        <!-- Кнопка повного екрану -->
-        <button id="fullscreenBtn" class="absolute top-4 right-4 z-50 p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors" title="Повний екран">
-            <svg id="fullscreenIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-            </svg>
-        </button>
+<div id="mainContainer" class="main-container bg-white w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden relative flex flex-col min-h-[650px] transition-all">
 
-        <!-- Контент слайдів -->
-        <div id="slides-container" class="flex-grow p-8 md:p-12 overflow-y-auto">
-            
-            <!-- Слайд 1 -->
-            <div class="slide active" data-index="1">
-                <div class="flex flex-col items-center justify-center h-full text-center">
-                    <span class="text-blue-600 font-bold tracking-widest uppercase mb-4">Тема 31</span>
-                    <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6">Алгоритми опрацювання табличних величин</h1>
-                    <p class="text-xl text-gray-600 max-w-2xl leading-relaxed">
-                        Знаходження суми значень елементів; суми або кількості елементів, що задовольняють заданим умовам.
+    <!-- Кнопка повного екрану -->
+    <button id="fullscreenBtn" class="absolute top-6 right-6 z-50 p-2 bg-gray-50 hover:bg-indigo-100 rounded-xl transition-colors group" title="Повний екран">
+        <svg id="fullscreenIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+        </svg>
+    </button>
+
+    <!-- Контент слайдів -->
+    <div id="slides-container" class="flex-grow p-8 md:p-16 overflow-y-auto">
+
+        <!-- Слайд 1: Титульний -->
+        <div class="slide active" data-index="1">
+            <div class="flex flex-col items-center justify-center h-full text-center">
+                <div class="bg-indigo-100 text-indigo-700 px-4 py-1 rounded-full text-sm font-bold uppercase tracking-widest mb-6">Інформатика • 5 клас</div>
+                <h1 class="text-5xl md:text-6xl font-black text-gray-900 mb-8 leading-tight">Авторське право <br><span class="text-indigo-600">у цифровому світі</span></h1>
+                <p class="text-xl text-gray-600 max-w-2xl">
+                    Дізнаємося, як поважати чужу працю та захищати власну творчість в Інтернеті.
+                </p>
+                <div class="mt-12 flex space-x-4">
+                    <div class="p-3 bg-gray-50 rounded-lg text-2xl">🎨</div>
+                    <div class="p-3 bg-gray-50 rounded-lg text-2xl">📚</div>
+                    <div class="p-3 bg-gray-50 rounded-lg text-2xl">💻</div>
+                    <div class="p-3 bg-gray-50 rounded-lg text-2xl">🎵</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Слайд 2: Що це таке? -->
+        <div class="slide" data-index="2">
+            <h2 class="text-3xl font-bold text-gray-800 mb-8 flex items-center">
+                <span class="bg-indigo-600 text-white w-10 h-10 rounded-lg flex items-center justify-center mr-4 text-xl">?</span>
+                Що таке авторське право?
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+                <div class="space-y-6">
+                    <p class="text-lg text-gray-700 leading-relaxed">
+                        Уявіть, що ви намалювали чудову картину або написали пісню. Це ваша інтелектуальна власність.
                     </p>
-                    <div class="mt-12 p-4 bg-blue-50 border-l-4 border-blue-500 text-blue-700 italic">
-                        Інформатика, 9 клас
+                    <div class="info-card border-l-4 border-indigo-500 bg-indigo-50">
+                        <strong>Авторське право</strong> — це закон, який каже, що тільки ви (автор) маєте право вирішувати, як використовувати ваш твір.
+                    </div>
+                </div>
+                <div class="bg-gray-100 p-8 rounded-2xl flex items-center justify-center border-2 border-dashed border-gray-300">
+                    <div class="text-center">
+                        <div class="text-7xl mb-4">🏠</div>
+                        <p class="text-gray-500 font-medium">Як власний будинок: <br>ні хто не може зайти без дозволу!</p>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Слайд 2 -->
-            <div class="slide" data-index="2">
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">Що таке табличні величини?</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+        <!-- Слайд 3: Хто такий автор? -->
+        <div class="slide" data-index="3">
+            <h2 class="text-3xl font-bold text-gray-800 mb-8">Хто може бути автором?</h2>
+            <p class="text-lg text-gray-600 mb-8">Автором стає людина, яка своєю творчою працею створила щось нове:</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="info-card text-center hover:shadow-lg transition-shadow">
+                    <div class="text-4xl mb-3">✍️</div>
+                    <p class="font-bold">Письменник</p>
+                </div>
+                <div class="info-card text-center hover:shadow-lg transition-shadow">
+                    <div class="text-4xl mb-3">📸</div>
+                    <p class="font-bold">Фотограф</p>
+                </div>
+                <div class="info-card text-center hover:shadow-lg transition-shadow">
+                    <div class="text-4xl mb-3">🎮</div>
+                    <p class="font-bold">Програміст</p>
+                </div>
+                <div class="info-card text-center hover:shadow-lg transition-shadow">
+                    <div class="text-4xl mb-3">🎬</div>
+                    <p class="font-bold">Блогер</p>
+                </div>
+            </div>
+            <p class="mt-8 p-4 bg-yellow-50 text-yellow-800 rounded-xl text-center font-medium italic">
+                Навіть ви, коли робите домашнє завдання або малюєте в Paint — вже автори!
+            </p>
+        </div>
+
+        <!-- Слайд 4: Об'єкти захисту -->
+        <div class="slide" data-index="4">
+            <h2 class="text-3xl font-bold text-gray-800 mb-8">Що захищає авторське право?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="flex items-start p-4 bg-blue-50 rounded-xl">
+                    <div class="text-3xl mr-4">📖</div>
                     <div>
-                        <p class="text-lg text-gray-700 mb-4">
-                            <strong>Таблична величина (масив)</strong> — це впорядкована сукупність фіксованої кількості значень одного типу, що мають спільне ім'я.
-                        </p>
-                        <ul class="space-y-3 text-gray-600">
-                            <li class="flex items-center"><span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span> Кожен елемент має свій індекс (номер).</li>
-                            <li class="flex items-center"><span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span> Доступ до значення здійснюється через ім'я та індекс: <code>A[i]</code>.</li>
-                        </ul>
+                        <h4 class="font-bold">Тексти</h4>
+                        <p class="text-sm text-gray-600">Книги, вірші, пости в Instagram, статті.</p>
                     </div>
-                    <div class="bg-gray-100 p-6 rounded-xl border border-gray-200">
-                        <p class="text-sm font-mono text-gray-500 mb-2">Приклад масиву A:</p>
-                        <table class="w-full text-center border-collapse">
-                            <tr>
-                                <td class="border p-2 bg-blue-100 font-bold">Індекс</td>
-                                <td class="border p-2">0</td>
-                                <td class="border p-2">1</td>
-                                <td class="border p-2">2</td>
-                                <td class="border p-2">3</td>
-                            </tr>
-                            <tr>
-                                <td class="border p-2 bg-blue-50 font-bold">Значення</td>
-                                <td class="border p-2 text-blue-600">10</td>
-                                <td class="border p-2 text-blue-600">-5</td>
-                                <td class="border p-2 text-blue-600">22</td>
-                                <td class="border p-2 text-blue-600">14</td>
-                            </tr>
-                        </table>
+                </div>
+                <div class="flex items-start p-4 bg-green-50 rounded-xl">
+                    <div class="text-3xl mr-4">🎵</div>
+                    <div>
+                        <h4 class="font-bold">Звуки</h4>
+                        <p class="text-sm text-gray-600">Пісні, мелодії, подкасти.</p>
+                    </div>
+                </div>
+                <div class="flex items-start p-4 bg-purple-50 rounded-xl">
+                    <div class="text-3xl mr-4">🖼️</div>
+                    <div>
+                        <h4 class="font-bold">Зображення</h4>
+                        <p class="text-sm text-gray-600">Малюнки, фотографії, ілюстрації.</p>
+                    </div>
+                </div>
+                <div class="flex items-start p-4 bg-red-50 rounded-xl">
+                    <div class="text-3xl mr-4">🚀</div>
+                    <div>
+                        <h4 class="font-bold">Програми</h4>
+                        <p class="text-sm text-gray-600">Комп'ютерні ігри та мобільні додатки.</p>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Слайд 3 -->
-            <div class="slide" data-index="3">
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">Алгоритм знаходження суми</h2>
-                <div class="space-y-4">
-                    <p class="text-lg text-gray-700">
-                        Для обчислення суми всіх елементів масиву використовується змінна-накопичувач (наприклад, <code>S</code>).
-                    </p>
-                    <div class="bg-green-50 p-6 rounded-lg border-l-4 border-green-500">
-                        <h4 class="font-bold text-green-800 mb-2">Основні кроки:</h4>
-                        <ol class="list-decimal ml-6 space-y-2 text-green-900">
-                            <li>Надати змінній <code>S</code> початкове значення 0.</li>
-                            <li>Використати цикл для перебору всіх елементів масиву.</li>
-                            <li>На кожному кроці додавати поточний елемент до суми: <code>S := S + A[i]</code>.</li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Слайд 4 -->
-            <div class="slide" data-index="4">
-                <h2 class="text-3xl font-bold text-gray-800 mb-4">Приклад коду: Сума (Python)</h2>
-                <div class="code-block">
-<pre>
-# Початкові дані
-numbers = [10, 15, 20, 5, 30]
-s = 0 # Змінна для суми
-
-# Цикл для накопичення результату
-for x in numbers:
-    s = s + x
-
-print("Сума елементів:", s)
-# Результат: 80
-</pre>
-                </div>
-                <p class="mt-4 text-gray-500 text-sm italic">
-                    Зауважте: у Python також можна просто використати вбудовану функцію sum(numbers).
+        <!-- Слайд 5: Символ © -->
+        <div class="slide" data-index="5">
+            <div class="flex flex-col items-center justify-center h-full">
+                <div class="text-9xl font-serif text-indigo-600 mb-6 drop-shadow-lg">©</div>
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">Символ копірайту</h2>
+                <p class="text-xl text-gray-600 text-center max-w-xl">
+                    Це спеціальний знак, який попереджає: "Цей твір захищено законом".
                 </p>
+                <div class="mt-8 bg-gray-800 text-white p-4 rounded-lg font-mono text-lg">
+                    © 2024 Олена Петренко
+                </div>
+                <p class="mt-4 text-sm text-gray-400">Знак © + Рік + Ім'я автора</p>
             </div>
+        </div>
 
-            <!-- Слайд 5 -->
-            <div class="slide" data-index="5">
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">Сума елементів за умовою</h2>
-                <div class="flex flex-col md:flex-row gap-6">
-                    <div class="flex-1">
-                        <p class="text-gray-700 mb-4">
-                            Часто потрібно знайти суму не всіх елементів, а лише тих, що задовольняють певній логічній умові (наприклад, лише додатні або лише парні).
-                        </p>
-                        <div class="bg-yellow-50 p-4 border border-yellow-200 rounded-lg">
-                            <p class="font-semibold text-yellow-800">Логіка:</p>
-                            <code class="text-sm">ЯКЩО (умова справджується) ТО (додати до суми)</code>
-                        </div>
-                    </div>
-                    <div class="flex-1 bg-gray-50 p-4 rounded-lg border">
-                        <p class="font-bold mb-2">Приклади умов:</p>
-                        <ul class="text-sm space-y-2">
-                            <li><code>A[i] > 0</code> — додатні</li>
-                            <li><code>A[i] < 0</code> — від'ємні</li>
-                            <li><code>A[i] % 2 == 0</code> — парні</li>
-                            <li><code>A[i] > 100</code> — більші за 100</li>
-                        </ul>
-                    </div>
+        <!-- Слайд 6: Права автора -->
+        <div class="slide" data-index="6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-8">Які права має автор?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="info-card bg-indigo-50 border-t-4 border-indigo-500">
+                    <h3 class="text-xl font-bold mb-3 text-indigo-700">Особисті права</h3>
+                    <ul class="space-y-2 list-disc ml-5 text-gray-700">
+                        <li>Називатися автором</li>
+                        <li>Вимагати згадки свого імені</li>
+                        <li>Забороняти псувати твір</li>
+                    </ul>
+                </div>
+                <div class="info-card bg-emerald-50 border-t-4 border-emerald-500">
+                    <h3 class="text-xl font-bold mb-3 text-emerald-700">Майнові права</h3>
+                    <ul class="space-y-2 list-disc ml-5 text-gray-700">
+                        <li>Дозволяти копіювати твір</li>
+                        <li>Продавати свій твір</li>
+                        <li>Отримувати за це гроші</li>
+                    </ul>
                 </div>
             </div>
+        </div>
 
-            <!-- Слайд 6 -->
-            <div class="slide" data-index="6">
-                <h2 class="text-3xl font-bold text-gray-800 mb-4">Приклад: Сума додатних чисел</h2>
-                <div class="code-block">
-<pre>
-A = [5, -3, 10, -2, 8, 0]
-s_pos = 0
-
-for i in range(len(A)):
-    if A[i] > 0: # Перевірка умови
-        s_pos = s_pos + A[i]
-
-print("Сума додатних елементів:", s_pos)
-# Результат: 23 (5 + 10 + 8)
-</pre>
-                </div>
-            </div>
-
-            <!-- Слайд 7 -->
-            <div class="slide" data-index="7">
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">Знаходження кількості елементів</h2>
-                <p class="text-lg text-gray-700 mb-6">
-                    Алгоритм підрахунку кількості (лічильник) схожий на знаходження суми, але замість значення елемента ми додаємо <strong>1</strong>.
+        <!-- Слайд 7: Плагіат -->
+        <div class="slide" data-index="7">
+            <h2 class="text-3xl font-bold text-red-600 mb-8 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 15c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                Плагіат — це крадіжка!
+            </h2>
+            <div class="bg-red-50 p-6 rounded-2xl border-2 border-red-100">
+                <p class="text-xl text-red-800 font-semibold mb-4 text-center italic">
+                    "Видати чужу роботу за свою — це і є плагіат."
                 </p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="p-6 bg-purple-50 rounded-xl border border-purple-200">
-                        <h4 class="font-bold text-purple-800 mb-2 underline">Сума</h4>
-                        <p class="font-mono text-sm">S = S + A[i]</p>
-                        <p class="text-xs mt-2 text-purple-600">Додаємо вміст "коробки"</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <div class="bg-white p-4 rounded-xl shadow-sm">
+                        <span class="text-red-500 font-bold">❌ Погано:</span> Скопіювати реферат з Інтернету та підписати своїм ім'ям.
                     </div>
-                    <div class="p-6 bg-indigo-50 rounded-xl border border-indigo-200">
-                        <h4 class="font-bold text-indigo-800 mb-2 underline">Кількість</h4>
-                        <p class="font-mono text-sm">K = K + 1</p>
-                        <p class="text-xs mt-2 text-indigo-600">Рахуємо саму "коробку"</p>
+                    <div class="bg-white p-4 rounded-xl shadow-sm">
+                        <span class="text-green-500 font-bold">✅ Добре:</span> Прочитати інформацію, написати своїми словами та вказати посилання на джерело.
                     </div>
                 </div>
             </div>
-
-            <!-- Слайд 8 -->
-            <div class="slide" data-index="8">
-                <h2 class="text-3xl font-bold text-gray-800 mb-4">Приклад: Кількість парних елементів</h2>
-                <div class="code-block">
-<pre>
-array = [12, 7, 24, 11, 8, 3]
-count = 0
-
-for x in array:
-    if x % 2 == 0: # Якщо ділиться на 2 без остачі
-        count = count + 1
-
-print("Кількість парних чисел:", count)
-# Результат: 3 (12, 24, 8)
-</pre>
-                </div>
-            </div>
-
-            <!-- Слайд 9 -->
-            <div class="slide" data-index="9">
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">Складні умови</h2>
-                <p class="text-gray-700 mb-4">Елементи можуть фільтруватися за декількома критеріями одночасно за допомогою операторів <strong>AND</strong> (та) або <strong>OR</strong> (або).</p>
-                <div class="bg-gray-800 text-white p-6 rounded-lg">
-                    <p class="text-blue-300 font-mono mb-2"># Приклад: Сума елементів в діапазоні [10, 50]</p>
-                    <p class="font-mono">if A[i] >= 10 <span class="text-red-400">and</span> A[i] <= 50:</p>
-                    <p class="font-mono ml-4">S = S + A[i]</p>
-                </div>
-                <div class="mt-6 flex gap-4">
-                    <div class="flex-1 p-4 bg-orange-50 border rounded text-sm">
-                        <strong>Порада:</strong> Завжди ініціалізуйте змінні (S=0, K=0) ПЕРЕД циклом, інакше програма видасть помилку.
-                    </div>
-                </div>
-            </div>
-
-            <!-- Слайд 10 -->
-            <div class="slide" data-index="10">
-                <div class="flex flex-col items-center justify-center h-full text-center">
-                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Висновки та перевірка</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full text-left">
-                        <div class="bg-blue-50 p-4 rounded-lg">
-                            <h4 class="font-bold mb-2">Запам'ятайте:</h4>
-                            <ul class="text-sm list-disc ml-4 space-y-1">
-                                <li>Сума: <code>S = S + елемент</code></li>
-                                <li>Кількість: <code>K = K + 1</code></li>
-                                <li>Умова: використовуємо <code>if</code> всередині циклу</li>
-                            </ul>
-                        </div>
-                        <div class="bg-green-50 p-4 rounded-lg">
-                            <h4 class="font-bold mb-2">Питання для самоконтролю:</h4>
-                            <ol class="text-sm list-decimal ml-4 space-y-1">
-                                <li>Чому дорівнює початкове значення суми?</li>
-                                <li>Як порахувати кількість тільки від'ємних чисел?</li>
-                                <li>Яка різниця між алгоритмом суми та кількості?</li>
-                            </ol>
-                        </div>
-                    </div>
-                    <p class="mt-10 text-2xl font-bold text-blue-600">Дякую за увагу!</p>
-                </div>
-            </div>
-
         </div>
 
-        <!-- Навігація -->
-        <div class="p-6 bg-gray-50 flex items-center justify-between border-t border-gray-200">
-            <button id="prevBtn" class="flex items-center px-6 py-2 bg-white border border-gray-300 rounded-full text-gray-700 hover:bg-gray-100 transition-all disabled:opacity-30">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
-                Назад
-            </button>
-            
-            <div id="slideNumber" class="text-gray-500 font-medium">Слайд 1 / 10</div>
-            
-            <button id="nextBtn" class="flex items-center px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all disabled:opacity-30 shadow-lg shadow-blue-200">
-                Далі
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-            </button>
+        <!-- Слайд 8: Як користуватися правильно -->
+        <div class="slide" data-index="8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-8">Золоті правила користувача</h2>
+            <div class="space-y-4">
+                <div class="flex items-center p-5 bg-gray-50 rounded-2xl border border-gray-200">
+                    <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mr-6 text-2xl">🔗</div>
+                    <p class="text-lg">Завжди вказуй <strong>ім'я автора</strong> або посилання на сайт.</p>
+                </div>
+                <div class="flex items-center p-5 bg-gray-50 rounded-2xl border border-gray-200">
+                    <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mr-6 text-2xl">💬</div>
+                    <p class="text-lg">Використовуй <strong>цитати</strong> (лапки), якщо копіюєш частину тексту.</p>
+                </div>
+                <div class="flex items-center p-5 bg-gray-50 rounded-2xl border border-gray-200">
+                    <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mr-6 text-2xl">🤝</div>
+                    <p class="text-lg">Запитай <strong>дозвіл</strong>, якщо хочеш використати роботу комерційно.</p>
+                </div>
+            </div>
         </div>
 
-        <div class="progress-bar">
-            <div id="progressFill" class="progress-fill" style="width: 10%;"></div>
+        <!-- Слайд 9: Безкоштовні ресурси -->
+        <div class="slide" data-index="9">
+            <h2 class="text-3xl font-bold text-gray-800 mb-8">Де брати матеріали легально?</h2>
+            <p class="text-lg text-gray-600 mb-6">Існують сайти, де автори дозволяють брати їхні роботи безкоштовно:</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="p-6 bg-indigo-600 text-white rounded-2xl shadow-xl">
+                    <h4 class="font-bold text-xl mb-2">Pixabay / Unsplash</h4>
+                    <p class="opacity-90">Безкоштовні та якісні фотографії.</p>
+                </div>
+                <div class="p-6 bg-pink-600 text-white rounded-2xl shadow-xl">
+                    <h4 class="font-bold text-xl mb-2">Bensound</h4>
+                    <p class="opacity-90">Музика для ваших відео без порушення прав.</p>
+                </div>
+                <div class="p-6 bg-orange-500 text-white rounded-2xl shadow-xl">
+                    <h4 class="font-bold text-xl mb-2">Wikipedia</h4>
+                    <p class="opacity-90">Вільна енциклопедія знань.</p>
+                </div>
+                <div class="p-6 bg-teal-500 text-white rounded-2xl shadow-xl">
+                    <h4 class="font-bold text-xl mb-2">Flaticon</h4>
+                    <p class="opacity-90">Набори іконок для презентацій.</p>
+                </div>
+            </div>
         </div>
+
+        <!-- Слайд 10: Фінал -->
+        <div class="slide" data-index="10">
+            <div class="flex flex-col items-center justify-center h-full text-center">
+                <div class="text-6xl mb-6">🌟</div>
+                <h2 class="text-4xl font-bold text-gray-900 mb-6">Готові бути чесними авторами?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full text-left">
+                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                        <p class="text-sm font-bold text-blue-800 mb-2">Поважай</p>
+                        <p class="text-xs text-blue-600">Працю інших людей в мережі.</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-xl border border-green-100">
+                        <p class="text-sm font-bold text-green-800 mb-2">Створюй</p>
+                        <p class="text-xs text-green-600">Свій власний цікавий контент.</p>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-xl border border-purple-100">
+                        <p class="text-sm font-bold text-purple-800 mb-2">Захищай</p>
+                        <p class="text-xs text-purple-600">Став знак © на свої роботи.</p>
+                    </div>
+                </div>
+                <p class="mt-12 text-3xl font-black text-indigo-600 animate-pulse">Дякую за увагу!</p>
+            </div>
+        </div>
+
     </div>
 
-    <script>
-        const slides = document.querySelectorAll('.slide');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        const slideNumberText = document.getElementById('slideNumber');
-        const progressFill = document.getElementById('progressFill');
-        const fullscreenBtn = document.getElementById('fullscreenBtn');
-        const fullscreenIcon = document.getElementById('fullscreenIcon');
-        const mainContainer = document.getElementById('mainContainer');
+    <!-- Навігація -->
+    <div class="p-6 bg-gray-50 flex items-center justify-between border-t border-gray-100">
+        <button id="prevBtn" class="flex items-center px-6 py-3 bg-white border border-gray-200 rounded-2xl text-gray-700 hover:bg-indigo-50 hover:border-indigo-200 transition-all disabled:opacity-30 disabled:hover:bg-white disabled:hover:border-gray-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            Назад
+        </button>
+
+        <div id="slideNumber" class="text-gray-400 font-bold text-sm tracking-widest uppercase">СЛАЙД 1 / 10</div>
+
+        <button id="nextBtn" class="flex items-center px-8 py-3 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 transition-all disabled:opacity-30 shadow-lg shadow-indigo-200 active:scale-95">
+            Далі
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+        </button>
+    </div>
+
+    <div class="progress-bar">
+        <div id="progressFill" class="progress-fill" style="width: 10%;"></div>
+    </div>
+</div>
+
+<script>
+    const slides = document.querySelectorAll('.slide');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const slideNumberText = document.getElementById('slideNumber');
+    const progressFill = document.getElementById('progressFill');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    const fullscreenIcon = document.getElementById('fullscreenIcon');
+
+    let currentSlide = 1;
+    const totalSlides = slides.length;
+
+    function updateUI() {
+        slides.forEach(slide => {
+            slide.classList.remove('active');
+            if (parseInt(slide.dataset.index) === currentSlide) {
+                slide.classList.add('active');
+            }
+        });
+
+        slideNumberText.innerText = `СЛАЙД ${currentSlide} / ${totalSlides}`;
+        progressFill.style.width = `${(currentSlide / totalSlides) * 100}%`;
+
+        prevBtn.disabled = (currentSlide === 1);
         
-        let currentSlide = 1;
-        const totalSlides = slides.length;
-
-        function updateUI() {
-            slides.forEach(slide => {
-                slide.classList.remove('active');
-                if (parseInt(slide.dataset.index) === currentSlide) {
-                    slide.classList.add('active');
-                }
-            });
-
-            slideNumberText.innerText = `Слайд ${currentSlide} / ${totalSlides}`;
-            progressFill.style.width = `${(currentSlide / totalSlides) * 100}%`;
-
-            prevBtn.disabled = (currentSlide === 1);
-            nextBtn.disabled = (currentSlide === totalSlides);
+        if (currentSlide === totalSlides) {
+            nextBtn.innerHTML = 'Завершити <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>';
+            nextBtn.classList.replace('bg-indigo-600', 'bg-green-600');
+        } else {
+            nextBtn.innerHTML = 'Далі <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>';
+            nextBtn.classList.replace('bg-green-600', 'bg-indigo-600');
         }
+    }
 
-        prevBtn.addEventListener('click', () => {
-            if (currentSlide > 1) {
-                currentSlide--;
-                updateUI();
-            }
-        });
+    function goToNext() {
+        if (currentSlide < totalSlides) {
+            currentSlide++;
+            updateUI();
+        }
+    }
 
-        nextBtn.addEventListener('click', () => {
-            if (currentSlide < totalSlides) {
-                currentSlide++;
-                updateUI();
-            }
-        });
+    function goToPrev() {
+        if (currentSlide > 1) {
+            currentSlide--;
+            updateUI();
+        }
+    }
 
-        // Повний екран
-        fullscreenBtn.addEventListener('click', () => {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.error(`Error attempting to enable full-screen mode: ${err.message}`);
-                });
-            } else {
-                document.exitFullscreen();
-            }
-        });
+    prevBtn.addEventListener('click', goToPrev);
+    nextBtn.addEventListener('click', goToNext);
 
-        document.addEventListener('fullscreenchange', () => {
-            if (document.fullscreenElement) {
-                // Іконка "Вихід з повного екрану"
-                fullscreenIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />';
-            } else {
-                // Іконка "Повний екран"
-                fullscreenIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />';
-            }
-        });
+    // Керування клавіатурою
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+            goToNext();
+        } else if (e.key === 'ArrowLeft') {
+            goToPrev();
+        } else if (e.key === 'f' || e.key === 'F') {
+            toggleFullscreen();
+        }
+    });
 
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight' || e.key === ' ') {
-                if (currentSlide < totalSlides) {
-                    currentSlide++;
-                    updateUI();
-                }
-            } else if (e.key === 'ArrowLeft') {
-                if (currentSlide > 1) {
-                    currentSlide--;
-                    updateUI();
-                }
-            } else if (e.key === 'f' || e.key === 'F') {
-                fullscreenBtn.click();
-            }
-        });
+    // Повний екран
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.error(`Помилка: ${err.message}`);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    }
 
-        updateUI();
-    </script>
+    fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+    document.addEventListener('fullscreenchange', () => {
+        if (document.fullscreenElement) {
+            fullscreenIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />';
+        } else {
+            fullscreenIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />';
+        }
+    });
+
+    updateUI();
+</script>
 </body>
 </html>
