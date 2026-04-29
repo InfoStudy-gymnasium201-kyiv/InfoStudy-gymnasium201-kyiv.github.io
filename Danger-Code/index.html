@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Симулятор диспетчера: Код Тривога</title>
+    <style>
+        :root {
+            --bg-color: #0b132b;
+            --panel-bg: #1c2541;
+            --accent-cyan: #48cae4;
+            --accent-red: #d90429;
+            --accent-green: #2a9d8f;
+            --accent-yellow: #e9c46a;
+            --text-light: #caf0f8;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        body { background-color: var(--bg-color); color: var(--text-light); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        header { background-color: #000; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent-cyan); }
+        header h1 { font-size: 1.5rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent-cyan); }
+        .stats { display: flex; gap: 20px; font-size: 1.2rem; font-weight: bold; }
+        .stats span { padding: 5px 10px; border-radius: 5px; background: rgba(255,255,255,0.1); }
+
+        #main-container { display: flex; flex: 1; overflow: hidden; }
+
+        /* Left Panel - Map */
+        #map-panel { flex: 2; padding: 20px; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 15px; border-right: 1px solid var(--accent-cyan); position: relative; }
+        .zone { background-color: var(--panel-bg); border: 2px solid #3a506b; border-radius: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; position: relative; }
+        .zone:hover { border-color: var(--accent-cyan); box-shadow: 0 0 10px rgba(72, 202, 228, 0.3); }
+        .zone.selected { border-color: var(--accent-cyan); box-shadow: 0 0 15px var(--accent-cyan); background-color: rgba(72, 202, 228, 0.1); }
+        .zone h2 { margin-bottom: 10px; font-size: 1.2rem; pointer-events: none; }
+        .zone-status { font-size: 0.9rem; color: var(--accent-green); pointer-events: none; }
+        
+        /* Alert Animations */
+        @keyframes blinkRed { 0% { background-color: rgba(217, 4, 41, 0.2); border-color: var(--accent-red); box-shadow: 0 0 20px var(--accent-red); } 50% { background-color: var(--panel-bg); border-color: #3a506b; box-shadow: none; } 100% { background-color: rgba(217, 4, 41, 0.2); border-color: var(--accent-red); box-shadow: 0 0 20px var(--accent-red); } }
+        .zone.alert { animation: blinkRed 1.5s infinite; }
+        .timer-bar { position: absolute; bottom: 0; left: 0; height: 5px; background-color: var(--accent-red); width: 100%; transition: width 1s linear; border-radius: 0 0 10px 10px; }
+
+        /* Right Panel - Controls */
+        #control-panel { flex: 1; background-color: #0f1833; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+        .panel-section { background: var(--panel-bg); padding: 15px; border-radius: 8px; border: 1px solid #3a506b; }
+        .panel-section h3 { margin-bottom: 15px; font-size: 1.1rem; color: var(--accent-yellow); border-bottom: 1px solid #3a506b; padding-bottom: 5px; }
+        
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button { background-color: #3a506b; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 0.9rem; }
+        button:hover:not(:disabled) { background-color: var(--accent-cyan); color: #000; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        #active-task-info { font-size: 0.9rem; min-height: 80px; }
+        .req-list { list-style: none; margin-top: 10px; }
+        .req-list li { margin: 5px 0; display: flex; align-items: center; gap: 10px; }
+        .req-list li::before { content: '❌'; font-size: 0.8rem; color: var(--accent-red); }
+        .req-list li.done::before { content: '✅'; font-size: 0.8rem; color: var(--accent-green); }
+
+        /* Bottom Log */
+        #log-panel { height: 150px; background-color: #000; border-top: 2px solid var(--accent-cyan); padding: 10px; overflow-y: auto; font-family: monospace; font-size: 0.9rem; }
+        .log-entry { margin-bottom: 5px; }
+        .log-time { color: var(--accent-yellow); margin-right: 10px; }
+        .log-critical { color: var(--accent-red); }
+        .log-success { color: var(--accent-green); }
+        .log-info { color: var(--accent-cyan); }
+
+        /* Overlays */
+        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
+        #overlay h1 { font-size: 3rem; color: var(--accent-cyan); margin-bottom: 20px; }
+        #overlay p { font-size: 1.2rem; margin-bottom: 30px; text-align: center; max-width: 600px; line-height: 1.5; }
+        #overlay button { font-size: 1.2rem; padding: 15px 40px; background-color: var(--accent-cyan); color: #000; }
+        #overlay button:hover { background-color: white; }
+    </style>
+</head>
+<body>
+
+    <div id="overlay">
+        <h1>Код: Тривога</h1>
+        <p>Ви — диспетчер центру цивільного захисту. Ваше завдання: реагувати на надзвичайні ситуації в районах міста.<br><br>Вибирайте район, де сталася біда, аналізуйте загрозу та застосовуйте правильні інструменти оповіщення та контролю інфраструктури, поки не вийшов час. Якщо рівень безпеки міста впаде до 0 — ви програєте.</p>
+        <button onclick="startGame()">Почати зміну</button>
+    </div>
+
+    <header>
+        <h1>Центр Управління</h1>
+        <div class="stats">
+            <div>Рейтинг: <span id="ui-score" style="color: var(--accent-yellow);">0</span></div>
+            <div>Безпека міста: <span id="ui-health" style="color: var(--accent-green);">100%</span></div>
+        </div>
+    </header>
+
+    <div id="main-container">
+        <div id="map-panel">
+            <div class="zone" id="zone-north" onclick="selectZone('north')">
+                <h2>Північний район</h2>
+                <div class="zone-status" id="status-north">Стабільний</div>
+                <div class="timer-bar" id="timer-north" style="display: none;"></div>
+            </div>
+            <div class="zone" id="zone-east" onclick="selectZone('east')">
+                <h2>Східний район (Промзона)</h2>
+                <div class="zone-status" id="status-east">Стабільний</div>
+                <div class="timer-bar" id="timer-east" style="display: none;"></div>
+            </div>
+            <div class="zone" id="zone-center" onclick="selectZone('center')">
+                <h2>Центр</h2>
+                <div class="zone-status" id="status-center">Стабільний</div>
+                <div class="timer-bar" id="timer-center" style="display: none;"></div>
+            </div>
+            <div class="zone" id="zone-south" onclick="selectZone('south')">
+                <h2>Південний район (Низина)</h2>
+                <div class="zone-status" id="status-south">Стабільний</div>
+                <div class="timer-bar" id="timer-south" style="display: none;"></div>
+            </div>
+        </div>
+
+        <div id="control-panel">
+            <div class="panel-section">
+                <h3>Діагностика: <span id="selected-zone-name" style="color: white;">Не обрано</span></h3>
+                <div id="active-task-info">Оберіть район на карті для керування.</div>
+            </div>
+
+            <div class="panel-section">
+                <h3>Цифрові інструменти</h3>
+                <div class="btn-grid">
+                    <button onclick="applyAction('drone')" disabled class="action-btn">Дрон-розвідник</button>
+                    <button onclick="applyAction('siren')" disabled class="action-btn">Сирени</button>
+                    <button onclick="applyAction('sms')" disabled class="action-btn">SMS / Push</button>
+                    <button onclick="applyAction('traffic')" disabled class="action-btn">Зміна трафіку (Табло)</button>
+                    <button onclick="applyAction('power')" disabled class="action-btn" style="background-color: #780000;">Вимкнення Електромережі</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="log-panel" id="console-log">
+        </div>
+
+    <script>
+        // Game State
+        let score = 0;
+        let cityHealth = 100;
+        let gameInterval;
+        let eventSpawner;
+        let selectedZone = null;
+        let gameTime = 0;
+
+        const zones = {
+            'north': { name: 'Північний район', element: document.getElementById('zone-north'), activeEvent: null },
+            'east': { name: 'Східний район', element: document.getElementById('zone-east'), activeEvent: null },
+            'center': { name: 'Центр', element: document.getElementById('zone-center'), activeEvent: null },
+            'south': { name: 'Південний район', element: document.getElementById('zone-south'), activeEvent: null }
+        };
+
+        const threatTypes = [
+            { id: 'flood', name: 'Повінь', reqs: ['sms', 'power'], time: 20, desc: 'Критичний підйом рівня води. Потрібно сповістити населення та знеструмити район, щоб уникнути замикань.' },
+            { id: 'chemical', name: 'Хімічна Загроза', reqs: ['drone', 'siren', 'traffic'], time: 25, desc: 'Спрацював датчик токсинів. Відправте дрон для оцінки, увімкніть сирени та перенаправте трафік від зони ураження.' },
+            { id: 'radiation', name: 'Радіаційний Сплеск', reqs: ['drone', 'siren', 'sms'], time: 30, desc: 'Аномалія на дозиметрах. Оцінка дроном, активація сирен та розсилка інструкцій по SMS.' },
+            { id: 'fire', name: 'Масштабна Пожежа', reqs: ['sms', 'traffic'], time: 20, desc: 'Пожежа перекидається на будівлі. Розсилка Push-повідомлень та звільнення доріг для рятувальників через цифрові табло.' }
+        ];
+
+        const actionNames = {
+            'drone': 'Дрон-розвідник',
+            'siren': 'Сирени',
+            'sms': 'SMS / Push',
+            'traffic': 'Зміна трафіку',
+            'power': 'Вимкнення Електромережі'
+        };
+
+        // UI Updates
+        function logMsg(msg, type = 'info') {
+            const logPanel = document.getElementById('log-panel');
+            const timeStr = new Date().toLocaleTimeString('uk-UA', { hour12: false });
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.innerHTML = `<span class="log-time">[${timeStr}]</span> ${msg}`;
+            logPanel.prepend(entry);
+        }
+
+        function updateStats() {
+            document.getElementById('ui-score').innerText = score;
+            const healthEl = document.getElementById('ui-health');
+            healthEl.innerText = cityHealth + '%';
+            if (cityHealth > 50) healthEl.style.color = 'var(--accent-green)';
+            else if (cityHealth > 20) healthEl.style.color = 'var(--accent-yellow)';
+            else healthEl.style.color = 'var(--accent-red)';
+        }
+
+        // Gameplay Mechanics
+        function startGame() {
+            document.getElementById('overlay').style.display = 'none';
+            logMsg('Система запущена. Моніторинг активний.', 'success');
+            
+            gameInterval = setInterval(gameLoop, 1000);
+            eventSpawner = setInterval(spawnEvent, 8000); // New event every 8 seconds (fast paced)
+        }
+
+        function spawnEvent() {
+            // Find a zone without an active event
+            const availableZones = Object.keys(zones).filter(k => zones[k].activeEvent === null);
+            if (availableZones.length === 0) return; // All zones busy
+
+            const zoneId = availableZones[Math.floor(Math.random() * availableZones.length)];
+            const threat = threatTypes[Math.floor(Math.random() * threatTypes.length)];
+
+            // Create event instance
+            zones[zoneId].activeEvent = {
+                type: threat.name,
+                desc: threat.desc,
+                reqs: [...threat.reqs], // required actions
+                completedReqs: [],
+                maxTime: threat.time,
+                timeLeft: threat.time
+            };
+
+            // Update UI for the zone
+            const zoneEl = zones[zoneId].element;
+            zoneEl.classList.add('alert');
+            document.getElementById(`status-${zoneId}`).innerText = `Увага: ${threat.name}!`;
+            document.getElementById(`status-${zoneId}`).style.color = 'var(--accent-red)';
+            
+            const timerEl = document.getElementById(`timer-${zoneId}`);
+            timerEl.style.display = 'block';
+            timerEl.style.width = '100%';
+
+            logMsg(`ДАТЧИКИ: Виявлено "${threat.name}" у районі "${zones[zoneId].name}"!`, 'critical');
+
+            // Refresh selected zone panel if we are currently looking at it
+            if (selectedZone === zoneId) selectZone(zoneId);
+        }
+
+        function selectZone(zoneId) {
+            // Deselect previous
+            if (selectedZone) zones[selectedZone].element.classList.remove('selected');
+            
+            selectedZone = zoneId;
+            zones[zoneId].element.classList.add('selected');
+            document.getElementById('selected-zone-name').innerText = zones[zoneId].name;
+
+            const infoPanel = document.getElementById('active-task-info');
+            const btns = document.querySelectorAll('.action-btn');
+
+            if (zones[zoneId].activeEvent) {
+                const ev = zones[zoneId].activeEvent;
+                // Enable buttons
+                btns.forEach(btn => btn.disabled = false);
+
+                // Build requirements list
+                let reqHTML = `<ul class="req-list">`;
+                ev.reqs.forEach(req => {
+                    const isDone = ev.completedReqs.includes(req);
+                    reqHTML += `<li class="${isDone ? 'done' : ''}">${actionNames[req]}</li>`;
+                });
+                reqHTML += `</ul>`;
+
+                infoPanel.innerHTML = `
+                    <strong style="color: var(--accent-red);">${ev.type}</strong><br>
+                    <span style="font-size: 0.8rem; color: #aaa;">${ev.desc}</span>
+                    ${reqHTML}
+                `;
+            } else {
+                infoPanel.innerHTML = `<span style="color: var(--accent-green);">Ситуація стабільна. Жодних дій не потрібно.</span>`;
+                btns.forEach(btn => btn.disabled = true);
+            }
+        }
+
+        function applyAction(actionId) {
+            if (!selectedZone || !zones[selectedZone].activeEvent) return;
+
+            const ev = zones[selectedZone].activeEvent;
+            
+            if (ev.reqs.includes(actionId) && !ev.completedReqs.includes(actionId)) {
+                ev.completedReqs.push(actionId);
+                logMsg(`Успіх: застосовано "${actionNames[actionId]}" у районі ${zones[selectedZone].name}.`, 'info');
+                
+                // Refresh UI
+                selectZone(selectedZone);
+
+                // Check if event resolved
+                if (ev.completedReqs.length === ev.reqs.length) {
+                    resolveEvent(selectedZone, true);
+                }
+            } else if (ev.completedReqs.includes(actionId)) {
+                logMsg(`Помилка: інструмент "${actionNames[actionId]}" вже застосовано тут.`, 'info');
+            } else {
+                logMsg(`Увага: інструмент "${actionNames[actionId]}" не потрібний для цієї ситуації!`, 'critical');
+                score -= 5; // Penalty for wrong action
+                updateStats();
+            }
+        }
+
+        function resolveEvent(zoneId, success) {
+            const ev = zones[zoneId].activeEvent;
+            const zoneEl = zones[zoneId].element;
+            
+            if (success) {
+                logMsg(`СИТУАЦІЯ ВИРІШЕНА: ${ev.type} в районі ${zones[zoneId].name}.`, 'success');
+                score += 50;
+            } else {
+                logMsg(`ПРОВАЛ: Час вичерпано на реагування (${ev.type}) в районі ${zones[zoneId].name}!`, 'critical');
+                cityHealth -= 20;
+            }
+
+            // Reset zone state
+            zones[zoneId].activeEvent = null;
+            zoneEl.classList.remove('alert');
+            document.getElementById(`status-${zoneId}`).innerText = 'Стабільний';
+            document.getElementById(`status-${zoneId}`).style.color = 'var(--accent-green)';
+            document.getElementById(`timer-${zoneId}`).style.display = 'none';
+
+            updateStats();
+            if (selectedZone === zoneId) selectZone(zoneId); // Refresh UI
+
+            checkGameOver();
+        }
+
+        function gameLoop() {
+            gameTime++;
+            
+            // Iterate over zones to update timers
+            for (let z in zones) {
+                if (zones[z].activeEvent) {
+                    zones[z].activeEvent.timeLeft--;
+                    
+                    // Update visual timer bar
+                    const pct = (zones[z].activeEvent.timeLeft / zones[z].activeEvent.maxTime) * 100;
+                    document.getElementById(`timer-${z}`).style.width = pct + '%';
+
+                    if (zones[z].activeEvent.timeLeft <= 0) {
+                        resolveEvent(z, false);
+                    }
+                }
+            }
+        }
+
+        function checkGameOver() {
+            if (cityHealth <= 0) {
+                cityHealth = 0;
+                updateStats();
+                clearInterval(gameInterval);
+                clearInterval(eventSpawner);
+                
+                const overlay = document.getElementById('overlay');
+                overlay.style.display = 'flex';
+                overlay.innerHTML = `
+                    <h1 style="color: var(--accent-red);">ГРУ ЗАКІНЧЕНО</h1>
+                    <p>Рівень безпеки міста впав до критичного нуля. Системи не впоралися з навантаженням.</p>
+                    <p style="font-size: 1.5rem; color: var(--accent-yellow);">Ваш фінальний рейтинг: ${score}</p>
+                    <button onclick="location.reload()">Спробувати знову</button>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
