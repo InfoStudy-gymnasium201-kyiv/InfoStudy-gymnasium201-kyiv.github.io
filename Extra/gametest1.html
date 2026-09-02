@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Піксельний Квест: Інтернет для Навчання</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Retro Pixel Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+
+    <style>
+        /* Custom Pixel Art Styles */
+        body {
+            font-family: 'VT323', monospace;
+            background-color: #0f172a;
+            color: #f8fafc;
+            image-rendering: pixelated;
+            user-select: none;
+        }
+
+        .font-pixel-heading {
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .pixel-border {
+            box-shadow: 
+                0 -4px 0 0 #000,
+                0 4px 0 0 #000,
+                -4px 0 0 0 #000,
+                4px 0 0 0 #000;
+        }
+
+        .pixel-box {
+            background-color: #1e293b;
+            border: 4px solid #475569;
+            box-shadow: 
+                inset -4px -4px 0px 0px #0f172a,
+                inset 4px 4px 0px 0px #334155,
+                0 6px 0 0 #000;
+        }
+
+        .pixel-box-green {
+            background-color: #064e3b;
+            border: 4px solid #10b981;
+            box-shadow: 
+                inset -4px -4px 0px 0px #022c22,
+                inset 4px 4px 0px 0px #059669,
+                0 6px 0 0 #000;
+        }
+
+        .pixel-box-purple {
+            background-color: #4c1d95;
+            border: 4px solid #a855f7;
+            box-shadow: 
+                inset -4px -4px 0px 0px #2e1065,
+                inset 4px 4px 0px 0px #7e22ce,
+                0 6px 0 0 #000;
+        }
+
+        .pixel-btn {
+            font-family: 'Press Start 2P', cursive;
+            position: relative;
+            display: inline-block;
+            padding: 12px 18px;
+            font-size: 12px;
+            text-align: center;
+            color: #fff;
+            background-color: #2563eb;
+            border: none;
+            box-shadow: 
+                inset -4px -4px 0 0 #1e40af,
+                inset 4px 4px 0 0 #60a5fa,
+                0 4px 0 0 #000;
+            cursor: pointer;
+            transition: transform 0.05s, box-shadow 0.05s;
+        }
+
+        .pixel-btn:hover {
+            background-color: #3b82f6;
+            transform: translateY(-2px);
+        }
+
+        .pixel-btn:active {
+            transform: translateY(2px);
+            box-shadow: 
+                inset -2px -2px 0 0 #1e40af,
+                inset 2px 2px 0 0 #60a5fa,
+                0 2px 0 0 #000;
+        }
+
+        .pixel-btn-amber {
+            background-color: #d97706;
+            box-shadow: 
+                inset -4px -4px 0 0 #92400e,
+                inset 4px 4px 0 0 #fbbf24,
+                0 4px 0 0 #000;
+        }
+        .pixel-btn-amber:hover { background-color: #f59e0b; }
+
+        .pixel-btn-green {
+            background-color: #059669;
+            box-shadow: 
+                inset -4px -4px 0 0 #064e3b,
+                inset 4px 4px 0 0 #34d399,
+                0 4px 0 0 #000;
+        }
+        .pixel-btn-green:hover { background-color: #10b981; }
+
+        .pixel-btn-option {
+            font-family: 'VT323', monospace;
+            font-size: 22px;
+            text-align: left;
+            background-color: #1e293b;
+            border: 3px solid #64748b;
+            box-shadow: inset -3px -3px 0 0 #0f172a, inset 3px 3px 0 0 #475569, 0 4px 0 0 #000;
+            width: 100%;
+            transition: all 0.15s ease-in-out;
+        }
+
+        .pixel-btn-option:hover {
+            border-color: #38bdf8;
+            background-color: #334155;
+            transform: scale(1.01);
+        }
+
+        /* Scanline retro effect */
+        .scanlines {
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 0, 0, 0.25) 50%
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+
+        /* Heart pulse animation */
+        @keyframes heartPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+        .heart-anim {
+            animation: heartPulse 1.2s infinite ease-in-out;
+        }
+
+        /* Canvas game styles */
+        #gameCanvas {
+            image-rendering: pixelated;
+            background: #000;
+            border: 4px solid #3b82f6;
+            border-radius: 8px;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between p-2 md:p-6 relative overflow-x-hidden">
+
+    <!-- Scanline overlay for CRT retro aesthetic -->
+    <div class="fixed inset-0 scanlines z-50 pointer-events-none opacity-40"></div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="w-full max-w-4xl z-10 flex flex-col gap-4">
+        
+        <!-- HEADER / NAVIGATION BAR -->
+        <header class="pixel-box p-3 md:p-4 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 md:w-12 md:h-12 bg-blue-600 border-2 border-white flex items-center justify-center rounded text-2xl shadow-md">
+                    💻
+                </div>
+                <div>
+                    <h1 class="font-pixel-heading text-xs md:text-sm text-yellow-400 tracking-wider">ПІКСЕЛЬНИЙ КВЕСТ</h1>
+                    <p class="text-slate-300 text-lg md:text-xl font-bold">Інтернет для Навчання та Розвитку</p>
+                </div>
+            </div>
+
+            <!-- Sound & Stats Header -->
+            <div class="flex items-center gap-4 text-lg">
+                <button id="soundToggle" class="pixel-btn p-2 text-xs" title="Увімкнути/Вимкнути звук">
+                    🔊 ЗВУК
+                </button>
+                <div class="flex items-center gap-1 bg-slate-900 px-3 py-1 rounded border border-slate-700">
+                    <span>🏆</span>
+                    <span id="scoreDisplay" class="font-bold text-yellow-400 text-xl">0</span>
+                    <span class="text-xs text-slate-400 ml-1">XP</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- SCREEN 1: WELCOME / CHARACTER SELECT -->
+        <section id="startScreen" class="pixel-box p-6 flex flex-col items-center text-center gap-6">
+            <div class="relative py-4">
+                <h2 class="font-pixel-heading text-base md:text-xl text-cyan-400 mb-2 leading-relaxed">
+                    ВІТАЄМО В АКАДЕМІЇ ЦИФРОВОГО РОЗВИТКУ!
+                </h2>
+                <p class="text-slate-300 text-xl max-w-2xl leading-snug">
+                    Інтернет — це не лише ігри! Це величезна Всесвітня Бібліотека, де можна вивчати мови, досліджувати космос, вчитися програмувати та відкривати світ. Пройди піксельний квест і стань <span class="text-yellow-400 font-bold">Майстром Навчання в Мережі</span>!
+                </p>
+            </div>
+
+            <!-- Character Select -->
+            <div class="w-full max-w-md bg-slate-900/80 p-4 rounded-lg border border-slate-700">
+                <h3 class="font-pixel-heading text-xs text-slate-300 mb-4">ОБЕРИ СВОГО ПІКСЕЛЬНОГО ГЕРОЯ:</h3>
+                <div class="grid grid-cols-3 gap-3" id="characterOptions">
+                    <button class="char-select-btn pixel-box p-3 flex flex-col items-center gap-2 hover:border-yellow-400 cursor-pointer border-2 border-yellow-400" data-char="hero_boy">
+                        <span class="text-4xl">👦</span>
+                        <span class="text-lg font-bold text-slate-200">Піксель</span>
+                    </button>
+                    <button class="char-select-btn pixel-box p-3 flex flex-col items-center gap-2 hover:border-yellow-400 cursor-pointer border-2 border-transparent opacity-70" data-char="hero_girl">
+                        <span class="text-4xl">👧</span>
+                        <span class="text-lg font-bold text-slate-200">Ніка</span>
+                    </button>
+                    <button class="char-select-btn pixel-box p-3 flex flex-col items-center gap-2 hover:border-yellow-400 cursor-pointer border-2 border-transparent opacity-70" data-char="hero_robot">
+                        <span class="text-4xl">🤖</span>
+                        <span class="text-lg font-bold text-slate-200">Робо-Учень</span>
+                    </button>
+                </div>
+            </div>
+
+            <button id="startGameBtn" class="pixel-btn pixel-btn-green text-sm md:text-base py-4 px-8 mt-2">
+                🚀 РОЗПОЧАТИ КВЕСТ
+            </button>
+        </section>
+
+        <!-- SCREEN 2: GAMEPLAY & QUESTION CONTAINER -->
+        <section id="gameScreen" class="hidden flex-col gap-4">
+            
+            <!-- Top Game HUD (Lives, Level Progress, Streak) -->
+            <div class="pixel-box p-3 flex justify-between items-center bg-slate-900">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm font-bold text-slate-400">ЖИТТЯ:</span>
+                    <div id="livesContainer" class="flex gap-1 text-2xl heart-anim">
+                        ❤️ ❤️ ❤️
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <span class="text-sm font-bold text-slate-400">РІВЕНЬ:</span>
+                    <span id="levelIndicator" class="font-pixel-heading text-xs text-emerald-400">1 / 8</span>
+                </div>
+
+                <div class="flex items-center gap-1 bg-amber-900/50 px-3 py-1 rounded border border-amber-600/50">
+                    <span class="text-amber-400">🔥 Серія:</span>
+                    <span id="streakDisplay" class="font-bold text-amber-300 text-xl">0</span>
+                </div>
+            </div>
+
+            <!-- Pixel Animated Canvas World -->
+            <div class="relative w-full flex justify-center">
+                <canvas id="gameCanvas" width="768" height="200" class="w-full max-w-full h-auto shadow-lg"></canvas>
+                <div id="questBadge" class="absolute top-2 left-2 bg-slate-900/90 text-cyan-300 px-3 py-1 rounded border border-cyan-500/50 text-base font-bold">
+                    📍 Локація: Школа Майбутнього
+                </div>
+            </div>
+
+            <!-- Question Dialogue Window -->
+            <div id="questionBox" class="pixel-box p-5 flex flex-col gap-4 bg-slate-800">
+                <!-- NPC / Mentor Info -->
+                <div class="flex items-center gap-3 border-b border-slate-700 pb-3">
+                    <div id="mentorAvatar" class="w-12 h-12 bg-indigo-900 border-2 border-indigo-400 rounded flex items-center justify-center text-3xl">
+                        🦉
+                    </div>
+                    <div>
+                        <h4 id="mentorName" class="font-pixel-heading text-xs text-indigo-300">Сова Мудрості</h4>
+                        <p class="text-slate-400 text-sm">Освітнє завдання:</p>
+                    </div>
+                </div>
+
+                <!-- Question Text -->
+                <h3 id="questionText" class="text-2xl font-bold text-white leading-relaxed">
+                    Завантаження запитання...
+                </h3>
+
+                <!-- Options List -->
+                <div id="optionsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-1">
+                    <!-- Dynamic Buttons Generated Here -->
+                </div>
+
+                <!-- Lifelines / Hints -->
+                <div class="flex justify-between items-center border-t border-slate-700 pt-3 mt-2">
+                    <button id="hintBtn" class="pixel-btn pixel-btn-amber text-xs py-2 px-4 flex items-center gap-2">
+                        <span>💡</span>
+                        <span>Підказка Наставника (<span id="hintCount">2</span>)</span>
+                    </button>
+                    <div id="explanationBox" class="hidden text-slate-300 text-lg italic">
+                        <!-- Populated upon answer -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Next Question Control -->
+            <div id="nextBox" class="hidden pixel-box p-4 bg-emerald-950 border-emerald-500 justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <span id="feedbackIcon" class="text-3xl">✅</span>
+                    <div>
+                        <h4 id="feedbackTitle" class="font-pixel-heading text-xs text-emerald-400">Правильно!</h4>
+                        <p id="feedbackText" class="text-slate-200 text-xl"></p>
+                    </div>
+                </div>
+                <button id="nextBtn" class="pixel-btn pixel-btn-green py-3 px-6 text-xs whitespace-nowrap">
+                    ДАЛІ ➡️
+                </button>
+            </div>
+        </section>
+
+        <!-- SCREEN 3: RESULTS / CERTIFICATE -->
+        <section id="resultsScreen" class="hidden pixel-box p-6 flex-col items-center text-center gap-6 bg-slate-900">
+            <div class="text-5xl my-2">🎓 🎉 🌟</div>
+            
+            <h2 class="font-pixel-heading text-lg md:text-2xl text-yellow-400 leading-relaxed">
+                КВЕСТ УСПІШНО ПРОЙДЕНО!
+            </h2>
+
+            <div class="w-full max-w-xl pixel-box-purple p-6 flex flex-col items-center gap-4 text-white">
+                <h3 class="font-pixel-heading text-xs text-cyan-300">СЕРТИФІКАТ ЦИФРОВОГО ЕКСПЕРТА</h3>
+                
+                <p class="text-2xl">Цим засвідчується, що юний дослідник</p>
+                <div id="certPlayerName" class="font-pixel-heading text-base md:text-lg text-yellow-300 bg-slate-900/80 px-4 py-2 border border-yellow-500/50 rounded">
+                    Герой Піксель
+                </div>
+                <p class="text-xl">успішно засвоїв правила та можливості використання мережі Інтернет для навчання, саморозвитку та здобуття нових навичок!</p>
+
+                <div class="grid grid-cols-2 gap-4 w-full mt-2 bg-slate-900/60 p-4 rounded-lg border border-purple-400/30">
+                    <div class="flex flex-col items-center">
+                        <span class="text-slate-400 text-sm">ЗДОБУТО XP:</span>
+                        <span id="finalScore" class="font-pixel-heading text-lg text-yellow-400">0</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <span class="text-slate-400 text-sm">ТОЧНІСТЬ:</span>
+                        <span id="finalAccuracy" class="font-pixel-heading text-lg text-emerald-400">100%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Takeaways for Kids -->
+            <div class="w-full max-w-xl pixel-box p-4 text-left">
+                <h4 class="font-pixel-heading text-xs text-emerald-400 mb-3">📌 ПАМ'ЯТАЙ ЗОЛОТІ ПРАВИЛА:</h4>
+                <ul class="list-disc list-inside space-y-2 text-slate-300 text-lg">
+                    <li>Використовуй інтернет для пошуку знань, читання та корисних хобі.</li>
+                    <li>Перевіряй факт у декількох надійних джерелах.</li>
+                    <li>Роби перерви що30 хвилин для збереження зору та здоров'я.</li>
+                    <li>Будь ввічливим у мережі та поважай інших дослідників.</li>
+                </ul>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-4">
+                <button id="restartBtn" class="pixel-btn pixel-btn-green py-4 px-6 text-xs">
+                    🔄 ЗІГРАТИ ЗНОВУ
+                </button>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="text-center text-slate-500 text-sm py-2">
+            Піксельна Навчальна Гра • "Інтернет для навчання та розвитку" • 2026
+        </footer>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // GAME STATE MANAGEMENT
+        const gameState = {
+            playerName: "Піксель",
+            character: "hero_boy",
+            score: 0,
+            lives: 3,
+            currentQuestion: 0,
+            streak: 0,
+            hintsLeft: 2,
+            soundEnabled: true,
+            totalCorrect: 0,
+            isAnswered: false
+        };
+
+        // RETRO AUDIO SYNTHESIS USING WEB AUDIO API
+        class PixelAudio {
+            constructor() {
+                this.ctx = null;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                }
+            }
+
+            playCorrect() {
+                if (!gameState.soundEnabled) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                osc.frequency.setValueAtTime(1046.50, now + 0.3); // C6
+
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.5);
+            }
+
+            playWrong() {
+                if (!gameState.soundEnabled) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.setValueAtTime(110, now + 0.15);
+
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.4);
+            }
+
+            playClick() {
+                if (!gameState.soundEnabled) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(100, now + 0.05);
+
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.05);
+            }
+
+            playVictory() {
+                if (!gameState.soundEnabled) return;
+                this.init();
+                const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99];
+                notes.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    const start = this.ctx.currentTime + idx * 0.12;
+
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(freq, start);
+
+                    gain.gain.setValueAtTime(0.08, start);
+                    gain.gain.exponentialRampToValueAtTime(0.001, start + 0.2);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(start);
+                    osc.stop(start + 0.2);
+                });
+            }
+        }
+
+        const audio = new PixelAudio();
+
+        // EDUCATIONAL QUESTION DATASET
+        const questions = [
+            {
+                mentor: "Сова Мудрості",
+                avatar: "🦉",
+                location: "Бібліотека Знань",
+                question: "Ти хочеш дізнатися більше про планети Сонячної системи. Як найкраще використати інтернет?",
+                options: [
+                    "Знайти освітні дитячі відео та інтерактивні енциклопедії",
+                    "Дивитися смішні короткі танцювальні ролики цілий день",
+                    "Грати лише в стрілялки та ігнорувати навчання",
+                    "Шукати картинки котиків без прочитання статей"
+                ],
+                correct: 0,
+                explanation: "Інтернет має безліч інтерактивних енциклопедій та освітніх каналів, які пояснюють складні речі просто і цікаво!",
+                hint: "Шукай ресурси, створені спеціально для навчання та пізнання світу!"
+            },
+            {
+                mentor: "Робот-Кодер",
+                avatar: "🤖",
+                location: "Лабораторія Технологій",
+                question: "Як інтернет допомагає вивчати іноземні мови або програмування?",
+                options: [
+                    "Він заважає вчитися, бо в ньому немає корисних сайтів",
+                    "Через спеціальні інтерактивні додатки, онлайн-курси та ігрові вправи",
+                    "Мови можна вчити тільки з паперових словників 19-го століття",
+                    "Інтернет автоматично вчить тебе, коли ти спиш"
+                ],
+                correct: 1,
+                explanation: "Завдяки онлайн-платформам та навчальним додаткам можна весело вивчати мови та кодинг у формі гри!",
+                hint: "Зверни увагу на спеціальні інтерактивні онлайн-платформи для дітей."
+            },
+            {
+                mentor: "Професор Пошуку",
+                avatar: "🧙‍♂️",
+                location: "Архів Фактів",
+                question: "Ти знайшов у мережі цікаву новину про динозаврів. Як перевірити, чи це правда?",
+                options: [
+                    "Одразу вірити всьому, що написано в інтернеті",
+                    "Порівняти інформацію на кількох надійних освітніх та наукових сайтах",
+                    "Переслати усім друзям, не читаючи до кінця",
+                    "Видалити браузер з комп'ютера"
+                ],
+                correct: 1,
+                explanation: "Критичне мислення дуже важливе! Завжди перевіряй факти в кількох перевірених джерелах.",
+                hint: "Справжній дослідник завжди перевіряє факт у 2-3 надійних джерелах."
+            },
+            {
+                mentor: "Арт-Гайд",
+                avatar: "🎨",
+                location: "Віртуальний Музей",
+                question: "Як за допомогою інтернету відвідати Лувр або музей науки у Токіо, не виходячи з дому?",
+                options: [
+                    "Це неможливо зробити через інтернет",
+                    "Завдяки віртуальним 3D-турів та онлайн-експозиціям музеїв",
+                    "Потрібно купити квиток на справжній літак у браузері",
+                    "Просто подивитися на карту світу"
+                ],
+                correct: 1,
+                explanation: "Більшість видатних музеїв світу мають безкоштовні 3D віртуальні екскурсії для учнів!",
+                hint: "Шукай відповідь про віртуальні 3D-подорожі та екскурсії."
+            },
+            {
+                mentor: "Майстер Балансу",
+                avatar: "🧘",
+                location: "Оаза Здоров'я",
+                question: "Скільки часу поспіль варто навчатися за комп'ютером або планшетом без перерви?",
+                options: [
+                    "5 годин без зупинки та відпочинку",
+                    "20-30 хвилин, після чого робити розминку для очей і тіла",
+                    "Взагалі не робити перерв, поки не болітимуть очі",
+                    "Навчатися лише вночі замість сну"
+                ],
+                correct: 1,
+                explanation: "Правильний баланс збереже твій зір та осанку! Перерви кожні 25-30 хвилин роблять навчання ефективнішим.",
+                hint: "Здоров'я очей вимагає регулярних коротких перерв з розминкою."
+            },
+            {
+                mentor: "Капітан Мережі",
+                avatar: "🦊",
+                location: "Цифровий Клас",
+                question: "Як правильної поводитися під час дистанційного онлайн-уроку в зумі або чаті?",
+                options: [
+                    "Вмикати гучну музику та заважати вчителю",
+                    "Поважати учасників, вимикати мікрофон коли відповідає інший та ставити запитання ввічливо",
+                    "Малювати на екрані чужих презентацій та дражнити однокласників",
+                    "Піти їсти та залишити увімкнену камеру без нагляду"
+                ],
+                correct: 1,
+                explanation: "Цифровий етикет — запорука приємного та продуктивного навчання для кожного!",
+                hint: "Ввічливість та повага працюють в інтернеті так само, як і в реальному житті."
+            },
+            {
+                mentor: "Хранитель Книг",
+                avatar: "📚",
+                location: "Електронна Бібліотека",
+                question: "Де в інтернеті безпечно та легально читати електронні книги або слухати аудіокниги?",
+                options: [
+                    "На офіційних дитячих електронних бібліотеках та освітніх порталах",
+                    "Завантажувати підозрілі файли з ненадійних форумів",
+                    "Купувати книги на невідомих сайтах без дозволу батьків",
+                    "Шукати книги у вірусних рекламних банерах"
+                ],
+                correct: 0,
+                explanation: "Шкільні та міські електронні бібліотеки надають тисячі безпечних книг для розвитку!",
+                hint: "Використовуй перевірені офіційні освітні ресурси та електронні бібліотеки."
+            },
+            {
+                mentor: "Наставник Творчості",
+                avatar: "🎼",
+                location: "Студія Талантів",
+                question: "Як інтернет може допомогти тобі розвинути власне хобі (малювання, кулінарія, гра на гітарі)?",
+                options: [
+                    "Ніяк, інтернет підходить лише для ігор",
+                    "Через перегляд безкоштовних покрокових майстер-класів та відеоуроків від майстрів",
+                    "Інтернет робить все за тебе, тобі не треба тренуватися",
+                    "Видаленням усіх творчих програм"
+                ],
+                correct: 1,
+                explanation: "У мережі є мільйони покрокових інструкцій та майстер-класів для розвитку будь-якого таланту!",
+                hint: "Шукай відповідь про відеоуроки та майстер-класи від фахівців."
+            }
+        ];
+
+        // PIXEL CANVAS ANIMATION ENGINE
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let animFrameId;
+        let playerX = 50;
+        let targetPlayerX = 50;
+        let groundY = 150;
+        let bgOffset = 0;
+
+        function drawPixelWorld() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Sky Background Gradient (Pixel Retro Style)
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Stars in sky
+            ctx.fillStyle = '#fef08a';
+            for (let i = 0; i < 20; i++) {
+                let x = (i * 47 + bgOffset) % canvas.width;
+                let y = (i * 19) % 90;
+                ctx.fillRect(x, y, 3, 3);
+            }
+
+            // Distant Pixel Mountains / Buildings
+            ctx.fillStyle = '#1e1b4b';
+            for (let i = 0; i < 8; i++) {
+                let x = i * 120 - (bgOffset * 0.3) % 120;
+                ctx.fillRect(x, 70, 80, 80);
+                // Windows in pixel buildings
+                ctx.fillStyle = '#f59e0b';
+                ctx.fillRect(x + 15, 85, 10, 10);
+                ctx.fillRect(x + 45, 85, 10, 10);
+                ctx.fillRect(x + 30, 110, 10, 10);
+                ctx.fillStyle = '#1e1b4b';
+            }
+
+            // Ground line
+            ctx.fillStyle = '#065f46';
+            ctx.fillRect(0, groundY + 20, canvas.width, 30);
+            
+            // Grass pixel border
+            ctx.fillStyle = '#10b981';
+            ctx.fillRect(0, groundY + 16, canvas.width, 4);
+
+            // Path bricks
+            ctx.fillStyle = '#047857';
+            for (let x = 0; x < canvas.width; x += 30) {
+                ctx.fillRect((x - bgOffset) % canvas.width, groundY + 24, 26, 8);
+            }
+
+            // Decorative Pixel Knowledge Chests / Objects on right
+            ctx.fillStyle = '#f59e0b';
+            ctx.fillRect(680, groundY - 10, 30, 26);
+            ctx.fillStyle = '#78350f';
+            ctx.fillRect(680, groundY - 2, 30, 4);
+            ctx.fillStyle = '#fef08a';
+            ctx.fillRect(692, groundY - 4, 6, 6);
+
+            // Smooth horizontal movement towards target
+            if (playerX < targetPlayerX) {
+                playerX += 3;
+                bgOffset += 1.5;
+            }
+
+            // Draw Pixel Character Avatar
+            drawCharacter(playerX, groundY - 20);
+
+            animFrameId = requestAnimationFrame(drawPixelWorld);
+        }
+
+        function drawCharacter(x, y) {
+            const charType = gameState.character;
+
+            if (charType === 'hero_robot') {
+                // Robot Body
+                ctx.fillStyle = '#94a3b8';
+                ctx.fillRect(x, y - 20, 24, 24); // Head
+                ctx.fillStyle = '#38bdf8';
+                ctx.fillRect(x + 4, y - 16, 6, 6); // Left eye
+                ctx.fillRect(x + 14, y - 16, 6, 6); // Right eye
+                ctx.fillStyle = '#475569';
+                ctx.fillRect(x + 2, y + 4, 20, 24); // Torso
+                ctx.fillStyle = '#e11d48';
+                ctx.fillRect(x + 10, y + 10, 4, 4); // Chest core light
+                // Legs
+                ctx.fillStyle = '#1e293b';
+                ctx.fillRect(x + 4, y + 28, 6, 12);
+                ctx.fillRect(x + 14, y + 28, 6, 12);
+            } else if (charType === 'hero_girl') {
+                // Girl Body
+                ctx.fillStyle = '#fcd34d'; // Hair
+                ctx.fillRect(x - 2, y - 24, 28, 14);
+                ctx.fillStyle = '#fca5a5'; // Face
+                ctx.fillRect(x + 2, y - 16, 20, 18);
+                ctx.fillStyle = '#0284c7'; // Eyes
+                ctx.fillRect(x + 5, y - 12, 4, 4);
+                ctx.fillRect(x + 15, y - 12, 4, 4);
+                ctx.fillStyle = '#ec4899'; // Dress
+                ctx.fillRect(x + 2, y + 2, 20, 22);
+                // Legs
+                ctx.fillStyle = '#78350f';
+                ctx.fillRect(x + 5, y + 24, 5, 12);
+                ctx.fillRect(x + 14, y + 24, 5, 12);
+            } else {
+                // Boy Pixel (Default)
+                ctx.fillStyle = '#b45309'; // Hair
+                ctx.fillRect(x, y - 22, 24, 10);
+                ctx.fillStyle = '#fde047'; // Face
+                ctx.fillRect(x + 2, y - 16, 20, 18);
+                ctx.fillStyle = '#1e293b'; // Eyes
+                ctx.fillRect(x + 5, y - 12, 4, 4);
+                ctx.fillRect(x + 15, y - 12, 4, 4);
+                ctx.fillStyle = '#2563eb'; // Shirt
+                ctx.fillRect(x + 2, y + 2, 20, 22);
+                // Legs
+                ctx.fillStyle = '#1e293b';
+                ctx.fillRect(x + 5, y + 24, 5, 12);
+                ctx.fillRect(x + 14, y + 24, 5, 12);
+            }
+        }
+
+        // UI & EVENT HANDLERS
+        const startScreen = document.getElementById('startScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        const resultsScreen = document.getElementById('resultsScreen');
+
+        const startGameBtn = document.getElementById('startGameBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const soundToggle = document.getElementById('soundToggle');
+        const hintBtn = document.getElementById('hintBtn');
+
+        // Character selection logic
+        document.querySelectorAll('.char-select-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                audio.playClick();
+                document.querySelectorAll('.char-select-btn').forEach(b => {
+                    b.classList.remove('border-yellow-400');
+                    b.classList.add('border-transparent', 'opacity-70');
+                });
+                const target = e.currentTarget;
+                target.classList.remove('border-transparent', 'opacity-70');
+                target.classList.add('border-yellow-400');
+                gameState.character = target.getAttribute('data-char');
+                if (gameState.character === 'hero_boy') gameState.playerName = "Піксель";
+                if (gameState.character === 'hero_girl') gameState.playerName = "Ніка";
+                if (gameState.character === 'hero_robot') gameState.playerName = "Робо-Учень";
+            });
+        });
+
+        soundToggle.addEventListener('click', () => {
+            gameState.soundEnabled = !gameState.soundEnabled;
+            soundToggle.textContent = gameState.soundEnabled ? "🔊 ЗВУК" : "🔇 БЕЗ ЗВУКУ";
+            audio.playClick();
+        });
+
+        startGameBtn.addEventListener('click', () => {
+            audio.playClick();
+            startScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            gameScreen.classList.add('flex');
+            initGame();
+        });
+
+        restartBtn.addEventListener('click', () => {
+            audio.playClick();
+            resultsScreen.classList.add('hidden');
+            resultsScreen.classList.remove('flex');
+            startScreen.classList.remove('hidden');
+        });
+
+        function initGame() {
+            gameState.score = 0;
+            gameState.lives = 3;
+            gameState.currentQuestion = 0;
+            gameState.streak = 0;
+            gameState.hintsLeft = 2;
+            gameState.totalCorrect = 0;
+
+            playerX = 50;
+            targetPlayerX = 50;
+            bgOffset = 0;
+
+            updateHUD();
+            drawPixelWorld();
+            loadQuestion();
+        }
+
+        function updateHUD() {
+            document.getElementById('scoreDisplay').textContent = gameState.score;
+            document.getElementById('streakDisplay').textContent = gameState.streak;
+            document.getElementById('levelIndicator').textContent = `${gameState.currentQuestion + 1} / ${questions.length}`;
+            document.getElementById('hintCount').textContent = gameState.hintsLeft;
+
+            // Render hearts
+            let heartsHtml = '';
+            for (let i = 0; i < 3; i++) {
+                if (i < gameState.lives) {
+                    heartsHtml += '❤️ ';
+                } else {
+                    heartsHtml += '🖤 ';
+                }
+            }
+            document.getElementById('livesContainer').innerHTML = heartsHtml;
+        }
+
+        function loadQuestion() {
+            gameState.isAnswered = false;
+            const q = questions[gameState.currentQuestion];
+
+            document.getElementById('questBadge').textContent = `📍 Локація: ${q.location}`;
+            document.getElementById('mentorAvatar').textContent = q.avatar;
+            document.getElementById('mentorName').textContent = q.mentor;
+            document.getElementById('questionText').textContent = q.question;
+
+            document.getElementById('nextBox').classList.add('hidden');
+            document.getElementById('nextBox').classList.remove('flex');
+            document.getElementById('explanationBox').classList.add('hidden');
+
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+
+            q.options.forEach((optText, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'pixel-btn-option p-4 rounded text-left flex items-center gap-3 text-white';
+                btn.innerHTML = `
+                    <span class="w-8 h-8 rounded bg-slate-700 border border-slate-500 flex items-center justify-center font-bold text-yellow-400 text-sm">
+                        ${String.fromCharCode(65 + idx)}
+                    </span>
+                    <span class="flex-1">${optText}</span>
+                `;
+                btn.addEventListener('click', () => handleAnswer(idx, btn));
+                container.appendChild(btn);
+            });
+
+            // Move character forward slightly on new question
+            targetPlayerX = 50 + (gameState.currentQuestion * 70);
+        }
+
+        function handleAnswer(selectedIndex, btnElement) {
+            if (gameState.isAnswered) return;
+            gameState.isAnswered = true;
+
+            const q = questions[gameState.currentQuestion];
+            const isCorrect = selectedIndex === q.correct;
+
+            const allButtons = document.querySelectorAll('.pixel-btn-option');
+            allButtons.forEach((b, idx) => {
+                b.disabled = true;
+                if (idx === q.correct) {
+                    b.classList.remove('bg-slate-800');
+                    b.classList.add('bg-emerald-900', 'border-emerald-400');
+                }
+            });
+
+            const nextBox = document.getElementById('nextBox');
+            const feedbackIcon = document.getElementById('feedbackIcon');
+            const feedbackTitle = document.getElementById('feedbackTitle');
+            const feedbackText = document.getElementById('feedbackText');
+
+            if (isCorrect) {
+                audio.playCorrect();
+                btnElement.classList.add('bg-emerald-800', 'border-emerald-400');
+                
+                gameState.streak++;
+                gameState.totalCorrect++;
+                const points = 100 + (gameState.streak * 20);
+                gameState.score += points;
+
+                feedbackIcon.textContent = '✅';
+                feedbackTitle.textContent = 'ПРАВИЛЬНО!';
+                feedbackTitle.className = 'font-pixel-heading text-xs text-emerald-400';
+                feedbackText.textContent = `${q.explanation} (+${points} XP)`;
+            } else {
+                audio.playWrong();
+                btnElement.classList.add('bg-rose-900', 'border-rose-500');
+
+                gameState.lives--;
+                gameState.streak = 0;
+
+                feedbackIcon.textContent = '❌';
+                feedbackTitle.textContent = 'НЕЗОВСІМ ТАК...';
+                feedbackTitle.className = 'font-pixel-heading text-xs text-rose-400';
+                feedbackText.textContent = q.explanation;
+            }
+
+            updateHUD();
+
+            nextBox.classList.remove('hidden');
+            nextBox.classList.add('flex');
+
+            const nextBtn = document.getElementById('nextBtn');
+            nextBtn.onclick = () => {
+                audio.playClick();
+                if (gameState.lives <= 0 || gameState.currentQuestion >= questions.length - 1) {
+                    showResults();
+                } else {
+                    gameState.currentQuestion++;
+                    updateHUD();
+                    loadQuestion();
+                }
+            };
+        }
+
+        // Hint System
+        hintBtn.addEventListener('click', () => {
+            if (gameState.isAnswered || gameState.hintsLeft <= 0) return;
+
+            audio.playClick();
+            gameState.hintsLeft--;
+            document.getElementById('hintCount').textContent = gameState.hintsLeft;
+
+            const q = questions[gameState.currentQuestion];
+            const explanationBox = document.getElementById('explanationBox');
+            explanationBox.textContent = `💡 Наставка каже: "${q.hint}"`;
+            explanationBox.classList.remove('hidden');
+
+            // Disable 1 wrong option
+            const buttons = document.querySelectorAll('.pixel-btn-option');
+            let disabledCount = 0;
+            buttons.forEach((btn, idx) => {
+                if (idx !== q.correct && disabledCount < 1) {
+                    btn.style.opacity = '0.4';
+                    btn.disabled = true;
+                    disabledCount++;
+                }
+            });
+        });
+
+        function showResults() {
+            if (animFrameId) cancelAnimationFrame(animFrameId);
+
+            gameScreen.classList.add('hidden');
+            gameScreen.classList.remove('flex');
+            resultsScreen.classList.remove('hidden');
+            resultsScreen.classList.add('flex');
+
+            audio.playVictory();
+
+            document.getElementById('certPlayerName').textContent = `Герой ${gameState.playerName}`;
+            document.getElementById('finalScore').textContent = gameState.score;
+
+            const accuracy = Math.round((gameState.totalCorrect / questions.length) * 100);
+            document.getElementById('finalAccuracy').textContent = `${accuracy}%`;
+        }
+    </script>
+</body>
+</html>
