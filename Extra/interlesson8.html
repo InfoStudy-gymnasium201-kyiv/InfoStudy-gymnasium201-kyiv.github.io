@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Цифрові технології. Інтернет</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Montserrat', sans-serif; }
+        .vector-shadow { box-shadow: 4px 4px 0px #1e293b; }
+        .vector-shadow-sm { box-shadow: 2px 2px 0px #1e293b; }
+        .vector-btn:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px #1e293b; }
+    </style>
+</head>
+<body class="bg-amber-50 text-slate-800 min-h-screen flex flex-col items-center justify-between p-4 selection:bg-cyan-300">
+
+    <!-- Заголовок -->
+    <header class="w-full max-w-4xl bg-white border-4 border-slate-800 p-4 rounded-2xl vector-shadow flex flex-col sm:flex-row justify-between items-center mb-6">
+        <div class="flex items-center gap-3 mb-2 sm:mb-0">
+            <div class="bg-cyan-400 border-2 border-slate-800 p-2 rounded-xl vector-shadow-sm">
+                <svg class="w-8 h-8 text-slate-900" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+            </div>
+            <div>
+                <h1 class="text-xl font-800 tracking-wide text-slate-900">ІНТЕРНЕТ ТА ТЕХНОЛОГІЇ</h1>
+                <p class="text-xs font-600 text-slate-600">Інтерактивний тренажер для 8 класу</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="bg-yellow-300 border-2 border-slate-800 px-4 py-1.5 rounded-xl font-bold text-sm vector-shadow-sm flex items-center gap-2">
+                <span>⭐ Бали:</span> <span id="total-score">0</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Основний контейнер -->
+    <main class="w-full max-w-4xl flex-grow flex flex-col justify-center items-center">
+        
+        <!-- Меню вибору ігор -->
+        <div id="menu-screen" class="w-full grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <!-- Гра 1 -->
+            <div onclick="startMiniGame(1)" class="bg-white border-4 border-slate-800 rounded-3xl p-6 vector-shadow flex flex-col justify-between cursor-pointer hover:bg-cyan-50 transition transform hover:-translate-y-1">
+                <div>
+                    <div class="w-14 h-14 bg-cyan-300 border-3 border-slate-800 rounded-2xl flex items-center justify-center text-2xl font-bold mb-4 vector-shadow-sm">📦</div>
+                    <h2 class="text-lg font-bold text-slate-900 mb-2">Пакетна комунікація</h2>
+                    <p class="text-xs text-slate-600 leading-relaxed">Сортуйте фрагменти даних за адресами призначень. Розвиваємо швидкість та реакцію!</p>
+                </div>
+                <div class="mt-6 flex items-center justify-between">
+                    <span class="text-xs bg-slate-100 border border-slate-800 px-2.5 py-1 rounded-lg font-bold">Сортування</span>
+                    <span class="bg-slate-900 text-white px-3 py-1.5 rounded-xl text-xs font-bold vector-btn">Грати →</span>
+                </div>
+            </div>
+
+            <!-- Гра 2 -->
+            <div onclick="startMiniGame(2)" class="bg-white border-4 border-slate-800 rounded-3xl p-6 vector-shadow flex flex-col justify-between cursor-pointer hover:bg-rose-50 transition transform hover:-translate-y-1">
+                <div>
+                    <div class="w-14 h-14 bg-rose-300 border-3 border-slate-800 rounded-2xl flex items-center justify-center text-2xl font-bold mb-4 vector-shadow-sm">🧠</div>
+                    <h2 class="text-lg font-bold text-slate-900 mb-2">Мережевий Квіз</h2>
+                    <p class="text-xs text-slate-600 leading-relaxed">Перевірте знання про протоколи, IP-адреси, маршрутизатори та історію Інтернету.</p>
+                </div>
+                <div class="mt-6 flex items-center justify-between">
+                    <span class="text-xs bg-slate-100 border border-slate-800 px-2.5 py-1 rounded-lg font-bold">Тестування</span>
+                    <span class="bg-slate-900 text-white px-3 py-1.5 rounded-xl text-xs font-bold vector-btn">Грати →</span>
+                </div>
+            </div>
+
+            <!-- Гра 3 -->
+            <div onclick="startMiniGame(3)" class="bg-white border-4 border-slate-800 rounded-3xl p-6 vector-shadow flex flex-col justify-between cursor-pointer hover:bg-emerald-50 transition transform hover:-translate-y-1">
+                <div>
+                    <div class="w-14 h-14 bg-emerald-300 border-3 border-slate-800 rounded-2xl flex items-center justify-center text-2xl font-bold mb-4 vector-shadow-sm">🌐</div>
+                    <h2 class="text-lg font-bold text-slate-900 mb-2">Побудуй Мережу</h2>
+                    <p class="text-xs text-slate-600 leading-relaxed">З'єднайте комп'ютери через комутатори та маршрутизатори для успішного передавання сигналу.</p>
+                </div>
+                <div class="mt-6 flex items-center justify-between">
+                    <span class="text-xs bg-slate-100 border border-slate-800 px-2.5 py-1 rounded-lg font-bold">ПАЗЛ</span>
+                    <span class="bg-slate-900 text-white px-3 py-1.5 rounded-xl text-xs font-bold vector-btn">Грати →</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Ігровий екран -->
+        <div id="game-screen" class="hidden w-full bg-white border-4 border-slate-800 rounded-3xl p-6 vector-shadow flex flex-col">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b-2 border-slate-200">
+                <button onclick="returnToMenu()" class="bg-slate-200 border-2 border-slate-800 px-4 py-1.5 rounded-xl text-xs font-bold vector-btn flex items-center gap-1">
+                    ← Назад до меню
+                </button>
+                <div id="game-title" class="text-base font-bold text-slate-900">Назва міні-гри</div>
+                <div id="game-progress" class="bg-cyan-200 border-2 border-slate-800 px-3 py-1 rounded-lg text-xs font-bold">Рівень: 1</div>
+            </div>
+
+            <!-- Вміст міні-гри 1: Сортування пакетів -->
+            <div id="game-1-container" class="hidden flex flex-col items-center">
+                <p class="text-xs text-slate-600 mb-4 text-center">Натисніть правильний сервер призначення для поточного пакету даних!</p>
+                <div id="packet-box" class="w-36 h-36 bg-amber-200 border-3 border-slate-800 rounded-2xl vector-shadow flex flex-col items-center justify-center mb-8 transform hover:scale-105 transition">
+                    <span class="text-3xl mb-1">📦</span>
+                    <span id="packet-ip" class="text-xs font-bold text-slate-900 bg-white px-2 py-1 border border-slate-800 rounded-lg">192.168.1.5</span>
+                </div>
+                <div class="grid grid-cols-3 gap-4 w-full max-w-xl">
+                    <button onclick="checkPacket(0)" class="server-btn bg-cyan-200 border-3 border-slate-800 p-4 rounded-2xl vector-shadow vector-btn text-center font-bold text-xs">
+                        🖥️ Сервер А<br><span class="text-[10px] font-normal text-slate-700">192.168.1.X</span>
+                    </button>
+                    <button onclick="checkPacket(1)" class="server-btn bg-rose-200 border-3 border-slate-800 p-4 rounded-2xl vector-shadow vector-btn text-center font-bold text-xs">
+                        🖥️ Сервер Б<br><span class="text-[10px] font-normal text-slate-700">10.0.0.X</span>
+                    </button>
+                    <button onclick="checkPacket(2)" class="server-btn bg-emerald-200 border-3 border-slate-800 p-4 rounded-2xl vector-shadow vector-btn text-center font-bold text-xs">
+                        🖥️ Сервер В<br><span class="text-[10px] font-normal text-slate-700">172.16.0.X</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Вміст міні-гри 2: Квіз -->
+            <div id="game-2-container" class="hidden flex flex-col">
+                <div id="quiz-question" class="text-sm md:text-base font-bold text-slate-900 mb-6 bg-amber-100 p-4 border-2 border-slate-800 rounded-2xl vector-shadow-sm">
+                    Питання з'явиться тут...
+                </div>
+                <div id="quiz-options" class="grid grid-cols-1 gap-3">
+                    <!-- Варіанти динамічно -->
+                </div>
+            </div>
+
+            <!-- Вміст міні-гри 3: Пазл з'єднання мережі -->
+            <div id="game-3-container" class="hidden flex flex-col items-center">
+                <p class="text-xs text-slate-600 mb-4 text-center">Розставте елементи мережі у правильному порядку від ПК до Інтернету:</p>
+                <div id="network-slots" class="flex flex-wrap justify-center gap-3 mb-6 w-full">
+                    <!-- Слоти для перетягування/кліків -->
+                </div>
+                <div class="border-t-2 border-dashed border-slate-300 pt-4 w-full">
+                    <p class="text-[11px] font-bold text-slate-500 mb-2 text-center">Доступні компоненти:</p>
+                    <div id="network-pool" class="flex flex-wrap justify-center gap-3">
+                        <!-- Доступні елементи -->
+                    </div>
+                </div>
+                <button onclick="checkNetwork()" class="mt-6 bg-emerald-400 border-3 border-slate-800 px-6 py-2 rounded-xl text-xs font-bold vector-shadow vector-btn">
+                    Перевірити з'єднання ⚡
+                </button>
+            </div>
+
+            <!-- Екран завершення міни-гри -->
+            <div id="game-over-screen" class="hidden flex flex-col items-center justify-center py-8">
+                <div class="text-5xl mb-3">🎉</div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2">Міні-гру завершено!</h3>
+                <p id="game-score-text" class="text-xs text-slate-600 mb-6">Ви заробили 50 балів.</p>
+                <button onclick="returnToMenu()" class="bg-yellow-300 border-3 border-slate-800 px-6 py-2.5 rounded-xl text-xs font-bold vector-shadow vector-btn">
+                    Продовжити вивчення 🚀
+                </button>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Повідомлення (модальне або статус) -->
+    <div id="toast" class="fixed bottom-4 bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold vector-shadow transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        Сповіщення
+    </div>
+
+    <!-- Підвал -->
+    <footer class="w-full max-w-4xl text-center py-4 text-xs text-slate-500 border-t-2 border-slate-200 mt-6">
+        Інтерактивний урок інформатики • Цифрові технології та Інтернет © 2026
+    </footer>
+
+    <script>
+        let totalScore = 0;
+        let currentGame = 0;
+
+        // Змінні для гри 1 (Пакетна комунікація)
+        const subnets = ["192.168.1.", "10.0.0.", "172.16.0."];
+        let currentPacket = { ip: "", subnetIndex: 0 };
+        let packetCount = 0;
+
+        // Змінні для гри 2 (Квіз)
+        const quizData = [
+            { q: "Що таке IP-адреса?", options: ["Унікальний числовий ідентифікатор пристрою в мережі", "Назва інтернет-провайдера", "Пароль до Wi-Fi роутера", "Обсяг завантажених даних"], correct: 0 },
+            { q: "Який протокол використовується для передавання гіпертексту (вебсторінок)?", options: ["FTP", "SMTP", "HTTP / HTTPS", "TCP"], correct: 2 },
+            { q: "Що робить маршрутизатор (роутер)?", options: ["Зберігає сайти в пам'яті", "Визначає найкращий шлях передачі пакетів між мережами", "друкує документи через інтернет", "Захищає від вірусів на рівні екрана"], correct: 1 },
+            { q: "Що таке Всесвітня павутина (World Wide Web)?", options: ["Система зв'язаних між собою гіпертекстових документів", "Фізичні кабелі під дном океану", "Назва першого комп'ютерного вірусу", "Швидкість з'єднання з мережею"], correct: 0 }
+        ];
+        let currentQuizIndex = 0;
+
+        // Змінні для гри 3 (Побудова мережі)
+        const correctOrder = ["Комп'ютер", "Комутатор (Switch)", "Маршрутизатор (Router)", "Провайдер / Інтернет"];
+        let userOrder = ["?", "?", "?", "?"];
+        const availablePool = ["Маршрутизатор (Router)", "Комп'ютер", "Провайдер / Інтернет", "Комутатор (Switch)"];
+
+        function showToast(message, isSuccess = true) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.className = `fixed bottom-4 px-4 py-2 rounded-xl text-xs font-bold vector-shadow transform transition-all duration-300 ${isSuccess ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'}`;
+            toast.style.transform = "translateY(0)";
+            toast.style.opacity = "1";
+            setTimeout(() => {
+                toast.style.transform = "translateY(20px)";
+                toast.style.opacity = "0";
+            }, 2000);
+        }
+
+        function updateScore(points) {
+            totalScore += points;
+            document.getElementById('total-score').innerText = totalScore;
+        }
+
+        function startMiniGame(gameId) {
+            currentGame = gameId;
+            document.getElementById('menu-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            document.getElementById('game-over-screen').classList.add('hidden');
+
+            // Сховати всі контейнери ігор
+            document.getElementById('game-1-container').classList.add('hidden');
+            document.getElementById('game-2-container').classList.add('hidden');
+            document.getElementById('game-3-container').classList.add('hidden');
+
+            if (gameId === 1) {
+                document.getElementById('game-title').innerText = "Гра 1: Сортування пакетів";
+                document.getElementById('game-1-container').classList.remove('hidden');
+                packetCount = 0;
+                nextPacket();
+            } else if (gameId === 2) {
+                document.getElementById('game-title').innerText = "Гра 2: Мережевий Квіз";
+                document.getElementById('game-2-container').classList.remove('hidden');
+                currentQuizIndex = 0;
+                loadQuizQuestion();
+            } else if (gameId === 3) {
+                document.getElementById('game-title').innerText = "Гра 3: Архітектура мережі";
+                document.getElementById('game-3-container').classList.remove('hidden');
+                initNetworkGame();
+            }
+        }
+
+        function returnToMenu() {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('menu-screen').classList.remove('hidden');
+        }
+
+        // --- Логіка гри 1 ---
+        function nextPacket() {
+            if (packetCount >= 5) {
+                endMiniGame();
+                return;
+            }
+            document.getElementById('game-progress').innerText = `Пакет: ${packetCount + 1}/5`;
+            const subnetIdx = Math.floor(Math.random() * 3);
+            const hostNum = Math.floor(Math.random() * 250) + 1;
+            currentPacket = {
+                ip: subnets[subnetIdx] + hostNum,
+                subnetIndex: subnetIdx
+            };
+            document.getElementById('packet-ip').innerText = currentPacket.ip;
+        }
+
+        function checkPacket(selectedServerIdx) {
+            if (selectedServerIdx === currentPacket.subnetIndex) {
+                showToast("Правильно! Пакет доставлено до цілі 🎯", true);
+                updateScore(15);
+            } else {
+                showToast("Помилка! Неправильна підмережа ❌", false);
+            }
+            packetCount++;
+            nextPacket();
+        }
+
+        // --- Логіка гри 2 ---
+        function loadQuizQuestion() {
+            if (currentQuizIndex >= quizData.length) {
+                endMiniGame();
+                return;
+            }
+            document.getElementById('game-progress').innerText = `Питання: ${currentQuizIndex + 1}/${quizData.length}`;
+            const q = quizData[currentQuizIndex];
+            document.getElementById('quiz-question').innerText = q.q;
+            
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left bg-slate-50 hover:bg-cyan-100 border-2 border-slate-800 p-3 rounded-xl font-bold text-xs vector-shadow-sm transition";
+                btn.innerText = `${String.fromCharCode(65 + idx)}. ${opt}`;
+                btn.onclick = () => checkQuizAnswer(idx, q.correct);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkQuizAnswer(selected, correct) {
+            if (selected === correct) {
+                showToast("Вірно! Чудові знання 🌟", true);
+                updateScore(20);
+            } else {
+                showToast("Невірно. Спробуйте наступне питання!", false);
+            }
+            currentQuizIndex++;
+            loadQuizQuestion();
+        }
+
+        // --- Логіка гри 3 ---
+        function initNetworkGame() {
+            userOrder = ["?", "?", "?", "?"];
+            renderNetworkSlots();
+            renderNetworkPool();
+        }
+
+        function renderNetworkSlots() {
+            const slotsContainer = document.getElementById('network-slots');
+            slotsContainer.innerHTML = '';
+            userOrder.forEach((item, idx) => {
+                const slot = document.createElement('div');
+                slot.className = `w-32 h-20 border-2 border-dashed border-slate-800 rounded-xl flex flex-col items-center justify-center p-2 text-center text-xs font-bold cursor-pointer bg-slate-50 ${item !== '?' ? 'bg-cyan-100 border-solid' : ''}`;
+                slot.innerHTML = `<span class="text-[10px] text-slate-400">Крок ${idx + 1}</span><span>${item}</span>`;
+                slot.onclick = () => {
+                    if (item !== '?') {
+                        userOrder[idx] = '?';
+                        renderNetworkSlots();
+                        renderNetworkPool();
+                    }
+                };
+                slotsContainer.appendChild(slot);
+            });
+        }
+
+        function renderNetworkPool() {
+            const poolContainer = document.getElementById('network-pool');
+            poolContainer.innerHTML = '';
+            availablePool.forEach(comp => {
+                // перевірити чи він вже використаний
+                if (!userOrder.includes(comp)) {
+                    const btn = document.createElement('button');
+                    btn.className = "bg-amber-200 border-2 border-slate-800 px-3 py-2 rounded-xl text-xs font-bold vector-shadow-sm vector-btn hover:bg-amber-300";
+                    btn.innerText = comp;
+                    btn.onclick = () => {
+                        const emptyIdx = userOrder.indexOf('?');
+                        if (emptyIdx !== -1) {
+                            userOrder[emptyIdx] = comp;
+                            renderNetworkSlots();
+                            renderNetworkPool();
+                        }
+                    };
+                    poolContainer.appendChild(btn);
+                }
+            });
+        }
+
+        function checkNetwork() {
+            if (userOrder.includes('?')) {
+                showToast("Заповніть усі кроки мережі!", false);
+                return;
+            }
+            let isCorrect = true;
+            for (let i = 0; i < correctOrder.length; i++) {
+                if (userOrder[i] !== correctOrder[i]) isCorrect = false;
+            }
+
+            if (isCorrect) {
+                showToast("Чудово! Маршрут збудовано правильно 🏆", true);
+                updateScore(30);
+                endMiniGame();
+            } else {
+                showToast("Порядок неправильний! Спробуйте ще раз.", false);
+            }
+        }
+
+        function endMiniGame() {
+            document.getElementById('game-1-container').classList.add('hidden');
+            document.getElementById('game-2-container').classList.add('hidden');
+            document.getElementById('game-3-container').classList.add('hidden');
+            document.getElementById('game-over-screen').classList.remove('hidden');
+            document.getElementById('game-progress').innerText = "Завершено";
+        }
+    </script>
+</body>
+</html>
