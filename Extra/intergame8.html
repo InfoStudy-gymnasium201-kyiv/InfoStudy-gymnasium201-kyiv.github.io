@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мережевий Архітектор: Побудуй Інтернет у Квартирі</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        .canvas-grid {
+            background-image: radial-gradient(#334155 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .device-card {
+            transition: all 0.2s ease;
+        }
+        .device-card:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- Верхня панель -->
+    <header class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex justify-between items-center z-10 shadow-lg">
+        <div class="flex items-center space-x-3">
+            <div class="bg-indigo-600 p-2 rounded-xl text-white font-bold text-xl">🌐</div>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight">Мережевий Архітектор</h1>
+                <p class="text-xs text-slate-400">Урок інформатики: Домашня мережа (8 клас)</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-6">
+            <div class="bg-slate-800 px-4 py-2 rounded-lg border border-slate-700 flex items-center space-x-2">
+                <span class="text-sm text-slate-400">Бюджет:</span>
+                <span id="budgetDisplay" class="font-bold text-emerald-400 text-lg">1500</span> <span class="text-xs text-emerald-500">грн</span>
+            </div>
+            <div class="bg-slate-800 px-4 py-2 rounded-lg border border-slate-700 flex items-center space-x-2">
+                <span class="text-sm text-slate-400">Статус:</span>
+                <span id="statusDisplay" class="font-semibold text-amber-400">Проєктування</span>
+            </div>
+            <button onclick="checkNetwork()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-xl font-semibold shadow-md transition flex items-center space-x-2">
+                <span>Перевірити мережу</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Основний вміст -->
+    <div class="flex flex-1 overflow-hidden">
+        
+        <!-- Бічна панель інструментів (Магазин / Каталог обладнання) -->
+        <aside class="w-80 bg-slate-900 border-r border-slate-800 flex flex-col p-4 overflow-y-auto">
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-3">Компоненти мережі</h2>
+            
+            <div class="space-y-3" id="deviceList">
+                <!-- Провайдер / Інтернет -->
+                <div draggable="true" ondragstart="drag(event, 'isp')" class="device-card bg-slate-800 border border-slate-700 p-3 rounded-xl cursor-grab flex items-center space-x-3">
+                    <div class="text-2xl bg-cyan-900/50 p-2 rounded-lg text-cyan-400">🔌</div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-sm">Вхід Інтернету (WAN)</h3>
+                        <p class="text-xs text-slate-400">Кабель провайдера</p>
+                    </div>
+                    <span class="text-xs bg-slate-700 px-2 py-1 rounded text-slate-300">Безкоштовно</span>
+                </div>
+
+                <!-- Роутер -->
+                <div draggable="true" ondragstart="drag(event, 'router')" class="device-card bg-slate-800 border border-slate-700 p-3 rounded-xl cursor-grab flex items-center space-x-3">
+                    <div class="text-2xl bg-indigo-900/50 p-2 rounded-lg text-indigo-400">📡</div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-sm">Wi-Fi Роутер</h3>
+                        <p class="text-xs text-slate-400">Роздає Wi-Fi та Ethernet</p>
+                    </div>
+                    <span class="text-xs bg-indigo-950 text-indigo-300 px-2 py-1 rounded font-semibold">600 грн</span>
+                </div>
+
+                <!-- Комутатор (Свич) -->
+                <div draggable="true" ondragstart="drag(event, 'switch')" class="device-card bg-slate-800 border border-slate-700 p-3 rounded-xl cursor-grab flex items-center space-x-3">
+                    <div class="text-2xl bg-blue-900/50 p-2 rounded-lg text-blue-400">🎛️</div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-sm">Комутатор (Switch)</h3>
+                        <p class="text-xs text-slate-400">Додаткові кабельні порти</p>
+                    </div>
+                    <span class="text-xs bg-indigo-950 text-indigo-300 px-2 py-1 rounded font-semibold">300 грн</span>
+                </div>
+
+                <!-- ПК (Робочий кабінет) -->
+                <div draggable="true" ondragstart="drag(event, 'pc')" class="device-card bg-slate-800 border border-slate-700 p-3 rounded-xl cursor-grab flex items-center space-x-3">
+                    <div class="text-2xl bg-emerald-900/50 p-2 rounded-lg text-emerald-400">🖥️</div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-sm">ПК (Кабінет)</h3>
+                        <p class="text-xs text-slate-400">Потребує кабель або Wi-Fi</p>
+                    </div>
+                    <span class="text-xs bg-indigo-950 text-indigo-300 px-2 py-1 rounded font-semibold">250 грн</span>
+                </div>
+
+                <!-- Smart TV (Вітальня) -->
+                <div draggable="true" ondragstart="drag(event, 'tv')" class="device-card bg-slate-800 border border-slate-700 p-3 rounded-xl cursor-grab flex items-center space-x-3">
+                    <div class="text-2xl bg-purple-900/50 p-2 rounded-lg text-purple-400">📺</div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-sm">Smart TV (Вітальня)</h3>
+                        <p class="text-xs text-slate-400">Для стрімінгу відео</p>
+                    </div>
+                    <span class="text-xs bg-indigo-950 text-indigo-300 px-2 py-1 rounded font-semibold">200 грн</span>
+                </div>
+
+                <!-- Смартфон / Ноутбук -->
+                <div draggable="true" ondragstart="drag(event, 'phone')" class="device-card bg-slate-800 border border-slate-700 p-3 rounded-xl cursor-grab flex items-center space-x-3">
+                    <div class="text-2xl bg-amber-900/50 p-2 rounded-lg text-amber-400">📱</div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-sm">Ґаджети (Wi-Fi)</h3>
+                        <p class="text-xs text-slate-400">Телефони, планшети</p>
+                    </div>
+                    <span class="text-xs bg-indigo-950 text-indigo-300 px-2 py-1 rounded font-semibold">100 грн</span>
+                </div>
+            </div>
+
+            <!-- Підказка для учня -->
+            <div class="mt-auto bg-slate-800/80 p-4 rounded-xl border border-slate-700">
+                <h4 class="text-xs font-bold text-indigo-400 uppercase mb-1">💡 Завдання уроку:</h4>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Підключіть інтернет (WAN) до роутера, а роутер — до всіх кімнат (ПК, Smart TV та ґаджетів). Забезпечте стабільний зв'язок та не перевищуйте бюджет!
+                </p>
+            </div>
+        </aside>
+
+        <!-- Полотно квартири -->
+        <main class="flex-1 relative canvas-grid flex flex-col overflow-hidden" ondragover="allowDrop(event)" ondrop="dropDevice(event)">
+            
+            <!-- Схема квартири (кімнати) -->
+            <div class="absolute inset-4 grid grid-cols-3 grid-rows-2 gap-4 pointer-events-none">
+                <!-- Коридор -->
+                <div class="border-2 border-dashed border-slate-700/60 rounded-2xl p-4 flex flex-col bg-slate-900/30">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Коридор (Вхід)</span>
+                </div>
+                <!-- Вітальня -->
+                <div class="border-2 border-dashed border-slate-700/60 rounded-2xl p-4 flex flex-col bg-slate-900/30">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Вітальня</span>
+                </div>
+                <!-- Спальня -->
+                <div class="border-2 border-dashed border-slate-700/60 rounded-2xl p-4 flex flex-col bg-slate-900/30">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Спальня</span>
+                </div>
+                <!-- Кабінет -->
+                <div class="border-2 border-dashed border-slate-700/60 rounded-2xl p-4 flex flex-col bg-slate-900/30">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Робочий Кабінет</span>
+                </div>
+                <!-- Кухня -->
+                <div class="border-2 border-dashed border-slate-700/60 rounded-2xl p-4 flex flex-col bg-slate-900/30">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Кухня</span>
+                </div>
+                <!-- Дитяча -->
+                <div class="border-2 border-dashed border-slate-700/60 rounded-2xl p-4 flex flex-col bg-slate-900/30">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Дитяча / Інше</span>
+                </div>
+            </div>
+
+            <!-- Контейнер для розміщених пристроїв та з'єднань (SVG лінії зв'язку) -->
+            <svg id="connectionCanvas" class="absolute inset-0 w-full h-full pointer-events-none z-0"></svg>
+            <div id="workspace" class="absolute inset-4 pointer-events-auto"></div>
+
+            <!-- Модальне вікно результатів / підказок -->
+            <div id="resultModal" class="hidden absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-30">
+                <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl max-w-md w-full shadow-2xl text-center">
+                    <div id="modalIcon" class="text-5xl mb-4">🏆</div>
+                    <h3 id="modalTitle" class="text-xl font-bold mb-2">Мережа працює ідеально!</h3>
+                    <p id="modalText" class="text-sm text-slate-300 mb-6">Ви правильно з'єднали провайдера, роутер та всі пристрої у квартирі.</p>
+                    <button onclick="closeModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-xl font-semibold transition w-full">Продовжити</button>
+                </div>
+            </div>
+
+            <!-- Панель з'єднань (Режим підключення кабелів) -->
+            <div class="absolute bottom-6 left-6 right-6 bg-slate-900/90 backdrop-blur-md border border-slate-800 p-4 rounded-2xl flex justify-between items-center z-20 shadow-xl">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-indigo-600/20 text-indigo-400 p-2 rounded-lg">🔌</div>
+                    <div>
+                        <h4 class="text-sm font-semibold">Режим з'єднання кабелями (Ethernet)</h4>
+                        <p class="text-xs text-slate-400">Натисніть на два пристрої по черзі, щоб прокласти кабель між ними.</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button onclick="toggleCableMode()" id="cableModeBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-sm font-semibold transition">
+                        Увімкнути з'єднання кабелем
+                    </button>
+                    <button onclick="resetWorkspace()" class="bg-rose-950/50 hover:bg-rose-900/50 text-rose-300 border border-rose-900 px-4 py-2 rounded-xl text-sm font-semibold transition">
+                        Скинути все
+                    </button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        let budget = 1500;
+        let devices = [];
+        let connections = [];
+        let isCableMode = false;
+        let selectedDeviceForCable = null;
+
+        const deviceCosts = {
+            isp: 0,
+            router: 600,
+            switch: 300,
+            pc: 250,
+            tv: 200,
+            phone: 100
+        };
+
+        const deviceNames = {
+            isp: 'Інтернет (WAN)',
+            router: 'Wi-Fi Роутер',
+            switch: 'Комутатор',
+            pc: 'ПК (Кабінет)',
+            tv: 'Smart TV',
+            phone: 'Ґаджети (Wi-Fi)'
+        };
+
+        const deviceIcons = {
+            isp: '🔌',
+            router: '📡',
+            switch: '🎛️',
+            pc: '🖥️',
+            tv: '📺',
+            phone: '📱'
+        };
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drag(ev, type) {
+            ev.dataTransfer.setData("text/plain", type);
+        }
+
+        function dropDevice(ev) {
+            ev.preventDefault();
+            const type = ev.dataTransfer.getData("text/plain");
+            const cost = deviceCosts[type];
+
+            if (budget < cost) {
+                showModal("❌ Недостатньо бюджету", "У вас немає коштів для покупки цього обладнання!", "⚠️");
+                return;
+            }
+
+            const rect = document.getElementById('workspace').getBoundingClientRect();
+            const x = ev.clientX - rect.left - 40;
+            const y = ev.clientY - rect.top - 40;
+
+            budget -= cost;
+            document.getElementById('budgetDisplay').innerText = budget;
+
+            const newDevice = {
+                id: 'dev_' + Date.now(),
+                type: type,
+                x: Math.max(10, Math.min(rect.width - 90, x)),
+                y: Math.max(10, Math.min(rect.height - 90, y))
+            };
+
+            devices.push(newDevice);
+            renderWorkspace();
+        }
+
+        function renderWorkspace() {
+            const workspace = document.getElementById('workspace');
+            workspace.innerHTML = '';
+
+            devices.forEach(dev => {
+                const el = document.createElement('div');
+                el.id = dev.id;
+                el.className = `absolute bg-slate-800 border-2 ${selectedDeviceForCable === dev.id ? 'border-indigo-400 ring-2 ring-indigo-400/50' : 'border-slate-700'} p-3 rounded-2xl flex flex-col items-center justify-center cursor-pointer shadow-lg select-none w-24 h-24 device-card`;
+                el.style.left = dev.x + 'px';
+                el.style.top = dev.y + 'px';
+                
+                el.innerHTML = `
+                    <span class="text-3xl mb-1">${deviceIcons[dev.type]}</span>
+                    <span class="text-[10px] font-semibold text-center truncate w-full text-slate-200">${deviceNames[dev.type]}</span>
+                `;
+
+                el.onclick = (e) => {
+                    e.stopPropagation();
+                    handleDeviceClick(dev.id);
+                };
+
+                // Додаємо можливість перетягування розміщених пристроїв
+                el.onmousedown = (e) => {
+                    if (isCableMode) return;
+                    let shiftX = e.clientX - el.getBoundingClientRect().left;
+                    let shiftY = e.clientY - el.getBoundingClientRect().top;
+
+                    function onMouseMove(event) {
+                        const rect = workspace.getBoundingClientRect();
+                        dev.x = Math.max(0, Math.min(rect.width - 96, event.clientX - rect.left - shiftX));
+                        dev.y = Math.max(0, Math.min(rect.height - 96, event.clientY - rect.top - shiftY));
+                        el.style.left = dev.x + 'px';
+                        el.style.top = dev.y + 'px';
+                        renderConnections();
+                    }
+
+                    function onMouseUp() {
+                        document.removeEventListener('mousemove', onMouseMove);
+                        document.removeEventListener('mouseup', onMouseUp);
+                    }
+
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.addEventListener('mouseup', onMouseUp);
+                };
+
+                workspace.appendChild(el);
+            });
+
+            renderConnections();
+        }
+
+        function toggleCableMode() {
+            isCableMode = !isCableMode;
+            selectedDeviceForCable = null;
+            const btn = document.getElementById('cableModeBtn');
+            if (isCableMode) {
+                btn.className = "bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-semibold transition shadow-md";
+                btn.innerText = "Режим з'єднання: УВІМКНЕНО";
+            } else {
+                btn.className = "bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-xl text-sm font-semibold transition";
+                btn.innerText = "Увімкнути з'єднання кабелем";
+            }
+            renderWorkspace();
+        }
+
+        function handleDeviceClick(id) {
+            if (!isCableMode) return;
+
+            if (!selectedDeviceForCable) {
+                selectedDeviceForCable = id;
+            } else {
+                if (selectedDeviceForCable !== id) {
+                    // Перевіряємо чи вже є таке з'єднання
+                    const exists = connections.some(c => (c.from === selectedDeviceForCable && c.to === id) || (c.from === id && c.to === selectedDeviceForCable));
+                    if (!exists) {
+                        connections.push({ from: selectedDeviceForCable, to: id });
+                    }
+                }
+                selectedDeviceForCable = null;
+            }
+            renderWorkspace();
+        }
+
+        function renderConnections() {
+            const svg = document.getElementById('connectionCanvas');
+            svg.innerHTML = '';
+
+            connections.forEach(conn => {
+                const fromDev = devices.find(d => d.id === conn.from);
+                const toDev = devices.find(d => d.id === conn.to);
+
+                if (fromDev && toDev) {
+                    const x1 = fromDev.x + 48;
+                    const y1 = fromDev.y + 48;
+                    const x2 = toDev.x + 48;
+                    const y2 = toDev.y + 48;
+
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', x1);
+                    line.setAttribute('y1', y1);
+                    line.setAttribute('x2', x2);
+                    line.setAttribute('y2', y2);
+                    line.setAttribute('stroke', '#6366f1');
+                    line.setAttribute('stroke-width', '3');
+                    line.setAttribute('stroke-dasharray', '6,6');
+                    svg.appendChild(line);
+                }
+            });
+        }
+
+        function checkNetwork() {
+            const isp = devices.find(d => d.type === 'isp');
+            const router = devices.find(d => d.type === 'router');
+            const clientDevices = devices.filter(d => ['pc', 'tv', 'phone'].includes(d.type));
+
+            if (!isp) {
+                showModal("⚠️ Відсутній інтернет", "Ви не додали вхід інтернету від провайдера (WAN)!", "🔌");
+                return;
+            }
+
+            if (!router) {
+                showModal("⚠️ Відсутній роутер", "Домашня мережа неможлива без Wi-Fi роутера!", "📡");
+                return;
+            }
+
+            // Перевірка з'єднання ISP з роутером
+            const ispConnectedToRouter = connections.some(c => 
+                (c.from === isp.id && c.to === router.id) || (c.from === router.id && c.to === isp.id)
+            );
+
+            if (!ispConnectedToRouter) {
+                showModal("⚠️ Немає зв'язку з провайдером", "Провайдер повинен бути з'єднаний кабелем з роутером!", "🌐");
+                return;
+            }
+
+            if (clientDevices.length === 0) {
+                showModal("⚠️ Немає споживачів", "Додайте хоча б один пристрій (ПК, Smart TV чи смартфон) у квартирі!", "📱");
+                return;
+            }
+
+            // Перевірка підключення клієнтів (через роутер або комутатор)
+            let allClientsConnected = true;
+            clientDevices.forEach(client => {
+                // Прямо до роутера або через світч
+                const directToRouter = connections.some(c => (c.from === client.id && c.to === router.id) || (c.from === router.id && c.to === client.id));
+                const connectedViaSwitch = devices.filter(d => d.type === 'switch').some(sw => {
+                    const clientToSwitch = connections.some(c => (c.from === client.id && c.to === sw.id) || (c.from === sw.id && c.to === client.id));
+                    const switchtoRouter = connections.some(c => (c.from === sw.id && c.to === router.id) || (c.from === router.id && c.to === sw.id));
+                    return clientToSwitch && switchtoRouter;
+                });
+                const isPhone = client.type === 'phone'; // Смартфони можуть працювати по Wi-Fi якщо роутер у мережі
+
+                if (!directToRouter && !connectedViaSwitch && !isPhone) {
+                    allClientsConnected = false;
+                }
+            });
+
+            if (!allClientsConnected) {
+                showModal("⚠️ Деякі пристрої не підключені", "Перевірте чи всі ПК та Smart TV з'єднані кабелями з роутером чи комутатором!", "💻");
+                return;
+            }
+
+            document.getElementById('statusDisplayinnerText', 'Мережа побудована успішно!');
+            document.getElementById('statusDisplay').className = "font-semibold text-emerald-400";
+            showModal("🎉 Вітаємо!", "Ви чудово впоралися з проєктуванням домашньої інтернет-мережі! Усі пристрої мають стабільний доступ до мережі інтернет.", "🏆");
+        }
+
+        function showModal(title, text, icon) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalText').innerText = text;
+            document.getElementById('modalIcon').innerText = icon;
+            document.getElementById('resultModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('resultModal').classList.add('hidden');
+        }
+
+        function resetWorkspace() {
+            budget = 1500;
+            devices = [];
+            connections = [];
+            isCableMode = false;
+            selectedDeviceForCable = null;
+            document.getElementById('budgetDisplay').innerText = budget;
+            document.getElementById('statusDisplay').innerText = "Проєктування";
+            document.getElementById('statusDisplay').className = "font-semibold text-amber-400";
+            renderWorkspace();
+        }
+    </script>
+</body>
+</html>
