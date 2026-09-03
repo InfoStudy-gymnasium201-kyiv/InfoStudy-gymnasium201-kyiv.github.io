@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="uk" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Історія ІТ: Квест-Зона</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .vector-shadow { box-shadow: 4px 4px 0px #0f172a; }
+        .vector-shadow-sm { box-shadow: 2px 2px 0px #0f172a; }
+        .vector-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px #0f172a; }
+    </style>
+</head>
+<body class="bg-amber-50 text-slate-900 h-full flex flex-col select-none overflow-x-hidden">
+
+    <!-- Header / Navbar -->
+    <header class="bg-white border-b-4 border-slate-900 p-4 flex justify-between items-center z-10 sticky top-0 shadow-sm">
+        <div class="flex items-center space-x-3">
+            <div class="bg-indigo-600 text-white w-10 h-10 border-2 border-slate-900 flex items-center justify-center font-extrabold text-xl vector-shadow-sm rounded-lg">9</div>
+            <div>
+                <h1 class="font-extrabold text-lg text-slate-900 leading-tight">Інформатика 405: Історія ІТ</h1>
+                <p class="text-xs text-slate-600 font-semibold">Інтерактивна навчальна аркада</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-4">
+            <div class="bg-amber-200 border-2 border-slate-900 px-3 py-1 font-extrabold text-sm vector-shadow-sm rounded-md flex items-center space-x-2">
+                <i class="fa-solid fa-star text-amber-600"></i>
+                <span id="score-display">0</span> балів
+            </div>
+            <button onclick="app.returnToMenu()" class="bg-slate-200 hover:bg-slate-300 border-2 border-slate-900 px-3 py-1 font-bold text-sm vector-shadow-sm rounded-md transition-all">
+                <i class="fa-solid fa-house mr-1">}</i> Меню
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main id="app-container" class="flex-1 max-w-5xl w-full mx-auto p-4 md:p-6 flex flex-col justify-center">
+        <!-- Dynamic content injected here -->
+    </main>
+
+    <!-- Footer Modal / Notifications -->
+    <div id="modal-container" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white border-4 border-slate-900 vector-shadow p-6 max-w-md w-full rounded-xl text-center">
+            <div id="modal-icon" class="text-5xl mb-4 text-emerald-600"><i class="fa-solid fa-trophy"></i></div>
+            <h3 id="modal-title" class="text-2xl font-extrabold mb-2 text-slate-900">Вітаємо!</h3>
+            <p id="modal-desc" class="text-slate-700 mb-6 font-medium">Ви успішно впоралися з завданням.</p>
+            <button onclick="app.closeModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold px-6 py-3 border-2 border-slate-900 vector-shadow vector-btn rounded-xl w-full">Продовжити</button>
+        </div>
+    </div>
+
+    <script>
+        // Game State & Navigation
+        class AppState {
+            constructor() {
+                this.score = 0;
+                this.currentMiniGame = null;
+                this.completedGames = new Set();
+            }
+
+            addScore(pts) {
+                this.score += pts;
+                document.getElementById('score-display').textContent = this.score;
+            }
+
+            showModal(title, desc, icon = 'fa-trophy', callback = null) {
+                document.getElementById('modal-title').textContent = title;
+                document.getElementById('modal-desc').textContent = desc;
+                document.getElementById('modal-icon').innerHTML = `<i class="fa-solid ${icon}"></i>`;
+                const modal = document.getElementById('modal-container');
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                this.modalCallback = callback;
+            }
+
+            closeModal() {
+                const modal = document.getElementById('modal-container');
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+                if (this.modalCallback) {
+                    this.modalCallback();
+                    this.modalCallback = null;
+                }
+            }
+
+            returnToMenu() {
+                this.currentMiniGame = null;
+                renderMainMenu();
+            }
+        }
+
+        const app = new AppState();
+
+        // --- MAIN MENU ---
+        function renderMainMenu() {
+            const container = document.getElementById('app-container');
+            container.innerHTML = `
+                <div class="text-center mb-8">
+                    <span class="bg-indigo-100 text-indigo-700 text-xs font-extrabold px-3 py-1 rounded-full border-2 border-slate-900 uppercase tracking-widest inline-block mb-3 vector-shadow-sm">9 клас • Інформатика</span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-3">Історія розвитку ІТ</h2>
+                    <p class="text-slate-600 font-medium max-w-xl mx-auto text-sm md:text-base">Оберіть міні-гру у векторному стилі, щоб дослідити еволюцію обчислювальної техніки, українських піонерів та мереж!</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Game 1 -->
+                    <div onclick="startBabbageGame()" class="bg-white border-4 border-slate-900 vector-shadow p-6 rounded-2xl cursor-pointer hover:bg-amber-50/50 transition-all group flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="bg-emerald-400 text-slate-900 w-12 h-12 border-2 border-slate-900 rounded-xl flex items-center justify-center text-xl font-extrabold vector-shadow-sm group-hover:rotate-6 transition-transform">
+                                    <i class="fa-solid fa-gears"></i>
+                                </div>
+                                <span class="bg-slate-100 border-2 border-slate-900 px-2 py-1 text-xs font-bold rounded">Міні-гра 1</span>
+                            </div>
+                            <h3 class="text-xl font-extrabold text-slate-900 mb-2">Механічна Ера Беббіджа</h3>
+                            <p class="text-slate-600 text-sm font-medium">Складіть частинами аналітичну машину та зберіть першу програму Ади Лавлейс для чисел Бернуллі.</p>
+                        </div>
+                        <div class="mt-6 flex items-center justify-between pt-4 border-t-2 border-slate-200">
+                            <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider"><i class="fa-solid fa-hand-pointer mr-1"></i> Збирання блоків</span>
+                            <span class="bg-slate-900 text-white px-4 py-2 font-extrabold text-xs rounded-lg vector-shadow-sm">Грати →</span>
+                        </div>
+                    </div>
+
+                    <!-- Game 2 -->
+                    <div onclick="startGenerationsGame()" class="bg-white border-4 border-slate-900 vector-shadow p-6 rounded-2xl cursor-pointer hover:bg-sky-50/50 transition-all group flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="bg-sky-400 text-slate-900 w-12 h-12 border-2 border-slate-900 rounded-xl flex items-center justify-center text-xl font-extrabold vector-shadow-sm group-hover:rotate-6 transition-transform">
+                                    <i class="fa-solid fa-microchip"></i>
+                                </div>
+                                <span class="bg-slate-100 border-2 border-slate-900 px-2 py-1 text-xs font-bold rounded">Міні-гра 2</span>
+                            </div>
+                            <h3 class="text-xl font-extrabold text-slate-900 mb-2">Еволюція Поколінь ЕОМ</h3>
+                            <p class="text-slate-600 text-sm font-medium">Розподіліть елементні бази та характеристики за п'ятьма поколіннями комп'ютерів.</p>
+                        </div>
+                        <div class="mt-6 flex items-center justify-between pt-4 border-t-2 border-slate-200">
+                            <span class="text-xs font-bold text-sky-600 uppercase tracking-wider"><i class="fa-solid fa-sliders mr-1"></i> Сортування карток</span>
+                            <span class="bg-slate-900 text-white px-4 py-2 font-extrabold text-xs rounded-lg vector-shadow-sm">Грати →</span>
+                        </div>
+                    </div>
+
+                    <!-- Game 3 -->
+                    <div onclick="startPioneersGame()" class="bg-white border-4 border-slate-900 vector-shadow p-6 rounded-2xl cursor-pointer hover:bg-purple-50/50 transition-all group flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="bg-purple-400 text-slate-900 w-12 h-12 border-2 border-slate-900 rounded-xl flex items-center justify-center text-xl font-extrabold vector-shadow-sm group-hover:rotate-6 transition-transform">
+                                    <i class="fa-solid fa-flag-checkered"></i>
+                                </div>
+                                <span class="bg-slate-100 border-2 border-slate-900 px-2 py-1 text-xs font-bold rounded">Міні-гра 3</span>
+                            </div>
+                            <h3 class="text-xl font-extrabold text-slate-900 mb-2">Українські Піотери ІТ</h3>
+                            <p class="text-slate-600 text-sm font-medium">Зіставте видатних учених (Лебедєв, Глушков, Ющенко) з їхніми епохальними розробками.</p>
+                        </div>
+                        <div class="mt-6 flex items-center justify-between pt-4 border-t-2 border-slate-200">
+                            <span class="text-xs font-bold text-purple-600 uppercase tracking-wider"><i class="fa-solid fa-link mr-1"></i> Зв'язки та факти</span>
+                            <span class="bg-slate-900 text-white px-4 py-2 font-extrabold text-xs rounded-lg vector-shadow-sm">Грати →</span>
+                        </div>
+                    </div>
+
+                    <!-- Game 4 -->
+                    <div onclick="startWebGame()" class="bg-white border-4 border-slate-900 vector-shadow p-6 rounded-2xl cursor-pointer hover:bg-rose-50/50 transition-all group flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="bg-rose-400 text-slate-900 w-12 h-12 border-2 border-slate-900 rounded-xl flex items-center justify-center text-xl font-extrabold vector-shadow-sm group-hover:rotate-6 transition-transform">
+                                    <i class="fa-solid fa-globe"></i>
+                                </div>
+                                <span class="bg-slate-100 border-2 border-slate-900 px-2 py-1 text-xs font-bold rounded">Міні-гра 4</span>
+                            </div>
+                            <h3 class="text-xl font-extrabold text-slate-900 mb-2">ARPANET & WWW Мережі</h3>
+                            <p class="text-slate-600 text-sm font-medium">Прокладіть інтернет-вузли від ARPANET до перших веб-серверів Тіма Бернерс-Лі.</p>
+                        </div>
+                        <div class="mt-6 flex items-center justify-between pt-4 border-t-2 border-slate-200">
+                            <span class="text-xs font-bold text-rose-600 uppercase tracking-wider"><i class="fa-solid fa-network-wired mr-1"></i> Інтерактивна мережа</span>
+                            <span class="bg-slate-900 text-white px-4 py-2 font-extrabold text-xs rounded-lg vector-shadow-sm">Грати →</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- MINI-GAME 1: BABBAGE & ADA ---
+        function startBabbageGame() {
+            app.currentMiniGame = 'babbage';
+            const container = document.getElementById('app-container');
+            container.innerHTML = `
+                <div class="bg-white border-4 border-slate-900 vector-shadow p-6 rounded-2xl">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <span class="bg-emerald-100 text-emerald-800 text-xs font-extrabold px-3 py-1 rounded border-2 border-slate-900">Міні-гра 1 з 4</span>
+                            <h3 class="text-2xl font-extrabold text-slate-900 mt-1">Механічна Ера: Чарльз Беббідж та Ада Лавлейс</h3>
+                        </div>
+                        <button onclick="app.returnToMenu()" class="border-2 border-slate-900 bg-slate-100 p-2 rounded-lg font-bold hover:bg-slate-200"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    
+                    <p class="text-slate-700 font-medium mb-6">Розставте компоненти Аналітичної машини у правильному порядку обробки даних (Введення → Пам'ять → Арифметичний пристрій → Виведення):</p>
+
+                    <div id="babbage-slots" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div class="drop-target border-3 border-dashed border-slate-400 bg-slate-50 p-4 rounded-xl min-h-[120px] flex flex-col items-center justify-center text-center font-bold text-slate-500" data-index="0">
+                            1. Блок введення
+                        </div>
+                        <div class="drop-target border-3 border-dashed border-slate-400 bg-slate-50 p-4 rounded-xl min-h-[120px] flex flex-col items-center justify-center text-center font-bold text-slate-500" data-index="1">
+                            2. Пам'ять (комірки)
+                        </div>
+                        <div class="drop-target border-3 border-dashed border-slate-400 bg-slate-50 p-4 rounded-xl min-h-[120px] flex flex-col items-center justify-center text-center font-bold text-slate-500" data-index="2">
+                            3. Арифметичний пристрій
+                        </div>
+                        <div class="drop-target border-3 border-dashed border-slate-400 bg-slate-50 p-4 rounded-xl min-h-[120px] flex flex-col items-center justify-center text-center font-bold text-slate-500" data-index="3">
+                            4. Блок виведення
+                        </div>
+                    </div>
+
+                    <p class="text-slate-700 font-bold mb-3">Оберіть відповідні модулі з переліку:</p>
+                    <div id="babbage-pieces" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                        <div draggable="true" ondragstart="drag(event)" id="piece-arithmetic" data-correct="2" class="bg-amber-200 border-3 border-slate-900 p-3 rounded-xl font-bold text-center cursor-grab vector-shadow-sm hover:bg-amber-300">
+                            <i class="fa-solid fa-calculator block text-lg mb-1"></i> Обчислення та логіка
+                        </div>
+                        <div draggable="true" ondragstart="drag(event)" id="piece-input" data-correct="0" class="bg-sky-200 border-3 border-slate-900 p-3 rounded-xl font-bold text-center cursor-grab vector-shadow-sm hover:bg-sky-300">
+                            <i class="fa-solid fa-keyboard block text-lg mb-1"></i> Введення перфокарт
+                        </div>
+                        <div draggable="true" ondragstart="drag(event)" id="piece-output" data-correct="3" class="bg-rose-200 border-3 border-slate-900 p-3 rounded-xl font-bold text-center cursor-grab vector-shadow-sm hover:bg-rose-300">
+                            <i class="fa-solid fa-print block text-lg mb-1"></i> Друк результатів
+                        </div>
+                        <div draggable="true" ondragstart="drag(event)" id="piece-memory" data-correct="1" class="bg-purple-200 border-3 border-slate-900 p-3 rounded-xl font-bold text-center cursor-grab vector-shadow-sm hover:bg-purple-300">
+                            <i class="fa-solid fa-database block text-lg mb-1"></i> Комірки пам'яті
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center bg-slate-100 p-4 rounded-xl border-2 border-slate-900">
+                        <div class="text-sm font-semibold text-slate-700"><i class="fa-solid fa-circle-info text-indigo-600 mr-1"></i> Ада Лавлейс написала першу програму для чисел Бернуллі!</div>
+                        <button onclick="checkBabbageGame()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold px-6 py-2 border-2 border-slate-900 vector-shadow vector-btn rounded-xl">Перевірити</button>
+                    </div>
+                </div>
+            `;
+            setupDragAndDrop();
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+        }
+
+        function setupDragAndDrop() {
+            const targets = document.querySelectorAll('.drop-target');
+            targets.forEach(target => {
+                target.addEventListener('dragover', (e) => e.preventDefault());
+                target.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    const data = e.dataTransfer.getData("text");
+                    const el = document.getElementById(data);
+                    target.innerHTML = '';
+                    target.appendChild(el);
+                    target.classList.remove('bg-slate-50', 'border-slate-400');
+                    target.classList.add('bg-emerald-50', 'border-emerald-600');
+                });
+            });
+        }
+
+        function checkBabbageGame() {
+            const targets = document.querySelectorAll('.drop-target');
+            let correctCount = 0;
+            targets.forEach(target => {
+                const child = target.firstElementChild;
+                if (child && child.getAttribute('data-correct') === target.getAttribute('data-index')) {
+                    correctCount++;
+                }
+            });
+
+            if (correctCount === 4) {
+                app.addScore(25);
+                app.showModal('Чудово!', 'Ви правильно відтворили архітектуру Аналітичної машини Чарльза Беббіджа!', 'fa-award', () => {
+                    app.returnToMenu();
+                });
+            } else {
+                app.showModal('Спробуйте ще раз', `Правильно розміщено лише ${correctCount} з 4 елементів. Перевірте послідовність!`, 'fa-triangle-exclamation');
+            }
+        }
+
+        // --- MINI-GAME 2: GENERATIONS OF COMPUTERS ---
+        function startGenerationsGame() {
+            app.currentMiniGame = 'generations';
+            const container = document.getElementById('app-container');
+            container.innerHTML = `
+                <div class="bg-white border-4 border-slate-900 vector-shadow p-6 rounded-2xl">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <span class="bg-sky-100 text-sky-800 text-xs font-extrabold px-3 py-1 rounded border-2 border-slate-900">Міні-гра 2 з 4</span>
+                            <h3 class="text-2xl font-extrabold text-slate-900 mt-1">Еволюція Поколінь ЕОМ</h3>
+                        </div>
+                        <button onclick="app.returnToMenu()" class="border-2 border-slate-900 bg-slate-100 p-2 rounded-lg font-bold hover:bg-slate-200"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+
+                    <p class="text-slate-700 font-medium mb-6">Зіставте елементну базу з правильним поколінням комп'ютерів:</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="space-y-3">
+                            <div class="p-3 bg-slate-100 border-2 border-slate-900 rounded-xl font-extrabold">1. Перше покоління</div>
+                            <div class="p-3 bg-slate-100 border-2 border-slate-900 rounded-xl font-extrabold">2. Друге покоління</div>
+                            <div class="p-3 bg-slate-100 border-2 border-slate-900 rounded-xl font-extrabold">3. Третє покоління</div>
+                            <div class="p-3 bg-slate-100 border-2 border-slate-900 rounded-xl font-extrabold">4. Четверте покоління</div>
+                            <div class="p-3 bg-slate-100 border-2 border-slate-900 rounded-xl font-extrabold">5. П'яте покоління</div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <select id="gen-0" class="w-full p-3 border-2 border-slate-900 font-bold rounded-xl bg-white vector-shadow-sm">
+                                <option value="">-- Оберіть елементну базу --</option>
+                                <option value="micro">Мікропроцесори (Intel 4004)</option>
+                                <option value="tubes">Електронно-вакуумні лампи</option>
+                                <option value="ai">Багатопроцесорні системи та ШІ</option>
+                                <option value="trans">Напівпровідникові транзистори</option>
+                                <option value="ic">Інтегральні схеми (мікросхеми)</option>
+                            </select>
+                            <select id="gen-1" class="w-full p-3 border-2 border-slate-900 font-bold rounded-xl bg-white vector-shadow-sm">
+                                <option value="">-- Оберіть елементну базу --</option>
+                                <option value="micro">Мікропроцесори (Intel 4004)</option>
+                                <option value="tubes">Електронно-вакуумні лампи</option>
+                                <option value="ai">Багатопроцесорні системи та ШІ</option>
+                                <option value="trans">Напівпровідникові транзистори</option>
+                                <option value="ic">Інтегральні схеми (мікросхеми)</option>
+                            </select>
+                            <select id="gen-2" class="w-full p-3 border-2 border-slate-900 font-bold rounded-xl bg-white vector-shadow-sm">
+                                <option value="">-- Оберіть елементну базу --</option>
+                                <option value="micro">Мікропроцесори (Intel 4004)</option>
+                                <option value="tubes">Електронно-вакуумні лампи</option>
+                                <option value="ai">Багатопроцесорні системи та ШІ</option>
+                                <option value="trans">Напівпровідникові транзистори</option>
+                                <option value="ic">Інтегральні схеми (мікросхеми)</option>
+                            </select>
+                            <select id="gen-3" class="w-full p-3 border-2 border-slate-900 font-bold rounded-xl bg-white vector-shadow-sm">
+                                <option value="">-- Оберіть елементну базу --</option>
+                                <option value="micro">Мікропроцесори (Intel 4004)</option>
+                                <option value="tubes">Електронно-вакуумні лампи</option>
+                                <option value="ai">Багатопроцесорні системи та ШІ</option>
+                                <option value="trans">Напівпровідникові транзистори</option>
+                                <option value="ic">Інтегральні схеми (мікросхеми)</option>
+                            </select>
+                            <select id="gen-4" class="w-full p-3 border-2 border-slate-900 font-bold rounded-xl bg-white vector-shadow-sm">
+                                <option value="">-- Оберіть елементну базу --</option>
+                                <option value="micro">Мікропроцесори (Intel 4004)</option>
+                                <option value="tubes">Електронно-вакуумні лампи</option>
+                                <option value="ai">Багатопроцесорні системи та ШІ</option>
+                                <option value="trans">Напівпровідникові транзистори</option>
+                                <option value="ic">Інтегральні схеми (мікросхеми)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button onclick="checkGenerationsGame()" class="bg-sky-600 hover:bg-sky-500 text-white font-extrabold px-6 py-2 border-2 border-slate-900 vector-shadow vector-btn rounded-xl">Перевірити покоління</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function checkGenerationsGame() {
+            const ans0 = document.getElementById('gen-0').value;
+            const ans1 = document.getElementById('gen-1').value;
+            const ans2 = document.getElementById('gen-2').value;
+            const ans3 = document.getElementById('gen-3').value;
+            const ans4 = document.getElementById('gen-4').value;
+
+            if (ans0 === 'tubes' && ans1 === 'trans' && ans2 === 'ic' && ans3 === 'micro' && ans4 === 'ai') {
+                app.addScore(25);
+                app.showModal('Браво!', 'Ви чудово орієнтуєтеся в поколіннях електронно-обчислювальних машин!', 'fa-medal', () => {
+                    app.returnToMenu();
+                });
+            } else {
+                app.showModal('Є помилки', 'Деякі покоління вказано невірно. Перевірте елементну базу за матеріалами конспекту!', 'fa-triangle-exclamation');
+            }
+        }
+
+        // --- MINI-GAME 3: UKRAINIAN PIONEERS ---
+        function startPioneersGame() {
+            app.currentMiniGame = 'pioneers';
+            const container = document.getElementById('app-container');
+            container.innerHTML = `
+                <div class="bg-white border-4 border-slate-900 vector-shadow p-6 rounded-2xl">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <span class="bg-purple-100 text-purple-800 text-xs font-extrabold px-3 py-1 rounded border-2 border-slate-900">Міні-гра 3 з 4</span>
+                            <h3 class="text-2xl font-extrabold text-slate-900 mt-1">Видатний внесок українських учених</h3>
+                        </div>
+                        <button onclick="app.returnToMenu()" class="border-2 border-slate-900 bg-slate-100 p-2 rounded-lg font-bold hover:bg-slate-200"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+
+                    <p class="text-slate-700 font-medium mb-6">З'єднайте вченого з його епохальним досягненням:</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-purple-50 border-3 border-slate-900 p-4 rounded-xl">
+                            <h4 class="font-extrabold text-purple-900 mb-2"><i class="fa-solid fa-user-graduate mr-1"></i> Сергій Лебедєв</h4>
+                            <p class="text-xs text-slate-600 mb-3 font-medium">Академік, керівник розробки в Києві.</p>
+                            <select id="pioneer-0" class="w-full p-2 border-2 border-slate-900 rounded font-bold text-xs bg-white">
+                                <option value="">-- Оберіть внесок --</option>
+                                <option value="mely">МЕОМ (перша ЕОМ у континентальній Європі)</option>
+                                <option value="ogas">Проект ОГАС (державна автоматизована система)</option>
+                                <option value="addr">Адресна мова програмування</option>
+                            </select>
+                        </div>
+
+                        <div class="bg-purple-50 border-3 border-slate-900 p-4 rounded-xl">
+                            <h4 class="font-extrabold text-purple-900 mb-2"><i class="fa-solid fa-user-graduate mr-1"></i> Віктор Глушков</h4>
+                            <p class="text-xs text-slate-600 mb-3 font-medium">Директор Інституту кібернетики.</p>
+                            <select id="pioneer-1" class="w-full p-2 border-2 border-slate-900 rounded font-bold text-xs bg-white">
+                                <option value="">-- Оберіть внесок --</option>
+                                <option value="mely">МЕОМ (перша ЕОМ у континентальній Європі)</option>
+                                <option value="ogas">Проект ОГАС (державна автоматизована система)</option>
+                                <option value="addr">Адресна мова програмування</option>
+                            </select>
+                        </div>
+
+                        <div class="bg-purple-50 border-3 border-slate-900 p-4 rounded-xl">
+                            <h4 class="font-extrabold text-purple-900 mb-2"><i class="fa-solid fa-user-graduate mr-1"></i> Катерина Ющенко</h4>
+                            <p class="text-xs text-slate-600 mb-3 font-medium">Науковиця у галузі програмування.</p>
+                            <select id="pioneer-2" class="w-full p-2 border-2 border-slate-900 rounded font-bold text-xs bg-white">
+                                <option value="">-- Оберіть внесок --</option>
+                                <option value="mely">МЕОМ (перша ЕОМ у континентальній Європі)</option>
+                                <option value="ogas">Проект ОГАС (державна автоматизована система)</option>
+                                <option value="addr">Адресна мова програмування</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button onclick="checkPioneersGame()" class="bg-purple-600 hover:bg-purple-500 text-white font-extrabold px-6 py-2 border-2 border-slate-900 vector-shadow vector-btn rounded-xl">Перевірити досягнення</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function checkPioneersGame() {
+            const p0 = document.getElementById('pioneer-0').value;
+            const p1 = document.getElementById('pioneer-1').value;
+            const p2 = document.getElementById('pioneer-2').value;
+
+            if (p0 === 'mely' && p1 === 'ogas' && p2 === 'addr') {
+                app.addScore(25);
+                app.showModal('Чудово!', 'Ви чудово знаєте внесок українських учених у світову IT-історію!', 'fa-star', () => {
+                    app.returnToMenu();
+                });
+            } else {
+                app.showModal('Спробуйте ще', 'Деякі відповіді щодо українських науковців некоректні.', 'fa-triangle-exclamation');
+            }
+        }
+
+        // --- MINI-GAME 4: ARPANET & WWW ---
+        function startWebGame() {
+            app.currentMiniGame = 'web';
+            const container = document.getElementById('app-container');
+            container.innerHTML = `
+                <div class="bg-white border-4 border-slate-900 vector-shadow p-6 rounded-2xl">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <span class="bg-rose-100 text-rose-800 text-xs font-extrabold px-3 py-1 rounded border-2 border-slate-900">Міні-гра 4 з 4</span>
+                            <h3 class="text-2xl font-extrabold text-slate-900 mt-1">Розвиток мереж та Всесвітньої павутини</h3>
+                        </div>
+                        <button onclick="app.returnToMenu()" class="border-2 border-slate-900 bg-slate-100 p-2 rounded-lg font-bold hover:bg-slate-200"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+
+                    <p class="text-slate-700 font-medium mb-6">Дайте відповіді на ключові питання щодо створення ARPANET та World Wide Web:</p>
+
+                    <div class="space-y-4 mb-6">
+                        <div class="bg-slate-50 border-2 border-slate-900 p-4 rounded-xl">
+                            <p class="font-bold text-slate-900 mb-2">1. У якому році розпочалася історія інтернету з мережі ARPANET?</p>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="selectWebOpt(1, '1955', this)" class="web-btn-1 border-2 border-slate-900 p-2 rounded-lg font-bold bg-white hover:bg-rose-100">1955 р.</button>
+                                <button onclick="selectWebOpt(1, '1969', this)" class="web-btn-1 border-2 border-slate-900 p-2 rounded-lg font-bold bg-white hover:bg-rose-100">1969 р.</button>
+                                <button onclick="selectWebOpt(1, '1991', this)" class="web-btn-1 border-2 border-slate-900 p-2 rounded-lg font-bold bg-white hover:bg-rose-100">1991 р.</button>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 border-2 border-slate-900 p-4 rounded-xl">
+                            <p class="font-bold text-slate-900 mb-2">2. Хто розробив концепцію World Wide Web (WWW), перший веб-сервер і браузер?</p>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="selectWebOpt(2, 'babbage', this)" class="web-btn-2 border-2 border-slate-900 p-2 rounded-lg font-bold bg-white hover:bg-rose-100">Чарльз Беббідж</button>
+                                <button onclick="selectWebOpt(2, 'berners', this)" class="web-btn-2 border-2 border-slate-900 p-2 rounded-lg font-bold bg-white hover:bg-rose-100">Тім Бернерс-Лі</button>
+                                <button onclick="selectWebOpt(2, 'glushkov', this)" class="web-btn-2 border-2 border-slate-900 p-2 rounded-lg font-bold bg-white hover:bg-rose-100">Віктор Глушков</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button onclick="checkWebGame()" class="bg-rose-600 hover:bg-rose-500 text-white font-extrabold px-6 py-2 border-2 border-slate-900 vector-shadow vector-btn rounded-xl">Завершити квест</button>
+                    </div>
+                </div>
+            `;
+            window.webAnswers = { q1: null, q2: null };
+        }
+
+        function selectWebOpt(qNum, val, btn) {
+            const buttons = document.querySelectorAll(`.web-btn-${qNum}`);
+            buttons.forEach(b => b.classList.remove('bg-rose-400', 'text-white'));
+            btn.classList.add('bg-rose-400', 'text-white');
+            window.webAnswers[`q${qNum}`] = val;
+        }
+
+        function checkWebGame() {
+            if (window.webAnswers.q1 === '1969' && window.webAnswers.q2 === 'berners') {
+                app.addScore(25);
+                app.showModal('Вітаємо з завершенням!', 'Ви успішно пройшли всі міні-ігри з історії інформаційних технологій та заробили максимальні бали!', 'fa-trophy', () => {
+                    app.returnToMenu();
+                });
+            } else {
+                app.showModal('Спробуйте ще', 'Перевірте дати створення ARPANET та автора World Wide Web.', 'fa-triangle-exclamation');
+            }
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            renderMainMenu();
+        };
+    </script>
+</body>
+</html>
