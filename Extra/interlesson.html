@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Навколишній світ й інформація — Тактильні Міні-Ігри</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            brand: ['Comfortaa', 'sans-serif'],
+            sans: ['Nunito', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    .font-brand {
+      font-family: 'Comfortaa', cursive;
+    }
+    /* Заборона перехоплення жестів скролу під час інтерактивних маніпуляцій */
+    .touch-none-interactive {
+      touch-action: none;
+    }
+    @keyframes pulse-soft {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+    .animate-pulse-soft {
+      animation: pulse-soft 2s infinite ease-in-out;
+    }
+    /* Кастомна неонова лінія для гри з кабелями */
+    .cable-line {
+      stroke-linecap: round;
+      transition: stroke 0.2s;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+  <!-- ШАПКА ГРИ -->
+  <header class="w-full max-w-5xl mx-auto px-4 pt-3 pb-2 flex items-center justify-between z-20">
+    <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('hub')">
+      <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-400 to-amber-500 shadow-lg shadow-amber-500/30 flex items-center justify-center text-2xl transform hover:rotate-6 transition">
+        🛰️
+      </div>
+      <div>
+        <h1 class="font-brand font-bold text-base sm:text-lg text-white leading-tight">Світ Інформації</h1>
+        <p class="text-[11px] text-indigo-300 font-semibold">Інтерактивна тактильна лабораторія</p>
+      </div>
+    </div>
+
+    <!-- Керування звуком, меню та прогрес -->
+    <div class="flex items-center space-x-2">
+      <button id="sound-btn" onclick="toggleSound()" class="w-9 h-9 rounded-xl bg-slate-800/80 border border-slate-700 hover:bg-slate-700 flex items-center justify-center text-sm shadow-md transition">
+        🔊
+      </button>
+      <button onclick="navigateTo('hub')" class="hidden sm:flex items-center space-x-1 px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700 hover:bg-slate-700 text-xs font-bold transition">
+        <span>🏠 Меню</span>
+      </button>
+      <div class="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-300 font-black text-xs">
+        <span>⭐</span>
+        <span id="total-stars">0</span>
+        <span class="text-amber-400/60 font-medium">/ 12</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ГОЛОВНИЙ РОБОЧИЙ ПРОСТІР -->
+  <main class="w-full max-w-4xl mx-auto px-3 py-2 flex-1 flex flex-col justify-center">
+
+    <!-- ============================================== -->
+    <!-- ЕКРАН 0: ГОЛОВНЕ МЕНЮ (ХАБ МІСІЙ)              -->
+    <!-- ============================================== -->
+    <div id="screen-hub" class="space-y-4">
+      <div class="text-center space-y-1">
+        <span class="px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-[11px] font-bold uppercase tracking-wider">
+          Практичний урок інформатики
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-brand font-bold text-white">
+          Обирай тактильний тренажер
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-400 max-w-lg mx-auto">
+          Тягни предмети у сенсори, протягуй неонові кабелі, складай конвеєрні ланцюжки та скануй новини рентгеном!
+        </p>
+      </div>
+
+      <!-- 4 Картки різних механік -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+        
+        <!-- Гра 1: Drag & Drop Сенсорів -->
+        <div onclick="startSensorsGame()" class="group bg-slate-800/70 hover:bg-slate-800 border-2 border-sky-500/40 hover:border-sky-400 rounded-3xl p-4 cursor-pointer transition shadow-lg relative overflow-hidden flex flex-col justify-between">
+          <div class="flex items-start justify-between">
+            <div class="w-13 h-13 rounded-2xl bg-sky-500/20 text-sky-400 border border-sky-500/30 p-2.5 text-3xl group-hover:scale-110 transition">
+              🖐️
+            </div>
+            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-900/60 text-sky-300 border border-sky-500/20" id="badge-game1">
+              0 / 3 ⭐
+            </span>
+          </div>
+          <div class="mt-3">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-sky-400">Механіка: Drag & Drop</div>
+            <h3 class="font-brand font-bold text-base sm:text-lg text-white group-hover:text-sky-300">1. Лабораторія сенсорів</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Хапай та перетягуй сигнали світу безпосередньо у відповідний орган чуття людини.</p>
+          </div>
+          <div class="mt-3 text-xs font-bold text-sky-400 flex items-center space-x-1">
+            <span>Грати</span> <span class="group-hover:translate-x-1 transition">➔</span>
+          </div>
+        </div>
+
+        <!-- Гра 2: З'єднання кабелями -->
+        <div onclick="startCablesGame()" class="group bg-slate-800/70 hover:bg-slate-800 border-2 border-emerald-500/40 hover:border-emerald-400 rounded-3xl p-4 cursor-pointer transition shadow-lg relative overflow-hidden flex flex-col justify-between">
+          <div class="flex items-start justify-between">
+            <div class="w-13 h-13 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 p-2.5 text-3xl group-hover:scale-110 transition">
+              🔌
+            </div>
+            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-900/60 text-emerald-300 border border-emerald-500/20" id="badge-game2">
+              0 / 3 ⭐
+            </span>
+          </div>
+          <div class="mt-3">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Механіка: З'єднання лініями</div>
+            <h3 class="font-brand font-bold text-base sm:text-lg text-white group-hover:text-emerald-300">2. Кібер-Кабелі інформації</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Тягни неоновий шнур від джерела інформації до правильного порту способу подання.</p>
+          </div>
+          <div class="mt-3 text-xs font-bold text-emerald-400 flex items-center space-x-1">
+            <span>Грати</span> <span class="group-hover:translate-x-1 transition">➔</span>
+          </div>
+        </div>
+
+        <!-- Гра 3: Конвеєр процесів -->
+        <div onclick="startPipelineGame()" class="group bg-slate-800/70 hover:bg-slate-800 border-2 border-purple-500/40 hover:border-purple-400 rounded-3xl p-4 cursor-pointer transition shadow-lg relative overflow-hidden flex flex-col justify-between">
+          <div class="flex items-start justify-between">
+            <div class="w-13 h-13 rounded-2xl bg-purple-500/20 text-purple-400 border border-purple-500/30 p-2.5 text-3xl group-hover:scale-110 transition">
+              ⚙️
+            </div>
+            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-900/60 text-purple-300 border border-purple-500/20" id="badge-game3">
+              0 / 3 ⭐
+            </span>
+          </div>
+          <div class="mt-3">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-purple-400">Механіка: Конструктор ланцюжка</div>
+            <h3 class="font-brand font-bold text-base sm:text-lg text-white group-hover:text-purple-300">3. Конвеєр інфо-процесів</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Розстав кроки у послідовний ланцюг та натисни тумблер запуску імпульсу енергії!</p>
+          </div>
+          <div class="mt-3 text-xs font-bold text-purple-400 flex items-center space-x-1">
+            <span>Грати</span> <span class="group-hover:translate-x-1 transition">➔</span>
+          </div>
+        </div>
+
+        <!-- Гра 4: Рентген-сканер -->
+        <div onclick="startScannerGame()" class="group bg-slate-800/70 hover:bg-slate-800 border-2 border-amber-500/40 hover:border-amber-400 rounded-3xl p-4 cursor-pointer transition shadow-lg relative overflow-hidden flex flex-col justify-between">
+          <div class="flex items-start justify-between">
+            <div class="w-13 h-13 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 p-2.5 text-3xl group-hover:scale-110 transition">
+              🔬
+            </div>
+            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-900/60 text-amber-300 border border-amber-500/20" id="badge-game4">
+              0 / 3 ⭐
+            </span>
+          </div>
+          <div class="mt-3">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-amber-400">Механіка: Рентген-лупа та штамп</div>
+            <h3 class="font-brand font-bold text-base sm:text-lg text-white group-hover:text-amber-300">4. Інфо-Рентген Фактів</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Просвіти новину спеціальною лупою, вияви приховані водяні знаки й постав штамп.</p>
+          </div>
+          <div class="mt-3 text-xs font-bold text-amber-400 flex items-center space-x-1">
+            <span>Грати</span> <span class="group-hover:translate-x-1 transition">➔</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Кнопка Сертифікату -->
+      <div class="text-center pt-2">
+        <button onclick="openCertificate()" class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 font-brand font-bold text-xs sm:text-sm text-slate-900 shadow-lg shadow-amber-500/20 transition active:scale-95">
+          📜 Отримати Іменний Сертифікат Дослідника
+        </button>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- ЕКРАН 1: ЛАБОРАТОРІЯ СЕНСОРІВ (СПРАВЖНІЙ DRAG & DROP)    -->
+    <!-- ======================================================= -->
+    <div id="screen-game-sensors" class="hidden flex flex-col space-y-3">
+      <!-- Верхній стан -->
+      <div class="flex items-center justify-between bg-slate-800/80 px-4 py-2.5 rounded-2xl border border-sky-500/30">
+        <div>
+          <span class="text-[10px] font-bold text-sky-400 uppercase tracking-wide">Механіка: Перетягування (Drag & Drop)</span>
+          <h3 class="text-xs sm:text-sm font-bold text-white">Перетягни об'єкт у датчик відповідного чуття</h3>
+        </div>
+        <div class="text-xs font-bold text-sky-300">
+          Залишилось: <span id="sensors-left-count">5</span>
+        </div>
+      </div>
+
+      <!-- Арена взаємодії -->
+      <div id="drag-arena" class="relative w-full h-[360px] sm:h-[390px] bg-slate-900/90 border-2 border-dashed border-sky-500/30 rounded-3xl p-3 overflow-hidden flex flex-col justify-between touch-none-interactive select-none">
+        
+        <!-- Верхній майданчик: Активний предмет для перетягування -->
+        <div class="flex flex-col items-center justify-center pt-3">
+          <div class="text-[11px] text-slate-400 mb-1">Схопи пальцем або мишкою та потягни вниз 👇</div>
+          
+          <div id="draggable-card" class="touch-none-interactive cursor-grab active:cursor-grabbing w-40 sm:w-48 bg-gradient-to-b from-sky-600 to-indigo-700 rounded-2xl p-3 shadow-2xl border-2 border-sky-300 text-center transform transition-transform duration-75 flex flex-col items-center">
+            <span id="drag-icon" class="text-4xl sm:text-5xl mb-1">🌈</span>
+            <div id="drag-title" class="font-bold text-xs sm:text-sm text-white leading-tight">Веселка в небі</div>
+            <div id="drag-sub" class="text-[10px] text-sky-200 mt-0.5">Барвисті кольори</div>
+          </div>
+        </div>
+
+        <!-- Підказка зворотного зв'язку -->
+        <div id="sensor-feedback" class="text-center text-xs font-bold h-4 transition-all opacity-0"></div>
+
+        <!-- 5 датчиків-приймачів (Drop Targets) -->
+        <div class="grid grid-cols-5 gap-1.5 sm:gap-3 pb-1">
+          
+          <div data-target="eyes" class="sensor-drop-zone bg-slate-800/90 border-2 border-slate-700 hover:border-sky-400 rounded-2xl p-2 text-center flex flex-col items-center justify-center transition-all duration-150 h-24">
+            <span class="text-2xl sm:text-3xl">👀</span>
+            <span class="text-[11px] font-bold text-slate-200 mt-1">Очі</span>
+            <span class="text-[9px] text-sky-400 font-semibold">Зір</span>
+          </div>
+
+          <div data-target="ears" class="sensor-drop-zone bg-slate-800/90 border-2 border-slate-700 hover:border-amber-400 rounded-2xl p-2 text-center flex flex-col items-center justify-center transition-all duration-150 h-24">
+            <span class="text-2xl sm:text-3xl">👂</span>
+            <span class="text-[11px] font-bold text-slate-200 mt-1">Вуха</span>
+            <span class="text-[9px] text-amber-400 font-semibold">Слух</span>
+          </div>
+
+          <div data-target="nose" class="sensor-drop-zone bg-slate-800/90 border-2 border-slate-700 hover:border-emerald-400 rounded-2xl p-2 text-center flex flex-col items-center justify-center transition-all duration-150 h-24">
+            <span class="text-2xl sm:text-3xl">👃</span>
+            <span class="text-[11px] font-bold text-slate-200 mt-1">Ніс</span>
+            <span class="text-[9px] text-emerald-400 font-semibold">Нюх</span>
+          </div>
+
+          <div data-target="tongue" class="sensor-drop-zone bg-slate-800/90 border-2 border-slate-700 hover:border-pink-400 rounded-2xl p-2 text-center flex flex-col items-center justify-center transition-all duration-150 h-24">
+            <span class="text-2xl sm:text-3xl">👅</span>
+            <span class="text-[11px] font-bold text-slate-200 mt-1">Язик</span>
+            <span class="text-[9px] text-pink-400 font-semibold">Смак</span>
+          </div>
+
+          <div data-target="skin" class="sensor-drop-zone bg-slate-800/90 border-2 border-slate-700 hover:border-purple-400 rounded-2xl p-2 text-center flex flex-col items-center justify-center transition-all duration-150 h-24">
+            <span class="text-2xl sm:text-3xl">✋</span>
+            <span class="text-[11px] font-bold text-slate-200 mt-1">Шкіра</span>
+            <span class="text-[9px] text-purple-400 font-semibold">Дотик</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- ЕКРАН 2: КІБЕР-КАБЕЛІ (З'ЄДНАННЯ НЕОНОВИМИ ПРОВОДАМИ)     -->
+    <!-- ======================================================= -->
+    <div id="screen-game-cables" class="hidden flex flex-col space-y-3">
+      <div class="flex items-center justify-between bg-slate-800/80 px-4 py-2.5 rounded-2xl border border-emerald-500/30">
+        <div>
+          <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wide">Механіка: З'єднання проводів</span>
+          <h3 class="text-xs sm:text-sm font-bold text-white">З'єднай джерело повідомлення з типом його подання</h3>
+        </div>
+        <div class="text-xs font-bold text-emerald-300">
+          З'єднано: <span id="cables-connected-count">0</span> / 4
+        </div>
+      </div>
+
+      <!-- Інтерактивне полотно комутатора -->
+      <div id="cables-board" class="relative w-full h-[370px] bg-slate-900 border-2 border-emerald-500/30 rounded-3xl p-3 flex justify-between select-none touch-none-interactive overflow-hidden">
+        
+        <!-- SVG шар для динамічного малювання кабелів -->
+        <svg id="cables-svg" class="absolute inset-0 w-full h-full pointer-events-none z-10">
+          <!-- Тимчасовий кабель, що тягнеться прямо зараз -->
+          <path id="active-wire" d="" stroke="#34d399" stroke-width="4" fill="none" stroke-dasharray="6,4" class="hidden" />
+          <!-- Постійні зафіксовані кабелі -->
+          <g id="fixed-wires"></g>
+        </svg>
+
+        <!-- Ліва колонка: 4 Джерела повідомлень -->
+        <div class="flex flex-col justify-around w-5/12 z-20 space-y-2">
+          
+          <div data-source="sound" class="cable-source group bg-slate-800 border-2 border-slate-700 hover:border-amber-400 rounded-2xl p-2.5 flex items-center justify-between cursor-pointer transition shadow-md">
+            <div class="flex items-center space-x-2 truncate">
+              <span class="text-xl">🐦</span>
+              <span class="text-[11px] font-bold text-slate-200 truncate">Спів пташки</span>
+            </div>
+            <div class="port-handle w-5 h-5 rounded-full bg-amber-500 border-2 border-white shadow flex items-center justify-center text-[10px] ml-1">●</div>
+          </div>
+
+          <div data-source="number" class="cable-source group bg-slate-800 border-2 border-slate-700 hover:border-purple-400 rounded-2xl p-2.5 flex items-center justify-between cursor-pointer transition shadow-md">
+            <div class="flex items-center space-x-2 truncate">
+              <span class="text-xl">🔢</span>
+              <span class="text-[11px] font-bold text-slate-200 truncate">Рівняння 5+7=12</span>
+            </div>
+            <div class="port-handle w-5 h-5 rounded-full bg-purple-500 border-2 border-white shadow flex items-center justify-center text-[10px] ml-1">●</div>
+          </div>
+
+          <div data-source="graphic" class="cable-source group bg-slate-800 border-2 border-slate-700 hover:border-pink-400 rounded-2xl p-2.5 flex items-center justify-between cursor-pointer transition shadow-md">
+            <div class="flex items-center space-x-2 truncate">
+              <span class="text-xl">🎨</span>
+              <span class="text-[11px] font-bold text-slate-200 truncate">Малюнок природи</span>
+            </div>
+            <div class="port-handle w-5 h-5 rounded-full bg-pink-500 border-2 border-white shadow flex items-center justify-center text-[10px] ml-1">●</div>
+          </div>
+
+          <div data-source="text" class="cable-source group bg-slate-800 border-2 border-slate-700 hover:border-sky-400 rounded-2xl p-2.5 flex items-center justify-between cursor-pointer transition shadow-md">
+            <div class="flex items-center space-x-2 truncate">
+              <span class="text-xl">📖</span>
+              <span class="text-[11px] font-bold text-slate-200 truncate">Вірш у книжці</span>
+            </div>
+            <div class="port-handle w-5 h-5 rounded-full bg-sky-500 border-2 border-white shadow flex items-center justify-center text-[10px] ml-1">●</div>
+          </div>
+
+        </div>
+
+        <!-- Права колонка: 4 Термінали типів інформації -->
+        <div class="flex flex-col justify-around w-5/12 z-20 space-y-2">
+          
+          <div data-target-type="text" class="cable-target bg-slate-800/90 border-2 border-slate-700 rounded-2xl p-2.5 flex items-center justify-between transition shadow-md">
+            <div class="port-target w-5 h-5 rounded-full bg-slate-600 border-2 border-slate-400 flex items-center justify-center text-[10px] mr-1">○</div>
+            <div class="text-right truncate">
+              <div class="text-[11px] font-bold text-white">Текстова</div>
+              <div class="text-[9px] text-slate-400">Слова, букви</div>
+            </div>
+          </div>
+
+          <div data-target-type="sound" class="cable-target bg-slate-800/90 border-2 border-slate-700 rounded-2xl p-2.5 flex items-center justify-between transition shadow-md">
+            <div class="port-target w-5 h-5 rounded-full bg-slate-600 border-2 border-slate-400 flex items-center justify-center text-[10px] mr-1">○</div>
+            <div class="text-right truncate">
+              <div class="text-[11px] font-bold text-white">Звукова</div>
+              <div class="text-[9px] text-slate-400">Мелодії, мова</div>
+            </div>
+          </div>
+
+          <div data-target-type="number" class="cable-target bg-slate-800/90 border-2 border-slate-700 rounded-2xl p-2.5 flex items-center justify-between transition shadow-md">
+            <div class="port-target w-5 h-5 rounded-full bg-slate-600 border-2 border-slate-400 flex items-center justify-center text-[10px] mr-1">○</div>
+            <div class="text-right truncate">
+              <div class="text-[11px] font-bold text-white">Числова</div>
+              <div class="text-[9px] text-slate-400">Цифри, формули</div>
+            </div>
+          </div>
+
+          <div data-target-type="graphic" class="cable-target bg-slate-800/90 border-2 border-slate-700 rounded-2xl p-2.5 flex items-center justify-between transition shadow-md">
+            <div class="port-target w-5 h-5 rounded-full bg-slate-600 border-2 border-slate-400 flex items-center justify-center text-[10px] mr-1">○</div>
+            <div class="text-right truncate">
+              <div class="text-[11px] font-bold text-white">Графічна</div>
+              <div class="text-[9px] text-slate-400">Схеми, фото</div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- ЕКРАН 3: КОНВЕЄР ІНФО-ПРОЦЕСІВ (КОНСТРУКТОР + ЗАПУСК)     -->
+    <!-- ======================================================= -->
+    <div id="screen-game-pipeline" class="hidden flex flex-col space-y-3">
+      <div class="flex items-center justify-between bg-slate-800/80 px-4 py-2 rounded-2xl border border-purple-500/30">
+        <div>
+          <span class="text-[10px] font-bold text-purple-400 uppercase tracking-wide">Механіка: Збирання послідовності</span>
+          <h3 class="text-xs sm:text-sm font-bold text-white">Збери інформаційний конвеєр у правильному порядку</h3>
+        </div>
+        <div class="text-xs font-bold text-purple-300">
+          Складено: <span id="pipeline-placed-count">0</span> / 4
+        </div>
+      </div>
+
+      <!-- Контейнер Конвеєра -->
+      <div class="bg-slate-900 border-2 border-purple-500/30 rounded-3xl p-4 flex flex-col justify-between space-y-4 shadow-xl">
+        
+        <!-- Сюжетна ситуація -->
+        <div class="bg-purple-950/60 border border-purple-500/30 rounded-2xl p-2.5 text-center">
+          <div class="text-[10px] font-bold text-purple-300 uppercase">Ситуація завдання:</div>
+          <div class="text-xs sm:text-sm font-extrabold text-white">«Як робот Родіон створює фотозвіт для шкільної газети?»</div>
+        </div>
+
+        <!-- 4 Послідовні слоти конвеєра (1 -> 2 -> 3 -> 4) -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 relative">
+          
+          <!-- Слот 1: Отримання -->
+          <div data-step-slot="0" class="pipeline-slot bg-slate-800/80 border-2 border-dashed border-slate-600 rounded-2xl p-2.5 min-h-[95px] flex flex-col items-center justify-center text-center transition">
+            <span class="text-[10px] font-black text-sky-400 mb-1">1. ОТРИМАННЯ</span>
+            <div class="slot-content text-xs text-slate-500 italic">Поклади блок сюди</div>
+          </div>
+
+          <!-- Слот 2: Збереження -->
+          <div data-step-slot="1" class="pipeline-slot bg-slate-800/80 border-2 border-dashed border-slate-600 rounded-2xl p-2.5 min-h-[95px] flex flex-col items-center justify-center text-center transition">
+            <span class="text-[10px] font-black text-emerald-400 mb-1">2. ЗБЕРЕЖЕННЯ</span>
+            <div class="slot-content text-xs text-slate-500 italic">Поклади блок сюди</div>
+          </div>
+
+          <!-- Слот 3: Опрацювання -->
+          <div data-step-slot="2" class="pipeline-slot bg-slate-800/80 border-2 border-dashed border-slate-600 rounded-2xl p-2.5 min-h-[95px] flex flex-col items-center justify-center text-center transition">
+            <span class="text-[10px] font-black text-amber-400 mb-1">3. ОПРАЦЮВАННЯ</span>
+            <div class="slot-content text-xs text-slate-500 italic">Поклади блок сюди</div>
+          </div>
+
+          <!-- Слот 4: Передавання -->
+          <div data-step-slot="3" class="pipeline-slot bg-slate-800/80 border-2 border-dashed border-slate-600 rounded-2xl p-2.5 min-h-[95px] flex flex-col items-center justify-center text-center transition">
+            <span class="text-[10px] font-black text-pink-400 mb-1">4. ПЕРЕДАВАННЯ</span>
+            <div class="slot-content text-xs text-slate-500 italic">Поклади блок сюди</div>
+          </div>
+
+        </div>
+
+        <!-- Доступні картки для розміщення (перемішані) -->
+        <div>
+          <div class="text-[10px] text-slate-400 mb-1.5 font-bold">Натисни на блок, щоб розмістити його в наступний слот конвеєра:</div>
+          <div id="pipeline-pieces" class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <!-- Генеруються скриптом -->
+          </div>
+        </div>
+
+        <!-- Важіль / Кнопка тесту конвеєра -->
+        <div class="pt-1 flex items-center justify-between">
+          <button onclick="resetPipeline()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
+            🔄 Скинути
+          </button>
+          
+          <button id="launch-pipeline-btn" onclick="launchPipelineCheck()" disabled class="px-6 py-2.5 rounded-2xl bg-slate-700 text-slate-400 font-brand font-bold text-xs sm:text-sm cursor-not-allowed transition flex items-center space-x-2">
+            <span>⚡</span>
+            <span>ЗАПУСТИТИ КОНВЕЄР</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- ЕКРАН 4: ІНФО-РЕНТГЕН ФАКТІВ (ЛІНЗА-СКАНЕР + ШТАМП)       -->
+    <!-- ======================================================= -->
+    <div id="screen-game-scanner" class="hidden flex flex-col space-y-3">
+      <div class="flex items-center justify-between bg-slate-800/80 px-4 py-2.5 rounded-2xl border border-amber-500/30">
+        <div>
+          <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wide">Механіка: Рентген-лупа та штамп</span>
+          <h3 class="text-xs sm:text-sm font-bold text-white">Досліди повідомлення лупою та винеси вердикт</h3>
+        </div>
+        <div class="text-xs font-bold text-amber-300">
+          Справа: <span id="scanner-doc-idx">1</span> / 4
+        </div>
+      </div>
+
+      <!-- Стіл детектива -->
+      <div class="bg-slate-900 border-2 border-amber-500/30 rounded-3xl p-4 flex flex-col justify-between space-y-3 shadow-xl relative">
+        
+        <!-- Документ повідомлення з подвійним шаром (звичайний текст і прихований рентген-шар) -->
+        <div id="scanner-viewport" class="relative bg-amber-50 rounded-2xl p-5 text-slate-800 min-h-[160px] shadow-inner select-none overflow-hidden touch-none-interactive cursor-crosshair">
+          
+          <!-- Звичайний видимий текст -->
+          <div class="relative z-0">
+            <div class="inline-block px-2 py-0.5 rounded bg-amber-200 text-amber-900 text-[10px] font-bold uppercase mb-2">
+              Знайдено в мережі Інтернет 🌐
+            </div>
+            <h4 id="scanner-claim" class="font-bold text-base sm:text-lg text-slate-900 leading-snug">
+              «Всі соки в магазинах зроблені зі справжніх свіжих фруктів прямо з дерева без цукру!»
+            </h4>
+            <p class="text-xs text-slate-500 mt-2 italic">
+              🔍 Поводь пальцем або курсором по полю нижче, щоб просвітити прихований водяний знак експертизи!
+            </p>
+          </div>
+
+          <!-- Інтерактивна лінза-рентген (слідує за пальцем/курсором) -->
+          <div id="xray-lens" class="absolute pointer-events-none w-32 h-32 rounded-full border-4 border-amber-500 bg-emerald-900/90 text-white shadow-2xl flex flex-col items-center justify-center p-2 text-center transform -translate-x-1/2 -translate-y-1/2 opacity-0 transition-opacity duration-100 z-30">
+            <span class="text-xl mb-0.5">🔬</span>
+            <span class="text-[9px] font-black uppercase text-amber-300 tracking-wider">Експертиза:</span>
+            <div id="xray-clue" class="text-[10px] font-bold text-emerald-200 leading-tight">
+              Склад: додано 40% цукру та барвники. Твердження хибне!
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Фізичні кнопки-печатки (Штампи для винесення рішення) -->
+        <div class="grid grid-cols-2 gap-3 pt-1">
+          
+          <button onclick="applyStampDecision(true)" class="group bg-gradient-to-b from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 border-2 border-emerald-400 p-3.5 rounded-2xl shadow-lg active:scale-95 transition flex items-center justify-center space-x-2 text-white">
+            <span class="text-2xl group-hover:scale-125 transition">✅</span>
+            <div class="text-left">
+              <div class="font-brand font-black text-xs sm:text-sm">ШТАМП: ПРАВДА</div>
+              <div class="text-[10px] text-emerald-200">Достовірна інформація</div>
+            </div>
+          </button>
+
+          <button onclick="applyStampDecision(false)" class="group bg-gradient-to-b from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 border-2 border-rose-400 p-3.5 rounded-2xl shadow-lg active:scale-95 transition flex items-center justify-center space-x-2 text-white">
+            <span class="text-2xl group-hover:scale-125 transition">🚫</span>
+            <div class="text-left">
+              <div class="font-brand font-black text-xs sm:text-sm">ШТАМП: ФЕЙК</div>
+              <div class="text-[10px] text-rose-200">Хибна / неправдива</div>
+            </div>
+          </button>
+
+        </div>
+
+        <!-- Підказка після штампування -->
+        <div id="scanner-feedback" class="text-center text-xs font-bold min-h-[20px] transition-all opacity-0"></div>
+
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- ЕКРАН 5: СЕРТИФІКАТ                            -->
+    <!-- ============================================== -->
+    <div id="screen-certificate" class="hidden">
+      <div class="bg-gradient-to-b from-slate-800 to-slate-900 rounded-3xl p-6 sm:p-8 border-4 border-amber-400 max-w-xl mx-auto text-center shadow-2xl relative">
+        <div class="w-16 h-16 mx-auto mb-2 bg-gradient-to-tr from-amber-400 to-yellow-300 rounded-2xl flex items-center justify-center text-3xl shadow-lg text-slate-900 font-bold">
+          🎓
+        </div>
+        <span class="text-[10px] font-black uppercase tracking-widest text-amber-400">Почесний Диплом</span>
+        <h2 class="text-xl sm:text-2xl font-brand font-bold text-white mt-1">
+          Експерт Навколишнього Світу й Інформації
+        </h2>
+        <p class="text-xs text-slate-300 mt-1 max-w-md mx-auto">
+          Нагороджується учень, який успішно опанував тактильні тренажери сприйняття, подання, обробки та перевірки фактів!
+        </p>
+
+        <div class="max-w-xs mx-auto my-4">
+          <label class="block text-[11px] font-bold text-slate-400 mb-1 text-left">Прізвище та ім'я учня:</label>
+          <input type="text" id="cert-name-input" value="Учень Інформатики" class="w-full px-3 py-2 rounded-xl bg-slate-700 border-2 border-amber-400/80 text-center font-bold text-white text-sm focus:outline-none focus:border-amber-300">
+        </div>
+
+        <div class="bg-slate-800/80 rounded-2xl p-3 border border-slate-700 flex justify-around items-center mb-5 text-xs font-bold">
+          <div>
+            <div class="text-slate-400 text-[10px]">Зірочки</div>
+            <div class="text-amber-400 text-lg">⭐ <span id="cert-stars-val">0</span> / 12</div>
+          </div>
+          <div class="h-8 w-px bg-slate-700"></div>
+          <div>
+            <div class="text-slate-400 text-[10px]">Рівень кваліфікації</div>
+            <div id="cert-rank-val" class="text-emerald-400 text-sm">Кібер-Дослідник</div>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-center gap-2.5">
+          <button onclick="window.print()" class="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-xs shadow-md transition">
+            🖨️ Роздрукувати диплом
+          </button>
+          <button onclick="navigateTo('hub')" class="px-5 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs transition">
+            Повернутися в меню
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ПІДВАЛ -->
+  <footer class="w-full max-w-4xl mx-auto px-4 py-2 text-center text-[10px] text-slate-500">
+    Урок інформатики НУШ • Тактильні міні-ігри: Drag & Drop, Схеми зв'язку, Конструктор процесів, Детектив-сканер
+  </footer>
+
+  <!-- МОДАЛКА ПЕРЕМОГИ В МІСІЇ -->
+  <div id="mission-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-800 rounded-3xl p-6 max-w-sm w-full text-center border-2 border-amber-400 shadow-2xl transform scale-95 transition">
+      <div id="modal-emoji" class="text-5xl mb-2">🎉</div>
+      <h3 id="modal-title" class="font-brand font-bold text-lg text-white mb-1">Місію завершено!</h3>
+      <p id="modal-desc" class="text-xs text-slate-300 mb-4">Чудова практична робота!</p>
+      
+      <div id="modal-stars" class="text-2xl mb-4 text-amber-400">⭐⭐⭐</div>
+
+      <div class="space-y-2">
+        <button id="modal-next-btn" onclick="handleModalNext()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-xs shadow transition">
+          Наступна місія ➔
+        </button>
+        <button onclick="closeModalToHub()" class="w-full py-2 text-[11px] text-slate-400 font-semibold hover:text-white">
+          Повернутися на карту
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ГОЛОВНА ЛОГІКА ІГОР -->
+  <script>
+    /* =======================================================
+       0. АУДІОСИСТЕМА (WEB AUDIO API)
+       ======================================================= */
+    let soundOn = true;
+    let actx = null;
+
+    function initActx() {
+      if (!actx) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) actx = new AudioCtx();
+      }
+    }
+
+    function toggleSound() {
+      soundOn = !soundOn;
+      document.getElementById('sound-btn').textContent = soundOn ? '🔊' : '🔇';
+      if (soundOn) playChime(440, 'sine', 0.1);
+    }
+
+    function playChime(freq, type = 'sine', duration = 0.12, gainVal = 0.1) {
+      if (!soundOn) return;
+      initActx();
+      if (!actx) return;
+      try {
+        if (actx.state === 'suspended') actx.resume();
+        const osc = actx.createOscillator();
+        const gain = actx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, actx.currentTime);
+        gain.gain.setValueAtTime(gainVal, actx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(actx.destination);
+        osc.start();
+        osc.stop(actx.currentTime + duration);
+      } catch(e) {}
+    }
+
+    function playSnapSound() {
+      playChime(600, 'triangle', 0.08, 0.15);
+      setTimeout(() => playChime(800, 'triangle', 0.15, 0.15), 60);
+    }
+
+    function playSuccessFanfare() {
+      const tones = [440, 554.37, 659.25, 880];
+      tones.forEach((t, i) => {
+        setTimeout(() => playChime(t, 'triangle', 0.18, 0.15), i * 90);
+      });
+    }
+
+    function playErrorBeep() {
+      playChime(220, 'sawtooth', 0.2, 0.12);
+    }
+
+    /* =======================================================
+       1. СТАН ТА НАВІГАЦІЯ
+       ======================================================= */
+    const appState = {
+      stars: { g1: 0, g2: 0, g3: 0, g4: 0 },
+      nextMission: 'hub'
+    };
+
+    function updateHeaderStars() {
+      const total = appState.stars.g1 + appState.stars.g2 + appState.stars.g3 + appState.stars.g4;
+      document.getElementById('total-stars').textContent = total;
+      document.getElementById('cert-stars-val').textContent = total;
+
+      document.getElementById('badge-game1').textContent = `${appState.stars.g1} / 3 ⭐`;
+      document.getElementById('badge-game2').textContent = `${appState.stars.g2} / 3 ⭐`;
+      document.getElementById('badge-game3').textContent = `${appState.stars.g3} / 3 ⭐`;
+      document.getElementById('badge-game4').textContent = `${appState.stars.g4} / 3 ⭐`;
+
+      const rankEl = document.getElementById('cert-rank-val');
+      if (total >= 11) rankEl.textContent = 'Генеральний Архітектор Інформації 🏆';
+      else if (total >= 8) rankEl.textContent = 'Майстер Кібер-Технологій ⚡';
+      else if (total >= 4) rankEl.textContent = 'Кібер-Дослідник 🔍';
+      else rankEl.textContent = 'Початківець-Практик 🌱';
+    }
+
+    function navigateTo(screenId) {
+      const screens = [
+        'screen-hub',
+        'screen-game-sensors',
+        'screen-game-cables',
+        'screen-game-pipeline',
+        'screen-game-scanner',
+        'screen-certificate'
+      ];
+      screens.forEach(s => document.getElementById(s)?.classList.add('hidden'));
+
+      const target = document.getElementById('screen-' + screenId);
+      if (target) target.classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function openCertificate() {
+      updateHeaderStars();
+      navigateTo('certificate');
+    }
+
+    /* =======================================================
+       2. МІНІ-ГРА 1: ЛАБОРАТОРІЯ СЕНСОРІВ (DRAG & DROP)
+       ======================================================= */
+    const sensorItems = [
+      { id: 'item1', target: 'eyes', icon: '🌈', title: 'Веселка в небі', sub: 'Різнобарвні смуги світла' },
+      { id: 'item2', target: 'ears', icon: '🔔', title: 'Дзвінок на перерву', sub: 'Гучний музичний сигнал' },
+      { id: 'item3', target: 'nose', icon: '🍓', title: 'Свіжа суниця', sub: 'Запашні лісові пахощі' },
+      { id: 'item4', target: 'tongue', icon: '🍋', title: 'Шматочок лимона', sub: 'Кислий соковитий смак' },
+      { id: 'item5', target: 'skin', icon: '🧊', title: 'Кубик льоду', sub: 'Холодний та слизький дотик' }
+    ];
+
+    let sensorCurrentIdx = 0;
+    let sensorCorrectCount = 0;
+    let dragCard = null;
+    let dragStartPos = { x: 0, y: 0 };
+    let isDragging = false;
+
+    function startSensorsGame() {
+      sensorCurrentIdx = 0;
+      sensorCorrectCount = 0;
+      setupNextSensorItem();
+      initDragEvents();
+      navigateTo('game-sensors');
+    }
+
+    function setupNextSensorItem() {
+      const left = sensorItems.length - sensorCurrentIdx;
+      document.getElementById('sensors-left-count').textContent = left;
+
+      if (sensorCurrentIdx >= sensorItems.length) {
+        finishSensorsGame();
+        return;
+      }
+
+      const item = sensorItems[sensorCurrentIdx];
+      document.getElementById('drag-icon').textContent = item.icon;
+      document.getElementById('drag-title').textContent = item.title;
+      document.getElementById('drag-sub').textContent = item.sub;
+      
+      const feedback = document.getElementById('sensor-feedback');
+      feedback.style.opacity = '0';
+      feedback.textContent = '';
+
+      dragCard = document.getElementById('draggable-card');
+      dragCard.style.transform = 'translate(0px, 0px)';
+    }
+
+    function initDragEvents() {
+      const card = document.getElementById('draggable-card');
+      
+      card.onpointerdown = (e) => {
+        isDragging = true;
+        dragStartPos = { x: e.clientX, y: e.clientY };
+        card.setPointerCapture(e.pointerId);
+        card.classList.add('scale-105', 'shadow-sky-500/50');
+      };
+
+      card.onpointermove = (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - dragStartPos.x;
+        const dy = e.clientY - dragStartPos.y;
+        card.style.transform = `translate(${dx}px, ${dy}px) rotate(${dx * 0.04}deg)`;
+
+        // Підсвічуємо зону над якою знаходиться палець
+        checkHoverDropZone(e.clientX, e.clientY);
+      };
+
+      card.onpointerup = (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        card.classList.remove('scale-105', 'shadow-sky-500/50');
+        
+        // Перевіряємо в який датчик кинули
+        evaluateDrop(e.clientX, e.clientY);
+      };
+    }
+
+    function checkHoverDropZone(x, y) {
+      document.querySelectorAll('.sensor-drop-zone').forEach(zone => {
+        const rect = zone.getBoundingClientRect();
+        if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+          zone.classList.add('border-white', 'scale-105', 'bg-slate-700');
+        } else {
+          zone.classList.remove('border-white', 'scale-105', 'bg-slate-700');
+        }
+      });
+    }
+
+    function evaluateDrop(x, y) {
+      const card = document.getElementById('draggable-card');
+      const currentItem = sensorItems[sensorCurrentIdx];
+      let droppedZone = null;
+
+      document.querySelectorAll('.sensor-drop-zone').forEach(zone => {
+        const rect = zone.getBoundingClientRect();
+        zone.classList.remove('border-white', 'scale-105', 'bg-slate-700');
+        if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+          droppedZone = zone;
+        }
+      });
+
+      const feedback = document.getElementById('sensor-feedback');
+
+      if (droppedZone) {
+        const targetType = droppedZone.getAttribute('data-target');
+        if (targetType === currentItem.target) {
+          playSnapSound();
+          sensorCorrectCount++;
+          feedback.textContent = 'Влучно! Датчик успішно прийняв сигнал! ✨';
+          feedback.className = 'text-center text-xs font-bold text-emerald-400 opacity-100 transition-all';
+          droppedZone.classList.add('bg-emerald-600/30', 'border-emerald-400');
+          setTimeout(() => droppedZone.classList.remove('bg-emerald-600/30', 'border-emerald-400'), 600);
+
+          sensorCurrentIdx++;
+          setTimeout(setupNextSensorItem, 600);
+          return;
+        } else {
+          playErrorBeep();
+          feedback.textContent = 'Цей орган чуття не сприймає цей сигнал. Спробуй інший!';
+          feedback.className = 'text-center text-xs font-bold text-rose-400 opacity-100 transition-all';
+        }
+      }
+
+      // Якщо промах або помилка - повертаємо назад
+      card.style.transition = 'transform 0.3s ease';
+      card.style.transform = 'translate(0px, 0px)';
+      setTimeout(() => { card.style.transition = ''; }, 300);
+    }
+
+    function finishSensorsGame() {
+      let stars = 3;
+      if (sensorCorrectCount < 4) stars = 2;
+      appState.stars.g1 = Math.max(appState.stars.g1, stars);
+      updateHeaderStars();
+      showMissionModal('Лабораторію Сенсорів Пройдено!', 'Ти успішно розподілив усі сигнали навколишнього світу за органами чуття людини.', stars, 'cables');
+    }
+
+    /* =======================================================
+       3. МІНІ-ГРА 2: КІБЕР-КАБЕЛІ (WIRING PUZZLE)
+       ======================================================= */
+    let cableConnectedCount = 0;
+    let isDrawingCable = false;
+    let activeCableSource = null;
+    let startPortCoords = { x: 0, y: 0 };
+    const connectedSources = new Set();
+
+    function startCablesGame() {
+      cableConnectedCount = 0;
+      connectedSources.clear();
+      document.getElementById('cables-connected-count').textContent = '0';
+      document.getElementById('fixed-wires').innerHTML = '';
+      
+      // Скидання стилів портів
+      document.querySelectorAll('.cable-source').forEach(s => s.classList.remove('opacity-40', 'pointer-events-none'));
+      document.querySelectorAll('.cable-target').forEach(t => t.classList.remove('border-emerald-400', 'bg-emerald-950/40'));
+
+      initCablesInteraction();
+      navigateTo('game-cables');
+    }
+
+    function initCablesInteraction() {
+      const board = document.getElementById('cables-board');
+      const activeWire = document.getElementById('active-wire');
+
+      document.querySelectorAll('.cable-source').forEach(sourceEl => {
+        sourceEl.onpointerdown = (e) => {
+          const type = sourceEl.getAttribute('data-source');
+          if (connectedSources.has(type)) return;
+
+          isDrawingCable = true;
+          activeCableSource = type;
+          sourceEl.setPointerCapture(e.pointerId);
+
+          const port = sourceEl.querySelector('.port-handle');
+          const boardRect = board.getBoundingClientRect();
+          const portRect = port.getBoundingClientRect();
+
+          startPortCoords = {
+            x: portRect.left + portRect.width / 2 - boardRect.left,
+            y: portRect.top + portRect.height / 2 - boardRect.top
+          };
+
+          activeWire.classList.remove('hidden');
+          updateActiveWire(startPortCoords.x, startPortCoords.y);
+        };
+
+        sourceEl.onpointermove = (e) => {
+          if (!isDrawingCable) return;
+          const boardRect = board.getBoundingClientRect();
+          const curX = e.clientX - boardRect.left;
+          const curY = e.clientY - boardRect.top;
+          updateActiveWire(curX, curY);
+        };
+
+        sourceEl.onpointerup = (e) => {
+          if (!isDrawingCable) return;
+          isDrawingCable = false;
+          activeWire.classList.add('hidden');
+
+          // Перевірка цілі під курсором
+          evaluateCableConnection(e.clientX, e.clientY);
+        };
+      });
+    }
+
+    function updateActiveWire(endX, endY) {
+      const path = document.getElementById('active-wire');
+      const cpX = (startPortCoords.x + endX) / 2;
+      path.setAttribute('d', `M ${startPortCoords.x} ${startPortCoords.y} C ${cpX} ${startPortCoords.y}, ${cpX} ${endY}, ${endX} ${endY}`);
+    }
+
+    function evaluateCableConnection(clientX, clientY) {
+      let matchedTarget = null;
+
+      document.querySelectorAll('.cable-target').forEach(targetEl => {
+        const rect = targetEl.getBoundingClientRect();
+        if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
+          matchedTarget = targetEl;
+        }
+      });
+
+      if (!matchedTarget) return;
+
+      const targetType = matchedTarget.getAttribute('data-target-type');
+      if (targetType === activeCableSource) {
+        // Правильне з'єднання!
+        playSnapSound();
+        connectedSources.add(activeCableSource);
+        cableConnectedCount++;
+        document.getElementById('cables-connected-count').textContent = cableConnectedCount;
+
+        // Фіксуємо постійний гарний провід
+        const board = document.getElementById('cables-board');
+        const boardRect = board.getBoundingClientRect();
+        const targetPort = matchedTarget.querySelector('.port-target');
+        const targetPortRect = targetPort.getBoundingClientRect();
+
+        const endX = targetPortRect.left + targetPortRect.width / 2 - boardRect.left;
+        const endY = targetPortRect.top + targetPortRect.height / 2 - boardRect.top;
+        const cpX = (startPortCoords.x + endX) / 2;
+
+        const fixedWire = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        fixedWire.setAttribute('d', `M ${startPortCoords.x} ${startPortCoords.y} C ${cpX} ${startPortCoords.y}, ${cpX} ${endY}, ${endX} ${endY}`);
+        fixedWire.setAttribute('stroke', '#34d399');
+        fixedWire.setAttribute('stroke-width', '4');
+        fixedWire.setAttribute('fill', 'none');
+        fixedWire.setAttribute('class', 'cable-line');
+        document.getElementById('fixed-wires').appendChild(fixedWire);
+
+        // Підсвічуємо та блокуємо з'єднані порти
+        const sourceEl = document.querySelector(`[data-source="${activeCableSource}"]`);
+        sourceEl.classList.add('opacity-50', 'pointer-events-none');
+        matchedTarget.classList.add('border-emerald-400', 'bg-emerald-950/60');
+        targetPort.classList.replace('bg-slate-600', 'bg-emerald-400');
+
+        if (cableConnectedCount >= 4) {
+          setTimeout(finishCablesGame, 700);
+        }
+      } else {
+        playErrorBeep();
+      }
+    }
+
+    function finishCablesGame() {
+      appState.stars.g2 = 3;
+      updateHeaderStars();
+      showMissionModal('Кабелі Зв\'язку Підключено!', 'Всі види інформації: текстова, звукова, числова й графічна знайшли свої порти!', 3, 'pipeline');
+    }
+
+    /* =======================================================
+       4. МІНІ-ГРА 3: КОНВЕЄР ІНФО-ПРОЦЕСІВ (КОНСТРУКТОР)
+       ======================================================= */
+    const pipelineData = [
+      { correctSlot: 0, label: '📷 Камера робить знімок', proc: 'Отримання' },
+      { correctSlot: 1, label: '💾 Фото пишеться на карту SD', proc: 'Збереження' },
+      { correctSlot: 2, label: '🎨 Фільтр та обрізка в редакторі', proc: 'Опрацювання' },
+      { correctSlot: 3, label: '📡 Відправка фото в газету', proc: 'Передавання' }
+    ];
+
+    let currentSlotsState = [null, null, null, null];
+
+    function startPipelineGame() {
+      resetPipeline();
+      navigateTo('game-pipeline');
+    }
+
+    function resetPipeline() {
+      currentSlotsState = [null, null, null, null];
+      document.getElementById('pipeline-placed-count').textContent = '0';
+      
+      const launchBtn = document.getElementById('launch-pipeline-btn');
+      launchBtn.disabled = true;
+      launchBtn.className = 'px-6 py-2.5 rounded-2xl bg-slate-700 text-slate-400 font-brand font-bold text-xs sm:text-sm cursor-not-allowed transition flex items-center space-x-2';
+
+      // Очищення слотів
+      document.querySelectorAll('.pipeline-slot').forEach(slot => {
+        slot.className = 'pipeline-slot bg-slate-800/80 border-2 border-dashed border-slate-600 rounded-2xl p-2.5 min-h-[95px] flex flex-col items-center justify-center text-center transition';
+        slot.querySelector('.slot-content').innerHTML = '<span class="text-xs text-slate-500 italic">Поклади блок сюди</span>';
+      });
+
+      // Рендер перемішаних карток
+      const container = document.getElementById('pipeline-pieces');
+      container.innerHTML = '';
+
+      // Перемішуємо копію
+      const shuffled = [...pipelineData].sort(() => Math.random() - 0.5);
+
+      shuffled.forEach((item, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'pipeline-piece bg-slate-800 hover:bg-slate-700 border-2 border-purple-400/60 p-2.5 rounded-2xl text-left shadow transition active:scale-95 flex flex-col justify-between';
+        btn.innerHTML = `
+          <div class="text-[9px] font-bold text-purple-300 uppercase">${item.proc}</div>
+          <div class="text-xs font-bold text-white mt-1 leading-snug">${item.label}</div>
+        `;
+        btn.onclick = () => placePieceInFirstFreeSlot(item, btn);
+        container.appendChild(btn);
+      });
+    }
+
+    function placePieceInFirstFreeSlot(item, pieceBtn) {
+      const freeSlotIdx = currentSlotsState.findIndex(s => s === null);
+      if (freeSlotIdx === -1) return;
+
+      playSnapSound();
+      currentSlotsState[freeSlotIdx] = item;
+      pieceBtn.classList.add('opacity-30', 'pointer-events-none');
+
+      const slot = document.querySelector(`[data-step-slot="${freeSlotIdx}"]`);
+      slot.classList.replace('border-slate-600', 'border-purple-400');
+      slot.classList.add('bg-purple-950/40');
+      slot.querySelector('.slot-content').innerHTML = `
+        <div class="text-xs font-bold text-white mt-1">${item.label}</div>
+      `;
+
+      const placedCount = currentSlotsState.filter(s => s !== null).length;
+      document.getElementById('pipeline-placed-count').textContent = placedCount;
+
+      if (placedCount === 4) {
+        const launchBtn = document.getElementById('launch-pipeline-btn');
+        launchBtn.disabled = false;
+        launchBtn.className = 'px-6 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-900 font-brand font-bold text-xs sm:text-sm cursor-pointer shadow-lg shadow-amber-500/20 transition flex items-center space-x-2 animate-pulse-soft';
+      }
+    }
+
+    function launchPipelineCheck() {
+      let allCorrect = true;
+      currentSlotsState.forEach((item, idx) => {
+        if (!item || item.correctSlot !== idx) allCorrect = false;
+      });
+
+      if (allCorrect) {
+        playSuccessFanfare();
+        // Анімація проходження енергії через слоти
+        document.querySelectorAll('.pipeline-slot').forEach((s, idx) => {
+          setTimeout(() => {
+            s.classList.remove('bg-purple-950/40');
+            s.classList.add('bg-emerald-600/40', 'border-emerald-400');
+          }, idx * 180);
+        });
+
+        setTimeout(() => {
+          appState.stars.g3 = 3;
+          updateHeaderStars();
+          showMissionModal('Конвеєр Працює Досконало!', 'Отримання ➔ Збереження ➔ Опрацювання ➔ Передавання виконано бездоганно!', 3, 'scanner');
+        }, 1100);
+      } else {
+        playErrorBeep();
+        alert('Увага: послідовність процесів порушено! Спочатку ми отримуємо інформацію, потім зберігаємо її, далі опрацьовуємо та передаємо. Спробуй ще раз!');
+        resetPipeline();
+      }
+    }
+
+    /* =======================================================
+       5. МІНІ-ГРА 4: ІНФО-РЕНТГЕН ФАКТІВ (СКАНЕР-ЛУПА)
+       ======================================================= */
+    const scannerDocs = [
+      {
+        claim: "«Близько 80-90% інформації про світ людина сприймає саме за допомогою очей (зору).»",
+        clue: "Науковий факт підтверджено: зір є домінантним сенсорним каналом людини.",
+        isTrue: true
+      },
+      {
+        claim: "«Будь-яке повідомлення в інтернеті є правдою і не потребує перевірки.»",
+        clue: "Увага, маніпуляція! В мережі безліч неперевірених фейків та вигадок.",
+        isTrue: false
+      },
+      {
+        claim: "«Світлофор на дорозі передає водіям графічну інформацію кольоровими знаками.»",
+        clue: "Дійсно: червоне, жовте та зелене світло — це візуальні графічні сигнали.",
+        isTrue: true
+      },
+      {
+        claim: "«Звукову інформацію можна спробувати на смак язиком або відчути носом.»",
+        clue: "Біологічна помилка! Звук сприймається виключно органами слуху — вухами.",
+        isTrue: false
+      }
+    ];
+
+    let currentScannerIdx = 0;
+    let scannerScore = 0;
+
+    function startScannerGame() {
+      currentScannerIdx = 0;
+      scannerScore = 0;
+      loadScannerDoc();
+      initXrayLens();
+      navigateTo('game-scanner');
+    }
+
+    function loadScannerDoc() {
+      document.getElementById('scanner-doc-idx').textContent = currentScannerIdx + 1;
+      const doc = scannerDocs[currentScannerIdx];
+      document.getElementById('scanner-claim').textContent = doc.claim;
+      document.getElementById('xray-clue').textContent = doc.clue;
+
+      const feedback = document.getElementById('scanner-feedback');
+      feedback.style.opacity = '0';
+      feedback.textContent = '';
+    }
+
+    function initXrayLens() {
+      const viewport = document.getElementById('scanner-viewport');
+      const lens = document.getElementById('xray-lens');
+
+      function updateLens(clientX, clientY) {
+        const rect = viewport.getBoundingClientRect();
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+
+        if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
+          lens.style.opacity = '1';
+          lens.style.left = `${x}px`;
+          lens.style.top = `${y}px`;
+        } else {
+          lens.style.opacity = '0';
+        }
+      }
+
+      viewport.onpointermove = (e) => updateLens(e.clientX, e.clientY);
+      viewport.onpointerdown = (e) => updateLens(e.clientX, e.clientY);
+      viewport.onpointerleave = () => { lens.style.opacity = '0'; };
+    }
+
+    function applyStampDecision(userDecision) {
+      const doc = scannerDocs[currentScannerIdx];
+      const feedback = document.getElementById('scanner-feedback');
+
+      if (userDecision === doc.isTrue) {
+        playSnapSound();
+        scannerScore++;
+        feedback.textContent = 'Вердикт правильний! Рентген-експертиза підтвердила твоє рішення. 🎯';
+        feedback.className = 'text-center text-xs font-bold text-emerald-400 opacity-100 transition-all';
+      } else {
+        playErrorBeep();
+        feedback.textContent = 'Помилка експертизи! Потрібно було ретельніше просвітити факт лупою. 🧐';
+        feedback.className = 'text-center text-xs font-bold text-rose-400 opacity-100 transition-all';
+      }
+
+      setTimeout(() => {
+        currentScannerIdx++;
+        if (currentScannerIdx < scannerDocs.length) {
+          loadScannerDoc();
+        } else {
+          finishScannerGame();
+        }
+      }, 1500);
+    }
+
+    function finishScannerGame() {
+      let stars = 3;
+      if (scannerScore < 3) stars = 2;
+      appState.stars.g4 = Math.max(appState.stars.g4, stars);
+      updateHeaderStars();
+      showMissionModal('Всі Розслідування Завершено!', 'Ти навчився перевіряти правдивість інформації за допомогою фактчекінгу!', stars, 'cert');
+    }
+
+    /* =======================================================
+       6. МОДАЛКА ПЕРЕМОГИ
+       ======================================================= */
+    function showMissionModal(title, desc, stars, nextKey) {
+      playSuccessFanfare();
+      appState.nextMission = nextKey;
+      document.getElementById('modal-title').textContent = title;
+      document.getElementById('modal-desc').textContent = desc;
+
+      let s = '';
+      for (let i = 0; i < stars; i++) s += '⭐ ';
+      document.getElementById('modal-stars').textContent = s;
+
+      document.getElementById('mission-modal').classList.remove('hidden');
+    }
+
+    function handleModalNext() {
+      document.getElementById('mission-modal').classList.add('hidden');
+      if (appState.nextMission === 'cables') startCablesGame();
+      else if (appState.nextMission === 'pipeline') startPipelineGame();
+      else if (appState.nextMission === 'scanner') startScannerGame();
+      else if (appState.nextMission === 'cert') openCertificate();
+      else navigateTo('hub');
+    }
+
+    function closeModalToHub() {
+      document.getElementById('mission-modal').classList.add('hidden');
+      navigateTo('hub');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      updateHeaderStars();
+    });
+  </script>
+</body>
+</html>
