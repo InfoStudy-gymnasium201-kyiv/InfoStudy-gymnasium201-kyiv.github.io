@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Кібер-Вартовий: Гра-тестування з техніки безпеки</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <style>
+    * {
+      font-family: 'Nunito', sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Vector flat aesthetic shadows & animations */
+    .vector-box {
+      border: 3px solid #1e293b;
+      box-shadow: 0 6px 0 #1e293b;
+      transition: all 0.15s ease-in-out;
+    }
+    .vector-box:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 0 #1e293b;
+    }
+    .vector-box:active {
+      transform: translateY(3px);
+      box-shadow: 0 3px 0 #1e293b;
+    }
+    .vector-box-static {
+      border: 3px solid #1e293b;
+      box-shadow: 0 6px 0 #1e293b;
+    }
+    .vector-btn-correct {
+      border: 3px solid #065f46 !important;
+      background-color: #10b981 !important;
+      color: #ffffff !important;
+      box-shadow: 0 6px 0 #065f46 !important;
+    }
+    .vector-btn-wrong {
+      border: 3px solid #991b1b !important;
+      background-color: #ef4444 !important;
+      color: #ffffff !important;
+      box-shadow: 0 6px 0 #991b1b !important;
+    }
+
+    /* Robot Floating & Eye Blink Animation */
+    @keyframes floatRobot {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(1.5deg); }
+    }
+    .floating-robot {
+      animation: floatRobot 3.5s ease-in-out infinite;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.4)); }
+      50% { filter: drop-shadow(0 0 14px rgba(59, 130, 246, 0.8)); }
+    }
+    .pulse-glow {
+      animation: pulseGlow 2s infinite;
+    }
+
+    /* Print styles for Certificate */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #certificate-modal, #certificate-modal * {
+        visibility: visible;
+      }
+      #certificate-modal {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: white;
+        padding: 0;
+        margin: 0;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 flex flex-col justify-between overflow-x-hidden relative">
+
+  <!-- Background decorative vector shapes -->
+  <div class="fixed inset-0 pointer-events-none opacity-20 z-0 overflow-hidden">
+    <svg class="absolute top-10 left-5 w-24 h-24 text-blue-500" viewBox="0 0 100 100" fill="currentColor">
+      <circle cx="50" cy="50" r="40" />
+    </svg>
+    <svg class="absolute bottom-20 left-10 w-32 h-32 text-amber-400" viewBox="0 0 100 100" fill="currentColor">
+      <polygon points="50,15 90,85 10,85" />
+    </svg>
+    <svg class="absolute top-1/4 right-8 w-28 h-28 text-emerald-400" viewBox="0 0 100 100" fill="currentColor">
+      <rect x="15" y="15" width="70" height="70" rx="15" />
+    </svg>
+    <svg class="absolute bottom-10 right-1/4 w-20 h-20 text-indigo-400" viewBox="0 0 100 100" fill="currentColor">
+      <circle cx="50" cy="50" r="30" />
+    </svg>
+  </div>
+
+  <!-- Sound & Top Navigation Bar -->
+  <header class="relative z-10 w-full max-w-4xl mx-auto px-4 pt-4 pb-2 flex items-center justify-between">
+    <div class="flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-2xl border-2 border-slate-800 shadow-[0_3px_0_#1e293b]">
+      <svg class="w-6 h-6 text-indigo-600" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+      </svg>
+      <span class="font-extrabold text-sm sm:text-base text-slate-800 tracking-wide uppercase">Кібер-Вартовий ТБ</span>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <!-- Sound Toggle -->
+      <button id="sound-btn" onclick="toggleSound()" class="bg-white p-2 rounded-xl border-2 border-slate-800 shadow-[0_3px_0_#1e293b] active:translate-y-0.5 active:shadow-[0_1px_0_#1e293b] transition flex items-center justify-center text-slate-700 hover:text-indigo-600" title="Звук">
+        <svg id="sound-icon-on" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+        </svg>
+        <svg id="sound-icon-off" class="w-6 h-6 hidden text-red-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Game Container -->
+  <main class="relative z-10 flex-1 max-w-4xl w-full mx-auto px-4 py-3 flex flex-col justify-center">
+
+    <!-- 1. START / WELCOME SCREEN -->
+    <section id="start-screen" class="bg-white rounded-3xl vector-box-static p-6 sm:p-10 text-center flex flex-col items-center">
+      <!-- Vector Mascot (Robot Robik) -->
+      <div class="relative mb-6 floating-robot">
+        <svg class="w-36 h-36 sm:w-44 sm:h-44 pulse-glow" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Antenna -->
+          <line x1="100" y1="20" x2="100" y2="45" stroke="#1e293b" stroke-width="6" stroke-linecap="round"/>
+          <circle cx="100" cy="16" r="10" fill="#f59e0b" stroke="#1e293b" stroke-width="4"/>
+          <!-- Ears / Bolts -->
+          <rect x="34" y="68" width="12" height="24" rx="4" fill="#64748b" stroke="#1e293b" stroke-width="4"/>
+          <rect x="154" y="68" width="12" height="24" rx="4" fill="#64748b" stroke="#1e293b" stroke-width="4"/>
+          <!-- Head -->
+          <rect x="42" y="45" width="116" height="85" rx="24" fill="#38bdf8" stroke="#1e293b" stroke-width="5"/>
+          <!-- Screen Face -->
+          <rect x="56" y="58" width="88" height="58" rx="14" fill="#0f172a"/>
+          <!-- Eyes -->
+          <circle id="bot-eye-left" cx="80" cy="84" r="10" fill="#22c55e" />
+          <circle id="bot-eye-right" cx="120" cy="84" r="10" fill="#22c55e" />
+          <circle cx="83" cy="81" r="3" fill="#ffffff" />
+          <circle cx="123" cy="81" r="3" fill="#ffffff" />
+          <!-- Smile -->
+          <path d="M90 102 Q100 110 110 102" stroke="#22c55e" stroke-width="4" stroke-linecap="round" fill="none"/>
+          <!-- Cheeks -->
+          <circle cx="68" cy="94" r="4" fill="#f43f5e"/>
+          <circle cx="132" cy="94" r="4" fill="#f43f5e"/>
+          <!-- Body -->
+          <rect x="62" y="135" width="76" height="50" rx="16" fill="#6366f1" stroke="#1e293b" stroke-width="5"/>
+          <!-- Body badge (Shield) -->
+          <path d="M100 146 L112 153 V164 C112 171 100 176 100 176 C100 176 88 171 88 164 V153 Z" fill="#fbbf24" stroke="#1e293b" stroke-width="3"/>
+        </svg>
+      </div>
+
+      <h1 class="text-3xl sm:text-4xl font-black text-slate-800 mb-2 tracking-tight">
+        Кібер-Вартовий: <span class="text-indigo-600 underline decoration-amber-400 decoration-wavy">Місія Безпеки</span>
+      </h1>
+      <p class="text-slate-600 text-base sm:text-lg max-w-lg mb-6 font-semibold">
+        Привіт, юний досліднику! Я твій робот-помічник <b class="text-indigo-600">Робик</b>. Доведи, що знаєш усі правила поведінки в комп'ютерному класі та отримай звання Справжнього Майстра Безпеки!
+      </p>
+
+      <!-- Player Info Inputs -->
+      <div class="w-full max-w-sm mb-6 text-left">
+        <label for="player-name" class="block text-xs font-black uppercase text-slate-700 tracking-wider mb-1.5">
+          Введи своє ім'я або нікнейм:
+        </label>
+        <div class="relative">
+          <input type="text" id="player-name" placeholder="Наприклад: Максим, Аліна чи Програміст" maxlength="25"
+            class="w-full bg-slate-50 border-3 border-slate-800 rounded-2xl px-4 py-3 font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-indigo-300 focus:bg-white transition vector-box-static">
+        </div>
+      </div>
+
+      <!-- Features summary badges -->
+      <div class="grid grid-cols-3 gap-2 sm:gap-4 w-full max-w-md mb-8">
+        <div class="bg-amber-50 border-2 border-amber-300 p-2.5 rounded-2xl flex flex-col items-center text-center">
+          <span class="text-xl">⚡</span>
+          <span class="text-xs font-black text-amber-800 mt-1">15 питань</span>
+        </div>
+        <div class="bg-rose-50 border-2 border-rose-300 p-2.5 rounded-2xl flex flex-col items-center text-center">
+          <span class="text-xl">🔋</span>
+          <span class="text-xs font-black text-rose-800 mt-1">3 Батарейки</span>
+        </div>
+        <div class="bg-emerald-50 border-2 border-emerald-300 p-2.5 rounded-2xl flex flex-col items-center text-center">
+          <span class="text-xl">🎖️</span>
+          <span class="text-xs font-black text-emerald-800 mt-1">Сертифікат</span>
+        </div>
+      </div>
+
+      <!-- Start Button -->
+      <button onclick="startGame()" class="w-full max-w-sm bg-amber-400 hover:bg-amber-300 text-slate-900 font-black text-xl py-4 px-8 rounded-2xl vector-box flex items-center justify-center gap-3 transition">
+        <span>ПОЧАТИ МІСІЮ</span>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </section>
+
+
+    <!-- 2. ACTIVE QUIZ GAME SCREEN -->
+    <section id="quiz-screen" class="hidden flex flex-col gap-4">
+      
+      <!-- Top HUD: Lives, Progress, Score -->
+      <div class="bg-white rounded-2xl vector-box-static p-4 flex flex-wrap items-center justify-between gap-3">
+        <!-- Batteries / Lives -->
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-black uppercase tracking-wider text-slate-500">Енергія:</span>
+          <div id="lives-container" class="flex items-center gap-1.5">
+            <!-- 3 Battery SVG icons injected dynamically -->
+          </div>
+        </div>
+
+        <!-- Progress counter -->
+        <div class="flex items-center gap-2 bg-slate-100 px-3 py-1 rounded-xl border-2 border-slate-800 font-black text-xs sm:text-sm text-slate-700">
+          <span id="question-number">Питання 1/15</span>
+        </div>
+
+        <!-- Score & Combo -->
+        <div class="flex items-center gap-2">
+          <div class="bg-amber-100 border-2 border-amber-500 text-amber-900 font-black px-3 py-1 rounded-xl text-xs sm:text-sm flex items-center gap-1">
+            <span>⭐</span>
+            <span id="score-display">0</span>
+          </div>
+          <div id="streak-badge" class="hidden bg-purple-100 border-2 border-purple-500 text-purple-900 font-black px-2 py-1 rounded-xl text-xs animate-bounce">
+            COMBO x<span id="streak-multiplier">1</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="w-full bg-slate-200 h-3.5 rounded-full border-2 border-slate-800 overflow-hidden p-0.5">
+        <div id="progress-bar-fill" class="bg-gradient-to-r from-indigo-500 to-emerald-400 h-full rounded-full transition-all duration-300" style="width: 6.66%;"></div>
+      </div>
+
+      <!-- Main Question Card with Vector Style -->
+      <div class="bg-white rounded-3xl vector-box-static p-5 sm:p-7 relative">
+        
+        <!-- Category & Icon Badge -->
+        <div class="flex items-center justify-between gap-2 mb-4">
+          <span id="question-category" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wide bg-indigo-100 text-indigo-800 border-2 border-indigo-300">
+            🛡️ Правила поведінки
+          </span>
+          
+          <!-- Mini Mascot Reaction -->
+          <div id="mini-mascot" class="flex items-center gap-1.5 text-xs font-extrabold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-xl border border-slate-300">
+            <span id="mascot-emoji">🤖</span>
+            <span id="mascot-text">«Думай уважно!»</span>
+          </div>
+        </div>
+
+        <!-- Question Text -->
+        <h2 id="question-text" class="text-xl sm:text-2xl font-black text-slate-800 leading-snug mb-6">
+          Завантаження питання...
+        </h2>
+
+        <!-- Answer Options Grid -->
+        <div id="options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-2">
+          <!-- Options injected via JS -->
+        </div>
+
+        <!-- Explanatory Feedback Sheet (Reveals after answer) -->
+        <div id="feedback-card" class="hidden mt-5 p-4 rounded-2xl border-3 border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 transition-all">
+          <div class="flex items-start gap-3 w-full">
+            <div id="feedback-icon" class="text-3xl flex-shrink-0">💡</div>
+            <div>
+              <h4 id="feedback-title" class="font-black text-base text-slate-900">Пояснення безпеки:</h4>
+              <p id="feedback-desc" class="text-sm font-semibold text-slate-700 mt-0.5 leading-relaxed"></p>
+            </div>
+          </div>
+          <button id="next-btn" onclick="nextQuestion()" class="w-full sm:w-auto flex-shrink-0 bg-indigo-600 hover:bg-indigo-500 text-white font-black px-6 py-3 rounded-xl vector-box flex items-center justify-center gap-2">
+            <span>Далі</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- 3. GAME OVER / RESULT SCREEN -->
+    <section id="result-screen" class="hidden bg-white rounded-3xl vector-box-static p-6 sm:p-10 text-center flex flex-col items-center">
+      
+      <!-- Trophy / Badge SVG -->
+      <div class="mb-4">
+        <div id="result-icon-container" class="w-28 h-28 sm:w-32 sm:h-32 mx-auto floating-robot flex items-center justify-center">
+          <!-- SVG Cup or Shield injected -->
+        </div>
+      </div>
+
+      <span id="result-badge-text" class="px-4 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-100 text-amber-800 border-2 border-amber-400 mb-2">
+        Місія Завершена!
+      </span>
+
+      <h2 id="result-title" class="text-2xl sm:text-4xl font-black text-slate-800 mb-1">
+        Вітаємо, Знавцю Безпеки!
+      </h2>
+      <p id="result-subtitle" class="text-slate-600 font-bold text-sm sm:text-base max-w-md mb-6">
+        Ти успішно склав перевірку правил поведінки та безпеки в комп'ютерному кабінеті!
+      </p>
+
+      <!-- Stats Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-lg mb-6">
+        <div class="bg-indigo-50 border-2 border-indigo-200 p-3 rounded-2xl">
+          <span class="text-xs font-extrabold text-indigo-700 block">Правильно</span>
+          <span id="stat-correct" class="text-2xl font-black text-indigo-900">15/15</span>
+        </div>
+        <div class="bg-emerald-50 border-2 border-emerald-200 p-3 rounded-2xl">
+          <span class="text-xs font-extrabold text-emerald-700 block">Точність</span>
+          <span id="stat-accuracy" class="text-2xl font-black text-emerald-900">100%</span>
+        </div>
+        <div class="bg-amber-50 border-2 border-amber-200 p-3 rounded-2xl">
+          <span class="text-xs font-extrabold text-amber-700 block">Бали</span>
+          <span id="stat-score" class="text-2xl font-black text-amber-900">1500</span>
+        </div>
+        <div class="bg-purple-50 border-2 border-purple-200 p-3 rounded-2xl">
+          <span class="text-xs font-extrabold text-purple-700 block">Макс. Комбо</span>
+          <span id="stat-streak" class="text-2xl font-black text-purple-900">x5</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-3 w-full max-w-md">
+        <button onclick="openCertificate()" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white font-black text-base py-3.5 px-5 rounded-2xl vector-box flex items-center justify-center gap-2">
+          <span>📜 Сертифікат Знавця</span>
+        </button>
+        <button onclick="toggleReviewModal(true)" class="flex-1 bg-indigo-500 hover:bg-indigo-400 text-white font-black text-base py-3.5 px-5 rounded-2xl vector-box flex items-center justify-center gap-2">
+          <span>🔍 Огляд відповідей</span>
+        </button>
+      </div>
+
+      <button onclick="restartGame()" class="mt-4 text-slate-500 hover:text-slate-800 font-extrabold text-sm underline decoration-slate-400">
+        Пройти гру ще раз 🔄
+      </button>
+
+    </section>
+
+  </main>
+
+  <!-- 4. REVIEW MODAL -->
+  <div id="review-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl vector-box-static max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden">
+      <!-- Modal Header -->
+      <div class="p-4 sm:p-5 border-b-2 border-slate-200 flex items-center justify-between bg-slate-50">
+        <h3 class="font-black text-lg sm:text-xl text-slate-800 flex items-center gap-2">
+          <span>📋 Огляд усіх 15 питань</span>
+        </h3>
+        <button onclick="toggleReviewModal(false)" class="text-slate-500 hover:text-slate-800 p-1.5 rounded-lg border-2 border-slate-800 bg-white vector-box">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Modal Questions List Scrollable -->
+      <div id="review-list" class="p-4 sm:p-6 overflow-y-auto space-y-4 text-left">
+        <!-- Review cards injected via JS -->
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 5. CERTIFICATE MODAL -->
+  <div id="certificate-modal" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl vector-box-static max-w-2xl w-full p-6 sm:p-8 flex flex-col items-center relative overflow-hidden text-center">
+      
+      <!-- Close Button (hidden during print) -->
+      <button onclick="closeCertificate()" class="no-print absolute top-4 right-4 text-slate-500 hover:text-slate-800 p-1.5 rounded-xl border-2 border-slate-800 bg-white vector-box">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+
+      <!-- Certificate Vector Border & Content -->
+      <div class="w-full border-4 border-dashed border-indigo-600 rounded-2xl p-5 sm:p-8 bg-gradient-to-br from-indigo-50/50 via-white to-amber-50/50 relative">
+        
+        <!-- Header Shield Icon -->
+        <div class="w-16 h-16 mx-auto mb-2 text-indigo-600">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/>
+          </svg>
+        </div>
+
+        <span class="text-xs font-black uppercase tracking-widest text-indigo-700">Офіційний Документ</span>
+        <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">СЕРТИФІКАТ БЕЗПЕКИ</h2>
+        <p class="text-xs font-extrabold text-slate-500 tracking-wider uppercase mb-4">Кабінет інформатики та ІКТ</p>
+
+        <p class="text-sm font-semibold text-slate-600">Цим підтверджується, що</p>
+        <h3 id="cert-player-name" class="text-2xl sm:text-3xl font-black text-indigo-700 my-2 underline decoration-amber-400">
+          Учень-Дослідник
+        </h3>
+        
+        <p class="text-xs sm:text-sm font-semibold text-slate-600 max-w-md mx-auto mb-4">
+          успішно засвоїв(ла) правила техніки безпеки, гігієни праці, ергономіки та захисту комп'ютерної техніки і отримує кваліфікацію:
+        </p>
+
+        <div class="inline-block bg-amber-100 border-2 border-amber-400 px-4 py-1.5 rounded-xl font-black text-amber-900 text-sm sm:text-base mb-6">
+          🎖️ <span id="cert-rank-title">Майстер Кібербезпеки</span>
+        </div>
+
+        <!-- Footer Signatures & Date -->
+        <div class="grid grid-cols-2 gap-4 text-xs font-bold text-slate-500 border-t-2 border-slate-200 pt-3">
+          <div class="text-left">
+            <span>Дата: </span><span id="cert-date" class="text-slate-800"></span><br>
+            <span>Результат: </span><span id="cert-score-text" class="text-emerald-700 font-extrabold"></span>
+          </div>
+          <div class="text-right flex flex-col items-end">
+            <span class="text-indigo-600 font-extrabold text-sm">Роботик 🤖</span>
+            <span>Кібер-Інструктор ТБ</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Action buttons inside modal -->
+      <div class="no-print mt-6 flex gap-3 w-full justify-center">
+        <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-black px-6 py-3 rounded-xl vector-box flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+          <span>Друкувати / Зберегти PDF</span>
+        </button>
+        <button onclick="closeCertificate()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-black px-5 py-3 rounded-xl vector-box">
+          Закрити
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- Footer -->
+  <footer class="relative z-10 w-full text-center py-3 text-xs font-bold text-slate-500">
+    Навчальна інтерактивна гра для уроків інформатики • Правила техніки безпеки 🛡️
+  </footer>
+
+
+  <!-- Game Script -->
+  <script>
+    // ------------------------------------------------------------
+    // 1. DATA: 15 Safety Questions
+    // ------------------------------------------------------------
+    const quizQuestions = [
+      {
+        id: 1,
+        category: "🚪 Вхід до класу",
+        catColor: "bg-blue-100 text-blue-800 border-blue-300",
+        question: "Коли учням дозволено заходити до кабінету інформатики?",
+        options: [
+          "Лише з дозволу вчителя, спокійно і без поспіху",
+          "У будь-який момент під час перерви",
+          "Як тільки пролунав дзвінок, забігаючи першим",
+          "Тільки якщо двері відчинені навстіж"
+        ],
+        correct: 0,
+        explanation: "Вхід до кабінету інформатики дозволений виключно за вказівкою вчителя для забезпечення дисципліни та безпеки учнів."
+      },
+      {
+        id: 2,
+        category: "🍔 Їжа та напої",
+        catColor: "bg-amber-100 text-amber-800 border-amber-300",
+        question: "Чи дозволено приносити та вживати їжу чи напої біля комп'ютера?",
+        options: [
+          "Категорично заборонено — ніякої їжі та напоїв біля ПК",
+          "Можна, якщо пити акуратно через соломинку",
+          "Дозволяється тільки чіпси та сухе печиво",
+          "Можна ставити відкриту пляшку з водою на системний блок"
+        ],
+        correct: 0,
+        explanation: "Рідина та крихти можуть потрапити всередину клавіатури або апаратури, спричинити замикання та зіпсувати техніку."
+      },
+      {
+        id: 3,
+        category: "⚡ Електробезпека",
+        catColor: "bg-rose-100 text-rose-800 border-rose-300",
+        question: "Що робити, якщо ти відчув запах гару, побачив дим або іскри біля комп'ютера?",
+        options: [
+          "Негайно повідомити вчителя, не торкаючись дротів та приладів",
+          "Спробувати залити місце займання водою з пляшки",
+          "Швидко висмикнути кабель живлення руками з розетки",
+          "Продовжувати грати, поки монітор не згасне"
+        ],
+        correct: 0,
+        explanation: "Ніколи не торкайтеся пошкоджених проводів і не тушіть техніку водою! Одразу голосно попередьте вчителя."
+      },
+      {
+        id: 4,
+        category: "👀 Зір та ергономіка",
+        catColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
+        question: "Яка оптимальна безпечна відстань повинна бути від очей до монітора?",
+        options: [
+          "50–70 см (приблизно довжина витягнутої руки)",
+          "15–20 см (якомога ближче, щоб краще бачити дрібний шрифт)",
+          "Не менше 2 метрів",
+          "Відстань не має жодного значення для очей"
+        ],
+        correct: 0,
+        explanation: "Відстань 50–70 см захищає м'язи очей від перевтоми та знижує навантаження на зір під час уроку."
+      },
+      {
+        id: 5,
+        category: "🔌 Дроти та живлення",
+        catColor: "bg-rose-100 text-rose-800 border-rose-300",
+        question: "Чому суворо заборонено торкатися кабелів, розеток і задньої панелі системного блоку?",
+        options: [
+          "Існує реальна небезпека ураження електричним струмом (220В)",
+          "Можна випадково стерти шпалери з робочого столу",
+          "Тому що пальці можуть забруднитися пилом",
+          "Щоб не розірвати інтернет-з'єднання"
+        ],
+        correct: 0,
+        explanation: "Кабелі та блоки живлення знаходяться під високою напругою 220В, небезпечною для життя та здоров'я!"
+      },
+      {
+        id: 6,
+        category: "🪑 Правильна постава",
+        catColor: "bg-indigo-100 text-indigo-800 border-indigo-300",
+        question: "Як правильно сидіти в кріслі за комп'ютерним столом?",
+        options: [
+          "Спина рівна, плечі розслаблені, ступні стоять на підлозі",
+          "Підібгавши одну або обидві ноги під себе на сидіння",
+          "Напівлежачи, сильно витягнувши ноги під сусідній стіл",
+          "Спираючись підборіддям на стіл упритул до екрана"
+        ],
+        correct: 0,
+        explanation: "Правильна посадка (кут у колінах та ліктях ~90°) запобігає викривленню хребта та швидкій втомі спини."
+      },
+      {
+        id: 7,
+        category: "🧼 Гігієна рук",
+        catColor: "bg-cyan-100 text-cyan-800 border-cyan-300",
+        question: "Чи можна сідати працювати за комп'ютер з мокрими або брудними руками?",
+        options: [
+          "Ні, руки обов'язково мають бути чистими та сухими",
+          "Можна, якщо торкатися тільки мишки, а не клавіатури",
+          "Так, волога покращує ковзання пальців по клавішах",
+          "Можна тільки взимку"
+        ],
+        correct: 0,
+        explanation: "Вода — чудовий провідник струму, а вологі руки підвищують ризик електроудару та швидко забруднюють обладнання."
+      },
+      {
+        id: 8,
+        category: "🩺 Самопочуття",
+        catColor: "bg-red-100 text-red-800 border-red-300",
+        question: "Що робити, якщо під час роботи за комп'ютером у тебе заболіли очі чи голова?",
+        options: [
+          "Негайно сповістити вчителя та припинити роботу для відпочинку",
+          "Терпіти і продовжувати виконувати завдання до дзвінка",
+          "Потайки випити ліки, знайдені в рюкзаку",
+          "Збільшити яскравість монітора на максимальний рівень"
+        ],
+        correct: 0,
+        explanation: "При будь-якому дискомфорті слід одразу попередити викладача, щоб зробити паузу та гімнастику для очей."
+      },
+      {
+        id: 9,
+        category: "💻 Завершення роботи",
+        catColor: "bg-purple-100 text-purple-800 border-purple-300",
+        question: "Як правильно вимикати комп'ютер після завершення уроку?",
+        options: [
+          "Через меню «Пуск» -> «Завершення роботи» за командою вчителя",
+          "Різко висмикнути вилку з подовжувача чи розетки",
+          "Утримувати кнопку живлення на блоці, поки він не затихне",
+          "Просто вимкнути монітор кнопкою на передній панелі"
+        ],
+        correct: 0,
+        explanation: "Коректне вимкнення через операційну систему зберігає відкриті файли та запобігає пошкодженню системних дисків."
+      },
+      {
+        id: 10,
+        category: "👁️ Гімнастика для очей",
+        catColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
+        question: "Яка вправа є корисною для зняття напруги з очей під час перерви?",
+        options: [
+          "Покліпати очима, подивитися у вікно вдалину на хмари чи дерева",
+          "Почати грати в динамічну гру на смартфоні",
+          "Щосили потерти очі кулаками",
+          "Дивитися на яскраву лампу на стелі не кліпаючи"
+        ],
+        correct: 0,
+        explanation: "Переведення погляду на далекі об'єкти знімає спазм зорових м'язів і повертає фокус зору в природний стан."
+      },
+      {
+        id: 11,
+        category: "🏃 Поведінка в класі",
+        catColor: "bg-blue-100 text-blue-800 border-blue-300",
+        question: "Як слід пересуватися кабінетом інформатики?",
+        options: [
+          "Спокійним кроком, не бігаючи і не зачіпаючи кабелі під ногами",
+          "Кататися на офісному стільці наввипередки з однокласниками",
+          "Бігати та грати у квача між рядами комп'ютерів",
+          "Стрибати через комп'ютерні подовжувачі та системні блоки"
+        ],
+        correct: 0,
+        explanation: "У кабінеті встановлена дорога техніка і прокладені кабелі: біг може призвести до падіння учнів та перекидання техніки."
+      },
+      {
+        id: 12,
+        category: "💾 Флешки та файли",
+        catColor: "bg-amber-100 text-amber-800 border-amber-300",
+        question: "Що необхідно зробити перед підключенням власної USB-флешки до комп'ютера?",
+        options: [
+          "Отримати дозвіл учителя та перевірити носій антивірусом",
+          "Швидко відкрити всі невідомі файли з розширенням .exe",
+          "Передати флешку всім однокласникам по черзі без перевірки",
+          "Нічого, на флешках ніколи не буває вірусів"
+        ],
+        correct: 0,
+        explanation: "Зовнішні носії можуть містити шкідливі віруси, які здатні заблокувати роботу шкільної мережі."
+      },
+      {
+        id: 13,
+        category: "📚 Порядок на столі",
+        catColor: "bg-teal-100 text-teal-800 border-teal-300",
+        question: "Чи можна класти на клавіатуру, системний блок або монітор зошити, книжки та одяг?",
+        options: [
+          "Ні, це перекриває вентиляцію ПК і може спричинити перегрів та поломку",
+          "Так, це чудове місце для зберігання теплої куртки",
+          "Можна закривати монітор підручником, щоб він не світив",
+          "Можна класти бутерброд прямо на клавіатуру"
+        ],
+        correct: 0,
+        explanation: "Вентиляційні решітки системного блоку мають бути вільними, інакше процесор перегріється і вийде з ладу."
+      },
+      {
+        id: 14,
+        category: "🛠️ Збої та програми",
+        catColor: "bg-indigo-100 text-indigo-800 border-indigo-300",
+        question: "Що робити, якщо програма зависла або на екрані з'явилося незрозуміле повідомлення про помилку?",
+        options: [
+          "Покликати вчителя, спокійно пояснивши, що сталося",
+          "Почати сильно бити кулаком по клавіатурі та монітору",
+          "Спробувати розібрати системний блок ручкою або ножицями",
+          "Вимкнути світло у всьому кабінеті через щиток"
+        ],
+        correct: 0,
+        explanation: "Самостійні спроби «ремонту» чи удари по техніці лише погіршать ситуацію. Завжди звертайтеся до вчителя."
+      },
+      {
+        id: 15,
+        category: "🧯 Пожежна безпека",
+        catColor: "bg-rose-100 text-rose-800 border-rose-300",
+        question: "Чому електроприлади під напругою суворо заборонено гасити звичайною водою?",
+        options: [
+          "Вода проводить струм — це призведе до смертельного удару електрикою",
+          "Вода просто залишить плями на пластиковому корпусі",
+          "Тому що вода в класі призначена тільки для миття підлоги",
+          "Вода охолодить прилад надто швидко"
+        ],
+        correct: 0,
+        explanation: "Вода є чудовим провідником струму. Гасити електротехніку можна лише вуглекислотними або порошковими вогнегасниками після знеструмлення!"
+      }
+    ];
+
+    // ------------------------------------------------------------
+    // 2. GAME STATE
+    // ------------------------------------------------------------
+    let currentQuestionIdx = 0;
+    let score = 0;
+    let streak = 0;
+    let maxStreak = 0;
+    let lives = 3;
+    let correctCount = 0;
+    let playerName = "Юний Знавець";
+    let isSoundEnabled = true;
+    let userAnswersLog = []; // { question, userChoice, isCorrect, options }
+
+    // Web Audio Synthesizer for Retro Game SFX
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSound(type) {
+      if (!isSoundEnabled) return;
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'correct') {
+          // Cheerful chime (Do-Mi-Sol)
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, now); // C5
+          osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+          osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+          osc.start(now);
+          osc.stop(now + 0.4);
+        } else if (type === 'wrong') {
+          // Low buzz
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(160, now);
+          osc.frequency.setValueAtTime(110, now + 0.12);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+          osc.start(now);
+          osc.stop(now + 0.35);
+        } else if (type === 'win') {
+          // Fanfare
+          const notes = [523.25, 659.25, 783.99, 1046.50];
+          notes.forEach((freq, idx) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            o.type = 'sine';
+            o.frequency.setValueAtTime(freq, now + idx * 0.12);
+            g.gain.setValueAtTime(0.25, now + idx * 0.12);
+            g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.3);
+            o.start(now + idx * 0.12);
+            o.stop(now + idx * 0.12 + 0.3);
+          });
+        }
+      } catch (e) {
+        console.log("Audio not allowed yet", e);
+      }
+    }
+
+    function toggleSound() {
+      isSoundEnabled = !isSoundEnabled;
+      document.getElementById('sound-icon-on').classList.toggle('hidden', !isSoundEnabled);
+      document.getElementById('sound-icon-off').classList.toggle('hidden', isSoundEnabled);
+    }
+
+    // ------------------------------------------------------------
+    // 3. UI RENDERING & GAME LOOP
+    // ------------------------------------------------------------
+    function renderLives() {
+      const container = document.getElementById('lives-container');
+      container.innerHTML = '';
+      for (let i = 0; i < 3; i++) {
+        const isAlive = i < lives;
+        container.innerHTML += `
+          <div class="relative transition-all duration-300 ${isAlive ? 'scale-100 opacity-100' : 'scale-90 opacity-30'}">
+            <svg class="w-6 h-6 ${isAlive ? 'text-emerald-500' : 'text-slate-400'}" viewBox="0 0 24 24" fill="currentColor">
+              <rect x="2" y="6" width="18" height="12" rx="3" stroke="#1e293b" stroke-width="2"/>
+              <path d="M21 10v4" stroke="#1e293b" stroke-width="2" stroke-linecap="round"/>
+              <path d="M6 10v4M10 10v4M14 10v4" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+        `;
+      }
+    }
+
+    function updateStreakDisplay() {
+      const streakBadge = document.getElementById('streak-badge');
+      const streakMultiplier = document.getElementById('streak-multiplier');
+      if (streak >= 2) {
+        streakBadge.classList.remove('hidden');
+        streakMultiplier.textContent = streak;
+      } else {
+        streakBadge.classList.add('hidden');
+      }
+    }
+
+    function startGame() {
+      initAudio();
+      const nameInput = document.getElementById('player-name').value.trim();
+      if (nameInput) {
+        playerName = nameInput;
+      }
+
+      currentQuestionIdx = 0;
+      score = 0;
+      streak = 0;
+      maxStreak = 0;
+      lives = 3;
+      correctCount = 0;
+      userAnswersLog = [];
+
+      document.getElementById('start-screen').classList.add('hidden');
+      document.getElementById('result-screen').classList.add('hidden');
+      document.getElementById('quiz-screen').classList.remove('hidden');
+
+      renderLives();
+      updateScoreUI();
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      const q = quizQuestions[currentQuestionIdx];
+      
+      // Update HUD
+      document.getElementById('question-number').textContent = `Питання ${currentQuestionIdx + 1}/${quizQuestions.length}`;
+      const progressPercent = ((currentQuestionIdx + 1) / quizQuestions.length) * 100;
+      document.getElementById('progress-bar-fill').style.width = `${progressPercent}%`;
+
+      // Update Category
+      const catEl = document.getElementById('question-category');
+      catEl.className = `inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wide border-2 ${q.catColor}`;
+      catEl.textContent = q.category;
+
+      // Update Question text
+      document.getElementById('question-text').textContent = q.question;
+
+      // Reset Mascot
+      setMascot("🤖", "«Думай уважно!»");
+
+      // Hide Feedback
+      const fbCard = document.getElementById('feedback-card');
+      fbCard.classList.add('hidden');
+      fbCard.className = "hidden mt-5 p-4 rounded-2xl border-3 border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 transition-all";
+
+      // Render Options (shuffled display mapping)
+      const optionsContainer = document.getElementById('options-container');
+      optionsContainer.innerHTML = '';
+
+      const letters = ['A', 'B', 'C', 'D'];
+      
+      // Shuffle options while keeping track of original correct index
+      const indexedOptions = q.options.map((opt, idx) => ({ text: opt, originalIdx: idx }));
+      // Fisher-Yates shuffle
+      for (let i = indexedOptions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indexedOptions[i], indexedOptions[j]] = [indexedOptions[j], indexedOptions[i]];
+      }
+
+      indexedOptions.forEach((item, displayIdx) => {
+        const btn = document.createElement('button');
+        btn.className = `w-full text-left p-3.5 sm:p-4 rounded-2xl bg-slate-50 hover:bg-indigo-50 border-3 border-slate-800 font-bold text-slate-800 text-sm sm:text-base flex items-start gap-3 vector-box transition-all`;
+        btn.onclick = () => selectAnswer(item.originalIdx, btn, indexedOptions);
+        btn.innerHTML = `
+          <span class="w-7 h-7 flex-shrink-0 rounded-xl bg-slate-200 border-2 border-slate-800 flex items-center justify-center font-black text-xs text-slate-700">
+            ${letters[displayIdx]}
+          </span>
+          <span class="mt-0.5 leading-snug">${item.text}</span>
+        `;
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    function setMascot(emoji, text) {
+      document.getElementById('mascot-emoji').textContent = emoji;
+      document.getElementById('mascot-text').textContent = text;
+    }
+
+    function selectAnswer(chosenIdx, clickedBtn, displayedItems) {
+      // Disable all buttons
+      const buttons = document.querySelectorAll('#options-container button');
+      buttons.forEach(b => {
+        b.disabled = true;
+        b.classList.remove('vector-box');
+      });
+
+      const q = quizQuestions[currentQuestionIdx];
+      const isCorrect = (chosenIdx === q.correct);
+
+      // Save to log
+      userAnswersLog.push({
+        question: q.question,
+        category: q.category,
+        userChoiceText: q.options[chosenIdx],
+        correctText: q.options[q.correct],
+        isCorrect: isCorrect,
+        explanation: q.explanation
+      });
+
+      // Style buttons
+      buttons.forEach((btn, idx) => {
+        const item = displayedItems[idx];
+        if (item.originalIdx === q.correct) {
+          btn.className = `w-full text-left p-3.5 sm:p-4 rounded-2xl vector-btn-correct font-black text-sm sm:text-base flex items-start gap-3`;
+        } else if (item.originalIdx === chosenIdx && !isCorrect) {
+          btn.className = `w-full text-left p-3.5 sm:p-4 rounded-2xl vector-btn-wrong font-black text-sm sm:text-base flex items-start gap-3`;
+        } else {
+          btn.className += ` opacity-40`;
+        }
+      });
+
+      // Feedback Card UI
+      const fbCard = document.getElementById('feedback-card');
+      const fbTitle = document.getElementById('feedback-title');
+      const fbDesc = document.getElementById('feedback-desc');
+      const fbIcon = document.getElementById('feedback-icon');
+
+      if (isCorrect) {
+        correctCount++;
+        streak++;
+        if (streak > maxStreak) maxStreak = streak;
+
+        // Calculate score with multiplier
+        const points = 100 * (1 + (streak - 1) * 0.2);
+        score += Math.round(points);
+        updateScoreUI();
+        updateStreakDisplay();
+
+        playSound('correct');
+        setMascot("🎉", "«Чудова відповідь!»");
+
+        fbCard.className = "mt-5 p-4 rounded-2xl border-3 border-emerald-600 bg-emerald-50 flex flex-col sm:flex-row items-center justify-between gap-4 transition-all";
+        fbIcon.textContent = "✅";
+        fbTitle.textContent = "Правильно! Відмінна робота!";
+        fbTitle.className = "font-black text-base text-emerald-900";
+      } else {
+        streak = 0;
+        updateStreakDisplay();
+        lives--;
+        renderLives();
+
+        playSound('wrong');
+        setMascot("⚠️", "«Будь обережнішим!»");
+
+        fbCard.className = "mt-5 p-4 rounded-2xl border-3 border-rose-600 bg-rose-50 flex flex-col sm:flex-row items-center justify-between gap-4 transition-all";
+        fbIcon.textContent = "⚠️";
+        fbTitle.textContent = "Обережно! Небезпечна дія!";
+        fbTitle.className = "font-black text-base text-rose-900";
+      }
+
+      fbDesc.textContent = q.explanation;
+      fbCard.classList.remove('hidden');
+
+      // Check if player died (lives == 0)
+      if (lives <= 0) {
+        document.getElementById('next-btn').innerHTML = `
+          <span>Завершити місію</span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7"/></svg>
+        `;
+      }
+    }
+
+    function updateScoreUI() {
+      document.getElementById('score-display').textContent = score;
+    }
+
+    function nextQuestion() {
+      if (lives <= 0 || currentQuestionIdx >= quizQuestions.length - 1) {
+        endGame();
+      } else {
+        currentQuestionIdx++;
+        loadQuestion();
+      }
+    }
+
+    // ------------------------------------------------------------
+    // 4. GAME OVER & RESULTS
+    // ------------------------------------------------------------
+    function endGame() {
+      playSound('win');
+      document.getElementById('quiz-screen').classList.add('hidden');
+      document.getElementById('result-screen').classList.remove('hidden');
+
+      const accuracy = Math.round((correctCount / quizQuestions.length) * 100);
+
+      document.getElementById('stat-correct').textContent = `${correctCount}/${quizQuestions.length}`;
+      document.getElementById('stat-accuracy').textContent = `${accuracy}%`;
+      document.getElementById('stat-score').textContent = score;
+      document.getElementById('stat-streak').textContent = `x${maxStreak > 0 ? maxStreak : 1}`;
+
+      const iconContainer = document.getElementById('result-icon-container');
+      const badgeText = document.getElementById('result-badge-text');
+      const title = document.getElementById('result-title');
+      const subtitle = document.getElementById('result-subtitle');
+
+      let rank = "Знавець ТБ";
+
+      if (lives > 0 && accuracy >= 90) {
+        rank = "🏆 Легендарний Кібер-Вартовий";
+        badgeText.textContent = "Найвищий Рівень!";
+        badgeText.className = "px-4 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-100 text-amber-800 border-2 border-amber-400 mb-2";
+        title.textContent = `Неймовірно, ${playerName}!`;
+        subtitle.textContent = "Ти знаєш усі тонкощі техніки безпеки на найвищому рівні! Кабінет інформатики у надійних руках.";
+        iconContainer.innerHTML = `
+          <svg class="w-28 h-28 text-amber-500 pulse-glow" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2l2.4 7.4h7.6l-6.2 4.5 2.4 7.4-6.2-4.5-6.2 4.5 2.4-7.4-6.2-4.5h7.6z"/>
+          </svg>
+        `;
+      } else if (accuracy >= 70) {
+        rank = "⚡ Експерт Комп'ютерної Безпеки";
+        badgeText.textContent = "Відмінний Результат!";
+        badgeText.className = "px-4 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border-2 border-emerald-400 mb-2";
+        title.textContent = `Чудова робота, ${playerName}!`;
+        subtitle.textContent = "Ти впевнено знаєш ключові правила та заходи безпеки при роботі з комп'ютерною технікою.";
+        iconContainer.innerHTML = `
+          <svg class="w-28 h-28 text-indigo-500" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+          </svg>
+        `;
+      } else {
+        rank = "🌱 Учень-Стажер Безпеки";
+        badgeText.textContent = "Потрібно повторити!";
+        badgeText.className = "px-4 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-rose-100 text-rose-800 border-2 border-rose-400 mb-2";
+        title.textContent = `${playerName}, є над чим попрацювати!`;
+        subtitle.textContent = "Деякі правила безпеки потребують додаткової уваги. Переглянь помилки та спробуй ще раз!";
+        iconContainer.innerHTML = `
+          <svg class="w-28 h-28 text-rose-500" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+          </svg>
+        `;
+      }
+
+      // Fill Certificate info
+      document.getElementById('cert-player-name').textContent = playerName;
+      document.getElementById('cert-rank-title').textContent = rank;
+      document.getElementById('cert-date').textContent = new Date().toLocaleDateString('uk-UA');
+      document.getElementById('cert-score-text').textContent = `${score} балів (${correctCount}/15 вірно)`;
+
+      renderReviewList();
+    }
+
+    function restartGame() {
+      document.getElementById('result-screen').classList.add('hidden');
+      document.getElementById('start-screen').classList.remove('hidden');
+    }
+
+    // ------------------------------------------------------------
+    // 5. REVIEW & CERTIFICATE MODALS
+    // ------------------------------------------------------------
+    function renderReviewList() {
+      const container = document.getElementById('review-list');
+      container.innerHTML = '';
+
+      userAnswersLog.forEach((item, idx) => {
+        const isCorrect = item.isCorrect;
+        container.innerHTML += `
+          <div class="p-4 rounded-2xl border-2 ${isCorrect ? 'border-emerald-300 bg-emerald-50/40' : 'border-rose-300 bg-rose-50/40'}">
+            <div class="flex items-center justify-between gap-2 mb-1.5">
+              <span class="text-xs font-black text-slate-500">Питання #${idx + 1} (${item.category})</span>
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-black ${isCorrect ? 'bg-emerald-200 text-emerald-900' : 'bg-rose-200 text-rose-900'}">
+                ${isCorrect ? 'Правильно ✅' : 'Помилка ❌'}
+              </span>
+            </div>
+            <h4 class="font-extrabold text-sm sm:text-base text-slate-900 mb-2">${item.question}</h4>
+            
+            <div class="text-xs font-bold space-y-1 mb-2">
+              <div class="${isCorrect ? 'text-emerald-800' : 'text-rose-700'}">
+                <b>Твоя відповідь:</b> ${item.userChoiceText}
+              </div>
+              ${!isCorrect ? `<div class="text-emerald-800"><b>Правильно:</b> ${item.correctText}</div>` : ''}
+            </div>
+
+            <div class="text-xs text-slate-600 bg-white/80 p-2.5 rounded-xl border border-slate-200 font-semibold">
+              💡 <b>Пояснення:</b> ${item.explanation}
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function toggleReviewModal(show) {
+      document.getElementById('review-modal').classList.toggle('hidden', !show);
+    }
+
+    function openCertificate() {
+      document.getElementById('certificate-modal').classList.remove('hidden');
+    }
+
+    function closeCertificate() {
+      document.getElementById('certificate-modal').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
