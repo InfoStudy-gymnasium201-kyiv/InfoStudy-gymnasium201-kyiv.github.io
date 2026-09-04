@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="uk" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Подорож у майбутнє: ІТ та ШІ</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Plus Jakarta Sans & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+          },
+          colors: {
+            cyber: {
+              dark: '#0B0F19',
+              card: '#151C2C',
+              border: '#2A364F',
+              accent: '#3B82F6',
+              neonCyan: '#06B6D4',
+              neonPurple: '#A855F7',
+              neonEmerald: '#10B981',
+              neonAmber: '#F59E0B',
+            }
+          },
+          animation: {
+            'pulse-glow': 'pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'bounce-subtle': 'bounceSubtle 1.5s infinite',
+            'float': 'float 3s ease-in-out infinite',
+          },
+          keyframes: {
+            pulseGlow: {
+              '0%, 100%': { opacity: 1, filter: 'drop-shadow(0 0 12px rgba(6, 182, 212, 0.6))' },
+              '50%': { opacity: 0.7, filter: 'drop-shadow(0 0 4px rgba(6, 182, 212, 0.2))' },
+            },
+            bounceSubtle: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-6px)' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-8px)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0B0F19;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #2A364F;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3B82F6;
+    }
+
+    /* Tactile Dragging Effects */
+    .dragging {
+      opacity: 0.5;
+      transform: scale(0.98);
+    }
+    .drag-over {
+      border-color: #06B6D4 !important;
+      background-color: rgba(6, 182, 212, 0.12) !important;
+      transform: scale(1.02);
+    }
+
+    /* Glassmorphism Cards */
+    .glass-card {
+      background: rgba(21, 28, 44, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-card-hover {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-card-hover:hover {
+      transform: translateY(-3px);
+      border-color: rgba(59, 130, 246, 0.4);
+      box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.2);
+    }
+
+    /* Wire Terminal Glows */
+    .terminal-dot {
+      transition: all 0.2s ease;
+    }
+    .terminal-dot:hover {
+      transform: scale(1.3);
+      filter: drop-shadow(0 0 8px currentColor);
+    }
+
+    /* Algorithm puzzle piece interlocking edge */
+    .puzzle-piece {
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    .puzzle-piece::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 24px;
+      height: 8px;
+      background: inherit;
+      border-radius: 0 0 8px 8px;
+      z-index: 2;
+    }
+    .puzzle-piece:last-child::after {
+      display: none;
+    }
+  </style>
+</head>
+
+<body class="bg-cyber-dark text-slate-100 font-sans min-h-screen flex flex-col justify-between selection:bg-cyber-neonCyan selection:text-cyber-dark overflow-x-hidden">
+
+  <!-- Top Navigation Header -->
+  <header class="sticky top-0 z-40 glass-card border-b border-cyber-border/60 px-4 py-3 md:px-8">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      
+      <!-- Logo & Title -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/30">
+          <i data-lucide="cpu" class="w-6 h-6 text-white"></i>
+        </div>
+        <div>
+          <h1 class="font-display font-extrabold text-lg md:text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-cyan-300">
+            Подорож у майбутнє
+          </h1>
+          <p class="text-xs text-slate-400 hidden sm:block">Інтерактивна гра з ІТ та ШІ • Урок Інформатики</p>
+        </div>
+      </div>
+
+      <!-- Overall Game Progress & Sound Toggle -->
+      <div class="flex items-center gap-4">
+        <!-- Progress Pills -->
+        <div class="flex items-center gap-1.5 bg-cyber-card/80 px-3 py-1.5 rounded-full border border-cyber-border">
+          <i data-lucide="trophy" class="w-4 h-4 text-amber-400"></i>
+          <span class="text-xs font-semibold text-slate-300">Прогрес:</span>
+          <span id="global-progress-text" class="text-xs font-bold text-cyber-neonCyan">0 / 4</span>
+        </div>
+
+        <!-- Mute / Sound FX Button -->
+        <button id="sound-toggle-btn" onclick="toggleAudio()" class="p-2 rounded-xl bg-cyber-card border border-cyber-border hover:border-cyber-accent text-slate-300 hover:text-white transition" title="Увімкнути/Вимкнути звук">
+          <i data-lucide="volume-2" id="sound-icon" class="w-5 h-5"></i>
+        </button>
+
+        <!-- Menu Hub Return Button -->
+        <button onclick="showMenuHub()" class="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-xl bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-700 hover:to-slate-600 border border-slate-600 text-slate-200 transition">
+          <i data-lucide="layout-grid" class="w-4 h-4"></i>
+          <span class="hidden md:inline">Меню ігор</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Interactive Canvas / Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8 flex flex-col justify-center">
+
+    <!-- GAME MENU HUB VIEW -->
+    <section id="menu-hub-view" class="space-y-8 py-4">
+      
+      <!-- Hero Banner -->
+      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-cyber-border p-6 md:p-10 shadow-2xl">
+        <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-10 -top-10 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <div class="relative z-10 max-w-3xl space-y-4">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-semibold">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            <span>Параграф 1 • Роль ІТ у житті сучасної людини</span>
+          </div>
+          <h2 class="font-display text-3xl md:text-5xl font-extrabold text-white leading-tight">
+            Ласкаво просимо до Світу Майбутніх Технологій!
+          </h2>
+          <p class="text-slate-300 text-sm md:text-base leading-relaxed">
+            Пройди 4 інтерактивні випробування з різними тактильними механіками! Перетягуй елементи, з'єднуй нейронні кабелі, складай безпечні алгоритми та класифікуй виходи українських винахідників.
+          </p>
+        </div>
+      </div>
+
+      <!-- Mini-Games Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+        <!-- Mini Game 1 Card -->
+        <div class="glass-card glass-card-hover rounded-2xl p-6 flex flex-col justify-between relative group border-t-4 border-t-blue-500">
+          <div id="game1-badge" class="absolute top-4 right-4 text-xs font-bold px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
+            Не пройдено
+          </div>
+          <div class="space-y-4">
+            <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+              <i data-lucide="history" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-display font-bold text-xl text-white">1. Часова Магістраль</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              <strong>Механіка: Drag & Drop.</strong> Порівняй побут та технології XX століття із сьогоденням («Тоді та Зараз»).
+            </p>
+          </div>
+          <button onclick="startMiniGame(1)" class="mt-6 w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20">
+            <span>Грати</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Mini Game 2 Card -->
+        <div class="glass-card glass-card-hover rounded-2xl p-6 flex flex-col justify-between relative group border-t-4 border-t-cyan-400">
+          <div id="game2-badge" class="absolute top-4 right-4 text-xs font-bold px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
+            Не пройдено
+          </div>
+          <div class="space-y-4">
+            <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+              <i data-lucide="zap" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-display font-bold text-xl text-white">2. Нейронні Кабелі</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              <strong>Механіка: З'єднання проводів.</strong> Проведи інтерактивні кабелі від квантових комп'ютерів та ШІ до їх визначень.
+            </p>
+          </div>
+          <button onclick="startMiniGame(2)" class="mt-6 w-full py-2.5 px-4 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-cyan-600/20">
+            <span>З'єднувати</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Mini Game 3 Card -->
+        <div class="glass-card glass-card-hover rounded-2xl p-6 flex flex-col justify-between relative group border-t-4 border-t-purple-500">
+          <div id="game3-badge" class="absolute top-4 right-4 text-xs font-bold px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
+            Не пройдено
+          </div>
+          <div class="space-y-4">
+            <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+              <i data-lucide="workflow" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-display font-bold text-xl text-white">3. Алгоритм Безпеки</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              <strong>Механіка: Пазл-ланцюжок.</strong> Вибудуй правильний алгоритм перевірки відповідей ШІ від галюцинацій (без цифр).
+            </p>
+          </div>
+          <button onclick="startMiniGame(3)" class="mt-6 w-full py-2.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-purple-600/20">
+            <span>Складати</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Mini Game 4 Card -->
+        <div class="glass-card glass-card-hover rounded-2xl p-6 flex flex-col justify-between relative group border-t-4 border-t-emerald-400">
+          <div id="game4-badge" class="absolute top-4 right-4 text-xs font-bold px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
+            Не пройдено
+          </div>
+          <div class="space-y-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+              <i data-lucide="award" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-display font-bold text-xl text-white">4. Лабораторія ІННОВАЦІЙ</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              <strong>Механіка: Матричний Сортувальник.</strong> Винаходи українських школярів INTARG та розмежування ШІ і людини.
+            </p>
+          </div>
+          <button onclick="startMiniGame(4)" class="mt-6 w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20">
+            <span>Дослідити</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- MINI-GAME 1 CONTAINER -->
+    <section id="game1-view" class="hidden space-y-6 max-w-5xl mx-auto w-full">
+      <!-- Game 1 Header -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 rounded-2xl">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2 text-xs text-blue-400 font-semibold uppercase tracking-wider">
+            <span>Міні-гра №1</span> • <span>Фізичний Drag & Drop</span>
+          </div>
+          <h2 class="font-display font-bold text-2xl text-white">Часова Магістраль: Тоді та Зараз</h2>
+          <p class="text-xs text-slate-300">Перетягни кожну технологічну картку у відповідний контейнер часової епохи!</p>
+        </div>
+        <button onclick="resetGame1()" class="self-start md:self-auto px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 border border-slate-700 flex items-center gap-2">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Скинути
+        </button>
+      </div>
+
+      <!-- Source Draggable Cards -->
+      <div class="glass-card p-5 rounded-2xl border-indigo-500/30">
+        <h3 class="text-xs font-bold uppercase text-slate-400 mb-3 flex items-center gap-2">
+          <i data-lucide="grip-horizontal" class="w-4 h-4 text-cyan-400"></i> Доступні картки технологій:
+        </h3>
+        <div id="game1-sources" class="flex flex-wrap gap-3 min-h-[70px] p-2 bg-slate-900/60 rounded-xl border border-slate-800">
+          <!-- Draggable items rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- Drop Target Buckets Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Drop Target: Past -->
+        <div id="bucket-past" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'past')" class="glass-card rounded-2xl p-5 border-2 border-dashed border-amber-500/40 bg-amber-950/10 min-h-[220px] transition flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-display font-bold text-amber-400 flex items-center gap-2 text-lg">
+                <i data-lucide="hourglass" class="w-5 h-5"></i> XX століття (Минуле)
+              </span>
+              <span class="text-xs px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 font-semibold" id="count-past">0 / 4</span>
+            </div>
+            <div id="bucket-past-items" class="space-y-2 min-h-[120px]"></div>
+          </div>
+          <p class="text-[11px] text-amber-300/60 text-center mt-2 italic">Перетягни сюди речі та звичаї минулого</p>
+        </div>
+
+        <!-- Drop Target: Present -->
+        <div id="bucket-present" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'present')" class="glass-card rounded-2xl p-5 border-2 border-dashed border-cyan-500/40 bg-cyan-950/10 min-h-[220px] transition flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-display font-bold text-cyan-400 flex items-center gap-2 text-lg">
+                <i data-lucide="smartphone" class="w-5 h-5"></i> Сьогодення (Сучасні ІТ)
+              </span>
+              <span class="text-xs px-2.5 py-1 rounded-full bg-cyan-500/20 text-cyan-300 font-semibold" id="count-present">0 / 4</span>
+            </div>
+            <div id="bucket-present-items" class="space-y-2 min-h-[120px]"></div>
+          </div>
+          <p class="text-[11px] text-cyan-300/60 text-center mt-2 italic">Перетягни сюди цифрові інновації сьогодення</p>
+        </div>
+
+      </div>
+
+      <!-- Verification Button -->
+      <div class="flex justify-end pt-2">
+        <button onclick="checkGame1()" class="py-3 px-8 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold text-sm shadow-xl shadow-cyan-500/20 transition flex items-center gap-2">
+          <i data-lucide="check-circle" class="w-5 h-5"></i> Перевірити відповіді
+        </button>
+      </div>
+    </section>
+
+    <!-- MINI-GAME 2 CONTAINER -->
+    <section id="game2-view" class="hidden space-y-6 max-w-5xl mx-auto w-full">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 rounded-2xl">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2 text-xs text-cyan-400 font-semibold uppercase tracking-wider">
+            <span>Міні-гра №2</span> • <span>Механіка з'єднання проводів</span>
+          </div>
+          <h2 class="font-display font-bold text-2xl text-white">Нейронні Кабелі: Поняття та Сутність</h2>
+          <p class="text-xs text-slate-300">Натисни на термінал ліворуч і протягни кабель до його опису праворуч!</p>
+        </div>
+        <button onclick="resetGame2()" class="self-start md:self-auto px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 border border-slate-700 flex items-center gap-2">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Скинути заново
+        </button>
+      </div>
+
+      <!-- Interactive SVG Canvas Wiring Board -->
+      <div id="wiring-board" class="glass-card rounded-2xl p-6 relative overflow-hidden select-none border border-cyan-500/30">
+        
+        <!-- SVG Overlay for Rendering Bezier Wires -->
+        <svg id="wiring-svg" class="absolute inset-0 w-full h-full pointer-events-none z-20">
+          <defs>
+            <linearGradient id="wireGradient1" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#3B82F6" />
+              <stop offset="100%" stop-color="#06B6D4" />
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+        </svg>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24 relative z-10">
+          
+          <!-- Left Column: Source Terminals -->
+          <div id="wire-left-terminals" class="space-y-4">
+            <h3 class="text-xs font-bold uppercase text-cyan-400 tracking-wider mb-2 flex items-center gap-2">
+              <i data-lucide="zap" class="w-4 h-4"></i> Поняття / Технологія
+            </h3>
+            <!-- Generated Terminals -->
+          </div>
+
+          <!-- Right Column: Target Terminals -->
+          <div id="wire-right-terminals" class="space-y-4">
+            <h3 class="text-xs font-bold uppercase text-purple-400 tracking-wider mb-2 flex items-center gap-2">
+              <i data-lucide="help-circle" class="w-4 h-4"></i> Визначення та Значення
+            </h3>
+            <!-- Generated Definitions -->
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button onclick="checkGame2()" class="py-3 px-8 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-500 hover:from-cyan-500 hover:to-blue-400 text-white font-bold text-sm shadow-xl shadow-cyan-500/20 transition flex items-center gap-2">
+          <i data-lucide="check-circle" class="w-5 h-5"></i> Перевірити з'єднання
+        </button>
+      </div>
+    </section>
+
+    <!-- MINI-GAME 3 CONTAINER -->
+    <section id="game3-view" class="hidden space-y-6 max-w-4xl mx-auto w-full">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 rounded-2xl">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2 text-xs text-purple-400 font-semibold uppercase tracking-wider">
+            <span>Міні-гра №3</span> • <span>Пазл-ланцюжок алгоритму</span>
+          </div>
+          <h2 class="font-display font-bold text-2xl text-white">Алгоритм Безпечної Взаємодії з ШІ</h2>
+          <p class="text-xs text-slate-300">Розставити блоки алгоритму у правильній логічній послідовності. Увага: підказок у вигляді цифр немає!</p>
+        </div>
+        <button onclick="resetGame3()" class="self-start md:self-auto px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 border border-slate-700 flex items-center gap-2">
+          <i data-lucide="shuffle" class="w-4 h-4"></i> Перемішати
+        </button>
+      </div>
+
+      <!-- Puzzle Chain List Container -->
+      <div class="glass-card p-6 rounded-2xl space-y-3 border-purple-500/30">
+        <div class="text-xs font-semibold text-purple-300/80 mb-2 flex items-center gap-2">
+          <i data-lucide="info" class="w-4 h-4 text-purple-400"></i> Використовуй кнопки стрілочок ▲ ▼ або перетягуй блоки для впорядкування:
+        </div>
+
+        <div id="puzzle-chain-container" class="space-y-3">
+          <!-- Dynamically generated puzzle steps -->
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button onclick="checkGame3()" class="py-3 px-8 rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 text-white font-bold text-sm shadow-xl shadow-purple-500/20 transition flex items-center gap-2">
+          <i data-lucide="check-circle" class="w-5 h-5"></i> Перевірити алгоритм
+        </button>
+      </div>
+    </section>
+
+    <!-- MINI-GAME 4 CONTAINER -->
+    <section id="game4-view" class="hidden space-y-6 max-w-5xl mx-auto w-full">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 rounded-2xl">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2 text-xs text-emerald-400 font-semibold uppercase tracking-wider">
+            <span>Міні-гра №4</span> • <span>Класифікатор та Винаходи INTARG</span>
+          </div>
+          <h2 class="font-display font-bold text-2xl text-white">Лабораторія Інновацій та ШІ</h2>
+          <p class="text-xs text-slate-300">Розподіли розробки українських юних винахідників та відрізни факти про ШІ від людських якостей!</p>
+        </div>
+        <button onclick="resetGame4()" class="self-start md:self-auto px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 border border-slate-700 flex items-center gap-2">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Скинути
+        </button>
+      </div>
+
+      <!-- Part A: Ukrainian Inventions Matching -->
+      <div class="glass-card p-6 rounded-2xl border-emerald-500/30 space-y-4">
+        <h3 class="font-display font-bold text-lg text-emerald-300 flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-xs">Частина А</span>
+          🇺🇦 Юні винахідники України на виставці INTARG
+        </h3>
+        <p class="text-xs text-slate-300">Вибери для кожного українського винаходу його головне призначення:</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+          
+          <!-- Invention 1 -->
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="p-2.5 rounded-lg bg-emerald-500/10 text-emerald-400">
+                <i data-lucide="bot" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-sm text-white">Робототехнічний комплекс</h4>
+                <p class="text-[11px] text-slate-400">Розробка для безпеки</p>
+              </div>
+            </div>
+            <select id="inv-select-1" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none">
+              <option value="">-- Оберіть призначення --</option>
+              <option value="mine">Знешкодження мін та збереження життів саперів i захисників</option>
+              <option value="stress">Відстеження рівню стресу вчителів під час уроку</option>
+              <option value="game">Автоматична гра в шахи краще за чемпіонів</option>
+            </select>
+          </div>
+
+          <!-- Invention 2 -->
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="p-2.5 rounded-lg bg-emerald-500/10 text-emerald-400">
+                <i data-lucide="watch" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-sm text-white">Розумний браслет здоров'я</h4>
+                <p class="text-[11px] text-slate-400">Розробка для освіти й медицини</p>
+              </div>
+            </div>
+            <select id="inv-select-2" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none">
+              <option value="">-- Оберіть призначення --</option>
+              <option value="mine">Знешкодження мін та збереження життів саперів i захисників</option>
+              <option value="stress">Відстеження рівню стресу та стану вчителів на уроках</option>
+              <option value="game">Переклад тексту на паперових квитках</option>
+            </select>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Part B: AI Capabilities vs Human Qualities Classification -->
+      <div class="glass-card p-6 rounded-2xl border-emerald-500/30 space-y-4">
+        <h3 class="font-display font-bold text-lg text-cyan-300 flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-xs">Частина Б</span>
+          🧠 Ш штучний Інтелект проти Людини
+        </h3>
+        <p class="text-xs text-slate-300">Класифікуй кожне твердження: це можливість алгоритмів ШІ чи унікальна риса людини?</p>
+
+        <div id="ai-vs-human-grid" class="space-y-3 pt-2">
+          <!-- Dynamically generated items with custom interactive toggles -->
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button onclick="checkGame4()" class="py-3 px-8 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold text-sm shadow-xl shadow-emerald-500/20 transition flex items-center gap-2">
+          <i data-lucide="check-circle" class="w-5 h-5"></i> Перевірити відповіді
+        </button>
+      </div>
+    </section>
+
+    <!-- VICTORY OVERLAY MODAL -->
+    <div id="victory-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+      <div class="glass-card max-w-lg w-full rounded-3xl p-6 md:p-8 border border-cyan-500/50 shadow-2xl text-center space-y-6 relative overflow-hidden animate-float">
+        <div class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-amber-400 via-yellow-300 to-cyan-400 flex items-center justify-center shadow-lg shadow-amber-400/30">
+          <i data-lucide="award" class="w-10 h-10 text-slate-950"></i>
+        </div>
+
+        <div class="space-y-2">
+          <h2 class="font-display text-3xl font-extrabold text-white">Вітаємо, Досліднику!</h2>
+          <p class="text-sm text-cyan-300 font-semibold">Ти успішно пройшов усі інтерактивні міні-ігри з ІТ та ШІ!</p>
+        </div>
+
+        <div class="bg-slate-900/90 rounded-2xl p-4 text-left border border-slate-800 text-xs space-y-2 text-slate-300">
+          <div class="flex items-center gap-2 text-amber-400 font-bold">
+            <i data-lucide="check-check" class="w-4 h-4"></i> Підсумок уроку:
+          </div>
+          <ul class="list-disc list-inside space-y-1 text-slate-300 leading-relaxed">
+            <li>ІТ допомагають нам у побуті, медицині та освіті.</li>
+            <li>Квантові комп'ютери працюють з кубітами й фотонами.</li>
+            <li>ШІ та ChatGPT — корисні інструменти, але схильні до <strong>галюцинацій</strong>.</li>
+            <li>Завжди критично перевіряй інформацію!</li>
+          </ul>
+        </div>
+
+        <div class="flex gap-3">
+          <button onclick="closeVictoryModal()" class="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm transition border border-slate-700">
+            Закрити
+          </button>
+          <button onclick="restartAllGames()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-sm shadow-lg shadow-cyan-500/20 transition">
+            Зіграти знову
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-cyber-border/40 py-4 px-6 text-center text-xs text-slate-400 glass-card mt-8">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+      <span>© Інтерактивний урок з інформатики «Роль ІТ у житті сучасної людини»</span>
+      <span class="flex items-center gap-1 text-slate-400">
+        Створено з <i data-lucide="heart" class="w-3.5 h-3.5 text-red-500 fill-red-500"></i> для українських школярів
+      </span>
+    </div>
+  </footer>
+
+  <script>
+    /* ===================================================================
+       AUDIO SYNTHESIZER (Web Audio API - No external files needed)
+       =================================================================== */
+    let audioEnabled = true;
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      const soundIcon = document.getElementById('sound-icon');
+      if (audioEnabled) {
+        soundIcon.setAttribute('data-lucide', 'volume-2');
+        playSynthSound('click');
+      } else {
+        soundIcon.setAttribute('data-lucide', 'volume-x');
+      }
+      lucide.createIcons();
+    }
+
+    function playSynthSound(type) {
+      if (!audioEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        const now = ctx.currentTime;
+
+        if (type === 'click') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(400, now);
+          osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+          osc.start(now);
+          osc.stop(now + 0.05);
+        } else if (type === 'connect') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(300, now);
+          osc.frequency.exponentialRampToValueAtTime(600, now + 0.12);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
+          osc.start(now);
+          osc.stop(now + 0.12);
+        } else if (type === 'success') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, now); // C5
+          osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+          osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+          osc.start(now);
+          osc.stop(now + 0.3);
+        } else if (type === 'error') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(180, now);
+          osc.frequency.linearRampToValueAtTime(110, now + 0.2);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+          osc.start(now);
+          osc.stop(now + 0.2);
+        }
+      } catch (e) {
+        console.warn('Audio play suppressed', e);
+      }
+    }
+
+    /* ===================================================================
+       GLOBAL GAME STATE & VIEW NAVIGATION
+       =================================================================== */
+    const gameState = {
+      completedGames: [false, false, false, false],
+      activeGame: 0 // 0 = Menu Hub
+    };
+
+    function updateGlobalProgress() {
+      const count = gameState.completedGames.filter(Boolean).length;
+      document.getElementById('global-progress-text').innerText = `${count} / 4`;
+
+      // Update badges in menu hub
+      for (let i = 1; i <= 4; i++) {
+        const badge = document.getElementById(`game${i}-badge`);
+        if (gameState.completedGames[i - 1]) {
+          badge.innerText = 'Виконано ✓';
+          badge.className = 'absolute top-4 right-4 text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+        }
+      }
+
+      if (count === 4) {
+        setTimeout(showVictoryModal, 600);
+      }
+    }
+
+    function showMenuHub() {
+      playSynthSound('click');
+      gameState.activeGame = 0;
+      document.getElementById('menu-hub-view').classList.remove('hidden');
+      document.getElementById('game1-view').classList.add('hidden');
+      document.getElementById('game2-view').classList.add('hidden');
+      document.getElementById('game3-view').classList.add('hidden');
+      document.getElementById('game4-view').classList.add('hidden');
+      updateGlobalProgress();
+      lucide.createIcons();
+    }
+
+    function startMiniGame(id) {
+      playSynthSound('click');
+      gameState.activeGame = id;
+      document.getElementById('menu-hub-view').classList.add('hidden');
+      document.getElementById('game1-view').classList.add('hidden');
+      document.getElementById('game2-view').classList.add('hidden');
+      document.getElementById('game3-view').classList.add('hidden');
+      document.getElementById('game4-view').classList.add('hidden');
+
+      document.getElementById(`game${id}-view`).classList.remove('hidden');
+
+      if (id === 1) initGame1();
+      else if (id === 2) initGame2();
+      else if (id === 3) initGame3();
+      else if (id === 4) initGame4();
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      lucide.createIcons();
+    }
+
+    function showVictoryModal() {
+      playSynthSound('success');
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+      document.getElementById('victory-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeVictoryModal() {
+      playSynthSound('click');
+      document.getElementById('victory-modal').classList.add('hidden');
+    }
+
+    function restartAllGames() {
+      gameState.completedGames = [false, false, false, false];
+      for (let i = 1; i <= 4; i++) {
+        const badge = document.getElementById(`game${i}-badge`);
+        badge.innerText = 'Не пройдено';
+        badge.className = 'absolute top-4 right-4 text-xs font-bold px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700';
+      }
+      closeVictoryModal();
+      showMenuHub();
+    }
+
+    /* ===================================================================
+       MINI-GAME 1 LOGIC: "Часова Магістраль: Тоді та Зараз"
+       =================================================================== */
+    const game1Data = [
+      { id: 'g1-1', title: 'Паперова енциклопедія в бібліотеці', era: 'past', icon: 'book-open' },
+      { id: 'g1-2', title: 'Запит "Oкей, Google" або чат-бот', era: 'present', icon: 'search' },
+      { id: 'g1-3', title: 'Паперовий лист у конверті', era: 'past', icon: 'mail' },
+      { id: 'g1-4', title: 'Стікери та меми в месенджері', era: 'present', icon: 'message-square' },
+      { id: 'g1-5', title: 'Віник та звичайна ганчірка', era: 'past', icon: 'sparkles' },
+      { id: 'g1-6', title: 'Робот-пилосос із сенсорами', era: 'present', icon: 'bot' },
+      { id: 'g1-7', title: 'Паперовий квиток з компостером', era: 'past', icon: 'ticket' },
+      { id: 'g1-8', title: 'Смарт-годинник та валідатор', era: 'present', icon: 'watch' },
+    ];
+
+    let game1CurrentAssignments = {}; // itemId -> 'past' | 'present'
+
+    function initGame1() {
+      game1CurrentAssignments = {};
+      renderGame1();
+    }
+
+    function resetGame1() {
+      playSynthSound('click');
+      initGame1();
+    }
+
+    function renderGame1() {
+      const sourcesContainer = document.getElementById('game1-sources');
+      const pastContainer = document.getElementById('bucket-past-items');
+      const presentContainer = document.getElementById('bucket-present-items');
+
+      sourcesContainer.innerHTML = '';
+      pastContainer.innerHTML = '';
+      presentContainer.innerHTML = '';
+
+      let pastCount = 0;
+      let presentCount = 0;
+
+      // Shuffle array for randomness
+      const shuffled = [...game1Data].sort(() => Math.random() - 0.5);
+
+      shuffled.forEach(item => {
+        const assigned = game1CurrentAssignments[item.id];
+        const cardEl = document.createElement('div');
+        cardEl.id = item.id;
+        cardEl.draggable = true;
+        cardEl.className = `p-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 cursor-grab active:cursor-grabbing text-xs text-slate-200 flex items-center gap-2.5 transition shadow-sm select-none ${assigned ? 'w-full' : ''}`;
+        cardEl.innerHTML = `<i data-lucide="${item.icon}" class="w-4 h-4 text-cyan-400 shrink-0"></i> <span>${item.title}</span>`;
+
+        cardEl.ondragstart = (e) => {
+          e.dataTransfer.setData('text/plain', item.id);
+          cardEl.classList.add('dragging');
+          playSynthSound('click');
+        };
+        cardEl.ondragend = () => {
+          cardEl.classList.remove('dragging');
+        };
+
+        if (!assigned) {
+          sourcesContainer.appendChild(cardEl);
+        } else if (assigned === 'past') {
+          pastContainer.appendChild(cardEl);
+          pastCount++;
+        } else if (assigned === 'present') {
+          presentContainer.appendChild(cardEl);
+          presentCount++;
+        }
+      });
+
+      document.getElementById('count-past').innerText = `${pastCount} / 4`;
+      document.getElementById('count-present').innerText = `${presentCount} / 4`;
+
+      lucide.createIcons();
+    }
+
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.currentTarget.classList.add('drag-over');
+    }
+
+    function handleDragLeave(e) {
+      e.currentTarget.classList.remove('drag-over');
+    }
+
+    function handleDrop(e, targetEra) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+      const itemId = e.dataTransfer.getData('text/plain');
+      if (itemId) {
+        game1CurrentAssignments[itemId] = targetEra;
+        playSynthSound('connect');
+        renderGame1();
+      }
+    }
+
+    function checkGame1() {
+      const keys = Object.keys(game1CurrentAssignments);
+      if (keys.length < game1Data.length) {
+        playSynthSound('error');
+        alert('Будь ласка, розподіли всі картки перед перевіркою!');
+        return;
+      }
+
+      let correct = 0;
+      game1Data.forEach(item => {
+        if (game1CurrentAssignments[item.id] === item.era) {
+          correct++;
+        }
+      });
+
+      if (correct === game1Data.length) {
+        playSynthSound('success');
+        gameState.completedGames[0] = true;
+        alert('Чудово! Ти бездоганно розрізняєш технології минулого та сучасного!');
+        showMenuHub();
+      } else {
+        playSynthSound('error');
+        alert(`Знайдено помилки (${correct} з ${game1Data.length} правильно). Спробуй ще раз!`);
+      }
+    }
+
+    /* ===================================================================
+       MINI-GAME 2 LOGIC: "Нейронні Кабелі: З'єднання проводів"
+       =================================================================== */
+    const game2Terms = [
+      { id: 'term-1', title: 'Квантовий комп\'ютер', matchId: 'def-1', color: '#06B6D4' },
+      { id: 'term-2', title: 'Штучний Інтелект (ШІ)', matchId: 'def-2', color: '#3B82F6' },
+      { id: 'term-3', title: 'ChatGPT', matchId: 'def-3', color: '#A855F7' },
+      { id: 'term-4', title: 'Галюцинації ШІ', matchId: 'def-4', color: '#F59E0B' },
+      { id: 'term-5', title: 'AutoDraw', matchId: 'def-5', color: '#10B981' },
+    ];
+
+    const game2Definitions = [
+      { id: 'def-1', text: 'Працює з фотонами й кубітами в мільярди разів швидше за суперкомп\'ютери' },
+      { id: 'def-2', text: 'Алгоритми та математика для завдань, що раніше потребували розуму людини' },
+      { id: 'def-3', text: 'Модель штучного інтелекту від OpenAI для генерування тексту та спілкування' },
+      { id: 'def-4', text: 'Вигадування неіснуючих фактів чат-ботом, що вимагає перевірки' },
+      { id: 'def-5', text: 'Сервіс, де нейромережа вгадує ваші схематичні малюнки та пропонує іконки' },
+    ];
+
+    let game2Connections = {}; // leftTermId -> rightDefId
+    let activeWireStart = null; // { termId, x, y, color }
+    let currentMousePos = { x: 0, y: 0 };
+
+    function initGame2() {
+      game2Connections = {};
+      activeWireStart = null;
+      renderGame2Terminals();
+      setupWiringEvents();
+      drawWires();
+    }
+
+    function resetGame2() {
+      playSynthSound('click');
+      initGame2();
+    }
+
+    function renderGame2Terminals() {
+      const leftContainer = document.getElementById('wire-left-terminals');
+      const rightContainer = document.getElementById('wire-right-terminals');
+
+      leftContainer.innerHTML = '<h3 class="text-xs font-bold uppercase text-cyan-400 tracking-wider mb-2 flex items-center gap-2"><i data-lucide="zap" class="w-4 h-4"></i> Поняття / Технологія</h3>';
+      rightContainer.innerHTML = '<h3 class="text-xs font-bold uppercase text-purple-400 tracking-wider mb-2 flex items-center gap-2"><i data-lucide="help-circle" class="w-4 h-4"></i> Визначення та Значення</h3>';
+
+      // Left column terms
+      game2Terms.forEach(term => {
+        const div = document.createElement('div');
+        div.className = 'glass-card p-3.5 rounded-xl border border-slate-700/80 flex items-center justify-between gap-3 text-xs font-semibold text-white cursor-pointer hover:border-cyan-400 transition select-none';
+        div.innerHTML = `
+          <span>${term.title}</span>
+          <div id="dot-left-${term.id}" class="w-4 h-4 rounded-full border-2 border-white terminal-dot shrink-0" style="background-color: ${term.color};"></div>
+        `;
+        
+        // Touch/Mouse Start Event on Dot
+        const dot = div.querySelector(`#dot-left-${term.id}`);
+        dot.addEventListener('mousedown', (e) => startDraggingWire(e, term));
+        dot.addEventListener('touchstart', (e) => startDraggingWire(e, term), { passive: false });
+
+        leftContainer.appendChild(div);
+      });
+
+      // Right column definitions (Shuffled)
+      const shuffledDefs = [...game2Definitions].sort(() => Math.random() - 0.5);
+
+      shuffledDefs.forEach(def => {
+        const div = document.createElement('div');
+        div.className = 'glass-card p-3.5 rounded-xl border border-slate-700/80 flex items-center gap-3 text-xs text-slate-300 cursor-pointer hover:border-purple-400 transition select-none';
+        div.innerHTML = `
+          <div id="dot-right-${def.id}" class="w-4 h-4 rounded-full border-2 border-slate-500 bg-slate-800 terminal-dot shrink-0" data-def-id="${def.id}"></div>
+          <span>${def.text}</span>
+        `;
+
+        const dot = div.querySelector(`#dot-right-${def.id}`);
+        dot.addEventListener('mouseup', () => completeWireConnection(def.id));
+        dot.addEventListener('touchend', (e) => {
+          // Identify element under touch
+          const touch = e.changedTouches[0];
+          const elem = document.elementFromPoint(touch.clientX, touch.clientY);
+          const defId = elem?.getAttribute('data-def-id') || elem?.closest('[data-def-id]')?.getAttribute('data-def-id');
+          if (defId) completeWireConnection(defId);
+        });
+
+        rightContainer.appendChild(div);
+      });
+
+      lucide.createIcons();
+    }
+
+    function setupWiringEvents() {
+      const board = document.getElementById('wiring-board');
+
+      const handleMove = (clientX, clientY) => {
+        if (!activeWireStart) return;
+        const rect = board.getBoundingClientRect();
+        currentMousePos = {
+          x: clientX - rect.left,
+          y: clientY - rect.top
+        };
+        drawWires();
+      };
+
+      board.onmousemove = (e) => handleMove(e.clientX, e.clientY);
+      board.ontouchmove = (e) => {
+        if (activeWireStart) e.preventDefault();
+        const touch = e.touches[0];
+        handleMove(touch.clientX, touch.clientY);
+      };
+
+      window.onmouseup = () => {
+        if (activeWireStart) {
+          activeWireStart = null;
+          drawWires();
+        }
+      };
+    }
+
+    function startDraggingWire(e, term) {
+      e.stopPropagation();
+      playSynthSound('click');
+      const board = document.getElementById('wiring-board');
+      const rect = board.getBoundingClientRect();
+      const dot = document.getElementById(`dot-left-${term.id}`);
+      const dotRect = dot.getBoundingClientRect();
+
+      activeWireStart = {
+        termId: term.id,
+        color: term.color,
+        x: dotRect.left + dotRect.width / 2 - rect.left,
+        y: dotRect.top + dotRect.height / 2 - rect.top
+      };
+
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      currentMousePos = { x: clientX - rect.left, y: clientY - rect.top };
+      drawWires();
+    }
+
+    function completeWireConnection(defId) {
+      if (activeWireStart) {
+        game2Connections[activeWireStart.termId] = defId;
+        playSynthSound('connect');
+        
+        // Highlight connected right dot
+        const rightDot = document.getElementById(`dot-right-${defId}`);
+        if (rightDot) {
+          rightDot.style.backgroundColor = activeWireStart.color;
+          rightDot.style.borderColor = '#FFFFFF';
+        }
+
+        activeWireStart = null;
+        drawWires();
+      }
+    }
+
+    function drawWires() {
+      const svg = document.getElementById('wiring-svg');
+      const board = document.getElementById('wiring-board');
+      if (!board || !svg) return;
+      const rect = board.getBoundingClientRect();
+
+      let svgHTML = svg.querySelector('defs').outerHTML;
+
+      // Draw existing locked connections
+      Object.keys(game2Connections).forEach(termId => {
+        const defId = game2Connections[termId];
+        const term = game2Terms.find(t => t.id === termId);
+        const leftDot = document.getElementById(`dot-left-${termId}`);
+        const rightDot = document.getElementById(`dot-right-${defId}`);
+
+        if (leftDot && rightDot) {
+          const lRect = leftDot.getBoundingClientRect();
+          const rRect = rightDot.getBoundingClientRect();
+
+          const x1 = lRect.left + lRect.width / 2 - rect.left;
+          const y1 = lRect.top + lRect.height / 2 - rect.top;
+          const x2 = rRect.left + rRect.width / 2 - rect.left;
+          const y2 = rRect.top + rRect.height / 2 - rect.top;
+
+          const dx = Math.abs(x2 - x1) * 0.5;
+          const pathD = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+
+          svgHTML += `<path d="${pathD}" stroke="${term.color}" stroke-width="4" fill="none" filter="url(#glow)" stroke-linecap="round"/>`;
+        }
+      });
+
+      // Draw active dragging wire
+      if (activeWireStart) {
+        const x1 = activeWireStart.x;
+        const y1 = activeWireStart.y;
+        const x2 = currentMousePos.x;
+        const y2 = currentMousePos.y;
+
+        const dx = Math.abs(x2 - x1) * 0.5;
+        const pathD = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+
+        svgHTML += `<path d="${pathD}" stroke="${activeWireStart.color}" stroke-width="4" stroke-dasharray="6,6" fill="none" stroke-linecap="round"/>`;
+      }
+
+      svg.innerHTML = svgHTML;
+    }
+
+    function checkGame2() {
+      const connectedCount = Object.keys(game2Connections).length;
+      if (connectedCount < game2Terms.length) {
+        playSynthSound('error');
+        alert('З\'єднай усі 5 каблів перед перевіркою!');
+        return;
+      }
+
+      let correct = 0;
+      game2Terms.forEach(term => {
+        if (game2Connections[term.id] === term.matchId) {
+          correct++;
+        }
+      });
+
+      if (correct === game2Terms.length) {
+        playSynthSound('success');
+        gameState.completedGames[1] = true;
+        alert('Чудова робота! Нейронні мережі та кабелі з\'єднано бездоганно!');
+        showMenuHub();
+      } else {
+        playSynthSound('error');
+        alert(`Знайдено помилки (${correct} з ${game2Terms.length} правильно). Спробуй ще раз!`);
+      }
+    }
+
+    /* ===================================================================
+       MINI-GAME 3 LOGIC: "Пазл-ланцюжок алгоритму" (без цифр)
+       =================================================================== */
+    const game3StepsData = [
+      { id: 'step-1', text: 'Сформулювати чітке запитання або завдання для ШІ', correctPos: 0 },
+      { id: 'step-2', text: 'Отримати згенеровану відповідь від чат-бота', correctPos: 1 },
+      { id: 'step-3', text: 'Проаналізувати текст на наявність можливих галюцинацій та помилок', correctPos: 2 },
+      { id: 'step-4', text: 'Перевірити сумнівні факти в авторитетних джерелах та Google', correctPos: 3 },
+      { id: 'step-5', text: 'Використати підтверджений результат для навчання чи роботи', correctPos: 4 },
+    ];
+
+    let game3CurrentOrder = [];
+
+    function initGame3() {
+      // Shuffle initially
+      game3CurrentOrder = [...game3StepsData].sort(() => Math.random() - 0.5);
+      renderGame3();
+    }
+
+    function resetGame3() {
+      playSynthSound('click');
+      initGame3();
+    }
+
+    function renderGame3() {
+      const container = document.getElementById('puzzle-chain-container');
+      container.innerHTML = '';
+
+      game3CurrentOrder.forEach((step, index) => {
+        const div = document.createElement('div');
+        div.className = 'puzzle-piece bg-slate-800/90 hover:bg-slate-700/90 border border-purple-500/40 p-4 rounded-xl flex items-center justify-between gap-4 text-xs font-semibold text-slate-100 shadow-md select-none transition';
+        
+        div.innerHTML = `
+          <div class="flex items-center gap-3">
+            <i data-lucide="grip-vertical" class="w-5 h-5 text-purple-400 shrink-0 cursor-grab"></i>
+            <span>${step.text}</span>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <button onclick="moveStep(${index}, -1)" class="p-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:text-purple-300 text-slate-400 transition" ${index === 0 ? 'disabled opacity-30' : ''}>
+              <i data-lucide="chevron-up" class="w-4 h-4"></i>
+            </button>
+            <button onclick="moveStep(${index}, 1)" class="p-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:text-purple-300 text-slate-400 transition" ${index === game3CurrentOrder.length - 1 ? 'disabled opacity-30' : ''}>
+              <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </button>
+          </div>
+        `;
+
+        container.appendChild(div);
+      });
+
+      lucide.createIcons();
+    }
+
+    function moveStep(index, delta) {
+      playSynthSound('click');
+      const targetIndex = index + delta;
+      if (targetIndex >= 0 && targetIndex < game3CurrentOrder.length) {
+        const temp = game3CurrentOrder[index];
+        game3CurrentOrder[index] = game3CurrentOrder[targetIndex];
+        game3CurrentOrder[targetIndex] = temp;
+        renderGame3();
+      }
+    }
+
+    function checkGame3() {
+      let correct = true;
+      for (let i = 0; i < game3CurrentOrder.length; i++) {
+        if (game3CurrentOrder[i].correctPos !== i) {
+          correct = false;
+          break;
+        }
+      }
+
+      if (correct) {
+        playSynthSound('success');
+        gameState.completedGames[2] = true;
+        alert('Вітаємо! Алгоритм безпечної перевірки ШІ складено абсолютно вірно!');
+        showMenuHub();
+      } else {
+        playSynthSound('error');
+        alert('Послідовність алгоритму містить помилки. Подумай, яке дійство має передувати наступному, і спробуй ще!');
+      }
+    }
+
+    /* ===================================================================
+       MINI-GAME 4 LOGIC: "Лабораторія Інновацій та ШІ"
+       =================================================================== */
+    const aiVsHumanData = [
+      { id: 'aih-1', title: 'Розпізнавати обличчя через FaceID та розблоковувати гаджет', type: 'ai' },
+      { id: 'aih-2', title: 'Відчувати щиру любов, біль, радість та співчуття', type: 'human' },
+      { id: 'aih-3', title: 'Грати в шахи краще за будь-якого чемпіона світу', type: 'ai' },
+      { id: 'aih-4', title: 'Мати власну свідомість, емпатію та сором', type: 'human' },
+      { id: 'aih-5', title: 'Генерувати сотні рядків коду та віршів за лічені секунди', type: 'ai' },
+      { id: 'aih-6', title: 'Володіти людським серцем та духовним світом', type: 'human' },
+    ];
+
+    let aiVsHumanSelections = {}; // id -> 'ai' | 'human'
+
+    function initGame4() {
+      aiVsHumanSelections = {};
+      renderGame4();
+    }
+
+    function resetGame4() {
+      playSynthSound('click');
+      document.getElementById('inv-select-1').value = '';
+      document.getElementById('inv-select-2').value = '';
+      initGame4();
+    }
+
+    function renderGame4() {
+      const container = document.getElementById('ai-vs-human-grid');
+      container.innerHTML = '';
+
+      aiVsHumanData.forEach(item => {
+        const selected = aiVsHumanSelections[item.id] || '';
+
+        const div = document.createElement('div');
+        div.className = 'bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-200';
+        div.innerHTML = `
+          <span class="font-medium">${item.title}</span>
+          <div class="flex items-center gap-2 shrink-0">
+            <button onclick="selectAiVsHuman('${item.id}', 'ai')" class="px-3 py-1.5 rounded-lg border font-semibold transition ${selected === 'ai' ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300' : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'}">
+              🤖 Можливість ШІ
+            </button>
+            <button onclick="selectAiVsHuman('${item.id}', 'human')" class="px-3 py-1.5 rounded-lg border font-semibold transition ${selected === 'human' ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300' : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'}">
+              ❤️ Унікальність Людини
+            </button>
+          </div>
+        `;
+
+        container.appendChild(div);
+      });
+    }
+
+    function selectAiVsHuman(id, choice) {
+      playSynthSound('click');
+      aiVsHumanSelections[id] = choice;
+      renderGame4();
+    }
+
+    function checkGame4() {
+      const inv1 = document.getElementById('inv-select-1').value;
+      const inv2 = document.getElementById('inv-select-2').value;
+
+      if (!inv1 || !inv2) {
+        playSynthSound('error');
+        alert('Будь ласка, оберіть призначення для винахідників України у Частині А!');
+        return;
+      }
+
+      if (Object.keys(aiVsHumanSelections).length < aiVsHumanData.length) {
+        playSynthSound('error');
+        alert('Будь ласка, класифікуй усі твердження у Частині Б!');
+        return;
+      }
+
+      // Check Part A
+      const partACorrect = (inv1 === 'mine' && inv2 === 'stress');
+
+      // Check Part B
+      let partBCorrectCount = 0;
+      aiVsHumanData.forEach(item => {
+        if (aiVsHumanSelections[item.id] === item.type) {
+          partBCorrectCount++;
+        }
+      });
+
+      if (partACorrect && partBCorrectCount === aiVsHumanData.length) {
+        playSynthSound('success');
+        gameState.completedGames[3] = true;
+        alert('Бездоганно! Ти чудово знаєш українські досягнення та роль штучного інтелекту!');
+        showMenuHub();
+      } else {
+        playSynthSound('error');
+        alert('Перевірте ваші відповіді. Деякі класифікації або вибори винаходів містять помилки!');
+      }
+    }
+
+    window.onload = function() {
+      lucide.createIcons();
+      updateGlobalProgress();
+    };
+  </script>
+</body>
+</html>
