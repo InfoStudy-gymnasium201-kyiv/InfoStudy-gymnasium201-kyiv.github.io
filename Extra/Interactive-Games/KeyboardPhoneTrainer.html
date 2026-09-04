@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="uk" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Тренажер швидкісного друку — ДРУКАР</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            400: '#38bdf8',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                            yellow: '#facc15',
+                            accent: '#10b981'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['System-UI', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'Monaco', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom animations & keypress interactions */
+        @keyframes pulse-subtle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(0.97); }
+        }
+        .key-target {
+            animation: pulse-subtle 1.2s infinite ease-in-out;
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+        }
+        .key-active {
+            transform: translateY(2px) scale(0.94) !important;
+            filter: brightness(1.2);
+        }
+        /* Mobile caret blinking */
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        .caret-blink {
+            animation: blink 1s infinite;
+        }
+        /* Touch feedback disable selection */
+        .no-select {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        /* Smooth scrolling */
+        html, body {
+            touch-action: manipulation;
+            overscroll-behavior-y: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-full font-sans antialiased flex flex-col justify-between no-select transition-colors duration-300">
+
+    <!-- Header Navigation -->
+    <header class="w-full max-w-md mx-auto px-4 pt-3 pb-2 flex justify-between items-center border-b border-slate-800">
+        <div class="flex items-center space-x-2">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-500 to-yellow-400 p-0.5 shadow-lg flex items-center justify-center">
+                <div class="w-full h-full bg-slate-900 rounded-[10px] flex items-center justify-center">
+                    <svg class="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                </div>
+            </div>
+            <div>
+                <h1 class="text-base font-bold tracking-wide bg-gradient-to-r from-sky-400 to-yellow-300 bg-clip-text text-transparent leading-none">
+                    ДРУКАР
+                </h1>
+                <span class="text-[10px] text-slate-400 tracking-wider">УКРАЇНСЬКИЙ ТРЕНАЖЕР</span>
+            </div>
+        </div>
+
+        <!-- Controls (Sound, Settings, Stats) -->
+        <div class="flex items-center space-x-1">
+            <button id="soundBtn" class="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition-all border border-slate-700/50" title="Звук">
+                <svg id="soundIconOn" class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                </svg>
+                <svg id="soundIconOff" class="w-4 h-4 text-slate-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>
+                </svg>
+            </button>
+            <button id="modeSelectBtn" class="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition-all border border-slate-700/50 flex items-center space-x-1" title="Налаштування">
+                <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container (App UI) -->
+    <main class="w-full max-w-md mx-auto px-4 py-2 flex-1 flex flex-col justify-between">
+        
+        <!-- Live Dashboard Badges -->
+        <div class="grid grid-cols-4 gap-2 my-2">
+            <!-- WPM -->
+            <div class="bg-slate-800/60 backdrop-blur border border-slate-700/50 rounded-xl p-2 text-center shadow-sm">
+                <span class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider block">WPM</span>
+                <span id="statWpm" class="text-xl font-extrabold text-sky-400 font-mono">0</span>
+            </div>
+            <!-- CPM -->
+            <div class="bg-slate-800/60 backdrop-blur border border-slate-700/50 rounded-xl p-2 text-center shadow-sm">
+                <span class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider block">ЗН/ХВ</span>
+                <span id="statCpm" class="text-xl font-extrabold text-yellow-400 font-mono">0</span>
+            </div>
+            <!-- Accuracy -->
+            <div class="bg-slate-800/60 backdrop-blur border border-slate-700/50 rounded-xl p-2 text-center shadow-sm">
+                <span class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider block">Точність</span>
+                <span id="statAcc" class="text-xl font-extrabold text-emerald-400 font-mono">100%</span>
+            </div>
+            <!-- Timer / Streak -->
+            <div class="bg-slate-800/60 backdrop-blur border border-slate-700/50 rounded-xl p-2 text-center shadow-sm">
+                <span id="statTimerLabel" class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider block">Час</span>
+                <span id="statTimer" class="text-xl font-extrabold text-purple-400 font-mono">30s</span>
+            </div>
+        </div>
+
+        <!-- Combo Streak Banner -->
+        <div class="flex justify-between items-center px-1 mb-1">
+            <div class="flex items-center space-x-1.5">
+                <span class="text-xs text-slate-400">Серія:</span>
+                <span id="streakCounter" class="text-xs font-bold text-amber-400 font-mono">🔥 0</span>
+            </div>
+            <div class="flex items-center space-x-1">
+                <span id="categoryTag" class="text-[11px] px-2 py-0.5 rounded-full bg-sky-950 text-sky-300 border border-sky-800/50 font-medium">
+                    Прості слова
+                </span>
+            </div>
+        </div>
+
+        <!-- Word Prompt Display Container -->
+        <div id="typingArea" class="relative bg-slate-800/90 border-2 border-slate-700 rounded-2xl p-4 my-auto shadow-xl transition-all cursor-pointer min-h-[130px] flex flex-col justify-center items-center text-center overflow-hidden">
+            
+            <!-- Hidden Input for Native Mobile Soft Keyboard Integration -->
+            <input type="text" id="hiddenInput" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" class="absolute opacity-0 pointer-events-none w-1 h-1 left-0 top-0">
+
+            <!-- Visual Progress Bar -->
+            <div class="absolute top-0 left-0 right-0 h-1 bg-slate-700 overflow-hidden">
+                <div id="progressBar" class="h-full bg-gradient-to-r from-sky-400 to-yellow-400 transition-all duration-300 w-0"></div>
+            </div>
+
+            <!-- Target Text Rendering -->
+            <div id="textContainer" class="text-2xl sm:text-3xl font-mono font-medium tracking-wide leading-relaxed break-words max-w-full px-2">
+                <!-- Dynamic text spans populated by JS -->
+            </div>
+
+            <!-- Mobile Tap to Focus Hint -->
+            <div id="focusHint" class="absolute bottom-1 text-[10px] text-slate-500 animate-pulse flex items-center space-x-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/>
+                </svg>
+                <span>Натисніть сюди для виклику клавіатури</span>
+            </div>
+        </div>
+
+        <!-- Action Control Buttons -->
+        <div class="flex justify-between items-center my-2 gap-2">
+            <button id="restartBtn" class="flex-1 py-2 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold rounded-xl flex items-center justify-center space-x-2 transition active:scale-95">
+                <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                <span>Перезапустити</span>
+            </button>
+            <button id="toggleKbdBtn" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-semibold rounded-xl flex items-center space-x-1.5 transition active:scale-95">
+                <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V5l12 7-12 7z"/>
+                </svg>
+                <span id="kbdToggleLabel">Сховати клв</span>
+            </button>
+        </div>
+
+        <!-- On-Screen Ukrainian Vector Keyboard -->
+        <div id="virtualKeyboard" class="w-full bg-slate-950/80 p-1.5 rounded-2xl border border-slate-800 shadow-2xl transition-all duration-300 my-1">
+            
+            <!-- Row 1 -->
+            <div class="flex justify-center space-x-1 mb-1 touch-none">
+                <button data-key="й" class="key-btn">Й</button>
+                <button data-key="ц" class="key-btn">Ц</button>
+                <button data-key="у" class="key-btn">У</button>
+                <button data-key="к" class="key-btn">К</button>
+                <button data-key="е" class="key-btn">Е</button>
+                <button data-key="н" class="key-btn">Н</button>
+                <button data-key="г" class="key-btn">Г</button>
+                <button data-key="ґ" class="key-btn bg-slate-800/80 text-yellow-300">Ґ</button>
+                <button data-key="ш" class="key-btn">Ш</button>
+                <button data-key="щ" class="key-btn">Щ</button>
+                <button data-key="з" class="key-btn">З</button>
+                <button data-key="х" class="key-btn">Х</button>
+            </div>
+
+            <!-- Row 2 -->
+            <div class="flex justify-center space-x-1 mb-1 touch-none">
+                <button data-key="ф" class="key-btn">Ф</button>
+                <button data-key="і" class="key-btn font-semibold text-sky-300">І</button>
+                <button data-key="в" class="key-btn">В</button>
+                <button data-key="а" class="key-btn">А</button>
+                <button data-key="п" class="key-btn">П</button>
+                <button data-key="р" class="key-btn">Р</button>
+                <button data-key="о" class="key-btn">О</button>
+                <button data-key="л" class="key-btn">Л</button>
+                <button data-key="д" class="key-btn">Д</button>
+                <button data-key="ж" class="key-btn">Ж</button>
+                <button data-key="є" class="key-btn font-semibold text-sky-300">Є</button>
+            </div>
+
+            <!-- Row 3 -->
+            <div class="flex justify-center space-x-1 mb-1 touch-none">
+                <button data-key="я" class="key-btn">Я</button>
+                <button data-key="ч" class="key-btn">Ч</button>
+                <button data-key="с" class="key-btn">С</button>
+                <button data-key="м" class="key-btn">М</button>
+                <button data-key="и" class="key-btn">И</button>
+                <button data-key="т" class="key-btn">Т</button>
+                <button data-key="ь" class="key-btn">Ь</button>
+                <button data-key="б" class="key-btn">Б</button>
+                <button data-key="ю" class="key-btn">Ю</button>
+                <button data-key="ї" class="key-btn font-semibold text-sky-300">Ї</button>
+            </div>
+
+            <!-- Row 4 (Space bar & Special punctuation) -->
+            <div class="flex justify-center space-x-1.5 touch-none">
+                <button data-key="'" class="key-btn w-10 text-amber-300 font-bold">'</button>
+                <button data-key="," class="key-btn w-9 text-slate-300">,</button>
+                <button data-key=" " class="key-btn flex-1 max-w-[180px] bg-slate-800 border-slate-600 text-xs text-slate-400">ПРОБІЛ</button>
+                <button data-key="." class="key-btn w-9 text-slate-300">.</button>
+                <button data-key="Backspace" class="key-btn w-11 bg-slate-800 text-rose-400 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Vector Footer -->
+    <footer class="w-full max-w-md mx-auto px-4 py-2 text-center text-[11px] text-slate-500 border-t border-slate-800/80">
+        Набирайте швидко та влучно • Підтримуються всі літери української абетки
+    </footer>
+
+    <!-- Modal: Settings & Mode Selection -->
+    <div id="modeModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md p-5 shadow-2xl space-y-4">
+            
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h2 class="text-base font-bold text-slate-100 flex items-center space-x-2">
+                    <svg class="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <span>Налаштування Тренування</span>
+                </h2>
+                <button id="closeModalBtn" class="text-slate-400 hover:text-white p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Word Lists Selection -->
+            <div>
+                <label class="text-xs text-slate-400 font-semibold mb-2 block">Категорія слів:</label>
+                <div class="grid grid-cols-2 gap-2" id="categoryOptions">
+                    <button data-cat="simple" class="cat-opt-btn active">🌱 Прості слова</button>
+                    <button data-cat="popular" class="cat-opt-btn">🇺🇦 Популярні слова</button>
+                    <button data-cat="complex" class="cat-opt-btn">⚡ Складні слова</button>
+                    <button data-cat="tech" class="cat-opt-btn">💻 IT та технології</button>
+                    <button data-cat="sentences" class="cat-opt-btn col-span-2">💬 Скоромовки та фрази</button>
+                </div>
+            </div>
+
+            <!-- Time Limit Selection -->
+            <div>
+                <label class="text-xs text-slate-400 font-semibold mb-2 block">Тривалість сесії:</label>
+                <div class="grid grid-cols-3 gap-2" id="timerOptions">
+                    <button data-time="15" class="time-opt-btn">15 сек</button>
+                    <button data-time="30" class="time-opt-btn active">30 сек</button>
+                    <button data-time="60" class="time-opt-btn">60 сек</button>
+                </div>
+            </div>
+
+            <!-- Custom Words Input area -->
+            <div>
+                <label class="text-xs text-slate-400 font-semibold mb-1 block">Власний текст (необов'язково):</label>
+                <textarea id="customWordsInput" rows="2" placeholder="Введіть власні українські слова через пробіл..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500 transition"></textarea>
+            </div>
+
+            <button id="applySettingsBtn" class="w-full py-3 bg-gradient-to-r from-sky-500 to-yellow-500 text-slate-950 font-bold rounded-xl shadow-lg hover:opacity-95 transition">
+                Зберегти та почати
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal: Results & Vector Badges -->
+    <div id="resultsModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-md p-6 shadow-2xl text-center space-y-4">
+            
+            <!-- Result Vector Badge Icon -->
+            <div class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-sky-500 via-yellow-400 to-emerald-400 p-1 shadow-2xl animate-bounce">
+                <div id="resultBadgeBg" class="w-full h-full bg-slate-900 rounded-[22px] flex items-center justify-center text-3xl">
+                    ⚡
+                </div>
+            </div>
+
+            <div>
+                <h3 id="resultTitle" class="text-xl font-extrabold text-white">Відмінний результат!</h3>
+                <p id="resultRank" class="text-xs font-medium text-amber-400 mt-1">Звання: "Кібер-Друкар 🤖"</p>
+            </div>
+
+            <!-- Stats Breakdown Grid -->
+            <div class="grid grid-cols-2 gap-3 py-2 bg-slate-800/50 rounded-2xl p-3 border border-slate-800">
+                <div class="text-left pl-2">
+                    <span class="text-[10px] text-slate-400 block">Швидкість (WPM):</span>
+                    <span id="resWpm" class="text-2xl font-black text-sky-400 font-mono">0</span>
+                </div>
+                <div class="text-left pl-2">
+                    <span class="text-[10px] text-slate-400 block">Символів за хв:</span>
+                    <span id="resCpm" class="text-2xl font-black text-yellow-400 font-mono">0</span>
+                </div>
+                <div class="text-left pl-2">
+                    <span class="text-[10px] text-slate-400 block">Точність:</span>
+                    <span id="resAcc" class="text-2xl font-black text-emerald-400 font-mono">0%</span>
+                </div>
+                <div class="text-left pl-2">
+                    <span class="text-[10px] text-slate-400 block">Макс. Серія (Streak):</span>
+                    <span id="resStreak" class="text-2xl font-black text-purple-400 font-mono">0</span>
+                </div>
+            </div>
+
+            <div class="pt-2 flex space-x-2">
+                <button id="shareResultBtn" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold rounded-xl flex items-center justify-center space-x-2 transition">
+                    <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                    </svg>
+                    <span>Скопіювати</span>
+                </button>
+                <button id="retryBtn" class="flex-1 py-3 bg-gradient-to-r from-sky-500 to-yellow-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg transition active:scale-95">
+                    Спробувати ще раз
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key style injection & logic -->
+    <style>
+        .key-btn {
+            background-color: rgba(30, 41, 59, 0.9);
+            border: 1px solid rgba(51, 65, 85, 0.8);
+            color: #f1f5f9;
+            font-weight: 600;
+            font-size: 0.85rem;
+            border-radius: 0.5rem;
+            height: 2.75rem;
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 0 rgba(0,0,0,0.3);
+            transition: all 0.08s ease;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .key-btn:active {
+            transform: translateY(2px);
+            box-shadow: none;
+            background-color: #0284c7;
+        }
+        .cat-opt-btn, .time-opt-btn {
+            padding: 0.6rem 0.5rem;
+            border-radius: 0.75rem;
+            background-color: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(51, 65, 85, 0.7);
+            color: #94a3b8;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .cat-opt-btn.active, .time-opt-btn.active {
+            background-color: rgba(14, 165, 233, 0.2);
+            border-color: #38bdf8;
+            color: #38bdf8;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+        }
+    </style>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Ukrainian Words Repositories
+        const WORD_SETS = {
+            simple: [
+                "кіт", "дім", "ліс", "вода", "небо", "хліб", "зима", "літо", "сонце", "поле",
+                "ріка", "мова", "зоря", "птах", "дуб", "сад", "світ", "день", "ніч", "чашка",
+                "мама", "тато", "друг", "рука", "очі", "вітер", "дощ", "сніг", "гора", "море"
+            ],
+            popular: [
+                "Україна", "перемога", "свобода", "друкарство", "клавіатура", "технології", "наснага",
+                "натхнення", "розвиток", "програма", "затишок", "подорож", "майбутнє", "співпраця",
+                "гармонія", "досягнення", "свідомість", "незламність", "патріот", "культура", "символ"
+            ],
+            complex: [
+                "інтерфейс", "швидкострільність", "переосмислення", "життєдіяльність", "взаєморозуміння",
+                "добросусідство", "відповідальність", "самовдосконалення", "високопродуктивний",
+                "концептуалізація", "багатофункціональність", "цілеспрямованість", "швидкодіючий"
+            ],
+            tech: [
+                "код", "пам'ять", "алгоритм", "розробка", "інтерфейс", "функція", "сервер", "додаток",
+                "смартфон", "дисплей", "сенсор", "швидкість", "оптимізація", "процесор", "байти",
+                "база даних", "інтернет", "фронтенд", "стилістика", "вектор"
+            ],
+            sentences: [
+                "Червона калина нахилилася до води.",
+                "Швидко слово мовиться, та не швидко діло робиться.",
+                "Зоряне небо над нами і моральний закон у нас.",
+                "Пташка радіє весні, а людина — доброму слову.",
+                "Українська мова — це сила, краса та наша ідентичність.",
+                "Знання — це зброя, а праця — шлях до успіху."
+            ]
+        };
+
+        // Application State
+        let currentCategory = 'simple';
+        let timerDuration = 30; // seconds
+        let timeLeft = 30;
+        let timerInterval = null;
+        let isRunning = false;
+        let soundEnabled = true;
+
+        let wordQueue = [];
+        let currentWordIndex = 0;
+        let currentCharIndex = 0;
+        let currentWord = "";
+
+        let totalTypedChars = 0;
+        let correctChars = 0;
+        let errorCount = 0;
+        let currentStreak = 0;
+        let maxStreak = 0;
+
+        // Web Audio Synthesizer
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, now);
+                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.04);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.04);
+                    osc.start(now);
+                    osc.stop(now + 0.04);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(160, now);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                } else if (type === 'space') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'finish') {
+                    // Short victory chord
+                    [523.25, 659.25, 783.99].forEach((freq, idx) => {
+                        const o = audioCtx.createOscillator();
+                        const g = audioCtx.createGain();
+                        o.connect(g);
+                        g.connect(audioCtx.destination);
+                        o.type = 'sine';
+                        o.frequency.setValueAtTime(freq, now + idx * 0.06);
+                        g.gain.setValueAtTime(0.15, now + idx * 0.06);
+                        g.gain.exponentialRampToValueAtTime(0.001, now + 0.3 + idx * 0.06);
+                        o.start(now + idx * 0.06);
+                        o.stop(now + 0.35 + idx * 0.06);
+                    });
+                }
+            } catch (e) {
+                // Ignore audio block issues
+            }
+        }
+
+        // DOM Elements
+        const typingArea = document.getElementById('typingArea');
+        const hiddenInput = document.getElementById('hiddenInput');
+        const textContainer = document.getElementById('textContainer');
+        const progressBar = document.getElementById('progressBar');
+        const statWpm = document.getElementById('statWpm');
+        const statCpm = document.getElementById('statCpm');
+        const statAcc = document.getElementById('statAcc');
+        const statTimer = document.getElementById('statTimer');
+        const streakCounter = document.getElementById('streakCounter');
+        const categoryTag = document.getElementById('categoryTag');
+        const restartBtn = document.getElementById('restartBtn');
+        const modeSelectBtn = document.getElementById('modeSelectBtn');
+        const modeModal = document.getElementById('modeModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const applySettingsBtn = document.getElementById('applySettingsBtn');
+        const customWordsInput = document.getElementById('customWordsInput');
+        const resultsModal = document.getElementById('resultsModal');
+        const retryBtn = document.getElementById('retryBtn');
+        const shareResultBtn = document.getElementById('shareResultBtn');
+        const soundBtn = document.getElementById('soundBtn');
+        const soundIconOn = document.getElementById('soundIconOn');
+        const soundIconOff = document.getElementById('soundIconOff');
+        const toggleKbdBtn = document.getElementById('toggleKbdBtn');
+        const virtualKeyboard = document.getElementById('virtualKeyboard');
+        const kbdToggleLabel = document.getElementById('kbdToggleLabel');
+
+        // Initialize Session
+        function generateQueue() {
+            let list = [];
+            if (customWordsInput.value.trim().length > 0) {
+                list = customWordsInput.value.trim().split(/\s+/);
+            } else {
+                list = [...WORD_SETS[currentCategory]];
+            }
+            // Shuffle list
+            for (let i = list.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [list[i], list[j]] = [list[j], list[i]];
+            }
+            wordQueue = list;
+            currentWordIndex = 0;
+            currentCharIndex = 0;
+        }
+
+        function resetStats() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            timeLeft = timerDuration;
+            totalTypedChars = 0;
+            correctChars = 0;
+            errorCount = 0;
+            currentStreak = 0;
+            maxStreak = 0;
+
+            statWpm.textContent = '0';
+            statCpm.textContent = '0';
+            statAcc.textContent = '100%';
+            statTimer.textContent = `${timeLeft}s`;
+            streakCounter.textContent = '🔥 0';
+            progressBar.style.width = '0%';
+        }
+
+        function startTimer() {
+            if (isRunning) return;
+            isRunning = true;
+            const startTime = Date.now();
+            const totalDuration = timerDuration * 1000;
+
+            timerInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const remaining = Math.max(0, totalDuration - elapsed);
+                timeLeft = Math.ceil(remaining / 1000);
+                
+                statTimer.textContent = `${timeLeft}s`;
+                
+                // Progress bar update
+                const percentage = (elapsed / totalDuration) * 100;
+                progressBar.style.width = `${Math.min(100, percentage)}%`;
+
+                updateStats();
+
+                if (remaining <= 0) {
+                    endSession();
+                }
+            }, 100);
+        }
+
+        function renderCurrentText() {
+            if (currentWordIndex >= wordQueue.length) {
+                generateQueue();
+            }
+            currentWord = wordQueue[currentWordIndex];
+
+            textContainer.innerHTML = '';
+            
+            // Build visual spans for current word
+            for (let i = 0; i < currentWord.length; i++) {
+                const charSpan = document.createElement('span');
+                charSpan.textContent = currentWord[i];
+                charSpan.className = 'inline-block transition-all duration-75 px-[1px] border-b-2 border-transparent';
+                
+                if (i === currentCharIndex) {
+                    charSpan.classList.add('text-sky-400', 'border-sky-400', 'caret-blink', 'scale-110');
+                } else if (i < currentCharIndex) {
+                    charSpan.classList.add('text-emerald-400', 'font-semibold');
+                } else {
+                    charSpan.classList.add('text-slate-400');
+                }
+                textContainer.appendChild(charSpan);
+            }
+
+            // Highlight target key on virtual keyboard
+            highlightVirtualKey();
+        }
+
+        function highlightVirtualKey() {
+            // Clear previous targets
+            document.querySelectorAll('.key-btn').forEach(k => k.classList.remove('key-target', 'bg-sky-500/30', 'border-sky-400'));
+            
+            if (currentCharIndex < currentWord.length) {
+                const targetChar = currentWord[currentCharIndex].toLowerCase();
+                const keyBtn = document.querySelector(`.key-btn[data-key="${targetChar}"]`);
+                if (keyBtn) {
+                    keyBtn.classList.add('key-target', 'bg-sky-500/30', 'border-sky-400');
+                }
+            } else {
+                // Target space
+                const spaceBtn = document.querySelector('.key-btn[data-key=" "]');
+                if (spaceBtn) {
+                    spaceBtn.classList.add('key-target', 'bg-sky-500/30', 'border-sky-400');
+                }
+            }
+        }
+
+        function processInputChar(inputChar) {
+            if (!isRunning && timeLeft > 0) {
+                startTimer();
+            }
+            if (!isRunning) return;
+
+            const expectedChar = currentCharIndex < currentWord.length ? currentWord[currentCharIndex] : ' ';
+
+            // Case-insensitive comparison or exact Ukrainian match
+            if (inputChar.toLowerCase() === expectedChar.toLowerCase() || (expectedChar === ' ' && inputChar === ' ')) {
+                // Correct char
+                correctChars++;
+                totalTypedChars++;
+                currentStreak++;
+                if (currentStreak > maxStreak) maxStreak = currentStreak;
+
+                if (inputChar === ' ') {
+                    playSound('space');
+                    // Move to next word
+                    currentWordIndex++;
+                    currentCharIndex = 0;
+                    renderCurrentText();
+                } else {
+                    playSound('click');
+                    currentCharIndex++;
+                    
+                    // If finished full word without space requirement (or last char)
+                    if (currentCharIndex >= currentWord.length) {
+                        // Automatically render space expectation or auto-advance if end of phrase
+                        renderCurrentText();
+                    } else {
+                        renderCurrentText();
+                    }
+                }
+            } else {
+                // Incorrect char
+                errorCount++;
+                totalTypedChars++;
+                currentStreak = 0;
+                playSound('error');
+
+                // Visual wobble error on container
+                typingArea.classList.add('border-rose-500/80', 'animate-bounce');
+                setTimeout(() => typingArea.classList.remove('border-rose-500/80', 'animate-bounce'), 200);
+            }
+
+            streakCounter.textContent = `🔥 ${currentStreak}`;
+            updateStats();
+        }
+
+        function handleBackspace() {
+            if (currentCharIndex > 0) {
+                currentCharIndex--;
+                renderCurrentText();
+            }
+        }
+
+        function updateStats() {
+            const timeElapsedMinutes = (timerDuration - timeLeft) / 60 || 0.001;
+            
+            // Standard CPM = (Correct characters / elapsed time in min)
+            const cpm = Math.round(correctChars / timeElapsedMinutes) || 0;
+            // Standard WPM = CPM / 5
+            const wpm = Math.round(cpm / 5) || 0;
+            
+            const total = correctChars + errorCount;
+            const accuracy = total > 0 ? Math.round((correctChars / total) * 100) : 100;
+
+            statWpm.textContent = wpm;
+            statCpm.textContent = cpm;
+            statAcc.textContent = `${accuracy}%`;
+        }
+
+        function endSession() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            playSound('finish');
+
+            const finalWpm = parseInt(statWpm.textContent) || 0;
+            const finalCpm = parseInt(statCpm.textContent) || 0;
+            const finalAcc = statAcc.textContent;
+
+            // Compute Rank & Badge
+            let rank = "Початківець 🐣";
+            let badgeIcon = "🐣";
+
+            if (finalWpm >= 70) {
+                rank = "Кібер-Друкар 🤖⚡";
+                badgeIcon = "🤖";
+            } else if (finalWpm >= 50) {
+                rank = "Блискавка ⚡";
+                badgeIcon = "⚡";
+            } else if (finalWpm >= 35) {
+                rank = "Сокіл 🦅";
+                badgeIcon = "🦅";
+            } else if (finalWpm >= 20) {
+                rank = "Заєць 🐇";
+                badgeIcon = "🐇";
+            } else {
+                rank = "Равлик 🐌";
+                badgeIcon = "🐌";
+            }
+
+            document.getElementById('resWpm').textContent = finalWpm;
+            document.getElementById('resCpm').textContent = finalCpm;
+            document.getElementById('resAcc').textContent = finalAcc;
+            document.getElementById('resStreak').textContent = maxStreak;
+            document.getElementById('resultRank').textContent = `Звання: "${rank}"`;
+            document.getElementById('resultBadgeBg').textContent = badgeIcon;
+
+            // Show Result Modal
+            resultsModal.classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        function startNewSession() {
+            resultsModal.classList.add('opacity-0', 'pointer-events-none');
+            modeModal.classList.add('opacity-0', 'pointer-events-none');
+            resetStats();
+            generateQueue();
+            renderCurrentText();
+            focusInput();
+        }
+
+        function focusInput() {
+            hiddenInput.focus();
+        }
+
+        // Event Listeners
+        typingArea.addEventListener('click', focusInput);
+
+        // Native Keyboard Event Listener
+        document.addEventListener('keydown', (e) => {
+            // Ignore system keys
+            if (e.ctrlKey || e.altKey || e.metaKey) return;
+
+            if (e.key === 'Backspace') {
+                handleBackspace();
+                animateVirtualKey('Backspace');
+                return;
+            }
+
+            if (e.key.length === 1) {
+                processInputChar(e.key);
+                animateVirtualKey(e.key.toLowerCase());
+            }
+        });
+
+        // Virtual Keyboard Touch / Click Events
+        document.querySelectorAll('.key-btn').forEach(btn => {
+            btn.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                const key = btn.getAttribute('data-key');
+                
+                btn.classList.add('key-active');
+                setTimeout(() => btn.classList.remove('key-active'), 120);
+
+                if (key === 'Backspace') {
+                    handleBackspace();
+                } else {
+                    processInputChar(key);
+                }
+                focusInput();
+            });
+        });
+
+        function animateVirtualKey(key) {
+            const btn = document.querySelector(`.key-btn[data-key="${key}"]`);
+            if (btn) {
+                btn.classList.add('key-active');
+                setTimeout(() => btn.classList.remove('key-active'), 120);
+            }
+        }
+
+        // Category selection in Modal
+        document.querySelectorAll('.cat-opt-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.cat-opt-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentCategory = btn.getAttribute('data-cat');
+            });
+        });
+
+        // Timer selection in Modal
+        document.querySelectorAll('.time-opt-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.time-opt-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                timerDuration = parseInt(btn.getAttribute('data-time'));
+            });
+        });
+
+        // Sound Toggle
+        soundBtn.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            soundIconOn.classList.toggle('hidden', !soundEnabled);
+            soundIconOff.classList.toggle('hidden', soundEnabled);
+        });
+
+        // Toggle Virtual Keyboard Visibility
+        toggleKbdBtn.addEventListener('click', () => {
+            const isHidden = virtualKeyboard.classList.contains('hidden');
+            if (isHidden) {
+                virtualKeyboard.classList.remove('hidden');
+                kbdToggleLabel.textContent = "Сховати клв";
+            } else {
+                virtualKeyboard.classList.add('hidden');
+                kbdToggleLabel.textContent = "Показати клв";
+            }
+        });
+
+        // Modal Controls
+        modeSelectBtn.addEventListener('click', () => {
+            modeModal.classList.remove('opacity-0', 'pointer-events-none');
+        });
+        closeModalBtn.addEventListener('click', () => {
+            modeModal.classList.add('opacity-0', 'pointer-events-none');
+        });
+        applySettingsBtn.addEventListener('click', () => {
+            const catNames = {
+                simple: "Прості слова",
+                popular: "Популярні слова",
+                complex: "Складні слова",
+                tech: "IT та технології",
+                sentences: "Скоромовки й фрази"
+            };
+            categoryTag.textContent = customWordsInput.value.trim() ? "Власний текст" : catNames[currentCategory];
+            startNewSession();
+        });
+
+        restartBtn.addEventListener('click', startNewSession);
+        retryBtn.addEventListener('click', startNewSession);
+
+        // Share Results
+        shareResultBtn.addEventListener('click', () => {
+            const text = `Мій результат у тренажері ДРУКАР: ${statWpm.textContent} WPM (${statCpm.textContent} зн/хв) з точністю ${statAcc.textContent}! 🇺🇦`;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text);
+                shareResultBtn.innerText = "Скопійовано! ✓";
+                setTimeout(() => shareResultBtn.innerText = "Скопіювати", 2000);
+            }
+        });
+
+        // Initial launch
+        window.addEventListener('load', () => {
+            startNewSession();
+        });
+    </script>
+</body>
+</html>
