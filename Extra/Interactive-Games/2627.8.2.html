@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="uk" class="h-full bg-slate-900 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>КіберПравовець: Цифровий Вартовий</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Font: Montserrat & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Montserrat', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              500: '#06b6d4',
+              600: '#0284c7',
+              700: '#0369a1',
+              900: '#0c4a6e',
+            },
+            cyber: {
+              purple: '#8b5cf6',
+              green: '#10b981',
+              red: '#ef4444',
+              yellow: '#f59e0b',
+              dark: '#0f172a'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    
+    .vector-border {
+      box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+      border: 2px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .wire-port {
+      transition: all 0.2s ease;
+    }
+    .wire-port:hover {
+      transform: scale(1.15);
+      box-shadow: 0 0 12px currentColor;
+    }
+
+    .drop-zone {
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+    .drop-zone.drag-over {
+      background-color: rgba(14, 165, 233, 0.15);
+      border-color: #38bdf8;
+    }
+
+    /* SVG Cable line styling */
+    .cable-line {
+      stroke-linecap: round;
+      filter: drop-shadow(0px 0px 4px currentColor);
+      transition: stroke-dashoffset 0.3s ease;
+    }
+
+    /* Pulse animation for interactive cues */
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.8; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.03); }
+    }
+    .pulse-target {
+      animation: pulse-glow 2s infinite ease-in-out;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col font-sans overflow-x-hidden bg-slate-950 text-slate-100">
+
+  <header class="bg-slate-900 border-b border-slate-800 px-4 py-3 sticky top-0 z-40 backdrop-blur bg-opacity-90">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-cyan-500/30">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <div>
+          <h1 class="font-extrabold text-lg sm:text-xl tracking-tight bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-300 bg-clip-text text-transparent">
+            КіберПравовець
+          </h1>
+          <p class="text-xs text-slate-400 font-mono">Інформатика 8 клас • Норми та Закони</p>
+        </div>
+      </div>
+
+      <!-- Game Status & Controls -->
+      <div class="flex items-center gap-4 text-sm font-mono">
+        <div class="bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-2">
+          <i class="fa-solid fa-star text-amber-400"></i>
+          <span>Бали: <strong id="score-display" class="text-cyan-400 font-bold text-base">0</strong></span>
+        </div>
+
+        <button id="sound-btn" onclick="toggleSound()" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition" title="Звукові ефекти">
+          <i id="sound-icon" class="fa-solid fa-volume-high"></i>
+        </button>
+
+        <button onclick="resetGame()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-rotate-left"></i>
+          <span class="hidden sm:inline">Скинути</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="bg-slate-900/50 border-b border-slate-800/80 px-4 py-2">
+    <div class="max-w-4xl mx-auto flex items-center justify-between text-xs font-mono">
+      <div id="step-btn-1" class="step-indicator flex items-center gap-2 text-cyan-400 font-bold cursor-pointer" onclick="switchStage(1)">
+        <span class="w-6 h-6 rounded-full bg-cyan-500/20 border border-cyan-400 flex items-center justify-center">1</span>
+        <span class="hidden md:inline">Терези Юстиції</span>
+      </div>
+      <div class="h-0.5 flex-1 bg-slate-800 mx-2"></div>
+
+      <div id="step-btn-2" class="step-indicator flex items-center gap-2 text-slate-500 cursor-pointer" onclick="switchStage(2)">
+        <span class="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center">2</span>
+        <span class="hidden md:inline">Кібер-Комутатор</span>
+      </div>
+      <div class="h-0.5 flex-1 bg-slate-800 mx-2"></div>
+
+      <div id="step-btn-3" class="step-indicator flex items-center gap-2 text-slate-500 cursor-pointer" onclick="switchStage(3)">
+        <span class="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center">3</span>
+        <span class="hidden md:inline">Конвеєр Ліцензій</span>
+      </div>
+      <div class="h-0.5 flex-1 bg-slate-800 mx-2"></div>
+
+      <div id="step-btn-4" class="step-indicator flex items-center gap-2 text-slate-500 cursor-pointer" onclick="switchStage(4)">
+        <span class="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center">4</span>
+        <span class="hidden md:inline">Алгоритм Захисту</span>
+      </div>
+    </div>
+  </section>
+
+  <main class="flex-1 max-w-5xl w-full mx-auto p-4 md:p-6 flex flex-col justify-center relative">
+
+    <!-- ================= STAGE 1: Drag & Drop Scale ================= -->
+    <div id="stage-1" class="stage-container space-y-6">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 vector-border">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+          <div>
+            <span class="text-xs font-mono font-bold text-cyan-400 uppercase tracking-wider">Міні-гра 1 • Фізичний Drag & Drop</span>
+            <h2 class="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-scale-balanced text-amber-400"></i> Судові Терези: Правопорушення
+            </h2>
+          </div>
+          <p class="text-xs text-slate-400 max-w-md">Перетягніть ситуації правопорушень на відповідну шальку терезів: <strong>Адміністративна</strong> чи <strong>Кримінальна</strong> відповідальність.</p>
+        </div>
+
+        <!-- Scale Visualisation Container -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
+          
+          <!-- Admin Scale Bucket -->
+          <div id="zone-admin" class="drop-zone bg-slate-950/80 border-2 border-dashed border-amber-500/40 rounded-xl p-4 flex flex-col justify-between min-h-[220px]"
+               ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="handleDrop(event, 'admin')">
+            <div class="flex items-center justify-between border-b border-amber-500/30 pb-2 mb-3">
+              <span class="font-bold text-amber-400 flex items-center gap-2">
+                <i class="fa-solid fa-gavel"></i> Адміністративна
+              </span>
+              <span class="text-xs font-mono bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded">Покарання: Штраф</span>
+            </div>
+            <p class="text-xs text-slate-500 mb-2 italic">Дрібні правопорушення, не є тяжкими злочинами (спам, дрібне шахрайство)</p>
+            <div id="bucket-admin" class="space-y-2 flex-1 flex flex-col justify-end"></div>
+          </div>
+
+          <!-- Criminal Scale Bucket -->
+          <div id="zone-criminal" class="drop-zone bg-slate-950/80 border-2 border-dashed border-rose-500/40 rounded-xl p-4 flex flex-col justify-between min-h-[220px]"
+               ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="handleDrop(event, 'criminal')">
+            <div class="flex items-center justify-between border-b border-rose-500/30 pb-2 mb-3">
+              <span class="font-bold text-rose-400 flex items-center gap-2">
+                <i class="fa-solid fa-user-ninja"></i> Кримінальна
+              </span>
+              <span class="text-xs font-mono bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded">Тяжкі злочини</span>
+            </div>
+            <p class="text-xs text-slate-500 mb-2 italic">Злам сайтів, віруси/трояни, кібербулінг, шахрайство з банківськими картками</p>
+            <div id="bucket-criminal" class="space-y-2 flex-1 flex flex-col justify-end"></div>
+          </div>
+        </div>
+
+        <!-- Draggable Cards Pool -->
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+          <h3 class="text-xs font-mono text-slate-400 mb-3 flex items-center gap-1.5">
+            <i class="fa-solid fa-hand-pointer text-cyan-400"></i> Картки ситуацій (натисніть або перетягніть):
+          </h3>
+          <div id="stage1-cards" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <!-- Cards populated dynamically -->
+          </div>
+        </div>
+
+        <div class="mt-6 flex justify-between items-center">
+          <div id="stage1-feedback" class="text-sm font-semibold hidden"></div>
+          <button id="stage1-next" onclick="verifyStage1()" class="ml-auto px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-500/20 transition flex items-center gap-2">
+            <span>Перевірити</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ================= STAGE 2: Interactive Wire Cables ================= -->
+    <div id="stage-2" class="stage-container space-y-6 hidden">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 vector-border relative">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+          <div>
+            <span class="text-xs font-mono font-bold text-cyan-400 uppercase tracking-wider">Міні-гра 2 • З'єднання проводів</span>
+            <h2 class="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-network-wired text-cyan-400"></i> Кібер-Комутатор: Загрози Безпеці
+            </h2>
+          </div>
+          <p class="text-xs text-slate-400 max-w-md">З'єднайте віртуальним кабелем загрозу зліва із відповідним аспектом безпеки (Тріада CIA) справа.</p>
+        </div>
+
+        <!-- Wire Board Interactive Area -->
+        <div class="relative bg-slate-950 rounded-xl p-4 sm:p-8 border border-slate-800 overflow-hidden min-h-[380px]" id="wire-board">
+          
+          <!-- SVG Overlay for dynamic cables -->
+          <svg id="wire-svg" class="absolute inset-0 w-full h-full pointer-events-none z-10">
+            <!-- Cables rendered dynamically -->
+          </svg>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-32 relative z-20">
+            
+            <!-- Left Side: Incidents / Threats -->
+            <div class="space-y-4" id="left-ports">
+              <h3 class="text-xs font-mono text-cyan-400 uppercase tracking-wider mb-2">Ситуація / Загроза</h3>
+              <!-- Left ports generated dynamically -->
+            </div>
+
+            <!-- Right Side: Security Pillars -->
+            <div class="space-y-4" id="right-ports">
+              <h3 class="text-xs font-mono text-cyan-400 uppercase tracking-wider mb-2">Аспект безпеки (Тріада)</h3>
+              <!-- Right ports generated dynamically -->
+            </div>
+
+          </div>
+        </div>
+
+        <div class="mt-6 flex justify-between items-center">
+          <button onclick="clearStage2Wires()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-mono rounded-lg border border-slate-700 transition">
+            <i class="fa-solid fa-eraser mr-1"></i> Очистити дроти
+          </button>
+          
+          <button id="stage2-next" onclick="verifyStage2()" class="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-500/20 transition flex items-center gap-2">
+            <span>Перевірити з'єднання</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ================= STAGE 3: Software & Licenses conveyor puzzle ================= -->
+    <div id="stage-3" class="stage-container space-y-6 hidden">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 vector-border">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+          <div>
+            <span class="text-xs font-mono font-bold text-cyan-400 uppercase tracking-wider">Міні-гра 3 • Пазл-Класифікатор</span>
+            <h2 class="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-compact-disc text-purple-400"></i> Конвеєр Ліцензій ПЗ
+            </h2>
+          </div>
+          <p class="text-xs text-slate-400 max-w-md">Розподіліть програми та особливості за 3 типами ліцензій з матеріалів підручника.</p>
+        </div>
+
+        <!-- License Types Buckets Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          
+          <!-- Proprietary Bucket -->
+          <div class="drop-zone bg-slate-950 p-4 rounded-xl border-2 border-indigo-500/30 flex flex-col justify-between min-h-[220px]"
+               id="license-proprietary" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="handleDropStage3(event, 'proprietary')">
+            <div>
+              <div class="flex items-center gap-2 font-bold text-indigo-400 border-b border-indigo-500/20 pb-2 mb-2">
+                <i class="fa-solid fa-lock text-sm"></i> Пропрієтарна
+              </div>
+              <p class="text-[11px] text-slate-400 mb-3">Закритий код, власність розробника. Копіювання та продаж заборонені.</p>
+            </div>
+            <div id="bucket-proprietary" class="space-y-2 flex-1 flex flex-col justify-end"></div>
+          </div>
+
+          <!-- Freeware Bucket -->
+          <div class="drop-zone bg-slate-950 p-4 rounded-xl border-2 border-emerald-500/30 flex flex-col justify-between min-h-[220px]"
+               id="license-freeware" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="handleDropStage3(event, 'freeware')">
+            <div>
+              <div class="flex items-center gap-2 font-bold text-emerald-400 border-b border-emerald-500/20 pb-2 mb-2">
+                <i class="fa-solid fa-gift text-sm"></i> Freeware
+              </div>
+              <p class="text-[11px] text-slate-400 mb-3">Безкоштовна для використання, але код закритий для змін.</p>
+            </div>
+            <div id="bucket-freeware" class="space-y-2 flex-1 flex flex-col justify-end"></div>
+          </div>
+
+          <!-- Open-Source Bucket -->
+          <div class="drop-zone bg-slate-950 p-4 rounded-xl border-2 border-sky-500/30 flex flex-col justify-between min-h-[220px]"
+               id="license-opensource" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="handleDropStage3(event, 'opensource')">
+            <div>
+              <div class="flex items-center gap-2 font-bold text-sky-400 border-b border-sky-500/20 pb-2 mb-2">
+                <i class="fa-solid fa-code-branch text-sm"></i> Відкрита (Open-source)
+              </div>
+              <p class="text-[11px] text-slate-400 mb-3">Повна свобода: вільний вихідний код, право модифікувати та поширювати.</p>
+            </div>
+            <div id="bucket-opensource" class="space-y-2 flex-1 flex flex-col justify-end"></div>
+          </div>
+
+        </div>
+
+        <!-- Software Items Pool -->
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+          <h3 class="text-xs font-mono text-slate-400 mb-3 flex items-center gap-1.5">
+            <i class="fa-solid fa-layer-group text-purple-400"></i> Елементи для сортування (натисніть або перетягніть):
+          </h3>
+          <div id="stage3-cards" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+            <!-- Stage 3 Cards injected dynamically -->
+          </div>
+        </div>
+
+        <div class="mt-6 flex justify-end">
+          <button onclick="verifyStage3()" class="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-500/20 transition flex items-center gap-2">
+            <span>Перевірити розстановку</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ================= STAGE 4: Algorithm Step Chain Puzzle ================= -->
+    <div id="stage-4" class="stage-container space-y-6 hidden">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 vector-border">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+          <div>
+            <span class="text-xs font-mono font-bold text-cyan-400 uppercase tracking-wider">Міні-гра 4 • Ланцюжок алгоритму</span>
+            <h2 class="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-diagram-project text-emerald-400"></i> Алгоритм Безпечної Поведінки
+            </h2>
+          </div>
+          <p class="text-xs text-slate-400 max-w-md">Вишикуйте кроки правильного реагування на підозріле повідомлення із фішинговим посиланням у послідовний алгоритм.</p>
+        </div>
+
+        <!-- Sequence Flowchart Builder Container -->
+        <div class="bg-slate-950 rounded-xl p-4 sm:p-6 border border-slate-800 my-4">
+          <h3 class="text-xs font-mono text-slate-400 mb-4 uppercase tracking-wider">Послідовність виконання (Крок 1 ➔ Крок 4):</h3>
+          
+          <div id="algorithm-slots" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <!-- Algorithm step drop slots generated dynamically -->
+          </div>
+        </div>
+
+        <!-- Steps Pool -->
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+          <h3 class="text-xs font-mono text-slate-400 mb-3 flex items-center gap-1.5">
+            <i class="fa-solid fa-cubes text-emerald-400"></i> Доступні кроки (Клацніть, щоб додати у вільне поле):
+          </h3>
+          <div id="stage4-pool" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <!-- Pool items populated dynamically -->
+          </div>
+        </div>
+
+        <div class="mt-6 flex justify-between items-center">
+          <button onclick="clearStage4()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-mono rounded-lg border border-slate-700 transition">
+            <i class="fa-solid fa-rotate-left mr-1"></i> Очистити ланцюжок
+          </button>
+
+          <button onclick="verifyStage4()" class="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition flex items-center gap-2">
+            <span>Завершити курс</span>
+            <i class="fa-solid fa-circle-check"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ================= STAGE 5: Final Certificate & Results ================= -->
+    <div id="stage-final" class="stage-container hidden">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-10 vector-border text-center max-w-2xl mx-auto space-y-6">
+        
+        <div class="inline-flex p-4 bg-cyan-500/10 rounded-full border border-cyan-500/30 text-cyan-400 text-4xl mb-2">
+          <i class="fa-solid fa-award"></i>
+        </div>
+
+        <div>
+          <span class="text-xs font-mono uppercase tracking-widest text-cyan-400">Урок інформатики 8 клас</span>
+          <h2 class="text-3xl font-extrabold text-white mt-1">Сертифікат Кібер-Експерта</h2>
+          <p class="text-sm text-slate-400 mt-2">Ви успішно засвоїли норми правової взаємодії та відповідальності у кіберпросторі!</p>
+        </div>
+
+        <!-- Score Breakdown Card -->
+        <div class="bg-slate-950 rounded-xl p-6 border border-slate-800 grid grid-cols-2 gap-4 font-mono text-left">
+          <div>
+            <span class="text-xs text-slate-500 block">Підсумковий бал:</span>
+            <span id="final-score" class="text-3xl font-black text-cyan-400">100 / 100</span>
+          </div>
+          <div>
+            <span class="text-xs text-slate-500 block">Рівень знань:</span>
+            <span id="final-rank" class="text-lg font-bold text-emerald-400">Кібер-Захисник</span>
+          </div>
+        </div>
+
+        <!-- Topics Mastered Checkmarks -->
+        <div class="text-left text-xs space-y-2 bg-slate-950/50 p-4 rounded-xl border border-slate-800/80">
+          <div class="flex items-center gap-2 text-slate-300">
+            <i class="fa-solid fa-check text-emerald-400"></i>
+            <span>Адміністративна та кримінальна відповідальність за кіберзлочини</span>
+          </div>
+          <div class="flex items-center gap-2 text-slate-300">
+            <i class="fa-solid fa-check text-emerald-400"></i>
+            <span>Тріада кібербезпеки: Конфіденційність, Цілісність, Доступність</span>
+          </div>
+          <div class="flex items-center gap-2 text-slate-300">
+            <i class="fa-solid fa-check text-emerald-400"></i>
+            <span>Ліцензії ПЗ: Пропрієтарна, Freeware, Open-source</span>
+          </div>
+          <div class="flex items-center gap-2 text-slate-300">
+            <i class="fa-solid fa-check text-emerald-400"></i>
+            <span>Алгоритм захисту від фішингу та інтернет-шахрайства</span>
+          </div>
+        </div>
+
+        <div class="pt-4 flex justify-center gap-4">
+          <button onclick="resetGame()" class="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl border border-slate-700 transition">
+            <i class="fa-solid fa-rotate-left mr-2"></i> Пройти знову
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <div id="toast" class="fixed bottom-5 right-5 max-w-sm bg-slate-900 border border-slate-700 p-4 rounded-xl shadow-2xl z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-start gap-3">
+    <div id="toast-icon" class="text-2xl text-cyan-400">
+      <i class="fa-solid fa-circle-info"></i>
+    </div>
+    <div>
+      <h4 id="toast-title" class="font-bold text-sm text-white">Сповіщення</h4>
+      <p id="toast-body" class="text-xs text-slate-300 mt-0.5">Деталі сповіщення...</p>
+    </div>
+  </div>
+
+  <script>
+    /* ================= AUDIO SYNTHESIZER (Web Audio API) ================= */
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const icon = document.getElementById('sound-icon');
+      if (soundEnabled) {
+        icon.className = 'fa-solid fa-volume-high text-cyan-400';
+        playTone(600, 0.1, 'sine');
+      } else {
+        icon.className = 'fa-solid fa-volume-xmark text-slate-500';
+      }
+    }
+
+    function playTone(freq, duration, type = 'sine') {
+      if (!soundEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+      } catch (e) { console.debug(e); }
+    }
+
+    function playSuccessSound() {
+      if (!soundEnabled) return;
+      playTone(523.25, 0.12, 'sine'); // C5
+      setTimeout(() => playTone(659.25, 0.12, 'sine'), 100); // E5
+      setTimeout(() => playTone(783.99, 0.25, 'sine'), 200); // G5
+    }
+
+    function playErrorSound() {
+      if (!soundEnabled) return;
+      playTone(220, 0.15, 'sawtooth');
+      setTimeout(() => playTone(180, 0.25, 'sawtooth'), 120);
+    }
+
+    function playWireConnectSound() {
+      playTone(800, 0.08, 'triangle');
+    }
+
+
+    /* ================= GAME STATE & SCORES ================= */
+    let currentStage = 1;
+    let totalScore = 0;
+    const stageScores = { 1: 0, 2: 0, 3: 0, 4: 0 };
+
+
+    /* ================= STAGE 1 LOGIC (Drag & Drop) ================= */
+    const stage1Data = [
+      { id: 'card-1', type: 'admin', title: 'Розповсюдження рекламного спаму в мережі', icon: 'fa-envelope-open-text' },
+      { id: 'card-2', type: 'criminal', title: 'Несанкціоноване втручання та злам сайту школи', icon: 'fa-user-ninja' },
+      { id: 'card-3', type: 'admin', title: 'Дрібне шахрайство через приватні оголошення', icon: 'fa-hand-holding-dollar' },
+      { id: 'card-4', type: 'criminal', title: 'Створення та поширення вірусу-трояна', icon: 'fa-bug' },
+      { id: 'card-5', type: 'criminal', title: 'Систематичний кібербулінг та цькування особи', icon: 'fa-comment-slash' },
+      { id: 'card-6', type: 'criminal', title: 'Крадіжка коштів з платіжних карток', icon: 'fa-credit-card' }
+    ];
+
+    let stage1Assignments = {}; // cardId -> 'admin' | 'criminal'
+    let selectedCardIdStage1 = null;
+
+    function initStage1() {
+      const pool = document.getElementById('stage1-cards');
+      pool.innerHTML = '';
+      document.getElementById('bucket-admin').innerHTML = '';
+      document.getElementById('bucket-criminal').innerHTML = '';
+      stage1Assignments = {};
+
+      stage1Data.forEach(card => {
+        const el = document.createElement('div');
+        el.id = card.id;
+        el.draggable = true;
+        el.ondragstart = (e) => handleDragStart(e, card.id);
+        el.onclick = () => selectCardStage1(card.id);
+        el.className = 'p-3 bg-slate-900 border border-slate-700 hover:border-cyan-400 rounded-lg cursor-pointer text-xs flex items-center gap-2 transition shadow-sm hover:shadow-cyan-500/10';
+        el.innerHTML = `
+          <i class="fa-solid ${card.icon} text-cyan-400 text-sm"></i>
+          <span class="flex-1">${card.title}</span>
+        `;
+        pool.appendChild(el);
+      });
+    }
+
+    function selectCardStage1(id) {
+      playTone(400, 0.05);
+      if (selectedCardIdStage1 === id) {
+        selectedCardIdStage1 = null;
+        highlightSelectedCardStage1();
+        return;
+      }
+      selectedCardIdStage1 = id;
+      highlightSelectedCardStage1();
+      showToast("Оберіть шальку терезів", "Клацніть на ліву або праву шальку для переміщення картки.");
+    }
+
+    function highlightSelectedCardStage1() {
+      stage1Data.forEach(card => {
+        const el = document.getElementById(card.id);
+        if (!el) return;
+        if (card.id === selectedCardIdStage1) {
+          el.classList.add('ring-2', 'ring-cyan-400', 'bg-slate-800');
+        } else {
+          el.classList.remove('ring-2', 'ring-cyan-400', 'bg-slate-800');
+        }
+      });
+    }
+
+    function allowDrop(ev) {
+      ev.preventDefault();
+      ev.currentTarget.classList.add('drag-over');
+    }
+
+    function leaveDrop(ev) {
+      ev.currentTarget.classList.remove('drag-over');
+    }
+
+    function handleDragStart(ev, id) {
+      ev.dataTransfer.setData('text/plain', id);
+      selectedCardIdStage1 = id;
+      playTone(350, 0.05);
+    }
+
+    function handleDrop(ev, bucketType) {
+      ev.preventDefault();
+      ev.currentTarget.classList.remove('drag-over');
+      const cardId = ev.dataTransfer.getData('text/plain') || selectedCardIdStage1;
+      if (cardId) {
+        assignCardStage1(cardId, bucketType);
+      }
+    }
+
+    // Direct click assignment on bucket
+    document.getElementById('zone-admin').addEventListener('click', () => {
+      if (selectedCardIdStage1) assignCardStage1(selectedCardIdStage1, 'admin');
+    });
+    document.getElementById('zone-criminal').addEventListener('click', () => {
+      if (selectedCardIdStage1) assignCardStage1(selectedCardIdStage1, 'criminal');
+    });
+
+    function assignCardStage1(cardId, bucketType) {
+      stage1Assignments[cardId] = bucketType;
+      const cardEl = document.getElementById(cardId);
+      const targetBucket = document.getElementById(`bucket-${bucketType}`);
+      if (cardEl && targetBucket) {
+        targetBucket.appendChild(cardEl);
+        cardEl.classList.remove('ring-2', 'ring-cyan-400');
+        playTone(500, 0.08);
+      }
+      selectedCardIdStage1 = null;
+    }
+
+    function verifyStage1() {
+      let correct = 0;
+      stage1Data.forEach(card => {
+        if (stage1Assignments[card.id] === card.type) {
+          correct++;
+        }
+      });
+
+      if (Object.keys(stage1Assignments).length < stage1Data.length) {
+        showToast("Увага!", "Будь ласка, розподіліть усі ситуації на терезах перед перевіркою.", "warning");
+        playErrorSound();
+        return;
+      }
+
+      const score = Math.round((correct / stage1Data.length) * 25);
+      stageScores[1] = score;
+      updateTotalScore();
+
+      if (correct === stage1Data.length) {
+        playSuccessSound();
+        showToast("Відмінно!", "Усі правопорушення класифіковано правильно! +25 балів.");
+        setTimeout(() => switchStage(2), 1500);
+      } else {
+        playErrorSound();
+        showToast("Є помилки", `Правильно: ${correct} з ${stage1Data.length}. Спробуйте уточнити відмінності.`, "error");
+      }
+    }
+
+
+    /* ================= STAGE 2 LOGIC (Interactive Wire Board) ================= */
+    const stage2Left = [
+      { id: 'L1', title: 'Викрадення пароля та особистих документів', target: 'R1' },
+      { id: 'L2', title: 'Підробка оцінок у електронному щоденнику', target: 'R2' },
+      { id: 'L3', title: 'DDoS-атака, що паралізувала вебсайт школи', target: 'R3' }
+    ];
+
+    const stage2Right = [
+      { id: 'R1', title: 'Загроза конфіденційності', desc: 'Розголошення особистих даних' },
+      { id: 'R2', title: 'Загроза цілісності', desc: 'Зміна даних без відома' },
+      { id: 'R3', title: 'Загроза доступності', desc: 'Відмова у обслуговуванні' }
+    ];
+
+    let connectionsStage2 = {}; // leftPortId -> rightPortId
+    let activeWireSource = null;
+
+    function initStage2() {
+      const leftContainer = document.getElementById('left-ports');
+      const rightContainer = document.getElementById('right-ports');
+      
+      leftContainer.innerHTML = '<h3 class="text-xs font-mono text-cyan-400 uppercase tracking-wider mb-2">Ситуація / Загроза</h3>';
+      rightContainer.innerHTML = '<h3 class="text-xs font-mono text-cyan-400 uppercase tracking-wider mb-2">Аспект безпеки (Тріада)</h3>';
+
+      connectionsStage2 = {};
+      activeWireSource = null;
+
+      stage2Left.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'p-3 bg-slate-900 border border-slate-700 rounded-xl flex items-center justify-between gap-3 text-xs';
+        div.innerHTML = `
+          <span>${item.title}</span>
+          <button id="port-${item.id}" onclick="handlePortClick('${item.id}', 'left')" class="wire-port w-6 h-6 rounded-full bg-cyan-500 border-2 border-slate-900 flex items-center justify-center text-slate-950 font-bold focus:outline-none" title="Порт кабелю">
+            <i class="fa-solid fa-plug text-[10px]"></i>
+          </button>
+        `;
+        leftContainer.appendChild(div);
+      });
+
+      stage2Right.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'p-3 bg-slate-900 border border-slate-700 rounded-xl flex items-center gap-3 text-xs';
+        div.innerHTML = `
+          <button id="port-${item.id}" onclick="handlePortClick('${item.id}', 'right')" class="wire-port w-6 h-6 rounded-full bg-indigo-500 border-2 border-slate-900 flex items-center justify-center text-slate-950 font-bold focus:outline-none" title="Порт прийому">
+            <i class="fa-solid fa-socket text-[10px]"></i>
+          </button>
+          <div>
+            <strong class="block text-slate-200">${item.title}</strong>
+            <span class="text-[10px] text-slate-400">${item.desc}</span>
+          </div>
+        `;
+        rightContainer.appendChild(div);
+      });
+
+      renderCables();
+      window.addEventListener('resize', renderCables);
+    }
+
+    function handlePortClick(id, side) {
+      if (side === 'left') {
+        activeWireSource = id;
+        playTone(600, 0.05);
+        showToast("Дріт підключено", "Тепер клацніть на порт відповідного аспекту безпеки справа.");
+        highlightPort(id);
+      } else if (side === 'right' && activeWireSource) {
+        connectionsStage2[activeWireSource] = id;
+        playWireConnectSound();
+        activeWireSource = null;
+        renderCables();
+      }
+    }
+
+    function highlightPort(id) {
+      document.querySelectorAll('.wire-port').forEach(p => p.classList.remove('ring-4', 'ring-cyan-400'));
+      const activeBtn = document.getElementById(`port-${id}`);
+      if (activeBtn) activeBtn.classList.add('ring-4', 'ring-cyan-400');
+    }
+
+    function clearStage2Wires() {
+      connectionsStage2 = {};
+      activeWireSource = null;
+      renderCables();
+      playTone(300, 0.08);
+    }
+
+    function renderCables() {
+      const svg = document.getElementById('wire-svg');
+      if (!svg) return;
+      svg.innerHTML = '';
+
+      const colors = { 'L1': '#06b6d4', 'L2': '#8b5cf6', 'L3': '#10b981' };
+
+      Object.entries(connectionsStage2).forEach(([leftId, rightId]) => {
+        const leftBtn = document.getElementById(`port-${leftId}`);
+        const rightBtn = document.getElementById(`port-${rightId}`);
+        const board = document.getElementById('wire-board');
+
+        if (leftBtn && rightBtn && board) {
+          const boardRect = board.getBoundingClientRect();
+          const lRect = leftBtn.getBoundingClientRect();
+          const rRect = rightBtn.getBoundingClientRect();
+
+          const x1 = lRect.left + lRect.width / 2 - boardRect.left;
+          const y1 = lRect.top + lRect.height / 2 - boardRect.top;
+          const x2 = rRect.left + rRect.width / 2 - boardRect.left;
+          const y2 = rRect.top + rRect.height / 2 - boardRect.top;
+
+          const dx = (x2 - x1) * 0.5;
+          const pathD = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('d', pathD);
+          path.setAttribute('stroke', colors[leftId] || '#38bdf8');
+          path.setAttribute('stroke-width', '4');
+          path.setAttribute('fill', 'none');
+          path.setAttribute('class', 'cable-line');
+          svg.appendChild(path);
+        }
+      });
+    }
+
+    function verifyStage2() {
+      let correct = 0;
+      stage2Left.forEach(item => {
+        if (connectionsStage2[item.id] === item.target) {
+          correct++;
+        }
+      });
+
+      if (Object.keys(connectionsStage2).length < stage2Left.length) {
+        showToast("Увага!", "З'єднайте проводами всі ситуації з правими портами.", "warning");
+        playErrorSound();
+        return;
+      }
+
+      const score = Math.round((correct / stage2Left.length) * 25);
+      stageScores[2] = score;
+      updateTotalScore();
+
+      if (correct === stage2Left.length) {
+        playSuccessSound();
+        showToast("Чудово!", "Усі загрози безпеці вірно підключено! +25 балів.");
+        setTimeout(() => switchStage(3), 1500);
+      } else {
+        playErrorSound();
+        showToast("Помилка у комутаторі", `Правильно підключено: ${correct} з ${stage2Left.length}.`, "error");
+      }
+    }
+
+
+    /* ================= STAGE 3 LOGIC (Software & Licenses Classifier) ================= */
+    const stage3Data = [
+      { id: 's1', type: 'proprietary', name: 'Microsoft Office', icon: 'fa-file-word' },
+      { id: 's2', type: 'proprietary', name: 'Adobe Photoshop', icon: 'fa-image' },
+      { id: 's3', type: 'freeware', name: 'Безкоштовна гра з закритим кодом', icon: 'fa-gamepad' },
+      { id: 's4', type: 'freeware', name: 'Утиліта з закритим кодом', icon: 'fa-wrench' },
+      { id: 's5', type: 'opensource', name: 'ОС Linux', icon: 'fa-terminal' },
+      { id: 's6', type: 'opensource', name: 'Браузер Mozilla Firefox', icon: 'fa-globe' }
+    ];
+
+    let stage3Assignments = {};
+    let selectedCardIdStage3 = null;
+
+    function initStage3() {
+      const pool = document.getElementById('stage3-cards');
+      pool.innerHTML = '';
+      document.getElementById('bucket-proprietary').innerHTML = '';
+      document.getElementById('bucket-freeware').innerHTML = '';
+      document.getElementById('bucket-opensource').innerHTML = '';
+      stage3Assignments = {};
+
+      stage3Data.forEach(card => {
+        const el = document.createElement('div');
+        el.id = card.id;
+        el.draggable = true;
+        el.ondragstart = (e) => {
+          e.dataTransfer.setData('text/plain', card.id);
+          selectedCardIdStage3 = card.id;
+        };
+        el.onclick = () => selectCardStage3(card.id);
+        el.className = 'p-2.5 bg-slate-900 border border-slate-700 hover:border-purple-400 rounded-lg cursor-pointer text-xs flex flex-col items-center text-center gap-1.5 transition';
+        el.innerHTML = `
+          <i class="fa-solid ${card.icon} text-purple-400 text-base"></i>
+          <span class="font-semibold text-[11px] leading-tight">${card.name}</span>
+        `;
+        pool.appendChild(el);
+      });
+    }
+
+    function selectCardStage3(id) {
+      playTone(450, 0.05);
+      selectedCardIdStage3 = id;
+      stage3Data.forEach(c => {
+        const item = document.getElementById(c.id);
+        if (item) {
+          if (c.id === id) item.classList.add('ring-2', 'ring-purple-400');
+          else item.classList.remove('ring-2', 'ring-purple-400');
+        }
+      });
+      showToast("Картку обрано", "Тепер натисніть на відповідний блок ліцензії вгорі.");
+    }
+
+    function handleDropStage3(ev, bucketType) {
+      ev.preventDefault();
+      ev.currentTarget.classList.remove('drag-over');
+      const id = ev.dataTransfer.getData('text/plain') || selectedCardIdStage3;
+      if (id) assignCardStage3(id, bucketType);
+    }
+
+    document.getElementById('license-proprietary').onclick = () => { if (selectedCardIdStage3) assignCardStage3(selectedCardIdStage3, 'proprietary'); };
+    document.getElementById('license-freeware').onclick = () => { if (selectedCardIdStage3) assignCardStage3(selectedCardIdStage3, 'freeware'); };
+    document.getElementById('license-opensource').onclick = () => { if (selectedCardIdStage3) assignCardStage3(selectedCardIdStage3, 'opensource'); };
+
+    function assignCardStage3(id, bucketType) {
+      stage3Assignments[id] = bucketType;
+      const cardEl = document.getElementById(id);
+      const targetBucket = document.getElementById(`bucket-${bucketType}`);
+      if (cardEl && targetBucket) {
+        targetBucket.appendChild(cardEl);
+        cardEl.classList.remove('ring-2', 'ring-purple-400');
+        playTone(520, 0.08);
+      }
+      selectedCardIdStage3 = null;
+    }
+
+    function verifyStage3() {
+      let correct = 0;
+      stage3Data.forEach(card => {
+        if (stage3Assignments[card.id] === card.type) {
+          correct++;
+        }
+      });
+
+      if (Object.keys(stage3Assignments).length < stage3Data.length) {
+        showToast("Увага!", "Будь ласка, розподіліть усі елементи програмного забезпечення.", "warning");
+        playErrorSound();
+        return;
+      }
+
+      const score = Math.round((correct / stage3Data.length) * 25);
+      stageScores[3] = score;
+      updateTotalScore();
+
+      if (correct === stage3Data.length) {
+        playSuccessSound();
+        showToast("Відмінно!", "Усі типи ліцензій ПЗ визначено вірно! +25 балів.");
+        setTimeout(() => switchStage(4), 1500);
+      } else {
+        playErrorSound();
+        showToast("Помилка класифікації", `Правильно: ${correct} з ${stage3Data.length}. Пригадайте приклади з підручника.`, "error");
+      }
+    }
+
+
+    /* ================= STAGE 4 LOGIC (Algorithm Step Chain Puzzle) ================= */
+    const stage4Steps = [
+      { id: 'step-a', correctPos: 1, text: '1. Отримано підозрілий лист із посиланням', icon: 'fa-envelope-open' },
+      { id: 'step-b', correctPos: 2, text: '2. Перевірити адресу відправника і не переходити', icon: 'fa-magnifying-glass' },
+      { id: 'step-c', correctPos: 3, text: '3. Повідомити про фішинг / позначити як спам', icon: 'fa-triangle-exclamation' },
+      { id: 'step-d', correctPos: 4, text: '4. Оновити антивірус та перевірити безпеку', icon: 'fa-shield-virus' }
+    ];
+
+    let userAlgorithmChain = [null, null, null, null]; // positions 0,1,2,3
+
+    function initStage4() {
+      userAlgorithmChain = [null, null, null, null];
+      renderStage4Slots();
+      renderStage4Pool();
+    }
+
+    function renderStage4Slots() {
+      const slotsContainer = document.getElementById('algorithm-slots');
+      slotsContainer.innerHTML = '';
+
+      for (let i = 0; i < 4; i++) {
+        const assignedItem = userAlgorithmChain[i];
+        const slot = document.createElement('div');
+        slot.className = 'border-2 border-dashed border-slate-700 bg-slate-900 rounded-xl p-3 min-h-[100px] flex flex-col justify-between items-center text-center transition';
+        
+        if (assignedItem) {
+          slot.classList.replace('border-slate-700', 'border-emerald-500/50');
+          slot.innerHTML = `
+            <div class="w-full text-right"><span class="text-[10px] font-mono text-emerald-400">Крок ${i+1}</span></div>
+            <i class="fa-solid ${assignedItem.icon} text-emerald-400 text-lg my-1"></i>
+            <span class="text-xs text-slate-200 font-medium">${assignedItem.text}</span>
+            <button onclick="removeFromChain(${i})" class="mt-2 text-[10px] text-rose-400 hover:underline">
+              <i class="fa-solid fa-xmark"></i> Видалити
+            </button>
+          `;
+        } else {
+          slot.innerHTML = `
+            <span class="text-xs font-mono text-slate-500 my-auto">Крок ${i+1} [Порожньо]</span>
+          `;
+        }
+        slotsContainer.appendChild(slot);
+      }
+    }
+
+    function renderStage4Pool() {
+      const poolContainer = document.getElementById('stage4-pool');
+      poolContainer.innerHTML = '';
+
+      // Shuffle pool items for challenge
+      const unusedSteps = stage4Steps.filter(s => !userAlgorithmChain.some(u => u && u.id === s.id));
+
+      unusedSteps.forEach(step => {
+        const btn = document.createElement('button');
+        btn.onclick = () => addToChain(step);
+        btn.className = 'p-3 bg-slate-900 border border-slate-700 hover:border-emerald-400 rounded-xl text-xs font-medium text-left flex items-center gap-3 transition shadow-sm hover:bg-slate-800';
+        btn.innerHTML = `
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <i class="fa-solid ${step.icon}"></i>
+          </div>
+          <span>${step.text}</span>
+        `;
+        poolContainer.appendChild(btn);
+      });
+    }
+
+    function addToChain(step) {
+      const emptyIdx = userAlgorithmChain.findIndex(x => x === null);
+      if (emptyIdx !== -1) {
+        userAlgorithmChain[emptyIdx] = step;
+        playTone(600, 0.08);
+        renderStage4Slots();
+        renderStage4Pool();
+      } else {
+        showToast("Ланцюжок повний", "Усі 4 кроки алгоритму вже заповнені.", "warning");
+      }
+    }
+
+    function removeFromChain(idx) {
+      userAlgorithmChain[idx] = null;
+      playTone(350, 0.08);
+      renderStage4Slots();
+      renderStage4Pool();
+    }
+
+    function clearStage4() {
+      userAlgorithmChain = [null, null, null, null];
+      playTone(300, 0.08);
+      renderStage4Slots();
+      renderStage4Pool();
+    }
+
+    function verifyStage4() {
+      if (userAlgorithmChain.some(x => x === null)) {
+        showToast("Заповніть усі кроки", "Будь ласка, розставте усе 4 кроки алгоритму безпеки.", "warning");
+        playErrorSound();
+        return;
+      }
+
+      let correctCount = 0;
+      userAlgorithmChain.forEach((item, idx) => {
+        if (item && item.correctPos === idx + 1) {
+          correctCount++;
+        }
+      });
+
+      const score = Math.round((correctCount / 4) * 25);
+      stageScores[4] = score;
+      updateTotalScore();
+
+      if (correctCount === 4) {
+        playSuccessSound();
+        showToast("Успіх!", "Правильний ланцюжок алгоритму відновлено! +25 балів.");
+        setTimeout(() => switchStage(5), 1500);
+      } else {
+        playErrorSound();
+        showToast("Невірна послідовність", `Правильно розташовано: ${correctCount} з 4 кроків. Спробуйте змінити порядок.`, "error");
+      }
+    }
+
+
+    /* ================= STAGE NAVIGATION & SCORE SYSTEM ================= */
+    function switchStage(stageNum) {
+      currentStage = stageNum;
+      document.querySelectorAll('.stage-container').forEach(el => el.classList.add('hidden'));
+
+      // Update stepper visuals
+      for (let i = 1; i <= 4; i++) {
+        const btn = document.getElementById(`step-btn-${i}`);
+        if (!btn) continue;
+        if (i === stageNum) {
+          btn.className = 'step-indicator flex items-center gap-2 text-cyan-400 font-bold cursor-pointer';
+          btn.children[0].className = 'w-6 h-6 rounded-full bg-cyan-500/20 border border-cyan-400 flex items-center justify-center';
+        } else if (i < stageNum) {
+          btn.className = 'step-indicator flex items-center gap-2 text-emerald-400 font-bold cursor-pointer';
+          btn.children[0].className = 'w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-400 flex items-center justify-center';
+        } else {
+          btn.className = 'step-indicator flex items-center gap-2 text-slate-500 cursor-pointer';
+          btn.children[0].className = 'w-6 h-6 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center';
+        }
+      }
+
+      if (stageNum <= 4) {
+        document.getElementById(`stage-${stageNum}`).classList.remove('hidden');
+      } else {
+        showFinalCertificate();
+      }
+
+      // Initialize stage logic when entering
+      if (stageNum === 1) initStage1();
+      if (stageNum === 2) setTimeout(initStage2, 50);
+      if (stageNum === 3) initStage3();
+      if (stageNum === 4) initStage4();
+    }
+
+    function updateTotalScore() {
+      totalScore = stageScores[1] + stageScores[2] + stageScores[3] + stageScores[4];
+      document.getElementById('score-display').textContent = totalScore;
+    }
+
+    function showFinalCertificate() {
+      document.getElementById('stage-final').classList.remove('hidden');
+      document.getElementById('final-score').textContent = `${totalScore} / 100`;
+
+      const rankEl = document.getElementById('final-rank');
+      if (totalScore >= 90) {
+        rankEl.textContent = 'Кібер-Експерт (12 балів)';
+        rankEl.className = 'text-lg font-bold text-emerald-400';
+      } else if (totalScore >= 70) {
+        rankEl.textContent = 'Кібер-Оперативник (9-10 балів)';
+        rankEl.className = 'text-lg font-bold text-cyan-400';
+      } else {
+        rankEl.textContent = 'Кібер-Новачок (Потребує повторення)';
+        rankEl.className = 'text-lg font-bold text-amber-400';
+      }
+    }
+
+    function resetGame() {
+      stageScores[1] = 0;
+      stageScores[2] = 0;
+      stageScores[3] = 0;
+      stageScores[4] = 0;
+      updateTotalScore();
+      switchStage(1);
+      showToast("Гру скинуто", "Ви можете пройти навчання з початку.");
+    }
+
+
+    /* ================= TOAST SYSTEM ================= */
+    let toastTimeout = null;
+    function showToast(title, body, type = 'info') {
+      const toast = document.getElementById('toast');
+      const icon = document.getElementById('toast-icon');
+      document.getElementById('toast-title').textContent = title;
+      document.getElementById('toast-body').textContent = body;
+
+      if (type === 'error') icon.className = 'text-2xl text-rose-500 <i class="fa-solid fa-circle-xmark"></i>';
+      else if (type === 'warning') icon.className = 'text-2xl text-amber-400 <i class="fa-solid fa-triangle-exclamation"></i>';
+      else icon.className = 'text-2xl text-cyan-400 <i class="fa-solid fa-circle-info"></i>';
+
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3500);
+    }
+
+    // Initialize initial stage on page load
+    window.onload = function() {
+      switchStage(1);
+    };
+  </script>
+</body>
+</html>
