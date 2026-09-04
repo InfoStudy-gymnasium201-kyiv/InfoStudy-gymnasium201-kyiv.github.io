@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ІнфоКвест: Пристрої Інформаційних Процесів</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;700&family=Exo+2:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background-color: #0b1120;
+            color: #f1f5f9;
+            user-select: none;
+            overflow-x: hidden;
+        }
+        .font-rounded {
+            font-family: 'Comfortaa', cursive;
+        }
+        .vector-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
+            border: 2px solid #334155;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .vector-card:hover {
+            border-color: #38bdf8;
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px -5px rgba(56, 189, 248, 0.25);
+        }
+        .draggable-item {
+            cursor: grab;
+            touch-action: none;
+        }
+        .draggable-item:active {
+            cursor: grabbing;
+            transform: scale(1.05);
+            z-index: 50;
+        }
+        .drop-zone {
+            transition: all 0.2s ease;
+        }
+        .drop-zone.drag-over {
+            background-color: rgba(56, 189, 248, 0.15);
+            border-color: #38bdf8 !important;
+            transform: scale(1.02);
+        }
+        .wire-node {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #0284c7;
+            border: 3px solid #38bdf8;
+            box-shadow: 0 0 10px #38bdf8;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .wire-node:hover {
+            transform: scale(1.25);
+        }
+        .wire-node.connected {
+            background: #10b981;
+            border-color: #34d399;
+            box-shadow: 0 0 12px #34d399;
+        }
+        svg.wire-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.03); }
+        }
+        .pulse-effect {
+            animation: pulse-glow 3s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between relative bg-slate-950 text-slate-100">
+
+    <!-- TOP NAVIGATION & HEADER -->
+    <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-cyan-500/20 border border-cyan-500/40 rounded-xl text-cyan-400">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold font-rounded text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400">
+                        ІнфоКвест: Пристрої
+                    </h1>
+                    <p class="text-xs text-slate-400">Інформаційні процеси • 6 клас</p>
+                </div>
+            </div>
+
+            <!-- SCORE & PROGRESS DISPLAY -->
+            <div class="flex items-center gap-4 bg-slate-800/80 px-4 py-2 rounded-2xl border border-slate-700">
+                <div class="flex items-center gap-1.5">
+                    <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                    </svg>
+                    <span id="scoreText" class="font-bold text-amber-300 text-lg">0</span>
+                    <span class="text-xs text-slate-400">балів</span>
+                </div>
+                <div class="h-6 w-px bg-slate-700"></div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-slate-400">Прогрес:</span>
+                    <div class="w-24 bg-slate-950 rounded-full h-2.5 overflow-hidden border border-slate-700">
+                        <div id="progressBar" class="bg-gradient-to-r from-cyan-500 to-emerald-400 h-full w-0 transition-all duration-500"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MINI-GAME SELECTION NAV -->
+    <nav class="max-w-7xl mx-auto w-full px-4 mt-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 bg-slate-900/60 p-1.5 rounded-2xl border border-slate-800">
+            <button onclick="switchTab(1)" id="tabBtn1" class="tab-btn px-3 py-2.5 rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg">
+                <span>1. Drag & Drop</span>
+            </button>
+            <button onclick="switchTab(2)" id="tabBtn2" class="tab-btn px-3 py-2.5 rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all text-slate-400 hover:text-white hover:bg-slate-800">
+                <span>2. З'єднання проводів</span>
+            </button>
+            <button onclick="switchTab(3)" id="tabBtn3" class="tab-btn px-3 py-2.5 rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all text-slate-400 hover:text-white hover:bg-slate-800">
+                <span>3. Ланцюжок алгоритму</span>
+            </button>
+            <button onclick="switchTab(4)" id="tabBtn4" class="tab-btn px-3 py-2.5 rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all text-slate-400 hover:text-white hover:bg-slate-800">
+                <span>4. Кібер-Діагностика</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-grow flex flex-col justify-center">
+
+        <!-- ========================================== -->
+        <!-- MINI-GAME 1: PHYSICAL DRAG & DROP -->
+        <!-- ========================================== -->
+        <section id="game1" class="game-section block">
+            <div class="bg-slate-900/60 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl">
+                <div class="mb-6 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                    <div>
+                        <h2 class="text-xl sm:text-2xl font-bold font-rounded text-cyan-400 flex items-center gap-2">
+                            <span>📦</span> Сортувальний Термінал
+                        </h2>
+                        <p class="text-sm text-slate-400">Розподіліть пристрої за основними інформаційними процесами, які вони виконують</p>
+                    </div>
+                    <button onclick="resetGame1()" class="self-start sm:self-auto px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold flex items-center gap-1 border border-slate-700">
+                        🔄 Скинути
+                    </button>
+                </div>
+
+                <!-- CARDS POOL -->
+                <div class="mb-8 bg-slate-950/80 p-4 rounded-2xl border border-slate-800/80">
+                    <h3 class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-3">Несортовані пристрої:</h3>
+                    <div id="dragItemsPool" class="flex flex-wrap gap-3 min-h-[90px] items-center justify-center">
+                        <!-- Dynamic items generated via JS -->
+                    </div>
+                </div>
+
+                <!-- DROP BINS GRID -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Bin 1 -->
+                    <div class="drop-zone border-2 border-dashed border-sky-500/30 bg-slate-900/80 rounded-2xl p-4 flex flex-col min-h-[220px]" data-category="input">
+                        <div class="flex items-center gap-2 mb-3 pb-2 border-b border-slate-800">
+                            <span class="p-2 rounded-lg bg-sky-500/20 text-sky-400">👁️</span>
+                            <h4 class="font-bold text-sm text-sky-300">Отримання та пошук</h4>
+                        </div>
+                        <div class="bin-items flex-grow flex flex-col gap-2"></div>
+                    </div>
+
+                    <!-- Bin 2 -->
+                    <div class="drop-zone border-2 border-dashed border-indigo-500/30 bg-slate-900/80 rounded-2xl p-4 flex flex-col min-h-[220px]" data-category="transmit">
+                        <div class="flex items-center gap-2 mb-3 pb-2 border-b border-slate-800">
+                            <span class="p-2 rounded-lg bg-indigo-500/20 text-indigo-400">📡</span>
+                            <h4 class="font-bold text-sm text-indigo-300">Передавання</h4>
+                        </div>
+                        <div class="bin-items flex-grow flex flex-col gap-2"></div>
+                    </div>
+
+                    <!-- Bin 3 -->
+                    <div class="drop-zone border-2 border-dashed border-amber-500/30 bg-slate-900/80 rounded-2xl p-4 flex flex-col min-h-[220px]" data-category="process">
+                        <div class="flex items-center gap-2 mb-3 pb-2 border-b border-slate-800">
+                            <span class="p-2 rounded-lg bg-amber-500/20 text-amber-400">⚙️</span>
+                            <h4 class="font-bold text-sm text-amber-300">Опрацювання</h4>
+                        </div>
+                        <div class="bin-items flex-grow flex flex-col gap-2"></div>
+                    </div>
+
+                    <!-- Bin 4 -->
+                    <div class="drop-zone border-2 border-dashed border-emerald-500/30 bg-slate-900/80 rounded-2xl p-4 flex flex-col min-h-[220px]" data-category="store">
+                        <div class="flex items-center gap-2 mb-3 pb-2 border-b border-slate-800">
+                            <span class="p-2 rounded-lg bg-emerald-500/20 text-emerald-400">💾</span>
+                            <h4 class="font-bold text-sm text-emerald-300">Зберігання</h4>
+                        </div>
+                        <div class="bin-items flex-grow flex flex-col gap-2"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- MINI-GAME 2: WIRE CONNECTION MECHANICS -->
+        <!-- ========================================== -->
+        <section id="game2" class="game-section hidden">
+            <div class="bg-slate-900/60 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl relative overflow-hidden">
+                <div class="mb-6 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                    <div>
+                        <h2 class="text-xl sm:text-2xl font-bold font-rounded text-sky-400 flex items-center gap-2">
+                            <span>🔌</span> Мережевий Комутатор
+                        </h2>
+                        <p class="text-sm text-slate-400">З'єднайте кабелями пристрої з їхніми конкретними призначеннями</p>
+                    </div>
+                    <button onclick="resetGame2()" class="self-start sm:self-auto px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold border border-slate-700">
+                        🔄 Оновити схему
+                    </button>
+                </div>
+
+                <!-- CANVAS FOR WIRES -->
+                <div id="wireContainer" class="relative bg-slate-950 rounded-2xl border border-slate-800 p-4 sm:p-8 min-h-[420px] flex justify-between items-center">
+                    <svg id="svgWireCanvas" class="wire-canvas"></svg>
+
+                    <!-- LEFT COLUMN (DEVICES) -->
+                    <div class="flex flex-col gap-6 z-10 w-2/5 max-w-[240px]">
+                        <h3 class="text-xs uppercase font-bold tracking-wider text-slate-500 mb-1">Пристрої:</h3>
+                        <div id="leftNodes" class="flex flex-col gap-5"></div>
+                    </div>
+
+                    <!-- RIGHT COLUMN (FUNCTIONS) -->
+                    <div class="flex flex-col gap-6 z-10 w-2/5 max-w-[280px]">
+                        <h3 class="text-xs uppercase font-bold tracking-wider text-slate-500 mb-1">Призначення:</h3>
+                        <div id="rightNodes" class="flex flex-col gap-5"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- MINI-GAME 3: ALGORITHM CHAIN PUZZLE -->
+        <!-- ========================================== -->
+        <section id="game3" class="game-section hidden">
+            <div class="bg-slate-900/60 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl">
+                <div class="mb-6 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                    <div>
+                        <h2 class="text-xl sm:text-2xl font-bold font-rounded text-indigo-400 flex items-center gap-2">
+                            <span>🧩</span> Алгоритмічний Ланцюжок
+                        </h2>
+                        <p class="text-sm text-slate-400">Розставте етапи інформаційного процесу у правильній логічній послідовності</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="loadAlgorithmScenario()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold border border-slate-700">
+                            🎲 Інший сценарій
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SCENARIO CARD -->
+                <div class="bg-indigo-950/40 border border-indigo-500/30 p-4 rounded-2xl mb-6 flex items-center gap-3">
+                    <span class="text-3xl">📋</span>
+                    <div>
+                        <h3 id="algoScenarioTitle" class="font-bold text-indigo-300">Завантаження сценарію...</h3>
+                        <p id="algoScenarioDesc" class="text-xs text-slate-300 mt-1">Опис завдання</p>
+                    </div>
+                </div>
+
+                <!-- SHUFFLED BLOCKS PIPELINE -->
+                <div class="mb-6">
+                    <p class="text-xs text-slate-400 mb-3 uppercase tracking-wider font-bold">Перетягуйте або міняйте місцями блоки, щоб утворити вірний потік:</p>
+                    <div id="algoChainContainer" class="flex flex-col gap-3">
+                        <!-- Dynamic puzzle blocks -->
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3">
+                    <button onclick="checkAlgorithm()" class="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-xl font-bold shadow-lg shadow-indigo-500/25 transition-all">
+                        Перевірити ланцюжок
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- MINI-GAME 4: CYBER DIAGNOSTICS -->
+        <!-- ========================================== -->
+        <section id="game4" class="game-section hidden">
+            <div class="bg-slate-900/60 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl">
+                <div class="mb-6 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                    <div>
+                        <h2 class="text-xl sm:text-2xl font-bold font-rounded text-emerald-400 flex items-center gap-2">
+                            <span>🔍</span> Кібер-Діагностика
+                        </h2>
+                        <p class="text-sm text-slate-400">Проаналізуйте специфікацію та розпізнайте пристрій за його описом</p>
+                    </div>
+                    <span class="text-xs font-bold px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full border border-emerald-500/30">
+                        Картка <span id="diagCurrentCard">1</span> з <span id="diagTotalCards">5</span>
+                    </span>
+                </div>
+
+                <!-- DIAGNOSTIC HUD DISPLAY -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                    <!-- DISPLAY SCREEN -->
+                    <div class="lg:col-span-7 bg-slate-950 p-6 rounded-2xl border border-emerald-500/30 shadow-inner relative overflow-hidden flex flex-col justify-between min-h-[260px]">
+                        <div class="absolute top-0 right-0 p-4 opacity-10 text-emerald-400 font-mono text-6xl font-bold select-none">
+                            SPEC
+                        </div>
+                        <div>
+                            <div class="inline-block px-2.5 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-mono rounded mb-3">
+                                [ СКАНОРАМА СТИСЛИХ ДАНИХ ]
+                            </div>
+                            <h3 id="diagPromptTitle" class="text-lg sm:text-xl font-bold text-slate-100 mb-3">
+                                Завантаження...
+                            </h3>
+                            <p id="diagPromptBody" class="text-sm text-slate-300 leading-relaxed font-sans">
+                                Текст завдання розпізнавання...
+                            </p>
+                        </div>
+                        <div id="diagFeedback" class="mt-4 p-3 rounded-xl hidden text-xs font-bold transition-all"></div>
+                    </div>
+
+                    <!-- CHOICES PANEL -->
+                    <div class="lg:col-span-5 flex flex-col gap-3" id="diagChoicesPanel">
+                        <!-- Choices injected dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL FOR COMPLETION -->
+    <div id="victoryModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-700 max-w-md w-full rounded-3xl p-6 text-center shadow-2xl relative">
+            <div class="w-20 h-20 bg-gradient-to-tr from-amber-400 to-amber-200 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl shadow-lg shadow-amber-500/30 pulse-effect">
+                🏆
+            </div>
+            <h3 class="text-2xl font-bold font-rounded text-amber-300 mb-2">Вітаємо, Експерте!</h3>
+            <p class="text-sm text-slate-300 mb-4">
+                Ви успішно опанували тематичний матеріал «Пристрої для здійснення інформаційних процесів»!
+            </p>
+            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 mb-6 flex justify-around">
+                <div>
+                    <div class="text-xs text-slate-400">Набрано балів</div>
+                    <div id="finalScore" class="text-2xl font-bold text-amber-400">0</div>
+                </div>
+                <div>
+                    <div class="text-xs text-slate-400">Статус</div>
+                    <div class="text-2xl font-bold text-emerald-400">100%</div>
+                </div>
+            </div>
+            <button onclick="closeModal()" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold rounded-xl transition-all shadow-lg">
+                Завершити та продовжити
+            </button>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900/60 border-t border-slate-800/80 py-3 text-center text-xs text-slate-500">
+        Урок інформатики • Матеріали теми "Пристрої для здійснення інформаційних процесів"
+    </footer>
+
+    <script>
+        /* WEB AUDIO API SYNTHESIZER FOR SOUND EFFECTS */
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'click') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.05);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            } else if (type === 'correct') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+                osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.linearRampToValueAtTime(110, now + 0.2);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            }
+        }
+
+        let totalScore = 0;
+        let activeTab = 1;
+
+        // Track completed milestones for progress calculation
+        const progressState = {
+            g1Completed: 0, // total 10 items
+            g2Completed: 0, // total 5 wires
+            g3Completed: false,
+            g4Completed: 0, // total 5 cards
+        };
+
+        function addScore(points) {
+            totalScore += points;
+            document.getElementById('scoreText').innerText = totalScore;
+            updateProgressBar();
+        }
+
+        function updateProgressBar() {
+            // Total points goal ~ 200
+            const maxPoints = 200;
+            const percentage = Math.min(100, Math.round((totalScore / maxPoints) * 100));
+            document.getElementById('progressBar').style.width = percentage + '%';
+
+            if (percentage >= 100) {
+                setTimeout(showVictory, 600);
+            }
+        }
+
+        function switchTab(tabIndex) {
+            playSound('click');
+            activeTab = tabIndex;
+            for (let i = 1; i <= 4; i++) {
+                const sec = document.getElementById(`game${i}`);
+                const btn = document.getElementById(`tabBtn${i}`);
+                if (i === tabIndex) {
+                    sec.classList.remove('hidden');
+                    sec.classList.add('block');
+                    btn.className = "tab-btn px-3 py-2.5 rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg";
+                } else {
+                    sec.classList.add('hidden');
+                    sec.classList.remove('block');
+                    btn.className = "tab-btn px-3 py-2.5 rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all text-slate-400 hover:text-white hover:bg-slate-800";
+                }
+            }
+            if (tabIndex === 2) {
+                renderGame2();
+            }
+        }
+
+        // DATA FOR MINI-GAME 1
+        const g1Devices = [
+            { id: 'g1_1', name: 'Термометр', icon: '🌡️', cat: 'input' },
+            { id: 'g1_2', name: 'Барометр', icon: '⏲️', cat: 'input' },
+            { id: 'g1_3', name: 'Мікроскоп', icon: '🔬', cat: 'input' },
+            { id: 'g1_4', name: 'Телевізор', icon: '📺', cat: 'transmit' },
+            { id: 'g1_5', name: 'Факс', icon: '📠', cat: 'transmit' },
+            { id: 'g1_6', name: 'Супутниковий зв\'язок', icon: '🛰️', cat: 'transmit' },
+            { id: 'g1_7', name: 'Калькулятор', icon: '🧮', cat: 'process' },
+            { id: 'g1_8', name: 'GPS-навігатор', icon: '🧭', cat: 'process' },
+            { id: 'g1_9', name: 'Флеш-накопичувач', icon: '🔌', cat: 'store' },
+            { id: 'g1_10', name: 'Оптичний диск', icon: '💿', cat: 'store' }
+        ];
+
+        function shuffleArray(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function initGame1() {
+            const pool = document.getElementById('dragItemsPool');
+            pool.innerHTML = '';
+            
+            // Clear bins
+            document.querySelectorAll('.bin-items').forEach(bin => bin.innerHTML = '');
+
+            const shuffled = shuffleArray([...g1Devices]);
+            shuffled.forEach(item => {
+                const card = document.createElement('div');
+                card.id = item.id;
+                card.draggable = true;
+                card.dataset.category = item.cat;
+                card.className = "draggable-item vector-card px-3 py-2 rounded-xl border flex items-center gap-2 text-xs font-semibold bg-slate-800 text-slate-200 shadow-md";
+                card.innerHTML = `<span>${item.icon}</span> <span>${item.name}</span>`;
+
+                card.addEventListener('dragstart', handleDragStart);
+                pool.appendChild(card);
+            });
+
+            // Set up drop zones
+            const dropZones = document.querySelectorAll('.drop-zone');
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', handleDragOver);
+                zone.addEventListener('dragleave', handleDragLeave);
+                zone.addEventListener('drop', handleDrop);
+            });
+        }
+
+        let draggedElement = null;
+
+        function handleDragStart(e) {
+            draggedElement = this;
+            e.dataTransfer.setData('text/plain', this.id);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            this.classList.add('drag-over');
+        }
+
+        function handleDragLeave() {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            this.classList.remove('drag-over');
+            if (!draggedElement) return;
+
+            const targetCategory = this.dataset.category;
+            const itemCategory = draggedElement.dataset.category;
+
+            if (targetCategory === itemCategory) {
+                playSound('correct');
+                const binContainer = this.querySelector('.bin-items');
+                draggedElement.draggable = false;
+                draggedElement.className = "vector-card px-3 py-2 rounded-xl border border-emerald-500/50 bg-emerald-950/40 text-emerald-200 text-xs font-semibold flex items-center gap-2 animate-bounce";
+                setTimeout(() => draggedElement.classList.remove('animate-bounce'), 1000);
+                binContainer.appendChild(draggedElement);
+                addScore(10);
+            } else {
+                playSound('wrong');
+                draggedElement.classList.add('animate-pulse');
+                setTimeout(() => draggedElement.classList.remove('animate-pulse'), 500);
+            }
+            draggedElement = null;
+        }
+
+        function resetGame1() {
+            playSound('click');
+            initGame1();
+        }
+
+        // DATA FOR MINI-GAME 2
+        const g2Pairs = [
+            { id: 'p1', left: 'Ваги', right: 'Точне вимірювання маси предметів' },
+            { id: 'p2', left: 'Факс', right: 'Передача зображень документів' },
+            { id: 'p3', left: 'Жорсткий диск (HDD/SSD)', right: 'Основне збереження даних у комп\'ютері' },
+            { id: 'p4', left: 'Спідометр', right: 'Вимірювання швидкості руху' },
+            { id: 'p5', left: 'Карта пам\'яті (SD)', right: 'Збереження фото в камерах і телефонах' }
+        ];
+
+        let selectedLeft = null;
+        let g2Connections = [];
+
+        function renderGame2() {
+            const leftCol = document.getElementById('leftNodes');
+            const rightCol = document.getElementById('rightNodes');
+            const svgCanvas = document.getElementById('svgWireCanvas');
+            
+            leftCol.innerHTML = '';
+            rightCol.innerHTML = '';
+            svgCanvas.innerHTML = '';
+            g2Connections = [];
+            selectedLeft = null;
+
+            const leftShuffled = shuffleArray([...g2Pairs]);
+            const rightShuffled = shuffleArray([...g2Pairs]);
+
+            leftShuffled.forEach(item => {
+                const row = document.createElement('div');
+                row.className = "flex items-center justify-between bg-slate-900 border border-slate-800 p-3 rounded-xl text-xs sm:text-sm font-semibold";
+                row.innerHTML = `
+                    <span class="text-slate-200">${item.left}</span>
+                    <div class="wire-node node-left" data-id="${item.id}" onclick="clickLeftNode(this, '${item.id}')"></div>
+                `;
+                leftCol.appendChild(row);
+            });
+
+            rightShuffled.forEach(item => {
+                const row = document.createElement('div');
+                row.className = "flex items-center justify-between bg-slate-900 border border-slate-800 p-3 rounded-xl text-xs sm:text-sm font-semibold gap-2";
+                row.innerHTML = `
+                    <div class="wire-node node-right" data-id="${item.id}" onclick="clickRightNode(this, '${item.id}')"></div>
+                    <span class="text-slate-300 text-right">${item.right}</span>
+                `;
+                rightCol.appendChild(row);
+            });
+        }
+
+        function clickLeftNode(nodeElem, id) {
+            playSound('click');
+            if (nodeElem.classList.contains('connected')) return;
+
+            document.querySelectorAll('.node-left').forEach(n => {
+                if (!n.classList.contains('connected')) n.style.transform = 'scale(1)';
+            });
+            nodeElem.style.transform = 'scale(1.4)';
+            selectedLeft = { elem: nodeElem, id: id };
+        }
+
+        function clickRightNode(nodeElem, id) {
+            if (!selectedLeft) return;
+            if (nodeElem.classList.contains('connected')) return;
+
+            if (selectedLeft.id === id) {
+                // Correct match
+                playSound('correct');
+                selectedLeft.elem.classList.add('connected');
+                nodeElem.classList.add('connected');
+
+                drawWire(selectedLeft.elem, nodeElem);
+                addScore(15);
+                selectedLeft = null;
+            } else {
+                playSound('wrong');
+                nodeElem.style.borderColor = '#ef4444';
+                setTimeout(() => nodeElem.style.borderColor = '#38bdf8', 500);
+            }
+        }
+
+        function drawWire(elemA, elemB) {
+            const svgCanvas = document.getElementById('svgWireCanvas');
+            const rectContainer = document.getElementById('wireContainer').getBoundingClientRect();
+            const rectA = elemA.getBoundingClientRect();
+            const rectB = elemB.getBoundingClientRect();
+
+            const x1 = rectA.left + rectA.width / 2 - rectContainer.left;
+            const y1 = rectA.top + rectA.height / 2 - rectContainer.top;
+            const x2 = rectB.left + rectB.width / 2 - rectContainer.left;
+            const y2 = rectB.top + rectB.height / 2 - rectContainer.top;
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const dx = (x2 - x1) * 0.5;
+            const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+
+            path.setAttribute('d', d);
+            path.setAttribute('stroke', '#34d399');
+            path.setAttribute('stroke-width', '4');
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke-linecap', 'round');
+            path.setAttribute('filter', 'drop-shadow(0 0 6px #34d399)');
+
+            svgCanvas.appendChild(path);
+        }
+
+        function resetGame2() {
+            playSound('click');
+            renderGame2();
+        }
+
+        // DATA FOR MINI-GAME 3 - NO NUMBERS, SHUFFLED SEQUENCES
+        const g3Scenarios = [
+            {
+                title: 'Метеорологічне спостереження',
+                desc: 'Логічна послідовність збору та збереження даних про температуру повітря',
+                steps: [
+                    'Вимірювання температури за допомогою електронного термометра',
+                    'Передавання показників через комп\'ютерну мережу Інтернет',
+                    'Автоматичне опрацювання даних сервером погоди',
+                    'Запис результатів у хмарне сховище'
+                ]
+            },
+            {
+                title: 'Створення цифрового відеорепортажу',
+                desc: 'Логічний процес підготовки та збереження відеоматеріалу',
+                steps: [
+                    'Зйомка події за допомогою відеокамери',
+                    'Опрацювання та монтаж відео на комп\'ютері',
+                    'Передавання готового ролика через мережу Інтернет',
+                    'Збереження копії відео на жорсткому диску (SSD)'
+                ]
+            }
+        ];
+
+        let currentScenarioIndex = 0;
+        let currentChainState = [];
+
+        function loadAlgorithmScenario() {
+            playSound('click');
+            currentScenarioIndex = (currentScenarioIndex + 1) % g3Scenarios.length;
+            const scenario = g3Scenarios[currentScenarioIndex];
+
+            document.getElementById('algoScenarioTitle').innerText = scenario.title;
+            document.getElementById('algoScenarioDesc').innerText = scenario.desc;
+
+            // Copy and shuffle steps WITHOUT step numbers!
+            currentChainState = shuffleArray([...scenario.steps]);
+            renderAlgorithmChain();
+        }
+
+        function renderAlgorithmChain() {
+            const container = document.getElementById('algoChainContainer');
+            container.innerHTML = '';
+
+            currentChainState.forEach((stepText, idx) => {
+                const block = document.createElement('div');
+                block.className = "vector-card p-4 rounded-xl border border-slate-700 bg-slate-900 flex items-center justify-between gap-3 text-sm font-semibold";
+                block.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="text-indigo-400 text-lg">🔗</span>
+                        <span class="text-slate-200">${stepText}</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button onclick="moveAlgoStep(${idx}, -1)" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs" ${idx === 0 ? 'disabled opacity-30' : ''}>
+                            ▲
+                        </button>
+                        <button onclick="moveAlgoStep(${idx}, 1)" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs" ${idx === currentChainState.length - 1 ? 'disabled opacity-30' : ''}>
+                            ▼
+                        </button>
+                    </div>
+                `;
+                container.appendChild(block);
+            });
+        }
+
+        function moveAlgoStep(index, direction) {
+            playSound('click');
+            const targetIndex = index + direction;
+            if (targetIndex < 0 || targetIndex >= currentChainState.length) return;
+
+            const temp = currentChainState[index];
+            currentChainState[index] = currentChainState[targetIndex];
+            currentChainState[targetIndex] = temp;
+
+            renderAlgorithmChain();
+        }
+
+        function checkAlgorithm() {
+            const targetSteps = g3Scenarios[currentScenarioIndex].steps;
+            let isCorrect = true;
+
+            for (let i = 0; i < targetSteps.length; i++) {
+                if (currentChainState[i] !== targetSteps[i]) {
+                    isCorrect = false;
+                    break;
+                }
+            }
+
+            if (isCorrect) {
+                playSound('correct');
+                addScore(30);
+                alert("Чудово! Ланцюжок побудовано абсолютно вірно!");
+            } else {
+                playSound('wrong');
+                alert("Послідовність містить помилки. Спробуйте змінити порядок блоків!");
+            }
+        }
+
+        // DATA FOR MINI-GAME 4
+        const g4Cards = [
+            {
+                title: 'Лабораторне вимірювання тиску',
+                body: 'Цей пристрій використовується для визначення атмосферного тиску та збору даних про зміни погоди.',
+                options: ['Барометр', 'Мікроскоп', 'Спідометр', 'Факс'],
+                answer: 'Барометр'
+            },
+            {
+                title: 'Навігаційний перетворювач',
+                body: 'Автоматично перетворює супутникові сигнали на графічну карту та надає голосові підказки водієві.',
+                options: ['Калькулятор', 'GPS-навігатор', 'Сенсорна панель', 'Телевізор'],
+                answer: 'GPS-навігатор'
+            },
+            {
+                title: 'Дистанційне передавання документів',
+                body: 'Пристрій, призначений спеціально для швидкої передачі паперових зображень документів по телефонних лініях.',
+                options: ['Смартфон', 'Радіо', 'Факс', 'Оптичний диск'],
+                answer: 'Факс'
+            },
+            {
+                title: 'Віртуальний носій інформації',
+                body: 'Сучасна технологія зберігання даних у віртуальному місці мережі Інтернет замість фізичної флешки.',
+                options: ['Хмарне сховище', 'Карта пам\'яті', 'Жорсткий диск', 'Відеокамера'],
+                answer: 'Хмарне сховище'
+            },
+            {
+                title: 'Оптичне дослідження мікрооб\'єктів',
+                body: 'Пристрій для отримання детальної зорової інформації про дуже дрібні біологічні об\'єкти.',
+                options: ['Ваги', 'Термометр', 'Мікроскоп', 'Барометр'],
+                answer: 'Мікроскоп'
+            }
+        ];
+
+        let diagIndex = 0;
+
+        function renderDiagnosticCard() {
+            const card = g4Cards[diagIndex];
+            document.getElementById('diagCurrentCard').innerText = diagIndex + 1;
+            document.getElementById('diagTotalCards').innerText = g4Cards.length;
+
+            document.getElementById('diagPromptTitle').innerText = card.title;
+            document.getElementById('diagPromptBody').innerText = card.body;
+
+            const feedback = document.getElementById('diagFeedback');
+            feedback.classList.add('hidden');
+
+            const choicesPanel = document.getElementById('diagChoicesPanel');
+            choicesPanel.innerHTML = '';
+
+            const shuffledOptions = shuffleArray([...card.options]);
+            shuffledOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "w-full p-3.5 bg-slate-900 border border-slate-700 hover:border-emerald-500 hover:bg-slate-800 rounded-xl text-left text-sm font-semibold transition-all flex items-center justify-between";
+                btn.innerHTML = `<span>${opt}</span> <span class="text-slate-500">➔</span>`;
+                btn.onclick = () => checkDiagChoice(opt, card.answer, btn);
+                choicesPanel.appendChild(btn);
+            });
+        }
+
+        function checkDiagChoice(selected, correct, btnElem) {
+            const feedback = document.getElementById('diagFeedback');
+            feedback.classList.remove('hidden');
+
+            if (selected === correct) {
+                playSound('correct');
+                btnElem.className = "w-full p-3.5 bg-emerald-950/80 border border-emerald-500 text-emerald-200 rounded-xl text-left text-sm font-semibold flex items-center justify-between";
+                feedback.className = "mt-4 p-3 rounded-xl text-xs font-bold transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+                feedback.innerText = "✓ Правильно! Пристрій розпізнано вірно.";
+                addScore(20);
+
+                setTimeout(() => {
+                    if (diagIndex < g4Cards.length - 1) {
+                        diagIndex++;
+                        renderDiagnosticCard();
+                    } else {
+                        alert("Розділ кібер-діагностики пройдено успішно!");
+                    }
+                }, 1200);
+            } else {
+                playSound('wrong');
+                btnElem.className = "w-full p-3.5 bg-rose-950/80 border border-rose-500 text-rose-200 rounded-xl text-left text-sm font-semibold flex items-center justify-between";
+                feedback.className = "mt-4 p-3 rounded-xl text-xs font-bold transition-all bg-rose-500/20 text-rose-300 border border-rose-500/30";
+                feedback.innerText = "✕ Неправильно. Спробуйте інший варіант!";
+            }
+        }
+
+        function showVictory() {
+            playSound('correct');
+            document.getElementById('finalScore').innerText = totalScore;
+            document.getElementById('victoryModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            playSound('click');
+            document.getElementById('victoryModal').classList.add('hidden');
+        }
+
+        window.onload = function() {
+            initGame1();
+            loadAlgorithmScenario();
+            renderDiagnosticCard();
+        };
+    </script>
+</body>
+</html>
