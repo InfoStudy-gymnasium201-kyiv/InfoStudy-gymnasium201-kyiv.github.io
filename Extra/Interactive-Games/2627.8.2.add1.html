@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Vector Arcade — Вступ до Python</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Fira+Code:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        pyyellow: '#FFE873',
+                        pyblue: '#306998',
+                        pydark: '#1E293B',
+                        accent: '#8B5CF6',
+                        cardbg: '#0F172A'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0B0F19;
+            color: #F8FAFC;
+            user-select: none;
+            overflow-x: hidden;
+        }
+
+        .bg-grid-pattern {
+            background-size: 32px 32px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+        }
+
+        .vector-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .vector-card:hover {
+            border-color: rgba(139, 92, 246, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .vector-btn {
+            transition: all 0.15s ease;
+            box-shadow: 0 4px 0 0 rgba(0,0,0,0.3);
+        }
+
+        .vector-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 0 rgba(0,0,0,0.3);
+        }
+
+        .wire-port {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 3px solid #38BDF8;
+            background: #0F172A;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .wire-port:hover {
+            transform: scale(1.25);
+            background: #38BDF8;
+        }
+
+        .wire-port.active {
+            background: #A855F7;
+            border-color: #F472B6;
+            box-shadow: 0 0 12px #A855F7;
+        }
+
+        .wire-port.connected {
+            background: #10B981;
+            border-color: #34D399;
+            box-shadow: 0 0 10px #10B981;
+        }
+
+        /* Puzzle Snap Block Styles */
+        .puzzle-block {
+            cursor: grab;
+            touch-action: none;
+            transition: box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        .puzzle-block:active {
+            cursor: grabbing;
+        }
+
+        .puzzle-block.dragging {
+            opacity: 0.8;
+            transform: scale(1.03);
+            z-index: 50;
+        }
+
+        .laser-line {
+            background: linear-gradient(90deg, transparent, #EF4444, #F59E0B, #EF4444, transparent);
+            box-shadow: 0 0 15px #EF4444;
+            animation: pulse-laser 1.5s infinite;
+        }
+
+        @keyframes pulse-laser {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        /* Glowing Effects */
+        .glow-pyblue { box-shadow: 0 0 20px rgba(48, 105, 152, 0.4); }
+        .glow-pyyellow { box-shadow: 0 0 20px rgba(255, 232, 115, 0.3); }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0F172A; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
+</head>
+<body class="min-h-screen bg-grid-pattern flex flex-col justify-between">
+
+    <!-- Top Navigation Header -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-40 px-4 py-3">
+        <div class="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-4">
+            <!-- Game Title & Logo -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-yellow-400 p-0.5 flex items-center justify-center shadow-lg">
+                    <div class="w-full h-full bg-slate-900 rounded-[10px] flex items-center justify-center">
+                        <svg class="w-6 h-6 text-yellow-400" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M11.996 0c-1.637 0-3.08.13-4.043.518-1.503.606-1.78 1.487-1.78 2.825v2.181h5.922v.822H3.805c-1.378 0-2.482.883-2.88 2.382-.46 1.728-.48 2.812 0 4.605.358 1.34 1.127 2.38 2.505 2.38h1.49v-2.102c0-1.536 1.36-2.868 2.906-2.868h5.882c1.233 0 2.228-.996 2.228-2.23V3.343c0-1.234-1.03-2.15-2.228-2.52C12.983.18 12.378 0 11.996 0zm-2.31 1.583a1.05 1.05 0 1 1 0 2.102 1.05 1.05 0 0 1 0-2.102zM12.004 24c1.637 0 3.08-.13 4.043-.518 1.503-.606 1.78-1.487 1.78-2.825v-2.181h-5.922v-.822h8.29c1.378 0 2.482-.883 2.88-2.382.46-1.728.48-2.812 0-4.605-.358-1.34-1.127-2.38-2.505-2.38h-1.49v2.102c0 1.536-1.36 2.868-2.906 2.868H10.31c-1.233 0-2.228.996-2.228 2.23v5.305c0 1.234 1.03 2.15 2.228 2.52.73.23 1.335.41 1.718.41zm2.31-1.583a1.05 1.05 0 1 1 0-2.102 1.05 1.05 0 0 1 0 2.102z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div>
+                    <h1 class="text-lg font-extrabold text-white tracking-tight flex items-center gap-2">
+                        Python Vector Arcade
+                        <span class="text-xs font-mono bg-yellow-400/10 text-yellow-400 px-2 py-0.5 rounded border border-yellow-400/20">v2.0</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Інтерактивна лабораторія коду</p>
+                </div>
+            </div>
+
+            <!-- Score & Progress -->
+            <div class="flex items-center space-x-4">
+                <div class="bg-slate-800/80 border border-slate-700/80 px-3 py-1.5 rounded-xl flex items-center gap-2">
+                    <i class="fa-solid fa-star text-yellow-400 text-sm"></i>
+                    <span class="text-xs text-slate-400">Бали:</span>
+                    <span id="scoreDisplay" class="font-mono font-bold text-yellow-400 text-base">0</span>
+                </div>
+                <div class="bg-slate-800/80 border border-slate-700/80 px-3 py-1.5 rounded-xl flex items-center gap-2">
+                    <i class="fa-solid fa-trophy text-purple-400 text-sm"></i>
+                    <span class="text-xs text-slate-400">Прогрес:</span>
+                    <span id="progressDisplay" class="font-mono font-bold text-purple-300 text-base">0/4</span>
+                </div>
+                <button id="soundToggle" onclick="toggleAudio()" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center text-slate-300 transition">
+                    <i id="soundIcon" class="fa-solid fa-volume-high"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs for Mini Games -->
+    <nav class="max-w-6xl mx-auto px-4 mt-6 w-full">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800">
+            <button onclick="switchTab(0)" id="tab-0" class="tab-btn px-3 py-2.5 rounded-xl font-bold text-xs md:text-sm flex items-center justify-center gap-2 transition bg-purple-600 text-white shadow">
+                <i class="fa-solid fa-plug text-xs"></i>
+                1. Змінні (Дроти)
+            </button>
+            <button onclick="switchTab(1)" id="tab-1" class="tab-btn px-3 py-2.5 rounded-xl font-bold text-xs md:text-sm flex items-center justify-center gap-2 transition text-slate-400 hover:text-white hover:bg-slate-800">
+                <i class="fa-solid fa-boxes-stacked text-xs"></i>
+                2. Масиви (Drag)
+            </button>
+            <button onclick="switchTab(2)" id="tab-2" class="tab-btn px-3 py-2.5 rounded-xl font-bold text-xs md:text-sm flex items-center justify-center gap-2 transition text-slate-400 hover:text-white hover:bg-slate-800">
+                <i class="fa-solid fa-scissors text-xs"></i>
+                3. Рядки (Зріз)
+            </button>
+            <button onclick="switchTab(3)" id="tab-3" class="tab-btn px-3 py-2.5 rounded-xl font-bold text-xs md:text-sm flex items-center justify-center gap-2 transition text-slate-400 hover:text-white hover:bg-slate-800">
+                <i class="fa-solid fa-puzzle-piece text-xs"></i>
+                4. Функції (Пазл)
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Game Canvas Container -->
+    <main class="max-w-6xl mx-auto px-4 my-6 w-full flex-1 flex flex-col justify-center">
+
+        <!-- ========================================== -->
+        <!-- MINI GAME 1: WIRE CONNECT (VARIABLES) -->
+        <!-- ========================================== -->
+        <section id="game-0" class="game-module block">
+            <div class="vector-card rounded-3xl p-6 relative overflow-hidden">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <span class="text-xs font-bold font-mono uppercase tracking-wider text-purple-400 bg-purple-950/60 px-3 py-1 rounded-full border border-purple-800/50">Механіка: З'єднання проводів</span>
+                        <h2 class="text-xl md:text-2xl font-black text-white mt-2">З'єднай змінну та її тип даних</h2>
+                        <p class="text-sm text-slate-400">Проведи кабель від виразу ліворуч до відповідного типу даних Python праворуч.</p>
+                    </div>
+                    <button onclick="resetGame1()" class="vector-btn bg-slate-800 hover:bg-slate-700 border border-slate-600 px-4 py-2 rounded-xl text-xs font-bold text-slate-200 flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i> Скинути дроти
+                    </button>
+                </div>
+
+                <!-- Wire Canvas Wrapper -->
+                <div class="relative min-h-[380px] bg-slate-950/80 rounded-2xl border border-slate-800/80 p-4 md:p-8 flex justify-between items-center" id="wireContainer">
+                    <svg id="wireSvg" class="absolute inset-0 w-full h-full pointer-events-none z-10"></svg>
+
+                    <!-- Left Ports (Variables) -->
+                    <div class="flex flex-col space-y-6 z-20 w-1/2 max-w-[260px]" id="leftPortList">
+                        <!-- Dynamic Nodes Inserted via JS -->
+                    </div>
+
+                    <!-- Right Ports (Data Types) -->
+                    <div class="flex flex-col space-y-6 z-20 w-1/2 max-w-[220px] items-end" id="rightPortList">
+                        <!-- Dynamic Nodes Inserted via JS -->
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-between items-center">
+                    <div id="game1Feedback" class="text-sm font-semibold text-slate-400 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-info text-blue-400"></i> Клацни на вузол зліва, а потім на відповідний справа.
+                    </div>
+                    <button onclick="checkGame1()" class="vector-btn bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold px-6 py-3 rounded-xl shadow-lg flex items-center gap-2">
+                        <i class="fa-solid fa-circle-check"></i> Перевірити
+                    </button>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- MINI GAME 2: DRAG & DROP ARRAYS -->
+        <!-- ========================================== -->
+        <section id="game-1" class="game-module hidden">
+            <div class="vector-card rounded-3xl p-6 relative">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <span class="text-xs font-bold font-mono uppercase tracking-wider text-cyan-400 bg-cyan-950/60 px-3 py-1 rounded-full border border-cyan-800/50">Механіка: Фізичний Drag & Drop</span>
+                        <h2 class="text-xl md:text-2xl font-black text-white mt-2">Векторний Масив та Індексація</h2>
+                        <p class="text-sm text-slate-400">Перетягни правильні елементи у відповідні комірки пам'яті за заданими операціями.</p>
+                    </div>
+                    <button onclick="resetGame2()" class="vector-btn bg-slate-800 hover:bg-slate-700 border border-slate-600 px-4 py-2 rounded-xl text-xs font-bold text-slate-200 flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i> Перезапустити
+                    </button>
+                </div>
+
+                <!-- Code Task Context -->
+                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 font-mono text-sm mb-6 text-purple-300 shadow-inner">
+                    <span class="text-slate-500"># Початковий список Python:</span><br>
+                    <span class="text-cyan-400 font-bold">items</span> = [<span id="arrayInitialState" class="text-yellow-300"></span>]
+                </div>
+
+                <!-- Array Visual Cells Drop Targets -->
+                <div class="mb-8">
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Комірки пам'яті (Очікувані значення):</p>
+                    <div id="arraySlotsContainer" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <!-- Rendered by JS -->
+                    </div>
+                </div>
+
+                <!-- Draggable Cargo Items Source -->
+                <div class="bg-slate-900/90 rounded-2xl border border-slate-800 p-4">
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Елементи для перетягування (Переплутано):</p>
+                    <div id="arrayDraggables" class="flex flex-wrap gap-3 min-h-[60px] items-center">
+                        <!-- Rendered by JS -->
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-between items-center">
+                    <div id="game2Feedback" class="text-sm font-semibold text-slate-400">
+                        Перетягни блок у правильний слот індексу.
+                    </div>
+                    <button onclick="checkGame2()" class="vector-btn bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold px-6 py-3 rounded-xl shadow-lg flex items-center gap-2">
+                        <i class="fa-solid fa-circle-check"></i> Перевірити масив
+                    </button>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- MINI GAME 3: STRING LASER SLICING -->
+        <!-- ========================================== -->
+        <section id="game-2" class="game-module hidden">
+            <div class="vector-card rounded-3xl p-6 relative">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <span class="text-xs font-bold font-mono uppercase tracking-wider text-emerald-400 bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-800/50">Механіка: Інтерактивна Нарізка Рядків</span>
+                        <h2 class="text-xl md:text-2xl font-black text-white mt-2">Лазерні Зрізи Рядків (Slicing)</h2>
+                        <p class="text-sm text-slate-400">Використовуй слайдери зрізу <code class="text-emerald-400 font-mono">[start : stop]</code>, щоб отримати потрібне слово.</p>
+                    </div>
+                    <div class="font-mono bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800 text-xs text-yellow-300">
+                        Рядок: <span id="stringTargetSource" class="text-emerald-400 font-bold">"DEVELOPER"</span>
+                    </div>
+                </div>
+
+                <!-- Laser Target Challenge Box -->
+                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 mb-6 flex flex-col items-center justify-center relative overflow-hidden">
+                    <p class="text-xs text-slate-400 font-mono mb-2 uppercase tracking-widest">Цільовий результат:</p>
+                    <div id="stringTargetResult" class="text-2xl md:text-4xl font-mono font-black text-yellow-400 tracking-widest bg-yellow-400/10 px-6 py-2 rounded-xl border border-yellow-400/30">
+                        "EVE"
+                    </div>
+                    
+                    <!-- Interactive Visual String Box -->
+                    <div class="mt-8 w-full max-w-2xl">
+                        <div class="flex justify-between mb-2 text-xs font-mono text-slate-500">
+                            <span>Позитивні індекси: 0, 1, 2, 3...</span>
+                            <span>Від'ємні індекси: ...-3, -2, -1</span>
+                        </div>
+                        <div id="stringVisualBar" class="flex justify-center border-2 border-slate-700 bg-slate-900 rounded-2xl p-2 gap-1 overflow-x-auto relative">
+                            <!-- Dynamic Character Boxes -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slice Sliders Control Panel -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-900/80 rounded-2xl border border-slate-800 p-6">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-2 flex justify-between">
+                            <span>Початок зрізу (START):</span>
+                            <span id="startValDisplay" class="font-mono text-emerald-400 font-bold">0</span>
+                        </label>
+                        <input type="range" id="sliceStartSlider" min="0" max="8" value="0" oninput="updateStringSlice()" class="w-full accent-emerald-500 cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-2 flex justify-between">
+                            <span>Кінець зрізу (STOP):</span>
+                            <span id="stopValDisplay" class="font-mono text-emerald-400 font-bold">3</span>
+                        </label>
+                        <input type="range" id="sliceStopSlider" min="0" max="8" value="3" oninput="updateStringSlice()" class="w-full accent-emerald-500 cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- Code Preview -->
+                <div class="mt-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="font-mono text-sm bg-slate-950 px-4 py-2.5 rounded-xl border border-slate-800 text-slate-300 w-full md:w-auto">
+                        Вираз: <span class="text-blue-400 font-bold">text</span>[<span id="codeSlicePreview" class="text-emerald-400 font-bold">0:3</span>] ➔ <span id="currentSlicedText" class="text-yellow-300 font-bold">""</span>
+                    </div>
+                    <button onclick="checkGame3()" class="vector-btn w-full md:w-auto bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-6 py-3 rounded-xl shadow-lg flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-scissors"></i> Виконати зріз
+                    </button>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- MINI GAME 4: ALGORITHM CHAIN PUZZLE -->
+        <!-- ========================================== -->
+        <section id="game-3" class="game-module hidden">
+            <div class="vector-card rounded-3xl p-6 relative">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <span class="text-xs font-bold font-mono uppercase tracking-wider text-amber-400 bg-amber-950/60 px-3 py-1 rounded-full border border-amber-800/50">Механіка: Пазл-ланцюжок коду</span>
+                        <h2 class="text-xl md:text-2xl font-black text-white mt-2">Пазл Алгоритму Функції</h2>
+                        <p class="text-sm text-slate-400">Розставити блоки коду функції у правильному логічному порядку виконання. Без нумерації та підказок!</p>
+                    </div>
+                    <button onclick="resetGame4()" class="vector-btn bg-slate-800 hover:bg-slate-700 border border-slate-600 px-4 py-2 rounded-xl text-xs font-bold text-slate-200 flex items-center gap-2">
+                        <i class="fa-solid fa-shuffle"></i> Перемішати блоки
+                    </button>
+                </div>
+
+                <!-- Puzzle Chain Sort Area -->
+                <div id="puzzleContainer" class="space-y-3 bg-slate-950 p-4 md:p-6 rounded-2xl border border-slate-800 min-h-[300px]">
+                    <!-- Dynamic draggable puzzle rows -->
+                </div>
+
+                <div class="mt-6 flex justify-between items-center">
+                    <div id="game4Feedback" class="text-sm font-semibold text-slate-400">
+                        Перетягуй рядки місцями для побудови вірного алгоритму.
+                    </div>
+                    <button onclick="checkGame4()" class="vector-btn bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold px-6 py-3 rounded-xl shadow-lg flex items-center gap-2">
+                        <i class="fa-solid fa-play"></i> Запустити алгоритм
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Win Completion Modal -->
+    <div id="victoryModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-50 hidden flex items-center justify-center p-4">
+        <div class="vector-card bg-slate-900 border-2 border-yellow-400/40 rounded-3xl p-8 max-w-md w-full text-center relative shadow-2xl">
+            <div class="w-20 h-20 bg-gradient-to-tr from-yellow-400 to-amber-500 rounded-3xl mx-auto flex items-center justify-center shadow-lg transform -rotate-6 mb-4">
+                <i class="fa-solid fa-trophy text-4xl text-slate-950"></i>
+            </div>
+            <h2 class="text-2xl font-black text-white mb-2">Вітаємо, Програмісте!</h2>
+            <p class="text-slate-300 text-sm mb-6">Ви успішно пройшли всі інтерактивні тести з теми "Вступ у Python"!</p>
+            
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs text-slate-400">Загальний рахунок:</span>
+                    <span id="finalScore" class="font-mono text-xl font-bold text-yellow-400">100</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-slate-400">Рівень знань:</span>
+                    <span class="text-xs font-bold text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded-full border border-emerald-800/50">Python Master</span>
+                </div>
+            </div>
+
+            <button onclick="restartFullGame()" class="vector-btn w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-3.5 rounded-xl shadow-lg">
+                Зіграти знову
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 py-4 text-center text-xs text-slate-500">
+        Урок інформатики: Вступ у Python • Змінні • Функції • Масиви • Рядки
+    </footer>
+
+    <!-- JS Logic -->
+    <script>
+        // Web Audio API Sound Synthesizer
+        let audioCtx = null;
+        let isMuted = false;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (isMuted) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'connect') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, now);
+                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.15);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+                    osc.start(now);
+                    osc.stop(now + 0.15);
+                } else if (type === 'success') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.1);
+                    osc.frequency.setValueAtTime(783.99, now + 0.2);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.setValueAtTime(160, now + 0.15);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, now);
+                    gain.gain.setValueAtTime(0.05, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                }
+            } catch (e) {
+                // Audio context suppressed if no interaction
+            }
+        }
+
+        function toggleAudio() {
+            isMuted = !isMuted;
+            const icon = document.getElementById('soundIcon');
+            if (isMuted) {
+                icon.className = 'fa-solid fa-volume-xmark text-slate-500';
+            } else {
+                icon.className = 'fa-solid fa-volume-high text-slate-300';
+                playSound('click');
+            }
+        }
+
+        // Global State
+        let currentTab = 0;
+        let score = 0;
+        let completedGames = [false, false, false, false];
+
+        function updateScore(points) {
+            score += points;
+            document.getElementById('scoreDisplay').innerText = score;
+        }
+
+        function markCompleted(gameIdx) {
+            if (!completedGames[gameIdx]) {
+                completedGames[gameIdx] = true;
+                updateScore(25);
+                const count = completedGames.filter(Boolean).length;
+                document.getElementById('progressDisplay').innerText = `${count}/4`;
+                
+                if (count === 4) {
+                    setTimeout(() => {
+                        document.getElementById('finalScore').innerText = score;
+                        document.getElementById('victoryModal').classList.remove('hidden');
+                        playSound('success');
+                    }, 600);
+                }
+            }
+        }
+
+        function switchTab(index) {
+            playSound('click');
+            currentTab = index;
+            document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+                if (i === index) {
+                    btn.className = 'tab-btn px-3 py-2.5 rounded-xl font-bold text-xs md:text-sm flex items-center justify-center gap-2 transition bg-purple-600 text-white shadow';
+                } else {
+                    btn.className = 'tab-btn px-3 py-2.5 rounded-xl font-bold text-xs md:text-sm flex items-center justify-center gap-2 transition text-slate-400 hover:text-white hover:bg-slate-800';
+                }
+            });
+
+            document.querySelectorAll('.game-module').forEach((mod, i) => {
+                if (i === index) {
+                    mod.classList.remove('hidden');
+                } else {
+                    mod.classList.add('hidden');
+                }
+            });
+
+            if (index === 0) drawWires();
+        }
+
+        // Helper shuffle function
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            const newArr = [...array];
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [newArr[currentIndex], newArr[randomIndex]] = [newArr[randomIndex], newArr[currentIndex]];
+            }
+            return newArr;
+        }
+
+
+        // ==========================================================
+        // MINI GAME 1: WIRE CONNECTIONS
+        // ==========================================================
+        const game1Data = [
+            { id: 'v1', expr: 'x = 42', type: 'int' },
+            { id: 'v2', expr: 'title = "Python"', type: 'str' },
+            { id: 'v3', expr: 'pi = 3.1415', type: 'float' },
+            { id: 'v4', expr: 'is_ready = True', type: 'bool' },
+            { id: 'v5', expr: 'nums = [1, 2, 3]', type: 'list' }
+        ];
+
+        let selectedLeftNode = null;
+        let connections = {}; // { leftId: rightType }
+        let currentLeftList = [];
+        let currentRightList = [];
+
+        function initGame1() {
+            currentLeftList = shuffle(game1Data);
+            currentRightList = shuffle([
+                { type: 'int', label: 'int (ціле число)' },
+                { type: 'str', label: 'str (рядок)' },
+                { type: 'float', label: 'float (дробове)' },
+                { type: 'bool', label: 'bool (булеве)' },
+                { type: 'list', label: 'list (список)' }
+            ]);
+
+            connections = {};
+            selectedLeftNode = null;
+
+            const leftBox = document.getElementById('leftPortList');
+            const rightBox = document.getElementById('rightPortList');
+
+            leftBox.innerHTML = currentLeftList.map(item => `
+                <div class="flex items-center justify-between bg-slate-900 border border-slate-800 px-3 py-2.5 rounded-xl">
+                    <span class="font-mono text-xs md:text-sm text-yellow-300 font-bold">${item.expr}</span>
+                    <button id="port-left-${item.id}" onclick="handleLeftPortClick('${item.id}')" class="wire-port ml-2" title="Підключити"></button>
+                </div>
+            `).join('');
+
+            rightBox.innerHTML = currentRightList.map(item => `
+                <div class="flex items-center justify-between bg-slate-900 border border-slate-800 px-3 py-2.5 rounded-xl w-full">
+                    <button id="port-right-${item.type}" onclick="handleRightPortClick('${item.type}')" class="wire-port mr-2" title="Підключити"></button>
+                    <span class="font-mono text-xs md:text-sm text-cyan-400 font-bold">${item.label}</span>
+                </div>
+            `).join('');
+
+            drawWires();
+        }
+
+        function handleLeftPortClick(id) {
+            playSound('click');
+            selectedLeftNode = id;
+            document.querySelectorAll('#leftPortList .wire-port').forEach(el => el.classList.remove('active'));
+            const btn = document.getElementById(`port-left-${id}`);
+            if (btn) btn.classList.add('active');
+        }
+
+        function handleRightPortClick(type) {
+            if (!selectedLeftNode) {
+                document.getElementById('game1Feedback').innerHTML = `<span class="text-amber-400"><i class="fa-solid fa-triangle-exclamation"></i> Спочатку обри елемент зліва!</span>`;
+                playSound('error');
+                return;
+            }
+
+            playSound('connect');
+            connections[selectedLeftNode] = type;
+            selectedLeftNode = null;
+            document.querySelectorAll('#leftPortList .wire-port').forEach(el => el.classList.remove('active'));
+            drawWires();
+        }
+
+        function resetGame1() {
+            connections = {};
+            selectedLeftNode = null;
+            document.querySelectorAll('.wire-port').forEach(p => p.classList.remove('active', 'connected'));
+            document.getElementById('game1Feedback').innerHTML = `<i class="fa-solid fa-circle-info text-blue-400"></i> Клацни на вузол зліва, а потім на відповідний справа.`;
+            drawWires();
+        }
+
+        function drawWires() {
+            const svg = document.getElementById('wireSvg');
+            if (!svg) return;
+            const container = document.getElementById('wireContainer');
+            const rectC = container.getBoundingClientRect();
+
+            svg.innerHTML = '';
+
+            Object.keys(connections).forEach(leftId => {
+                const rightType = connections[leftId];
+                const leftPort = document.getElementById(`port-left-${leftId}`);
+                const rightPort = document.getElementById(`port-right-${rightType}`);
+
+                if (leftPort && rightPort) {
+                    leftPort.classList.add('connected');
+                    rightPort.classList.add('connected');
+
+                    const rL = leftPort.getBoundingClientRect();
+                    const rR = rightPort.getBoundingClientRect();
+
+                    const x1 = rL.left + rL.width / 2 - rectC.left;
+                    const y1 = rL.top + rL.height / 2 - rectC.top;
+                    const x2 = rR.left + rR.width / 2 - rectC.left;
+                    const y2 = rR.top + rR.height / 2 - rectC.top;
+
+                    const cx1 = x1 + (x2 - x1) * 0.5;
+                    const cy1 = y1;
+                    const cx2 = x1 + (x2 - x1) * 0.5;
+                    const cy2 = y2;
+
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('d', `M ${x1} ${y1} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${x2} ${y2}`);
+                    path.setAttribute('stroke', '#A855F7');
+                    path.setAttribute('stroke-width', '4');
+                    path.setAttribute('fill', 'none');
+                    path.setAttribute('stroke-linecap', 'round');
+                    path.style.filter = 'drop-shadow(0px 0px 6px #A855F7)';
+
+                    svg.appendChild(path);
+                }
+            });
+        }
+
+        function checkGame1() {
+            const total = game1Data.length;
+            const connectedCount = Object.keys(connections).length;
+
+            if (connectedCount < total) {
+                playSound('error');
+                document.getElementById('game1Feedback').innerHTML = `<span class="text-red-400"><i class="fa-solid fa-xmark"></i> З'єднай усі проводки перед перевіркою!</span>`;
+                return;
+            }
+
+            let correct = 0;
+            game1Data.forEach(item => {
+                if (connections[item.id] === item.type) correct++;
+            });
+
+            if (correct === total) {
+                playSound('success');
+                document.getElementById('game1Feedback').innerHTML = `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-check"></i> Чудово! Усі типи даних з'єднано вірно! (+25 б.)</span>`;
+                markCompleted(0);
+            } else {
+                playSound('error');
+                document.getElementById('game1Feedback').innerHTML = `<span class="text-red-400"><i class="fa-solid fa-triangle-exclamation"></i> Знайдено помилки у з'єднаннях. Спробуй ще раз!</span>`;
+            }
+        }
+
+
+        // ==========================================================
+        // MINI GAME 2: DRAG & DROP ARRAYS
+        // ==========================================================
+        const game2Tasks = [
+            { indexLabel: 'items[0]', expected: '"apple"' },
+            { indexLabel: 'items[1]', expected: '"banana"' },
+            { indexLabel: 'items[2]', expected: '"cherry"' },
+            { indexLabel: 'items[-1]', expected: '"dragonfruit"' }
+        ];
+
+        let draggedItemVal = null;
+        let slotAssignments = {};
+
+        function initGame2() {
+            document.getElementById('arrayInitialState').innerText = `"apple", "banana", "cherry", "dragonfruit"`;
+            slotAssignments = {};
+
+            const draggablesList = shuffle([
+                '"apple"', '"banana"', '"cherry"', '"dragonfruit"'
+            ]);
+
+            const slotsBox = document.getElementById('arraySlotsContainer');
+            slotsBox.innerHTML = game2Tasks.map((t, idx) => `
+                <div class="bg-slate-900 border-2 border-dashed border-slate-700 rounded-2xl p-4 flex flex-col items-center justify-between min-h-[120px]"
+                     ondragover="allowDrop(event)" ondrop="handleDrop(event, ${idx})">
+                    <span class="text-xs font-mono text-purple-400 font-bold bg-purple-950 px-2 py-0.5 rounded border border-purple-800">${t.indexLabel}</span>
+                    <div id="slot-content-${idx}" class="w-full flex justify-center items-center my-2 font-mono text-sm font-bold text-yellow-300 min-h-[40px]">
+                        <span class="text-slate-600 text-xs font-sans">Порожньо</span>
+                    </div>
+                </div>
+            `).join('');
+
+            renderDraggables(draggablesList);
+        }
+
+        function renderDraggables(items) {
+            const dragBox = document.getElementById('arrayDraggables');
+            dragBox.innerHTML = items.map((val, i) => `
+                <div id="drag-item-${i}" draggable="true" ondragstart="handleDragStart(event, '${val}')" onclick="handleClickSelect('${val}')"
+                     class="puzzle-block bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-mono font-bold text-sm px-4 py-2.5 rounded-xl shadow border border-cyan-400/30">
+                     ${val}
+                </div>
+            `).join('');
+        }
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function handleDragStart(ev, val) {
+            draggedItemVal = val;
+            playSound('click');
+        }
+
+        function handleClickSelect(val) {
+            // Mobile friendly tap-to-place fallback
+            draggedItemVal = val;
+            playSound('click');
+            // Auto place in first empty slot
+            for (let i = 0; i < game2Tasks.length; i++) {
+                if (!slotAssignments[i]) {
+                    assignSlot(i, val);
+                    break;
+                }
+            }
+        }
+
+        function handleDrop(ev, slotIdx) {
+            ev.preventDefault();
+            if (draggedItemVal) {
+                assignSlot(slotIdx, draggedItemVal);
+            }
+        }
+
+        function assignSlot(slotIdx, val) {
+            playSound('connect');
+            slotAssignments[slotIdx] = val;
+            const slotEl = document.getElementById(`slot-content-${slotIdx}`);
+            slotEl.innerHTML = `
+                <div class="bg-slate-800 text-yellow-300 font-mono px-3 py-1.5 rounded-lg border border-yellow-400/30 flex items-center justify-between w-full">
+                    <span>${val}</span>
+                    <button onclick="clearSlot(${slotIdx})" class="text-slate-400 hover:text-red-400 text-xs ml-2">✕</button>
+                </div>
+            `;
+        }
+
+        function clearSlot(slotIdx) {
+            playSound('click');
+            delete slotAssignments[slotIdx];
+            document.getElementById(`slot-content-${slotIdx}`).innerHTML = `<span class="text-slate-600 text-xs font-sans">Порожньо</span>`;
+        }
+
+        function resetGame2() {
+            initGame2();
+            document.getElementById('game2Feedback').innerHTML = `Перетягни блок у правильний слот індексу.`;
+        }
+
+        function checkGame2() {
+            let correct = 0;
+            game2Tasks.forEach((t, i) => {
+                if (slotAssignments[i] === t.expected) correct++;
+            });
+
+            if (correct === game2Tasks.length) {
+                playSound('success');
+                document.getElementById('game2Feedback').innerHTML = `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-check"></i> Масив заповнено абсолютно вірно! (+25 б.)</span>`;
+                markCompleted(1);
+            } else {
+                playSound('error');
+                document.getElementById('game2Feedback').innerHTML = `<span class="text-red-400"><i class="fa-solid fa-xmark"></i> Деякі індекси містять хибні значення. Спробуй ще раз!</span>`;
+            }
+        }
+
+
+        // ==========================================================
+        // MINI GAME 3: STRING SLICING LASER
+        // ==========================================================
+        const stringSource = "PYTHON_CODE";
+        const stringTarget = "HON"; // Slice range [3:6]
+
+        function initGame3() {
+            document.getElementById('stringTargetSource').innerText = `"${stringSource}"`;
+            document.getElementById('stringTargetResult').innerText = `"${stringTarget}"`;
+
+            const sliderStart = document.getElementById('sliceStartSlider');
+            const sliderStop = document.getElementById('sliceStopSlider');
+
+            sliderStart.max = stringSource.length;
+            sliderStop.max = stringSource.length;
+
+            sliderStart.value = 0;
+            sliderStop.value = 2;
+
+            renderStringVisuals();
+            updateStringSlice();
+        }
+
+        function renderStringVisuals() {
+            const bar = document.getElementById('stringVisualBar');
+            bar.innerHTML = stringSource.split('').map((char, i) => `
+                <div id="char-box-${i}" class="flex flex-col items-center justify-center w-10 h-14 bg-slate-800 border border-slate-700 rounded-xl font-mono transition-all">
+                    <span class="text-xs text-slate-500">${i}</span>
+                    <span class="text-base font-black text-white">${char}</span>
+                </div>
+            `).join('');
+        }
+
+        function updateStringSlice() {
+            const start = parseInt(document.getElementById('sliceStartSlider').value);
+            const stop = parseInt(document.getElementById('sliceStopSlider').value);
+
+            document.getElementById('startValDisplay').innerText = start;
+            document.getElementById('stopValDisplay').innerText = stop;
+
+            document.getElementById('codeSlicePreview').innerText = `${start}:${stop}`;
+
+            const sliced = stringSource.slice(start, stop);
+            document.getElementById('currentSlicedText').innerText = `"${sliced}"`;
+
+            // Highlight visual blocks
+            for (let i = 0; i < stringSource.length; i++) {
+                const box = document.getElementById(`char-box-${i}`);
+                if (i >= start && i < stop) {
+                    box.className = "flex flex-col items-center justify-center w-10 h-14 bg-emerald-600/30 border-2 border-emerald-400 rounded-xl font-mono scale-105 shadow-lg shadow-emerald-500/20";
+                } else {
+                    box.className = "flex flex-col items-center justify-center w-10 h-14 bg-slate-800 border border-slate-700 rounded-xl font-mono transition-all opacity-50";
+                }
+            }
+        }
+
+        function checkGame3() {
+            const start = parseInt(document.getElementById('sliceStartSlider').value);
+            const stop = parseInt(document.getElementById('sliceStopSlider').value);
+            const sliced = stringSource.slice(start, stop);
+
+            if (sliced === stringTarget) {
+                playSound('success');
+                markCompleted(2);
+                alertCustom('Зріз проведено ідеально! Ви отримали підрядок "HON". (+25 б.)');
+            } else {
+                playSound('error');
+                alertCustom('Невірно! Поточний зріз повертає "' + sliced + '", а потрібно "' + stringTarget + '".');
+            }
+        }
+
+
+        // ==========================================================
+        // MINI GAME 4: ALGORITHM PUZZLE CHAIN
+        // ==========================================================
+        const algorithmCorrectOrder = [
+            'def calculate_bonus(score):',
+            '    base_bonus = score * 2',
+            '    if base_bonus > 100:',
+            '        return base_bonus + 50',
+            '    return base_bonus',
+            'print(calculate_bonus(60))'
+        ];
+
+        let currentAlgorithmState = [];
+
+        function initGame4() {
+            currentAlgorithmState = shuffle([...algorithmCorrectOrder]);
+            renderPuzzleRows();
+        }
+
+        function renderPuzzleRows() {
+            const container = document.getElementById('puzzleContainer');
+            container.innerHTML = currentAlgorithmState.map((line, idx) => `
+                <div class="puzzle-block bg-slate-900 border border-slate-700 hover:border-amber-400/50 rounded-xl p-3 flex items-center justify-between shadow"
+                     draggable="true" ondragstart="handlePuzzleDragStart(event, ${idx})" ondragover="allowDrop(event)" ondrop="handlePuzzleDrop(event, ${idx})">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-grip-vertical text-slate-600"></i>
+                        <code class="font-mono text-xs md:text-sm text-yellow-300">${line.replace(/ /g, '&nbsp;')}</code>
+                    </div>
+                    <div class="flex gap-1">
+                        <button onclick="movePuzzleRow(${idx}, -1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 rounded text-xs text-slate-300">▲</button>
+                        <button onclick="movePuzzleRow(${idx}, 1)" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 rounded text-xs text-slate-300">▼</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        let draggedPuzzleIdx = null;
+
+        function handlePuzzleDragStart(ev, idx) {
+            draggedPuzzleIdx = idx;
+            playSound('click');
+        }
+
+        function handlePuzzleDrop(ev, targetIdx) {
+            ev.preventDefault();
+            if (draggedPuzzleIdx !== null && draggedPuzzleIdx !== targetIdx) {
+                const item = currentAlgorithmState.splice(draggedPuzzleIdx, 1)[0];
+                currentAlgorithmState.splice(targetIdx, 0, item);
+                playSound('connect');
+                renderPuzzleRows();
+            }
+        }
+
+        function movePuzzleRow(idx, dir) {
+            playSound('click');
+            const targetIdx = idx + dir;
+            if (targetIdx >= 0 && targetIdx < currentAlgorithmState.length) {
+                const temp = currentAlgorithmState[idx];
+                currentAlgorithmState[idx] = currentAlgorithmState[targetIdx];
+                currentAlgorithmState[targetIdx] = temp;
+                renderPuzzleRows();
+            }
+        }
+
+        function resetGame4() {
+            initGame4();
+            document.getElementById('game4Feedback').innerHTML = `Перетягуй рядки місцями для побудови вірного алгоритму.`;
+        }
+
+        function checkGame4() {
+            let isCorrect = true;
+            for (let i = 0; i < algorithmCorrectOrder.length; i++) {
+                if (currentAlgorithmState[i] !== algorithmCorrectOrder[i]) {
+                    isCorrect = false;
+                    break;
+                }
+            }
+
+            if (isCorrect) {
+                playSound('success');
+                document.getElementById('game4Feedback').innerHTML = `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-check"></i> Алгоритм функції побудовано бездоганно! (+25 б.)</span>`;
+                markCompleted(3);
+            } else {
+                playSound('error');
+                document.getElementById('game4Feedback').innerHTML = `<span class="text-red-400"><i class="fa-solid fa-xmark"></i> Порядок виконання алгоритму порушено. Перевірте відступи та логіку!</span>`;
+            }
+        }
+
+
+        // Custom Toast Alert
+        function alertCustom(msg) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-6 right-6 bg-slate-900 border border-yellow-400/50 text-white font-semibold text-sm px-5 py-3 rounded-2xl shadow-2xl z-50 flex items-center gap-3 animate-bounce';
+            toast.innerHTML = `<i class="fa-solid fa-circle-info text-yellow-400 text-lg"></i> <span>${msg}</span>`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3500);
+        }
+
+        function restartFullGame() {
+            score = 0;
+            completedGames = [false, false, false, false];
+            document.getElementById('scoreDisplay').innerText = 0;
+            document.getElementById('progressDisplay').innerText = "0/4";
+            document.getElementById('victoryModal').classList.add('hidden');
+            
+            initGame1();
+            initGame2();
+            initGame3();
+            initGame4();
+            switchTab(0);
+        }
+
+        // Window Initialization
+        window.onload = function() {
+            initGame1();
+            initGame2();
+            initGame3();
+            initGame4();
+
+            window.addEventListener('resize', drawWires);
+        };
+    </script>
+</body>
+</html>
