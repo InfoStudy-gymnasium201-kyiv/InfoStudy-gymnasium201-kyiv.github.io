@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="uk" class="h-full bg-slate-900 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Історія IT: Векторний квест</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        vector: {
+                            cyan: '#00f2fe',
+                            blue: '#4facfe',
+                            purple: '#7f00ff',
+                            pink: '#ff007f',
+                            yellow: '#ffb199',
+                            emerald: '#00f5a0',
+                            dark: '#0b0f19',
+                            card: '#161e2e'
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-6px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom styled elements for tactile feedback */
+        .vector-border {
+            box-shadow: 0 0 15px rgba(79, 172, 254, 0.2), inset 0 0 15px rgba(79, 172, 254, 0.1);
+            border: 2px solid rgba(79, 172, 254, 0.4);
+        }
+        .vector-border:hover {
+            box-shadow: 0 0 25px rgba(0, 242, 254, 0.4), inset 0 0 20px rgba(0, 242, 254, 0.2);
+            border-color: rgba(0, 242, 254, 0.8);
+        }
+        .wire-canvas {
+            pointer-events: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+        }
+        .draggable-item {
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+        }
+        .draggable-item:active {
+            cursor: grabbing;
+        }
+        .drop-zone.drag-over {
+            border-color: #00f5a0 !important;
+            background-color: rgba(0, 245, 160, 0.1) !important;
+            transform: scale(1.02);
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0f19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f293d;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans overflow-x-hidden bg-slate-950 text-slate-100">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-0 z-50 px-4 py-3">
+        <div class="max-w-7xl mx-mx-auto flex justify-between items-center max-w-7xl mx-auto">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                    <i class="fa-solid fa-microchip text-xl text-slate-950"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg sm:text-xl tracking-tight bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-300 bg-clip-text text-transparent">
+                        Історія IT: Векторна Лабораторія
+                    </h1>
+                    <p class="text-xs text-slate-400 hidden sm:block">Інтерактивний урок інформатики (9 клас)</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <!-- Score Indicator -->
+                <div class="bg-slate-800/80 border border-slate-700/60 rounded-xl px-3 py-1.5 flex items-center gap-2">
+                    <i class="fa-solid fa-star text-amber-400 text-sm"></i>
+                    <span class="text-xs text-slate-400">Бали:</span>
+                    <span id="total-score" class="font-bold text-amber-300 text-base">0</span>
+                </div>
+
+                <!-- Navigation buttons -->
+                <button id="btn-home" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition" title="На головну">
+                    <i class="fa-solid fa-house"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col justify-center">
+
+        <!-- SCREEN 0: LEVEL SELECTOR / MENU -->
+        <section id="screen-menu" class="space-y-6">
+            <div class="text-center space-y-2 max-w-2xl mx-auto">
+                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                    Практичний інтерактив
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Обери практичну місію</h2>
+                <p class="text-slate-400 text-sm sm:text-base">
+                    Пройди всі 4 тактильні міні-ігри. У кожному завданні варіанти переплутано, а підказки відсутні. Використовуй знання тему ІТ!
+                </p>
+            </div>
+
+            <!-- Mini Games Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-5xl mx-auto">
+                
+                <!-- Game 1 Card -->
+                <div onclick="switchGame(1)" class="group cursor-pointer bg-slate-900 border border-slate-800 hover:border-cyan-500/50 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-500/10 flex flex-col justify-between relative overflow-hidden">
+                    <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-cyan-500/5 rounded-full blur-2xl group-hover:bg-cyan-500/15 transition-all"></div>
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-xl group-hover:scale-110 transition">
+                                <i class="fa-solid fa-cubes"></i>
+                            </span>
+                            <span id="badge-g1" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400">
+                                Не пройдено
+                            </span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white group-hover:text-cyan-300 transition mb-2">
+                            1. Конструктор Поколінь ЕОМ
+                        </h3>
+                        <p class="text-slate-400 text-sm">
+                            Тактильне перетягування (Drag & Drop): розстав елементну базу та характеристики за відповідними 5 поколіннями комп'ютерів.
+                        </p>
+                    </div>
+                    <div class="mt-6 flex items-center text-xs font-semibold text-cyan-400 group-hover:translate-x-1 transition">
+                        Розпочати місію <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </div>
+                </div>
+
+                <!-- Game 2 Card -->
+                <div onclick="switchGame(2)" class="group cursor-pointer bg-slate-900 border border-slate-800 hover:border-purple-500/50 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-500/10 flex flex-col justify-between relative overflow-hidden">
+                    <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-purple-500/5 rounded-full blur-2xl group-hover:bg-purple-500/15 transition-all"></div>
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xl group-hover:scale-110 transition">
+                                <i class="fa-solid fa-network-wired"></i>
+                            </span>
+                            <span id="badge-g2" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400">
+                                Не пройдено
+                            </span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white group-hover:text-purple-300 transition mb-2">
+                            2. Патч-панель "Корифеї Кібернетики"
+                        </h3>
+                        <p class="text-slate-400 text-sm">
+                            Комутація кабелями: з'єднай видатних учених (Беббіджа, Лавлейс, Лебедєва, Глушкова, Ющенко, Бернерса-Лі) з їхніми винаходами.
+                        </p>
+                    </div>
+                    <div class="mt-6 flex items-center text-xs font-semibold text-purple-400 group-hover:translate-x-1 transition">
+                        З'єднати лінія з'єднання <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </div>
+                </div>
+
+                <!-- Game 3 Card -->
+                <div onclick="switchGame(3)" class="group cursor-pointer bg-slate-900 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10 flex flex-col justify-between relative overflow-hidden">
+                    <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/15 transition-all"></div>
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl group-hover:scale-110 transition">
+                                <i class="fa-solid fa-[#00f5a0] fa-timeline"></i>
+                            </span>
+                            <span id="badge-g3" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400">
+                                Не пройдено
+                            </span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white group-hover:text-emerald-300 transition mb-2">
+                            3. Часовий Реконструктор Подій
+                        </h3>
+                        <p class="text-slate-400 text-sm">
+                            Впорядкування хронології: впорядкуй переплутані фрагменти історії від ХІХ століття до створення WWW та ШІ.
+                        </p>
+                    </div>
+                    <div class="mt-6 flex items-center text-xs font-semibold text-emerald-400 group-hover:translate-x-1 transition">
+                        Впорядкувати час <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </div>
+                </div>
+
+                <!-- Game 4 Card -->
+                <div onclick="switchGame(4)" class="group cursor-pointer bg-slate-900 border border-slate-800 hover:border-amber-500/50 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/10 flex flex-col justify-between relative overflow-hidden">
+                    <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/15 transition-all"></div>
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl group-hover:scale-110 transition">
+                                <i class="fa-solid fa-filter"></i>
+                            </span>
+                            <span id="badge-g4" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400">
+                                Не пройдено
+                            </span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white group-hover:text-amber-300 transition mb-2">
+                            4. Сортувальник IT Кластерів
+                        </h3>
+                        <p class="text-slate-400 text-sm">
+                            Тактильний розподіл сфер: відправ технологічні концепції у відповідні накопичувачі (Механіка, Школа Кібернетики України, Мережі).
+                        </p>
+                    </div>
+                    <div class="mt-6 flex items-center text-xs font-semibold text-amber-400 group-hover:translate-x-1 transition">
+                        Розподілити блоки <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- GAME 1: HARDWARE EVOLUTION ASSEMBLY -->
+        <section id="screen-g1" class="hidden space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+                <div>
+                    <h2 class="text-xl font-bold text-cyan-400 flex items-center gap-2">
+                        <i class="fa-solid fa-cubes"></i> Місія 1: Покоління ЕОМ
+                    </h2>
+                    <p class="text-xs text-slate-400">Перетягни плашки з елементною базою та властивостями у комірки відповідних поколінь.</p>
+                </div>
+                <button onclick="checkGame1()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-sm transition shadow-lg shadow-cyan-500/20 active:scale-95">
+                    <i class="fa-solid fa-circle-check mr-1.5"></i> Перевірити
+                </button>
+            </div>
+
+            <!-- Unassigned Dock -->
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Доступні елементи (Переплутано):</h3>
+                <div id="g1-dock" class="flex flex-wrap gap-2.5 min-h-[60px] p-2 bg-slate-950 rounded-xl border border-dashed border-slate-800 drop-zone" data-target="dock">
+                    <!-- Items inserted by JS -->
+                </div>
+            </div>
+
+            <!-- Generations Target Slots Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                <!-- 1 Gen -->
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 flex flex-col justify-between space-y-3">
+                    <div class="border-b border-slate-800 pb-2">
+                        <span class="text-xs font-extrabold text-cyan-400 uppercase">1-ше Покоління</span>
+                        <h4 class="text-sm font-semibold text-slate-200">Лампова Ера</h4>
+                    </div>
+                    <div class="space-y-2">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase">Елементна база:</p>
+                        <div class="g1-slot min-h-[42px] bg-slate-950/80 rounded-lg border border-slate-800 p-1 drop-zone" data-gen="1" data-type="base"></div>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase">Особливість:</p>
+                        <div class="g1-slot min-h-[42px] bg-slate-950/80 rounded-lg border border-slate-800 p-1 drop-zone" data-gen="1" data-type="trait"></div>
+                    </div>
+                </div>
+
+                <!-- 2 Gen -->
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 flex flex-col justify-between space-y-3">
+                    <div class="border-b border-slate-800 pb-2">
+                        <span class="text-xs font-extrabold text-blue-400 uppercase">2-ге Покоління</span>
+                        <h4 class="text-sm font-semibold text-slate-200">Транзисторне</h4>
+                    </div>
+                    <div class="space-y-2">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase">Елементна база:</p>
+                        <div class="g1-slot min-h-[42px] bg-slate-950/80 rounded-lg border border-slate-800 p-1 drop-zone" data-gen="2" data-type="base"></div>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase">Особливість:</p>
+                        <div class="g1-slot min-h-[42px] bg-slate-950/80 rounded-lg border border-slate-800 p-1 drop-zone" data-gen="2" data-type="trait"></div>
+                    </div>
+                </div>
+
+                <!-- 3 Gen -->
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 flex flex-col justify-between space-y-3">
+                    <div class="border-b border-slate-800 pb-2">
+                        <span class="text-xs font-extrabold text-indigo-400 uppercase">3-тє Покоління</span>
+                        <h4 class="text-sm font-semibold text-slate-200">Інтегральне</h4>
+                    </div>
+                    <div class="space-y-2">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase">Елементна база:</p>
+                        <div class="g1-slot min-h-[42px] bg-slate-950/80 rounded-lg border border-slate-800 p-1 drop-zone" data-gen="3" data-type="base"></div>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase">Особливість:</p>
+                        <div class="g1-slot min-h-[42px] bg-slate-950/80 rounded-lg border border-slate-800 p-1 drop-zone" data-gen="3" data-type="trait"></div>
+                    </div>
+                </div>
+
+                <!-- 4 Gen -->
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 flex flex-col justify-between space-y-3">
+                    <div class="border-b border-slate-800 pb-2">
+                        <span class="text-xs font-extrabold text-purple-400 uppercase">4-те Покоління</span>
+                        <h4 class="text-sm font-semibold text-slate-200">Мікропроцесорне</h4>
+                    </div>
+                    <div class="space-y-2">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase">Елементна база:</p>
+                        <div class="g1-slot min-h-[42px] bg-slate-950/80 rounded-lg border border-slate-800 p-1 drop-zone" data-gen="4" data-type="base"></div>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase">Особливість:</p>
+                        <div class="g1-slot min-h-[42px] bg-slate-950/80 rounded-lg border border-slate-800 p-1 drop-zone" data-gen="4" data-type="trait"></div>
+                    </div>
+                </div>
+
+                <!-- 5 Gen -->
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 flex flex-col justify-between space-y-3">
+                    <div class="border-b border-slate-800 pb-2">
+                        <span class="text-xs font-extrabold text-emerald-400 uppercase">5-те Покоління</span>
+                        <h4 class="text-sm font-semibold text-slate-200">Сучасне & ШІ</h4>
+                    </div>
+                    <div class="space-y-2">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase">Елементна база:</p>
+                        <div class="g1-slot min-h-[42px] bg-slate-950/80 rounded-lg border border-slate-800 p-1 drop-zone" data-gen="5" data-type="base"></div>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase">Особливість:</p>
+                        <div class="g1-slot min-h-[42px] bg-slate-950/80 rounded-lg border border-slate-800 p-1 drop-zone" data-gen="5" data-type="trait"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- GAME 2: CYBERNETICS PATCHBOARD -->
+        <section id="screen-g2" class="hidden space-y-6 relative">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+                <div>
+                    <h2 class="text-xl font-bold text-purple-400 flex items-center gap-2">
+                        <i class="fa-solid fa-network-wired"></i> Місія 2: Патч-панель "Корифеї Кібернетики"
+                    </h2>
+                    <p class="text-xs text-slate-400">Натисни спочатку на науковця (ліворуч), а потім на його винаходи (праворуч), щоб з'єднати їх дрітом.</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="resetWires()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition">
+                        <i class="fa-solid fa-rotate-left mr-1"></i> Скинути з'єднання
+                    </button>
+                    <button onclick="checkGame2()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-400 hover:to-pink-500 text-white font-bold text-sm transition shadow-lg shadow-purple-500/20 active:scale-95">
+                        <i class="fa-solid fa-circle-check mr-1.5"></i> Перевірити
+                    </button>
+                </div>
+            </div>
+
+            <!-- Wire Patch Board Grid Container -->
+            <div class="relative bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-6 min-h-[500px]" id="patchboard-container">
+                <svg id="wire-svg" class="wire-canvas"></svg>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-24 relative z-20">
+                    <!-- Left Column: Scientists -->
+                    <div class="space-y-3">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Видатні особистості:</h3>
+                        <div id="g2-scientists-list" class="space-y-3">
+                            <!-- Scientists cards injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Breakthroughs -->
+                    <div class="space-y-3">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Відкриття та технології (Переплутано):</h3>
+                        <div id="g2-innovations-list" class="space-y-3">
+                            <!-- Innovations injected by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- GAME 3: TIMELINE RECONSTRUCTOR -->
+        <section id="screen-g3" class="hidden space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+                <div>
+                    <h2 class="text-xl font-bold text-emerald-400 flex items-center gap-2">
+                        <i class="fa-solid fa-timeline"></i> Місія 3: Часовий Реконструктор Подій
+                    </h2>
+                    <p class="text-xs text-slate-400">Розташуй картки подій від найдавнішої (зверху/ліворуч) до найсучаснішої (знизу/праворуч), використовуючи кнопки стрілок.</p>
+                </div>
+                <button onclick="checkGame3()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-bold text-sm transition shadow-lg shadow-emerald-500/20 active:scale-95">
+                    <i class="fa-solid fa-circle-check mr-1.5"></i> Перевірити
+                </button>
+            </div>
+
+            <!-- Timeline interactive container -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-6">
+                <div id="g3-timeline-container" class="space-y-3">
+                    <!-- Cards injected by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- GAME 4: TECH CLUSTER SORTER -->
+        <section id="screen-g4" class="hidden space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+                <div>
+                    <h2 class="text-xl font-bold text-amber-400 flex items-center gap-2">
+                        <i class="fa-solid fa-filter"></i> Місія 4: Сортувальник IT Кластерів
+                    </h2>
+                    <p class="text-xs text-slate-400">Перетягни терміни зі сховища у відповідний тематичний контейнер технологій.</p>
+                </div>
+                <button onclick="checkGame4()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-bold text-sm transition shadow-lg shadow-amber-500/20 active:scale-95">
+                    <i class="fa-solid fa-circle-check mr-1.5"></i> Перевірити
+                </button>
+            </div>
+
+            <!-- Source items vault -->
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Нерозподілені елементи:</h3>
+                <div id="g4-vault" class="flex flex-wrap gap-2.5 min-h-[70px] p-3 bg-slate-950 rounded-xl border border-dashed border-slate-800 drop-zone" data-cluster="vault">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+
+            <!-- Target 3 Containers -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Cluster A -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+                    <div class="flex items-center gap-2 pb-2 border-b border-slate-800">
+                        <span class="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-sm">A</span>
+                        <div>
+                            <h4 class="text-sm font-bold text-white">Механіка та Концепції</h4>
+                            <p class="text-[10px] text-slate-400">Перші обчислювачі та мовні фундаменти</p>
+                        </div>
+                    </div>
+                    <div id="g4-target-A" class="min-h-[160px] p-2 bg-slate-950 rounded-xl border border-slate-800 space-y-2 drop-zone" data-cluster="A"></div>
+                </div>
+
+                <!-- Cluster B -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+                    <div class="flex items-center gap-2 pb-2 border-b border-slate-800">
+                        <span class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-sm">Б</span>
+                        <div>
+                            <h4 class="text-sm font-bold text-white">Українська Кібернетика</h4>
+                            <p class="text-[10px] text-slate-400">Вітчизняний внесок у світову IT-науку</p>
+                        </div>
+                    </div>
+                    <div id="g4-target-B" class="min-h-[160px] p-2 bg-slate-950 rounded-xl border border-slate-800 space-y-2 drop-zone" data-cluster="B"></div>
+                </div>
+
+                <!-- Cluster C -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+                    <div class="flex items-center gap-2 pb-2 border-b border-slate-800">
+                        <span class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm">В</span>
+                        <div>
+                            <h4 class="text-sm font-bold text-white">Мережі та Всесвітнє Павутиння</h4>
+                            <p class="text-[10px] text-slate-400">ARPANET, WWW та веб-технології</p>
+                        </div>
+                    </div>
+                    <div id="g4-target-C" class="min-h-[160px] p-2 bg-slate-950 rounded-xl border border-slate-800 space-y-2 drop-zone" data-cluster="C"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RESULTS & CERTIFICATE MODAL -->
+        <div id="modal-result" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+            <div class="bg-slate-900 border border-slate-800 max-w-lg w-full rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative text-center">
+                <div class="w-20 h-20 bg-gradient-to-tr from-amber-400 to-yellow-200 text-slate-950 rounded-3xl mx-auto flex items-center justify-center text-3xl font-black shadow-lg shadow-amber-500/20 animate-bounce">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                
+                <div>
+                    <h3 class="text-2xl font-black text-white">Результат Перевірки</h3>
+                    <p id="modal-subtitle" class="text-slate-400 text-sm mt-1">Оцінка знань за матеріалами теми</p>
+                </div>
+
+                <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 space-y-3">
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-slate-400">Точність відповідей:</span>
+                        <span id="modal-accuracy" class="font-extrabold text-cyan-400">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
+                        <div id="modal-progress-bar" class="bg-gradient-to-r from-cyan-400 to-emerald-400 h-full w-0 transition-all duration-700"></div>
+                    </div>
+                    <p id="modal-feedback" class="text-xs text-slate-300 font-medium pt-2">Чудовий результат!</p>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="closeModal()" class="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm transition">
+                        Продовжити
+                    </button>
+                    <button onclick="switchGame(0); closeModal();" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold text-sm transition shadow-lg shadow-cyan-500/20">
+                        Меню місій
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Global State
+        const state = {
+            score: 0,
+            completedGames: { 1: false, 2: false, 3: false, 4: false },
+            wireConnections: {}, // scientistId -> innovationId
+            selectedScientist: null
+        };
+
+        // Utility: Fisher-Yates Shuffle
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            const newArr = [...array];
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [newArr[currentIndex], newArr[randomIndex]] = [newArr[randomIndex], newArr[currentIndex]];
+            }
+            return newArr;
+        }
+
+        // GAME 1 DATA
+        const g1Items = [
+            { id: 'g1-b1', gen: 1, type: 'base', text: 'Електронно-вакуумні лампи', icon: 'fa-lightbulb' },
+            { id: 'g1-t1', gen: 1, type: 'trait', text: 'Величезні розміри, машинний код', icon: 'fa-server' },
+            { id: 'g1-b2', gen: 2, type: 'base', text: 'Напівпровідникові транзистори (1947)', icon: 'fa-bolt' },
+            { id: 'g1-t2', gen: 2, type: 'trait', text: 'Зменшення розмірів, алгоритмічні мови', icon: 'fa-code' },
+            { id: 'g1-b3', gen: 3, type: 'base', text: 'Інтегральні схеми (мікросхеми)', icon: 'fa-microchip' },
+            { id: 'g1-t3', gen: 3, type: 'trait', text: 'Поява операційних систем', icon: 'fa-desktop' },
+            { id: 'g1-b4', gen: 4, type: 'base', text: 'Мікропроцесори (Intel 4004)', icon: 'fa-memory' },
+            { id: 'g1-t4', gen: 4, type: 'trait', text: 'Ера персональних комп’ютерів (ПК)', icon: 'fa-laptop' },
+            { id: 'g1-b5', gen: 5, type: 'base', text: 'Багатопроцесорні та квантові чипи', icon: 'fa-atom' },
+            { id: 'g1-t5', gen: 5, type: 'trait', text: 'Штучний інтелект & паралельні обчислення', icon: 'fa-brain' }
+        ];
+
+        function initGame1() {
+            const dock = document.getElementById('g1-dock');
+            dock.innerHTML = '';
+            document.querySelectorAll('.g1-slot').forEach(slot => slot.innerHTML = '');
+
+            const shuffled = shuffle(g1Items);
+            shuffled.forEach(item => {
+                const el = createDraggableCard(item.id, item.text, item.icon, 'cyan');
+                dock.appendChild(el);
+            });
+        }
+
+        function createDraggableCard(id, text, iconClass, color = 'cyan') {
+            const div = document.createElement('div');
+            div.id = id;
+            div.draggable = true;
+            div.className = `draggable-item bg-slate-800 hover:bg-slate-700 border border-slate-700/80 rounded-xl p-2.5 text-xs text-slate-200 flex items-center gap-2 shadow-md transition transform active:scale-95`;
+            div.innerHTML = `<i class="fa-solid ${iconClass} text-${color}-400"></i> <span>${text}</span>`;
+
+            div.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', id);
+                div.classList.add('opacity-50');
+            });
+
+            div.addEventListener('dragend', () => {
+                div.classList.remove('opacity-50');
+            });
+
+            return div;
+        }
+
+        function setupGlobalDragDrop() {
+            document.addEventListener('dragover', (e) => {
+                const dropZone = e.target.closest('.drop-zone');
+                if (dropZone) {
+                    e.preventDefault();
+                    dropZone.classList.add('drag-over');
+                }
+            });
+
+            document.addEventListener('dragleave', (e) => {
+                const dropZone = e.target.closest('.drop-zone');
+                if (dropZone) {
+                    dropZone.classList.remove('drag-over');
+                }
+            });
+
+            document.addEventListener('drop', (e) => {
+                const dropZone = e.target.closest('.drop-zone');
+                if (!dropZone) return;
+
+                e.preventDefault();
+                dropZone.classList.remove('drag-over');
+
+                const id = e.dataTransfer.getData('text/plain');
+                const draggedEl = document.getElementById(id);
+                if (!draggedEl) return;
+
+                // For Game 1 slots: restrict to 1 child per slot
+                if (dropZone.classList.contains('g1-slot')) {
+                    if (dropZone.children.length > 0) {
+                        // return existing to dock
+                        const existing = dropZone.children[0];
+                        document.getElementById('g1-dock').appendChild(existing);
+                    }
+                    dropZone.appendChild(draggedEl);
+                } else {
+                    dropZone.appendChild(draggedEl);
+                }
+            });
+        }
+
+        // GAME 2 DATA
+        const g2Scientists = [
+            { id: 'babbage', name: 'Чарльз Беббідж', role: 'Англійський математик XIX ст.' },
+            { id: 'lovelace', name: 'Ада Лавлейс', role: 'Перший у світі програміст' },
+            { id: 'lebedev', name: 'Сергій Лебедєв', role: 'Керівник розробки у Києві' },
+            { id: 'glushkov', name: 'Віктор Глушков', role: 'Голова Інституту кібернетики' },
+            { id: 'yushchenko', name: 'Катерина Ющенко', role: 'Українська вчена-програміст' },
+            { id: 'berners', name: 'Тім Бернерс-Лі', role: 'Британський вчений' }
+        ];
+
+        const g2Innovations = [
+            { id: 'babbage-inn', sid: 'babbage', title: 'Проект Аналітичної машини', desc: 'Перший механічний прообраз програмованого комп\'ютера' },
+            { id: 'lovelace-inn', sid: 'lovelace', title: 'Алгоритм обчислення чисел Бернуллі', desc: 'Перша програма, введення понять циклів та комірок' },
+            { id: 'lebedev-inn', sid: 'lebedev', title: 'МЕОМ (Київ, наприкінці 1940-х)', desc: 'Перша ЕОМ у континентальній Європі' },
+            { id: 'glushkov-inn', sid: 'glushkov', title: 'Проект мережі ЗДАС (ОГАС)', desc: 'Концептуальний аналог мережевих систем управління' },
+            { id: 'yushchenko-inn', sid: 'yushchenko', title: '«Адресна мова програмування»', desc: 'Високорівнева мова, що передувала вказівникам' },
+            { id: 'berners-inn', sid: 'berners', title: 'Концепція WWW та мова HTML', desc: 'Створення першого веб-сервера та браузера' }
+        ];
+
+        function initGame2() {
+            state.wireConnections = {};
+            state.selectedScientist = null;
+            renderGame2List();
+            renderWires();
+        }
+
+        function renderGame2List() {
+            const scContainer = document.getElementById('g2-scientists-list');
+            const innContainer = document.getElementById('g2-innovations-list');
+
+            scContainer.innerHTML = '';
+            innContainer.innerHTML = '';
+
+            g2Scientists.forEach(sc => {
+                const div = document.createElement('div');
+                div.id = `sc-${sc.id}`;
+                div.onclick = () => selectScientist(sc.id);
+                div.className = `p-3 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:border-purple-500/60 transition flex items-center justify-between group`;
+                div.innerHTML = `
+                    <div>
+                        <div class="font-bold text-sm text-white group-hover:text-purple-300">${sc.name}</div>
+                        <div class="text-[11px] text-slate-400">${sc.role}</div>
+                    </div>
+                    <span class="w-4 h-4 rounded-full border-2 border-purple-500/50 bg-slate-900 group-hover:bg-purple-500 transition shadow-sm"></span>
+                `;
+                scContainer.appendChild(div);
+            });
+
+            const shuffledInn = shuffle(g2Innovations);
+            shuffledInn.forEach(inn => {
+                const div = document.createElement('div');
+                div.id = `inn-${inn.id}`;
+                div.onclick = () => selectInnovation(inn.id);
+                div.className = `p-3 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:border-pink-500/60 transition flex items-center justify-between group`;
+                div.innerHTML = `
+                    <span class="w-4 h-4 rounded-full border-2 border-pink-500/50 bg-slate-900 group-hover:bg-pink-500 transition shadow-sm"></span>
+                    <div class="text-right">
+                        <div class="font-bold text-sm text-white group-hover:text-pink-300">${inn.title}</div>
+                        <div class="text-[11px] text-slate-400">${inn.desc}</div>
+                    </div>
+                `;
+                innContainer.appendChild(div);
+            });
+        }
+
+        function selectScientist(scId) {
+            state.selectedScientist = scId;
+            g2Scientists.forEach(sc => {
+                const el = document.getElementById(`sc-${sc.id}`);
+                if (sc.id === scId) {
+                    el.classList.add('border-purple-400', 'bg-purple-950/30', 'ring-2', 'ring-purple-500/30');
+                } else {
+                    el.classList.remove('border-purple-400', 'bg-purple-950/30', 'ring-2', 'ring-purple-500/30');
+                }
+            });
+        }
+
+        function selectInnovation(innId) {
+            if (!state.selectedScientist) return;
+
+            // Save wire connection
+            state.wireConnections[state.selectedScientist] = innId;
+            
+            // Clear selection glow
+            const prevSc = state.selectedScientist;
+            state.selectedScientist = null;
+            document.getElementById(`sc-${prevSc}`)?.classList.remove('border-purple-400', 'bg-purple-950/30', 'ring-2', 'ring-purple-500/30');
+
+            renderWires();
+        }
+
+        function resetWires() {
+            state.wireConnections = {};
+            state.selectedScientist = null;
+            document.querySelectorAll('#g2-scientists-list > div').forEach(el => el.classList.remove('border-purple-400', 'bg-purple-950/30', 'ring-2', 'ring-purple-500/30'));
+            renderWires();
+        }
+
+        function renderWires() {
+            const svg = document.getElementById('wire-svg');
+            const container = document.getElementById('patchboard-container');
+            if (!svg || !container) return;
+
+            svg.innerHTML = '';
+            const cRect = container.getBoundingClientRect();
+
+            Object.entries(state.wireConnections).forEach(([scId, innId]) => {
+                const scEl = document.getElementById(`sc-${scId}`);
+                const innEl = document.getElementById(`inn-${innId}`);
+
+                if (scEl && innEl) {
+                    const scRect = scEl.getBoundingClientRect();
+                    const innRect = innEl.getBoundingClientRect();
+
+                    const x1 = scRect.right - cRect.left - 10;
+                    const y1 = scRect.top + scRect.height/2 - cRect.top;
+                    const x2 = innRect.left - cRect.left + 10;
+                    const y2 = innRect.top + innRect.height/2 - cRect.top;
+
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    const dx = Math.abs(x2 - x1) * 0.5;
+                    const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+
+                    path.setAttribute('d', d);
+                    path.setAttribute('stroke', '#c084fc');
+                    path.setAttribute('stroke-width', '4');
+                    path.setAttribute('fill', 'none');
+                    path.setAttribute('stroke-linecap', 'round');
+                    path.setAttribute('class', 'drop-shadow-[0_0_8px_rgba(192,132,252,0.6)]');
+
+                    svg.appendChild(path);
+                }
+            });
+        }
+
+        window.addEventListener('resize', renderWires);
+
+        // GAME 3 DATA (In correct chronological order)
+        const g3Chronology = [
+            { id: 'ev1', year: 'ХІХ століття', title: 'Проект Аналітичної машини Чарльза Беббіджа', icon: 'fa-gear' },
+            { id: 'ev2', year: '1947 рік', title: 'Винахід напівпровідникового транзистора', icon: 'fa-bolt' },
+            { id: 'ev3', year: 'Кінець 1940-х', title: 'Створення МЕОМ під керівництвом С. Лебедєва у Києві', icon: 'fa-microchip' },
+            { id: 'ev4', year: '1969 рік', title: 'Запуск комп\'ютерної мережі ARPANET в США', icon: 'fa-network-wired' },
+            { id: 'ev5', year: '1970-ті роки', title: 'Створення мікропроцесора Intel 4004', icon: 'fa-memory' },
+            { id: 'ev6', year: 'Початок 1990-х', title: 'Тім Бернерс-Лі створює Всесвітню павутину (WWW)', icon: 'fa-globe' }
+        ];
+
+        let g3CurrentState = [];
+
+        function initGame3() {
+            g3CurrentState = shuffle(g3Chronology);
+            renderGame3();
+        }
+
+        function renderGame3() {
+            const container = document.getElementById('g3-timeline-container');
+            container.innerHTML = '';
+
+            g3CurrentState.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = `p-4 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-between gap-4 shadow-md transition`;
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 font-bold text-sm flex items-center justify-center border border-emerald-500/20">
+                            ${index + 1}
+                        </span>
+                        <div>
+                            <h4 class="font-bold text-sm text-white">${item.title}</h4>
+                            <p class="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5">
+                                <i class="fa-solid ${item.icon} text-emerald-400 text-[10px]"></i> Історична віха
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-1">
+                        <button onclick="moveGame3Item(${index}, -1)" ${index === 0 ? 'disabled class="opacity-30 p-2"' : 'class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs transition"'}>
+                            <i class="fa-solid fa-arrow-up"></i>
+                        </button>
+                        <button onclick="moveGame3Item(${index}, 1)" ${index === g3CurrentState.length - 1 ? 'disabled class="opacity-30 p-2"' : 'class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs transition"'}>
+                            <i class="fa-solid fa-arrow-down"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function moveGame3Item(index, direction) {
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= g3CurrentState.length) return;
+
+            const temp = g3CurrentState[index];
+            g3CurrentState[index] = g3CurrentState[newIndex];
+            g3CurrentState[newIndex] = temp;
+
+            renderGame3();
+        }
+
+        // GAME 4 DATA
+        const g4Items = [
+            { id: 'g4-1', cluster: 'A', text: 'Аналітична машина Беббіджа', icon: 'fa-gears' },
+            { id: 'g4-2', cluster: 'A', text: 'Числа Бернуллі та алгоритм Лавлейс', icon: 'fa-calculator' },
+            { id: 'g4-3', cluster: 'A', text: 'Комірки пам’яті та перші цикли', icon: 'fa-cube' },
+            
+            { id: 'g4-4', cluster: 'B', text: 'МЕОМ (Мала електронна лічильна машина)', icon: 'fa-server' },
+            { id: 'g4-5', cluster: 'B', text: 'Проект ОГАС / ЗДАС (В. Глушков)', icon: 'fa-diagram-project' },
+            { id: 'g4-6', cluster: 'B', text: '«Адресна мова програмування» (К. Ющенко)', icon: 'fa-code-branch' },
+
+            { id: 'g4-7', cluster: 'C', text: 'Мережа ARPANET (DARPA 1969)', icon: 'fa-network-wired' },
+            { id: 'g4-8', cluster: 'C', text: 'World Wide Web (WWW)', icon: 'fa-globe' },
+            { id: 'g4-9', cluster: 'C', text: 'Мова розмітки HTML та веб-сервер', icon: 'fa-file-code' }
+        ];
+
+        function initGame4() {
+            const vault = document.getElementById('g4-vault');
+            vault.innerHTML = '';
+            document.getElementById('g4-target-A').innerHTML = '';
+            document.getElementById('g4-target-B').innerHTML = '';
+            document.getElementById('g4-target-C').innerHTML = '';
+
+            const shuffled = shuffle(g4Items);
+            shuffled.forEach(item => {
+                const el = createDraggableCard(item.id, item.text, item.icon, 'amber');
+                vault.appendChild(el);
+            });
+        }
+
+        // CHECK GAME 1
+        function checkGame1() {
+            let correct = 0;
+            const total = 10;
+
+            document.querySelectorAll('.g1-slot').forEach(slot => {
+                const gen = parseInt(slot.dataset.gen);
+                const type = slot.dataset.type;
+                const child = slot.children[0];
+
+                if (child) {
+                    const itemData = g1Items.find(i => i.id === child.id);
+                    if (itemData && itemData.gen === gen && itemData.type === type) {
+                        correct++;
+                        slot.className = "g1-slot min-h-[42px] bg-emerald-950/40 rounded-lg border border-emerald-500/50 p-1 drop-zone";
+                    } else {
+                        slot.className = "g1-slot min-h-[42px] bg-rose-950/40 rounded-lg border border-rose-500/50 p-1 drop-zone";
+                    }
+                }
+            });
+
+            showResultModal(correct, total, 1);
+        }
+
+        // CHECK GAME 2
+        function checkGame2() {
+            let correct = 0;
+            const total = g2Scientists.length;
+
+            Object.entries(state.wireConnections).forEach(([scId, innId]) => {
+                const inn = g2Innovations.find(i => i.id === innId);
+                if (inn && inn.sid === scId) {
+                    correct++;
+                }
+            });
+
+            showResultModal(correct, total, 2);
+        }
+
+        // CHECK GAME 3
+        function checkGame3() {
+            let correct = 0;
+            const total = g3Chronology.length;
+
+            g3CurrentState.forEach((item, index) => {
+                if (item.id === g3Chronology[index].id) {
+                    correct++;
+                }
+            });
+
+            showResultModal(correct, total, 3);
+        }
+
+        // CHECK GAME 4
+        function checkGame4() {
+            let correct = 0;
+            const total = g4Items.length;
+
+            ['A', 'B', 'C'].forEach(clusterKey => {
+                const targetEl = document.getElementById(`g4-target-${clusterKey}`);
+                Array.from(targetEl.children).forEach(child => {
+                    const itemData = g4Items.find(i => i.id === child.id);
+                    if (itemData && itemData.cluster === clusterKey) {
+                        correct++;
+                        child.classList.add('border-emerald-500/60', 'bg-emerald-950/30');
+                    } else {
+                        child.classList.add('border-rose-500/60', 'bg-rose-950/30');
+                    }
+                });
+            });
+
+            showResultModal(correct, total, 4);
+        }
+
+        function showResultModal(correct, total, gameNum) {
+            const accuracy = Math.round((correct / total) * 100);
+            const scoreGained = Math.round((correct / total) * 250);
+
+            if (!state.completedGames[gameNum]) {
+                state.score += scoreGained;
+                state.completedGames[gameNum] = true;
+                document.getElementById(`badge-g${gameNum}`).className = "px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+                document.getElementById(`badge-g${gameNum}`).innerText = "Пройдено";
+                document.getElementById('total-score').innerText = state.score;
+            }
+
+            document.getElementById('modal-accuracy').innerText = `${accuracy}% (${correct}/${total})`;
+            document.getElementById('modal-progress-bar').style.width = `${accuracy}%`;
+
+            let feedback = "Чудова робота! Знання матеріалу на високому рівні.";
+            if (accuracy < 50) feedback = "Рекомендуємо перечитати матеріали уроку та спробувати ще раз!";
+            else if (accuracy < 80) feedback = "Добре виконано! Проте є декілька дрібних помилок.";
+            
+            document.getElementById('modal-feedback').innerText = feedback;
+            document.getElementById('modal-result').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-result').classList.add('hidden');
+        }
+
+        function switchGame(gameId) {
+            const screens = ['screen-menu', 'screen-g1', 'screen-g2', 'screen-g3', 'screen-g4'];
+            screens.forEach((id, idx) => {
+                const el = document.getElementById(id);
+                if (idx === gameId) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+
+            if (gameId === 1) initGame1();
+            if (gameId === 2) {
+                initGame2();
+                setTimeout(renderWires, 100);
+            }
+            if (gameId === 3) initGame3();
+            if (gameId === 4) initGame4();
+        }
+
+        document.getElementById('btn-home').addEventListener('click', () => switchGame(0));
+
+        // Initialize application on load
+        window.onload = function () {
+            setupGlobalDragDrop();
+            switchGame(0);
+        };
+    </script>
+</body>
+</html>
