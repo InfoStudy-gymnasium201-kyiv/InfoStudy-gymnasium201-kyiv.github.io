@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ІнфоКвест: Повідомлення та Носії</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Nunito', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e1b4b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4f46e5;
+            border-radius: 4px;
+        }
+
+        /* Animations */
+        @keyframes pulse-subtle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        .animate-pulse-subtle {
+            animation: pulse-subtle 3s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        /* Drag & Drop Visual State */
+        .dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+        .drag-over {
+            border-color: #fbbf24 !important;
+            background-color: rgba(251, 191, 36, 0.15) !important;
+            transform: scale(1.02);
+        }
+
+        /* Glassmorphism effects */
+        .glass-panel {
+            background: rgba(30, 27, 75, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden relative">
+
+    <!-- Dynamic Decorative Vector Grid Background -->
+    <div class="fixed inset-0 pointer-events-none z-0 opacity-20">
+        <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+            <defs>
+                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#6366f1" stroke-width="1"/>
+                    <circle cx="40" cy="40" r="2" fill="#818cf8"/>
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+        </svg>
+    </div>
+
+    <!-- Header Navbar -->
+    <header class="relative z-10 bg-slate-900/80 border-b border-indigo-900/50 backdrop-blur-md px-4 py-3 sticky top-0 shadow-lg">
+        <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="showScreen('hub')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg md:text-xl bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300">
+                        ІнфоЛаб: Повідомлення
+                    </h1>
+                    <p class="text-xs text-slate-400">Інформатика 3-4 клас • Векторна Гра</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <!-- Total Score & Stars -->
+                <div class="flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-full border border-amber-500/30">
+                    <svg class="w-5 h-5 text-amber-400 fill-amber-400 animate-spin-slow" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                    </svg>
+                    <span id="global-score" class="font-bold text-amber-300 text-sm md:text-base">0 / 400</span>
+                </div>
+
+                <!-- Mute Sound Toggle Button -->
+                <button id="sound-btn" onclick="toggleSound()" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition border border-slate-700" title="Увімкнути / вимкнути звук">
+                    <svg id="sound-icon-on" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M11 5L6 9H2v6h4l5 4V5z"></path>
+                    </svg>
+                    <svg id="sound-icon-off" class="w-5 h-5 hidden text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" stroke-dasharray="2 2"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"></path>
+                    </svg>
+                </button>
+
+                <!-- Navigation Hub Home -->
+                <button onclick="showScreen('hub')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs md:text-sm font-bold transition shadow-md flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 00-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    Меню
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="relative z-10 max-w-6xl mx-auto px-4 py-6 flex-grow flex flex-col justify-center w-full">
+
+        <!-- ================= HUB SCREEN ================= -->
+        <section id="screen-hub" class="space-y-8 animate-fadeIn">
+            <!-- Hero Banner -->
+            <div class="text-center space-y-3 max-w-2xl mx-auto">
+                <span class="inline-block px-3 py-1 rounded-full bg-indigo-900/60 text-indigo-300 text-xs font-semibold border border-indigo-700/50">
+                    Інтерактивна Лабораторія
+                </span>
+                <h2 class="text-3xl md:text-4xl font-black text-white tracking-tight">
+                    Способи подання та носії повідомлень
+                </h2>
+                <p class="text-slate-300 text-sm md:text-base leading-relaxed">
+                    Обирай міні-гру та досліджуй, як людство та комп'ютери зберігають і передають інформацію! Варіанти переплутані — підказок немає!
+                </p>
+            </div>
+
+            <!-- Mini Games Selection Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Mini-Game 1 Card -->
+                <div onclick="startMiniGame(1)" class="group cursor-pointer glass-panel rounded-2xl p-6 hover:border-indigo-500/80 transition-all duration-300 hover:-translate-y-1 shadow-xl relative overflow-hidden">
+                    <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-indigo-600/10 rounded-full blur-2xl group-hover:bg-indigo-600/20 transition"></div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-indigo-300 group-hover:scale-110 transition">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <span id="badge-game-1" class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">Не пройдено</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-indigo-300 transition">1. Хронологія Носіїв</h3>
+                    <p class="text-slate-400 text-sm mb-4">Тактильне перетягування: класифікуй носії повідомлень за епохами розвитку (Давні, Паперові/Плівки, Електронні).</p>
+                    <div class="flex items-center text-xs font-bold text-indigo-400 group-hover:translate-x-1 transition">
+                        Розпочати місію &rarr;
+                    </div>
+                </div>
+
+                <!-- Mini-Game 2 Card -->
+                <div onclick="startMiniGame(2)" class="group cursor-pointer glass-panel rounded-2xl p-6 hover:border-purple-500/80 transition-all duration-300 hover:-translate-y-1 shadow-xl relative overflow-hidden">
+                    <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-purple-600/10 rounded-full blur-2xl group-hover:bg-purple-600/20 transition"></div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-12 h-12 rounded-2xl bg-purple-600/30 border border-purple-500/50 flex items-center justify-center text-purple-300 group-hover:scale-110 transition">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c.41 0 .782-.241.944-.618l1.5-3.5A1.5 1.5 0 0113.13 2.82l1.37 3.425c.162.407.567.68 1.002.68H17a3 3 0 013 3v2a3 3 0 01-3 3h-1.5c-.435 0-.84.273-1.002.68l-1.37 3.425a1.5 1.5 0 01-2.858-.938l1.5-3.501c.162-.377.534-.618.944-.618H17"></path>
+                            </svg>
+                        </div>
+                        <span id="badge-game-2" class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">Не пройдено</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-purple-300 transition">2. Маршрутизатор Способів</h3>
+                    <p class="text-slate-400 text-sm mb-4">Комутатор сигналів: направляй повідомлення у правильні канали (Графічний, Звуковий, Текстовий, Світловий/Жести, Комбінований).</p>
+                    <div class="flex items-center text-xs font-bold text-purple-400 group-hover:translate-x-1 transition">
+                        Розпочати місію &rarr;
+                    </div>
+                </div>
+
+                <!-- Mini-Game 3 Card -->
+                <div onclick="startMiniGame(3)" class="group cursor-pointer glass-panel rounded-2xl p-6 hover:border-emerald-500/80 transition-all duration-300 hover:-translate-y-1 shadow-xl relative overflow-hidden">
+                    <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-emerald-600/10 rounded-full blur-2xl group-hover:bg-emerald-600/20 transition"></div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-600/30 border border-emerald-500/50 flex items-center justify-center text-emerald-300 group-hover:scale-110 transition">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                        <span id="badge-game-3" class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">Не пройдено</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-emerald-300 transition">3. Симулятор Пам'яті: RAM vs ROM</h3>
+                    <p class="text-slate-400 text-sm mb-4">Симулятор Живлення ПК: швидко розподіляй дані між оперативною (RAM) та зовнішньою (Hard Drive) пам'яттю до вимкнення світла!</p>
+                    <div class="flex items-center text-xs font-bold text-emerald-400 group-hover:translate-x-1 transition">
+                        Розпочати місію &rarr;
+                    </div>
+                </div>
+
+                <!-- Mini-Game 4 Card -->
+                <div onclick="startMiniGame(4)" class="group cursor-pointer glass-panel rounded-2xl p-6 hover:border-amber-500/80 transition-all duration-300 hover:-translate-y-1 shadow-xl relative overflow-hidden">
+                    <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-amber-600/10 rounded-full blur-2xl group-hover:bg-amber-600/20 transition"></div>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-600/30 border border-amber-500/50 flex items-center justify-center text-amber-300 group-hover:scale-110 transition">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                            </svg>
+                        </div>
+                        <span id="badge-game-4" class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">Не пройдено</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-amber-300 transition">4. Сортувальник Комп'ютерних Даних</h3>
+                    <p class="text-slate-400 text-sm mb-4">Класифікація потоків: сортуй вхідні фрагменти на Текстові, Графічні та Числові дані за допомогою сенсорних кнопок.</p>
+                    <div class="flex items-center text-xs font-bold text-amber-400 group-hover:translate-x-1 transition">
+                        Розпочати місію &rarr;
+                    </div>
+                </div>
+            </div>
+
+            <!-- Global Progress Bar -->
+            <div class="glass-panel p-5 rounded-2xl max-w-xl mx-auto space-y-2 text-center">
+                <div class="flex justify-between text-xs font-bold text-slate-300">
+                    <span>Загальний Прогрес Знань</span>
+                    <span id="progress-percent-text">0%</span>
+                </div>
+                <div class="w-full h-3 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+                    <div id="progress-bar-fill" class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-400 w-0 transition-all duration-500"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= MINI-GAME 1: CARRIER ERA CHRONOLOGY ================= -->
+        <section id="screen-game-1" class="hidden space-y-6">
+            <!-- Game Header -->
+            <div class="flex flex-wrap items-center justify-between gap-4 glass-panel p-4 rounded-2xl">
+                <div>
+                    <h2 class="text-xl font-black text-indigo-300 flex items-center gap-2">
+                        <span>🏛️</span> Місія 1: Хронологія Носіїв
+                    </h2>
+                    <p class="text-xs text-slate-400">Перетягни або натисни на картку носія, а потім обери правильний контейнер епохи.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="text-sm font-extrabold bg-indigo-950/80 px-3 py-1.5 rounded-xl border border-indigo-700/50 text-indigo-200">
+                        Залишилось: <span id="g1-remaining" class="text-amber-400">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Source Items Tray (Shuffled Cards) -->
+            <div class="glass-panel p-4 rounded-2xl border-indigo-500/30">
+                <h3 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-3">Нерозподілені Носії Інформації (Переплутано):</h3>
+                <div id="g1-item-pool" class="flex flex-wrap gap-3 min-h-[90px] items-center justify-center p-2 rounded-xl bg-slate-900/60 border border-slate-800">
+                    <!-- Dynamic draggable items will render here -->
+                </div>
+            </div>
+
+            <!-- Target Drop Zones (3 Eras) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Era 1: Ancient -->
+                <div id="zone-ancient" data-era="ancient" class="drop-zone glass-panel p-4 rounded-2xl border-2 border-dashed border-amber-600/40 hover:border-amber-500 transition min-h-[220px] flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2 pb-2 border-b border-amber-600/30">
+                            <div class="w-8 h-8 rounded-lg bg-amber-800/40 flex items-center justify-center text-amber-300 font-bold text-sm">🪨</div>
+                            <div>
+                                <h4 class="font-bold text-amber-300 text-sm">Стародавні Носії</h4>
+                                <p class="text-[10px] text-amber-400/70">Перші природні матеріали</p>
+                            </div>
+                        </div>
+                        <div class="dropped-container flex flex-wrap gap-2 min-h-[120px] p-2 bg-slate-900/40 rounded-xl"></div>
+                    </div>
+                </div>
+
+                <!-- Era 2: Paper & Film -->
+                <div id="zone-paper" data-era="paper" class="drop-zone glass-panel p-4 rounded-2xl border-2 border-dashed border-sky-600/40 hover:border-sky-500 transition min-h-[220px] flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2 pb-2 border-b border-sky-600/30">
+                            <div class="w-8 h-8 rounded-lg bg-sky-800/40 flex items-center justify-center text-sky-300 font-bold text-sm">📜</div>
+                            <div>
+                                <h4 class="font-bold text-sky-300 text-sm">Паперові та Плівкові</h4>
+                                <p class="text-[10px] text-sky-400/70">Друковані й аналогові носії</p>
+                            </div>
+                        </div>
+                        <div class="dropped-container flex flex-wrap gap-2 min-h-[120px] p-2 bg-slate-900/40 rounded-xl"></div>
+                    </div>
+                </div>
+
+                <!-- Era 3: Electronic -->
+                <div id="zone-electronic" data-era="electronic" class="drop-zone glass-panel p-4 rounded-2xl border-2 border-dashed border-emerald-600/40 hover:border-emerald-500 transition min-h-[220px] flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2 pb-2 border-b border-emerald-600/30">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-800/40 flex items-center justify-center text-emerald-300 font-bold text-sm">💾</div>
+                            <div>
+                                <h4 class="font-bold text-emerald-300 text-sm">Електронні Носії</h4>
+                                <p class="text-[10px] text-emerald-400/70">Сучасні цифрові накопичувачі</p>
+                            </div>
+                        </div>
+                        <div class="dropped-container flex flex-wrap gap-2 min-h-[120px] p-2 bg-slate-900/40 rounded-xl"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-between items-center pt-2">
+                <button onclick="resetGame1()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-bold text-sm transition">
+                    🔄 Перемішати та Скинути
+                </button>
+                <button onclick="checkGame1()" class="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-xl font-black text-sm shadow-lg shadow-indigo-500/25 transition">
+                    Перевірити Результат ✨
+                </button>
+            </div>
+        </section>
+
+        <!-- ================= MINI-GAME 2: MESSAGE PRESENTATION ROUTER ================= -->
+        <section id="screen-game-2" class="hidden space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-4 glass-panel p-4 rounded-2xl">
+                <div>
+                    <h2 class="text-xl font-black text-purple-300 flex items-center gap-2">
+                        <span>📡</span> Місія 2: Маршрутизатор Способів Подання
+                    </h2>
+                    <p class="text-xs text-slate-400">Обери картку повідомлення та комутуй її на правильний канал передачі.</p>
+                </div>
+                <div class="text-sm font-extrabold bg-purple-950/80 px-3 py-1.5 rounded-xl border border-purple-700/50 text-purple-200">
+                    Картка: <span id="g2-current-index">1</span> з <span id="g2-total-count">6</span>
+                </div>
+            </div>
+
+            <!-- Active Card Display Unit -->
+            <div id="g2-active-card-box" class="glass-panel p-6 rounded-3xl border-2 border-purple-500/50 max-w-lg mx-auto text-center space-y-4 shadow-2xl relative">
+                <div class="inline-block px-3 py-1 rounded-full bg-purple-900/50 text-purple-300 text-xs font-bold border border-purple-500/30">
+                    Вхідний Сигнал
+                </div>
+                <div id="g2-card-icon" class="text-5xl my-2 animate-bounce-short">❓</div>
+                <h3 id="g2-card-title" class="text-xl font-extrabold text-white">Завантаження...</h3>
+                <p id="g2-card-desc" class="text-xs text-slate-300 max-w-xs mx-auto">Опис ситуації або повідомлення</p>
+            </div>
+
+            <!-- Channel Selectors (Tactile Switchboard Buttons) -->
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-3 max-w-4xl mx-auto">
+                <button onclick="routeSignal('graphic')" class="p-4 rounded-2xl bg-slate-900/80 hover:bg-indigo-900/60 border border-indigo-500/30 hover:border-indigo-400 flex flex-col items-center gap-2 transition group hover:scale-105">
+                    <span class="text-3xl group-hover:scale-110 transition">🖼️</span>
+                    <span class="text-xs font-bold text-indigo-300">Графічний</span>
+                    <span class="text-[9px] text-slate-400">Малюнки, плакати</span>
+                </button>
+
+                <button onclick="routeSignal('text')" class="p-4 rounded-2xl bg-slate-900/80 hover:bg-blue-900/60 border border-blue-500/30 hover:border-blue-400 flex flex-col items-center gap-2 transition group hover:scale-105">
+                    <span class="text-3xl group-hover:scale-110 transition">📖</span>
+                    <span class="text-xs font-bold text-blue-300">Текстовий</span>
+                    <span class="text-[9px] text-slate-400">Книги, листи</span>
+                </button>
+
+                <button onclick="routeSignal('audio')" class="p-4 rounded-2xl bg-slate-900/80 hover:bg-emerald-900/60 border border-emerald-500/30 hover:border-emerald-400 flex flex-col items-center gap-2 transition group hover:scale-105">
+                    <span class="text-3xl group-hover:scale-110 transition">🔔</span>
+                    <span class="text-xs font-bold text-emerald-300">Звуковий</span>
+                    <span class="text-[9px] text-slate-400">Мова, дзвоник, радіо</span>
+                </button>
+
+                <button onclick="routeSignal('gesture_light')" class="p-4 rounded-2xl bg-slate-900/80 hover:bg-amber-900/60 border border-amber-500/30 hover:border-amber-400 flex flex-col items-center gap-2 transition group hover:scale-105">
+                    <span class="text-3xl group-hover:scale-110 transition">🚦</span>
+                    <span class="text-xs font-bold text-amber-300">Жести / Світло</span>
+                    <span class="text-[9px] text-slate-400">Міміка, світлофор</span>
+                </button>
+
+                <button onclick="routeSignal('combined')" class="p-4 rounded-2xl bg-slate-900/80 hover:bg-pink-900/60 border border-pink-500/30 hover:border-pink-400 flex flex-col items-center gap-2 transition group hover:scale-105 col-span-2 md:col-span-1">
+                    <span class="text-3xl group-hover:scale-110 transition">🎬</span>
+                    <span class="text-xs font-bold text-pink-300">Комбінований</span>
+                    <span class="text-[9px] text-slate-400">Фільм, книга з ілюстраціями</span>
+                </button>
+            </div>
+
+            <!-- Signal Routing History Console -->
+            <div class="glass-panel p-4 rounded-2xl max-w-2xl mx-auto space-y-2">
+                <h4 class="text-xs font-bold text-slate-400 uppercase">Журнал маршрутизації:</h4>
+                <div id="g2-log" class="space-y-1.5 max-h-36 overflow-y-auto text-xs">
+                    <p class="text-slate-500 italic">Натисни кнопку способу, щоб направити сигнал...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= MINI-GAME 3: PC MEMORY SIMULATOR (RAM VS ROM) ================= -->
+        <section id="screen-game-3" class="hidden space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-4 glass-panel p-4 rounded-2xl">
+                <div>
+                    <h2 class="text-xl font-black text-emerald-300 flex items-center gap-2">
+                        <span>⚡</span> Місія 3: Пам'ять Комп'ютера (RAM vs ROM)
+                    </h2>
+                    <p class="text-xs text-slate-400">Параметри живлення: оперативна пам'ять (RAM) стирається при вимкненні! Довготривалі дані клади в Зовнішню пам'ять (Hard Drive / Flash)!</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="simulatePowerOff()" id="power-btn" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-red-600/30 transition flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        Тест Вимкнення Світла! ⚡
+                    </button>
+                </div>
+            </div>
+
+            <!-- Current Data Queue Object -->
+            <div id="g3-data-stream" class="glass-panel p-5 rounded-2xl text-center border-2 border-emerald-500/40 relative max-w-md mx-auto space-y-3">
+                <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700/50">
+                    Дані чекають на запис
+                </span>
+                <div id="g3-item-title" class="text-lg font-bold text-white">Завантаження даних...</div>
+                <p id="g3-item-desc" class="text-xs text-slate-300">Опис елемента</p>
+
+                <div class="flex justify-center gap-4 pt-2">
+                    <button onclick="storeDataIn('ram')" class="px-5 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-extrabold rounded-xl text-xs transition shadow-lg flex items-center gap-2">
+                        <span>⚡</span> У Оперативну (RAM)
+                    </button>
+                    <button onclick="storeDataIn('rom')" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-extrabold rounded-xl text-xs transition shadow-lg flex items-center gap-2">
+                        <span>💾</span> У Постійну (Hard Drive)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Computer Memory Modules Visualization -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- RAM Slot Module -->
+                <div id="ram-module" class="glass-panel p-5 rounded-2xl border-2 border-sky-500/40 relative overflow-hidden flex flex-col justify-between min-h-[220px]">
+                    <div class="absolute -right-4 -top-4 text-6xl opacity-10 font-black">RAM</div>
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="font-bold text-sky-300 flex items-center gap-2">
+                                🧠 Оперативна Пам'ять (RAM)
+                            </h3>
+                            <span class="text-[10px] font-bold text-amber-400 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800">
+                                Зникає при вимкненні!
+                            </span>
+                        </div>
+                        <div id="ram-contents" class="space-y-2 min-h-[100px] bg-slate-950/50 p-3 rounded-xl border border-sky-900/30">
+                            <p class="text-xs text-slate-500 italic">Сюди записуються тимчасові дані під час роботи...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hard Drive ROM Module -->
+                <div id="rom-module" class="glass-panel p-5 rounded-2xl border-2 border-purple-500/40 relative overflow-hidden flex flex-col justify-between min-h-[220px]">
+                    <div class="absolute -right-4 -top-4 text-6xl opacity-10 font-black">HDD</div>
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="font-bold text-purple-300 flex items-center gap-2">
+                                💽 Зовнішня / Постійна Пам'ять
+                            </h3>
+                            <span class="text-[10px] font-bold text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800">
+                                Зберігається назавжди!
+                            </span>
+                        </div>
+                        <div id="rom-contents" class="space-y-2 min-h-[100px] bg-slate-950/50 p-3 rounded-xl border border-purple-900/30">
+                            <p class="text-xs text-slate-500 italic">Сюди записуються файли для довготривалого зберігання...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= MINI-GAME 4: DATA TYPES CLASSIFIER ================= -->
+        <section id="screen-game-4" class="hidden space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-4 glass-panel p-4 rounded-2xl">
+                <div>
+                    <h2 class="text-xl font-black text-amber-300 flex items-center gap-2">
+                        <span>💻</span> Місія 4: Види Комп'ютерних Даних
+                    </h2>
+                    <p class="text-xs text-slate-400">Розподіляй дані з комп'ютера за трьома типами: Текстові, Графічні та Числові.</p>
+                </div>
+                <div class="text-sm font-extrabold bg-amber-950/80 px-3 py-1.5 rounded-xl border border-amber-700/50 text-amber-200">
+                    Очки: <span id="g4-score-display">0</span>
+                </div>
+            </div>
+
+            <!-- Active Data Card -->
+            <div id="g4-active-container" class="glass-panel p-6 rounded-3xl border-2 border-amber-500/50 max-w-md mx-auto text-center space-y-3 shadow-2xl relative">
+                <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-amber-950 text-amber-300 border border-amber-700">
+                    Фрагмент Комп'ютерних Даних
+                </span>
+                <div id="g4-card-content" class="text-2xl font-black text-white p-4 bg-slate-900/80 rounded-2xl border border-slate-700 my-2">
+                    "..."
+                </div>
+                <p id="g4-card-hint" class="text-xs text-slate-400">Опис типу даних</p>
+            </div>
+
+            <!-- 3 Category Classifiers -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+                <button onclick="classifyData('text')" class="p-5 rounded-2xl glass-panel border border-sky-500/40 hover:border-sky-400 hover:bg-sky-900/30 transition text-center space-y-2 group">
+                    <div class="text-4xl group-hover:scale-110 transition">🔤</div>
+                    <h3 class="font-extrabold text-sky-300 text-sm">Текстові дані</h3>
+                    <p class="text-[11px] text-slate-400">Літери, слова, розділові знаки, символи</p>
+                </button>
+
+                <button onclick="classifyData('graphic')" class="p-5 rounded-2xl glass-panel border border-purple-500/40 hover:border-purple-400 hover:bg-purple-900/30 transition text-center space-y-2 group">
+                    <div class="text-4xl group-hover:scale-110 transition">🎨</div>
+                    <h3 class="font-extrabold text-purple-300 text-sm">Графічні дані</h3>
+                    <p class="text-[11px] text-slate-400">Малюнки, схеми, фотографії, іконки</p>
+                </button>
+
+                <button onclick="classifyData('numeric')" class="p-5 rounded-2xl glass-panel border border-emerald-500/40 hover:border-emerald-400 hover:bg-emerald-900/30 transition text-center space-y-2 group">
+                    <div class="text-4xl group-hover:scale-110 transition">🔢</div>
+                    <h3 class="font-extrabold text-emerald-300 text-sm">Числові дані</h3>
+                    <p class="text-[11px] text-slate-400">Кількість об'єктів, підрахунки, числа</p>
+                </button>
+            </div>
+        </section>
+
+        <!-- Custom Modal Dialog (replaces alert/confirm) -->
+        <div id="modal-overlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+            <div class="glass-panel p-6 rounded-3xl max-w-md w-full border-2 border-indigo-500/50 text-center space-y-4 shadow-2xl animate-pulse-subtle">
+                <div id="modal-icon" class="text-6xl">🏆</div>
+                <h3 id="modal-title" class="text-2xl font-black text-white">Заголовок</h3>
+                <p id="modal-body" class="text-sm text-slate-300 leading-relaxed">Опис результатів місії...</p>
+                <div id="modal-actions" class="flex justify-center gap-3 pt-2">
+                    <button onclick="closeModal()" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-sm shadow-lg shadow-indigo-600/30 transition">
+                        Зрозуміло! 🚀
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 border-t border-indigo-900/30 py-4 text-center text-xs text-slate-500 bg-slate-950/80">
+        <p>Інтерактивний тренажер з інформатики • Розроблено за матеріалами уроку «Способи подання повідомлень, носії повідомлень»</p>
+    </footer>
+
+    <script>
+        /* ================= AUDIO SYNTHESIS & SOUND EFFECTS ================= */
+        let soundEnabled = true;
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioCtx();
+            }
+        }
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'success') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.setValueAtTime(160, now + 0.12);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'poweroff') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.exponentialRampToValueAtTime(40, now + 0.6);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+                    osc.start(now);
+                    osc.stop(now + 0.6);
+                }
+            } catch (e) {
+                // Audio fallback silence
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('sound-icon-on').classList.toggle('hidden', !soundEnabled);
+            document.getElementById('sound-icon-off').classList.toggle('hidden', soundEnabled);
+        }
+
+        /* ================= GLOBAL STATE & NAVIGATION ================= */
+        const gameState = {
+            scores: { g1: 0, g2: 0, g3: 0, g4: 0 },
+            completed: { g1: false, g2: false, g3: false, g4: false }
+        };
+
+        function showScreen(screenId) {
+            playSound('click');
+            ['hub', 'game-1', 'game-2', 'game-3', 'game-4'].forEach(id => {
+                const el = document.getElementById(`screen-${id}`);
+                if (el) el.classList.add('hidden');
+            });
+            const target = document.getElementById(`screen-${screenId}`);
+            if (target) target.classList.remove('hidden');
+
+            updateGlobalUI();
+        }
+
+        function updateGlobalUI() {
+            const totalScore = gameState.scores.g1 + gameState.scores.g2 + gameState.scores.g3 + gameState.scores.g4;
+            document.getElementById('global-score').textContent = `${totalScore} / 400`;
+
+            let completedCount = 0;
+            [1, 2, 3, 4].forEach(num => {
+                const key = `g${num}`;
+                const badge = document.getElementById(`badge-game-${num}`);
+                if (gameState.completed[key]) {
+                    completedCount++;
+                    if (badge) {
+                        badge.textContent = `Пройдено (${gameState.scores[key]} б.)`;
+                        badge.className = "text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-900/80 text-emerald-300 border border-emerald-500/50";
+                    }
+                }
+            });
+
+            const percent = Math.round((completedCount / 4) * 100);
+            document.getElementById('progress-percent-text').textContent = `${percent}%`;
+            document.getElementById('progress-bar-fill').style.width = `${percent}%`;
+        }
+
+        function showModal(title, body, icon = '🏆') {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-body').textContent = body;
+            document.getElementById('modal-icon').textContent = icon;
+            document.getElementById('modal-overlay').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            playSound('click');
+            document.getElementById('modal-overlay').classList.add('hidden');
+        }
+
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        /* ================= MINI-GAME 1 LOGIC ================= */
+        // Data from PDF regarding media carriers:
+        // Ancient: Каміння, Глиняні дощечки, Береста
+        // Paper/Film: Книги, Журнали, Газети, Фотоплівка, Відеоплівка
+        // Electronic: Жорсткий магнітний диск, Оптичний диск (CD/DVD), Флеш-накопичувач, Карта пам'яті
+        const g1RawItems = [
+            { id: 'm1', name: 'Каміння із зарубками', era: 'ancient', icon: '🪨' },
+            { id: 'm2', name: 'Глиняні дощечки', era: 'ancient', icon: '🧱' },
+            { id: 'm3', name: 'Береста (кора)', era: 'ancient', icon: '🪵' },
+            { id: 'm4', name: 'Друкована книга', era: 'paper', icon: '📖' },
+            { id: 'm5', name: 'Газета та журнал', era: 'paper', icon: '📰' },
+            { id: 'm6', name: 'Відеоплівка для кіно', era: 'paper', icon: '🎞️' },
+            { id: 'm7', name: 'Жорсткий магнітний диск', era: 'electronic', icon: '💽' },
+            { id: 'm8', name: 'Флеш-накопичувач', era: 'electronic', icon: '🔌' },
+            { id: 'm9', name: 'Оптичний диск (CD)', era: 'electronic', icon: '💿' },
+            { id: 'm10', name: 'карта пам\'яті SD', era: 'electronic', icon: '🎴' }
+        ];
+
+        let g1CurrentPool = [];
+        let selectedG1Item = null;
+
+        function startMiniGame(gameNum) {
+            if (gameNum === 1) resetGame1();
+            if (gameNum === 2) resetGame2();
+            if (gameNum === 3) resetGame3();
+            if (gameNum === 4) resetGame4();
+            showScreen(`game-${gameNum}`);
+        }
+
+        function resetGame1() {
+            g1CurrentPool = shuffleArray(g1RawItems);
+            selectedG1Item = null;
+            document.getElementById('g1-remaining').textContent = g1CurrentPool.length;
+
+            // Clear containers
+            document.getElementById('g1-item-pool').innerHTML = '';
+            document.querySelectorAll('.dropped-container').forEach(c => c.innerHTML = '');
+
+            // Render shuffled items in pool
+            g1CurrentPool.forEach(item => {
+                const card = createG1ItemCard(item);
+                document.getElementById('g1-item-pool').appendChild(card);
+            });
+
+            setupG1DropZones();
+        }
+
+        function createG1ItemCard(item) {
+            const card = document.createElement('div');
+            card.className = "item-card bg-slate-800 hover:bg-slate-700 border border-slate-600 px-3 py-2 rounded-xl text-xs font-bold text-slate-200 cursor-grab active:cursor-grabbing shadow-md flex items-center gap-2 transition hover:scale-105";
+            card.draggable = true;
+            card.dataset.id = item.id;
+            card.dataset.era = item.era;
+            card.innerHTML = `<span>${item.icon}</span> <span>${item.name}</span>`;
+
+            // Click to select tactile mechanic (mobile friendly)
+            card.onclick = (e) => {
+                e.stopPropagation();
+                playSound('click');
+                document.querySelectorAll('.item-card').forEach(c => c.classList.remove('ring-2', 'ring-amber-400', 'bg-slate-700'));
+                card.classList.add('ring-2', 'ring-amber-400', 'bg-slate-700');
+                selectedG1Item = item;
+            };
+
+            // Drag mechanics
+            card.addEventListener('dragstart', (e) => {
+                selectedG1Item = item;
+                card.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', item.id);
+            });
+
+            card.addEventListener('dragend', () => {
+                card.classList.remove('dragging');
+            });
+
+            return card;
+        }
+
+        function setupG1DropZones() {
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                zone.onclick = () => {
+                    if (selectedG1Item) {
+                        moveG1ItemToZone(selectedG1Item, zone);
+                    }
+                };
+
+                zone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    zone.classList.add('drag-over');
+                });
+
+                zone.addEventListener('dragleave', () => {
+                    zone.classList.remove('drag-over');
+                });
+
+                zone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    zone.classList.remove('drag-over');
+                    if (selectedG1Item) {
+                        moveG1ItemToZone(selectedG1Item, zone);
+                    }
+                });
+            });
+        }
+
+        function moveG1ItemToZone(item, zoneEl) {
+            playSound('click');
+            const targetContainer = zoneEl.querySelector('.dropped-container');
+            const existingCard = document.querySelector(`[data-id="${item.id}"]`);
+
+            if (existingCard) {
+                existingCard.remove();
+            }
+
+            // Create placed card
+            const placedCard = createG1ItemCard(item);
+            placedCard.classList.remove('ring-2', 'ring-amber-400');
+            targetContainer.appendChild(placedCard);
+
+            selectedG1Item = null;
+
+            // Update count remaining in main pool
+            const poolCount = document.getElementById('g1-item-pool').children.length;
+            document.getElementById('g1-remaining').textContent = poolCount;
+        }
+
+        function checkGame1() {
+            let correctCount = 0;
+            let totalPlaced = 0;
+
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                const targetEra = zone.dataset.era;
+                const placedCards = zone.querySelectorAll('.item-card');
+
+                placedCards.forEach(card => {
+                    totalPlaced++;
+                    if (card.dataset.era === targetEra) {
+                        correctCount++;
+                        card.classList.add('border-emerald-500', 'bg-emerald-950/60');
+                    } else {
+                        card.classList.add('border-red-500', 'bg-red-950/60', 'animate-shake');
+                    }
+                });
+            });
+
+            if (totalPlaced < g1RawItems.length) {
+                playSound('error');
+                showModal("💡 Не всі носії розподілено!", `Ти розподілив ${totalPlaced} з ${g1RawItems.length} носіїв. Перетягни всі картки у відповідні епохи перед перевіркою!`, '⚠️');
+                return;
+            }
+
+            if (correctCount === g1RawItems.length) {
+                playSound('success');
+                gameState.scores.g1 = 100;
+                gameState.completed.g1 = true;
+                updateGlobalUI();
+                showModal("🎉 Ідеально!", "Ти чудово знаєш еволюцію носіїв інформації від стародавніх часів до сучасних цифрових пристроїв!", "🌟");
+            } else {
+                playSound('error');
+                showModal("❌ Є помилки", `Правильно розподілено: ${correctCount} з ${g1RawItems.length}. Картки з червоною рамкою стоять не у своїй епосі. Спробуй ще раз!`, "🧐");
+            }
+        }
+
+        /* ================= MINI-GAME 2 LOGIC ================= */
+        // Signal presentation types:
+        // graphic, text, audio, gesture_light, combined
+        const g2RawCards = [
+            { id: 's1', title: 'Скельний малюнок первісних людей', desc: 'Зарубки та кольорові зображення на стіні печери', type: 'graphic', icon: '🎨' },
+            { id: 's2', title: 'Шкільний дзвоник на перерву', desc: 'Гучний тривалий звук на весь коридор', type: 'audio', icon: '🔔' },
+            { id: 's3', title: 'Лист другові на папері', desc: 'Записані слова, літери та розділові знаки', type: 'text', icon: '✉️' },
+            { id: 's4', title: 'Світлофор на перехресті', desc: 'Червоне світло забороняє рух водіям та пішоходам', type: 'gesture_light', icon: '🚦' },
+            { id: 's5', title: 'Анімаційний мультфільм', desc: 'Відеоряд, текстові титри та озвучка персонажів', type: 'combined', icon: '🎬' },
+            { id: 's6', title: 'Посмішка та кивок головою', desc: 'Вираз обличчя та рух для вираження згоди без слів', type: 'gesture_light', icon: '😊' },
+            { id: 's7', title: 'Ілюстрована дитяча книжка', desc: 'Текст казки разом із кольоровими картинками', type: 'combined', icon: '📚' },
+            { id: 's8', title: 'Радіопередача новин', desc: 'Голос диктора в прямому ефірі', type: 'audio', icon: '📻' }
+        ];
+
+        let g2Cards = [];
+        let g2CurrentIndex = 0;
+        let g2Score = 0;
+
+        function resetGame2() {
+            g2Cards = shuffleArray(g2RawCards);
+            g2CurrentIndex = 0;
+            g2Score = 0;
+            document.getElementById('g2-log').innerHTML = '<p class="text-slate-500 italic">Натисни кнопку способу, щоб направити сигнал...</p>';
+            renderG2CurrentCard();
+        }
+
+        function renderG2CurrentCard() {
+            document.getElementById('g2-total-count').textContent = g2Cards.length;
+            document.getElementById('g2-current-index').textContent = g2CurrentIndex + 1;
+
+            if (g2CurrentIndex >= g2Cards.length) {
+                // Finished
+                gameState.scores.g2 = Math.round((g2Score / g2Cards.length) * 100);
+                gameState.completed.g2 = true;
+                updateGlobalUI();
+                playSound('success');
+                showModal("📡 Маршрутизацію завершено!", `Твій результат: ${g2Score} з ${g2Cards.length} правильних сигналів!`, "🏆");
+                return;
+            }
+
+            const item = g2Cards[g2CurrentIndex];
+            document.getElementById('g2-card-icon').textContent = item.icon;
+            document.getElementById('g2-card-title').textContent = item.title;
+            document.getElementById('g2-card-desc').textContent = item.desc;
+        }
+
+        function routeSignal(selectedType) {
+            if (g2CurrentIndex >= g2Cards.length) return;
+
+            const currentItem = g2Cards[g2CurrentIndex];
+            const logBox = document.getElementById('g2-log');
+
+            if (logBox.children.length === 1 && logBox.children[0].classList.contains('italic')) {
+                logBox.innerHTML = '';
+            }
+
+            const logEntry = document.createElement('div');
+            logEntry.className = "p-2 rounded-xl border flex items-center justify-between text-xs";
+
+            if (currentItem.type === selectedType) {
+                playSound('success');
+                g2Score++;
+                logEntry.classList.add('bg-emerald-950/60', 'border-emerald-700/50', 'text-emerald-300');
+                logEntry.innerHTML = `<span>✅ ${currentItem.title}</span> <span class="font-bold">Правильно</span>`;
+            } else {
+                playSound('error');
+                logEntry.classList.add('bg-red-950/60', 'border-red-700/50', 'text-red-300');
+                logEntry.innerHTML = `<span>❌ ${currentItem.title}</span> <span class="font-bold">Помилка</span>`;
+            }
+
+            logBox.prepend(logEntry);
+            g2CurrentIndex++;
+            renderG2CurrentCard();
+        }
+
+        /* ================= MINI-GAME 3 LOGIC ================= */
+        // RAM (temporary, cleared on power off): Відкрита вкладка браузера, Поточні обчислення калькулятора, Незбережений документ, Поточний кадр гри
+        // ROM / Hard Drive (permanent): Встановлена програма, Збережене фото, Записане відео, Завантажена електронна книга
+        const g3RawItems = [
+            { id: 'p1', title: 'Незбережений текст у блокноті', target: 'ram', desc: 'Набрані літери, які ще не натискали «Зберегти»' },
+            { id: 'p2', title: 'Фотографія з відпочинку на диску', target: 'rom', desc: 'Збережений графічний файл у папці' },
+            { id: 'p3', title: 'Поточна гра, яка зараз відкрита', target: 'ram', desc: 'Дані роботи програми в дану секунду' },
+            { id: 'p4', title: 'Встановлена операційна система', target: 'rom', desc: 'Системні файли на жорсткому диску' },
+            { id: 'p5', title: 'Результат обчислення калькулятора', target: 'ram', desc: 'Число на екрані під час обчислень' },
+            { id: 'p6', title: 'Завантажена улюблена пісня MP3', target: 'rom', desc: 'Аудіофайл у пам\'яті флешки' }
+        ];
+
+        let g3Items = [];
+        let g3CurrentIndex = 0;
+        let g3RamList = [];
+        let g3RomList = [];
+
+        function resetGame3() {
+            g3Items = shuffleArray(g3RawItems);
+            g3CurrentIndex = 0;
+            g3RamList = [];
+            g3RomList = [];
+            document.getElementById('ram-contents').innerHTML = '<p class="text-xs text-slate-500 italic">Сюди записуються тимчасові дані під час роботи...</p>';
+            document.getElementById('rom-contents').innerHTML = '<p class="text-xs text-slate-500 italic">Сюди записуються файли для довготривалого зберігання...</p>';
+            renderG3CurrentItem();
+        }
+
+        function renderG3CurrentItem() {
+            if (g3CurrentIndex >= g3Items.length) {
+                document.getElementById('g3-item-title').textContent = "Всі дані розподілено!";
+                document.getElementById('g3-item-desc').textContent = "Натисни кнопку «Тест Вимкнення Світла ⚡», щоб перевірити збереження!";
+                return;
+            }
+
+            const item = g3Items[g3CurrentIndex];
+            document.getElementById('g3-item-title').textContent = item.title;
+            document.getElementById('g3-item-desc').textContent = item.desc;
+        }
+
+        function storeDataIn(storageType) {
+            if (g3CurrentIndex >= g3Items.length) return;
+            playSound('click');
+
+            const item = g3Items[g3CurrentIndex];
+
+            if (storageType === 'ram') {
+                g3RamList.push(item);
+                const ramBox = document.getElementById('ram-contents');
+                if (ramBox.querySelector('.italic')) ramBox.innerHTML = '';
+                const tag = document.createElement('div');
+                tag.className = "text-xs p-2 rounded-lg bg-sky-900/40 border border-sky-700/50 text-sky-200 flex items-center justify-between";
+                tag.innerHTML = `<span>⚡ ${item.title}</span>`;
+                ramBox.appendChild(tag);
+            } else {
+                g3RomList.push(item);
+                const romBox = document.getElementById('rom-contents');
+                if (romBox.querySelector('.italic')) romBox.innerHTML = '';
+                const tag = document.createElement('div');
+                tag.className = "text-xs p-2 rounded-lg bg-purple-900/40 border border-purple-700/50 text-purple-200 flex items-center justify-between";
+                tag.innerHTML = `<span>💾 ${item.title}</span>`;
+                romBox.appendChild(tag);
+            }
+
+            g3CurrentIndex++;
+            renderG3CurrentItem();
+        }
+
+        function simulatePowerOff() {
+            playSound('poweroff');
+
+            // Visual blackout effect on RAM module
+            const ramModule = document.getElementById('ram-module');
+            ramModule.classList.add('bg-black', 'border-red-600');
+
+            setTimeout(() => {
+                ramModule.classList.remove('bg-black', 'border-red-600');
+                // Clear RAM visualization
+                document.getElementById('ram-contents').innerHTML = '<p class="text-xs text-red-400 font-bold p-2 bg-red-950/80 rounded-lg border border-red-800 animate-pulse">⚡ Світло зникло! Всі дані з RAM ВИДАЛЕНО!</p>';
+
+                // Calculate points
+                let correctCount = 0;
+                g3RamList.forEach(item => {
+                    if (item.target === 'ram') correctCount++;
+                });
+                g3RomList.forEach(item => {
+                    if (item.target === 'rom') correctCount++;
+                });
+
+                const total = g3Items.length;
+                const score = Math.round((correctCount / total) * 100);
+
+                gameState.scores.g3 = score;
+                gameState.completed.g3 = true;
+                updateGlobalUI();
+
+                if (score >= 80) {
+                    playSound('success');
+                    showModal("⚡ Живлення вимкнено!", `Усі важливі довготривалі файли збереглися на жорсткому диску! Правильно розподілено: ${correctCount} з ${total}.`, "💾");
+                } else {
+                    playSound('error');
+                    showModal("💥 Втрата даних!", `Незбережені файли зникли з оперативної пам'яті (RAM)! Правильно: ${correctCount} з ${total}. Запам'ятай: RAM — тимчасова пам'ять!`, "⚠️");
+                }
+            }, 800);
+        }
+
+        /* ================= MINI-GAME 4 LOGIC ================= */
+        // Data Types in Computer (PDF):
+        // Textual: літери, цифри, розділові знаки
+        // Graphic: малюнки, схеми, фото
+        // Numeric: кількість об'єктів
+        const g4RawItems = [
+            { id: 'd1', content: '«Привіт, як справи?»', type: 'text', hint: 'Текст із літер та розділових знаків' },
+            { id: 'd2', content: '🖼️ Схема мікросхеми ПК', type: 'graphic', hint: 'Кольорове схематичне зображення' },
+            { id: 'd3', content: '42 учні в класі', type: 'numeric', hint: 'Число, що позначає кількість' },
+            { id: 'd4', content: '«Інформатика 2026»', type: 'text', hint: 'Назва предмета у вигляді слів' },
+            { id: 'd5', content: '📸 Фотографія котика', type: 'graphic', hint: 'Графічний файл з камери' },
+            { id: 'd6', content: '100% заряду батареї', type: 'numeric', hint: 'Підраховане числове значення' },
+            { id: 'd7', content: '🎨 Малюнок у Paint', type: 'graphic', hint: 'Векторний або растровий малюнок' },
+            { id: 'd8', content: '250 гривень', type: 'numeric', hint: 'Числова сума та кількість' }
+        ];
+
+        let g4Items = [];
+        let g4Index = 0;
+        let g4Score = 0;
+
+        function resetGame4() {
+            g4Items = shuffleArray(g4RawItems);
+            g4Index = 0;
+            g4Score = 0;
+            document.getElementById('g4-score-display').textContent = g4Score;
+            renderG4Card();
+        }
+
+        function renderG4Card() {
+            if (g4Index >= g4Items.length) {
+                gameState.scores.g4 = Math.round((g4Score / g4Items.length) * 100);
+                gameState.completed.g4 = true;
+                updateGlobalUI();
+                playSound('success');
+                showModal("🎉 Модуль Кодування пройшов успішно!", `Ти вірно класифікував ${g4Score} з ${g4Items.length} типів даних у комп'ютері!`, "💻");
+                return;
+            }
+
+            const item = g4Items[g4Index];
+            document.getElementById('g4-card-content').textContent = item.content;
+            document.getElementById('g4-card-hint').textContent = item.hint;
+        }
+
+        function classifyData(selectedType) {
+            if (g4Index >= g4Items.length) return;
+
+            const item = g4Items[g4Index];
+            if (item.type === selectedType) {
+                playSound('success');
+                g4Score++;
+                document.getElementById('g4-score-display').textContent = g4Score;
+            } else {
+                playSound('error');
+            }
+
+            g4Index++;
+            renderG4Card();
+        }
+
+        // Initialize default view
+        window.onload = function() {
+            updateGlobalUI();
+        };
+    </script>
+</body>
+</html>
