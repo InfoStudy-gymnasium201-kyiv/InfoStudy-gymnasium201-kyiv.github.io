@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Інформатика 405: Дії з Інформацією</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'cyber-blue': '#00f0ff',
+                        'cyber-purple': '#7000ff',
+                        'cyber-pink': '#ff007f',
+                        'cyber-dark': '#0d1117',
+                        'cyber-card': '#161b22',
+                        'vector-green': '#10b981',
+                        'vector-yellow': '#f59e0b'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'glow': '0 0 15px rgba(0, 240, 255, 0.4)',
+                        'glow-purple': '0 0 15px rgba(112, 0, 255, 0.4)',
+                        'glow-green': '0 0 15px rgba(16, 185, 129, 0.4)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom animations & tactile styles */
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 10px rgba(0, 240, 255, 0.3); }
+            50% { box-shadow: 0 0 25px rgba(0, 240, 255, 0.8); }
+        }
+        .animate-pulse-glow {
+            animation: pulseGlow 2s infinite;
+        }
+        .wire-canvas {
+            pointer-events: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+        }
+        .vector-border {
+            border: 3px solid #30363d;
+            border-radius: 1rem;
+        }
+        .vector-card {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .vector-card:hover {
+            transform: translateY(-4px);
+        }
+        .vector-card:active {
+            transform: translateY(1px) scale(0.98);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0d1117;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f0ff;
+        }
+    </style>
+</head>
+<body class="bg-cyber-dark text-slate-100 min-h-screen flex flex-col font-sans select-none overflow-x-hidden">
+
+    <!-- Header Navigation -->
+    <header class="bg-cyber-card/90 backdrop-blur border-b border-slate-800 sticky top-0 z-50 px-4 py-3 shadow-lg">
+        <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('dashboard')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white font-black text-xl shadow-glow">
+                    405
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-cyan-400 tracking-wide leading-tight">ІНФОРМАТИКА</h1>
+                    <p class="text-xs text-slate-400">Інформація навколо нас &bull; 4 клас</p>
+                </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="flex items-center gap-4 bg-slate-900/80 px-4 py-2 rounded-2xl border border-slate-800">
+                <div class="flex items-center gap-2">
+                    <span class="text-amber-400 text-lg">⭐</span>
+                    <span id="score-display" class="font-bold text-amber-300 text-lg">0</span>
+                    <span class="text-xs text-slate-500 uppercase font-semibold">Балів</span>
+                </div>
+                <div class="h-4 w-[1px] bg-slate-700"></div>
+                <div class="flex items-center gap-2">
+                    <span class="text-cyan-400 text-lg">🏆</span>
+                    <span id="progress-display" class="font-bold text-cyan-300 text-lg">0/4</span>
+                    <span class="text-xs text-slate-500 uppercase font-semibold">Модулів</span>
+                </div>
+                <button id="sound-btn" onclick="toggleSound()" class="ml-2 text-slate-400 hover:text-white transition p-1">
+                    🔊
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6 relative">
+
+        <!-- DASHBOARD VIEW -->
+        <section id="view-dashboard" class="space-y-6">
+            <!-- Hero Banner -->
+            <div class="relative bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/30 rounded-3xl p-6 md:p-8 overflow-hidden shadow-2xl">
+                <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="max-w-2xl relative z-10 space-y-3">
+                    <span class="bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">Інтерактивна система</span>
+                    <h2 class="text-2xl md:text-4xl font-extrabold text-white tracking-tight">Досліджуй Світ Комп'ютерних Даних</h2>
+                    <p class="text-slate-300 text-sm md:text-base leading-relaxed">
+                        Пройди 4 тактильні випробування: з'єднуй мережі, сортуй потоки даних, налаштовуй безпечне робоче місце та керуй процесором!
+                    </p>
+                </div>
+            </div>
+
+            <!-- Mini-Game Selection Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- Card 1: Specialized & Personal Devices Wiring -->
+                <div onclick="startModule(1)" class="vector-card cursor-pointer bg-slate-900/90 border border-slate-800 hover:border-cyan-500/50 rounded-3xl p-6 flex flex-col justify-between space-y-4 group relative overflow-hidden shadow-lg">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-bl-full transition-transform group-hover:scale-110"></div>
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-14 h-14 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-3xl group-hover:bg-cyan-500 group-hover:text-black transition-colors">
+                                🔌
+                            </div>
+                            <span id="badge-m1" class="text-xs bg-slate-800 text-slate-400 px-3 py-1 rounded-full border border-slate-700">Не пройдено</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white group-hover:text-cyan-400 transition-colors">1. Мережевий Компонувальник</h3>
+                        <p class="text-slate-400 text-sm mt-2">
+                            З'єднуй кабелем спеціалізовані комп'ютери (сервери, суперкомп'ютери, мікрокомп'ютери, ноутбуки, планшети) з їхнім призначенням!
+                        </p>
+                    </div>
+                    <div class="flex items-center text-cyan-400 font-semibold text-sm gap-2 pt-2">
+                        <span>Запустити модуль</span>
+                        <span class="group-hover:translate-x-1 transition-transform">➔</span>
+                    </div>
+                </div>
+
+                <!-- Card 2: Data Types & Input Devices Router -->
+                <div onclick="startModule(2)" class="vector-card cursor-pointer bg-slate-900/90 border border-slate-800 hover:border-purple-500/50 rounded-3xl p-6 flex flex-col justify-between space-y-4 group relative overflow-hidden shadow-lg">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-bl-full transition-transform group-hover:scale-110"></div>
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-14 h-14 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-3xl group-hover:bg-purple-500 group-hover:text-white transition-colors">
+                                📡
+                            </div>
+                            <span id="badge-m2" class="text-xs bg-slate-800 text-slate-400 px-3 py-1 rounded-full border border-slate-700">Не пройдено</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white group-hover:text-purple-400 transition-colors">2. Сортувальник Потоку Даних</h3>
+                        <p class="text-slate-400 text-sm mt-2">
+                            Розподіляй види даних (текстові, числові, графічні, геодані тощо) за відповідними пристроями введення.
+                        </p>
+                    </div>
+                    <div class="flex items-center text-purple-400 font-semibold text-sm gap-2 pt-2">
+                        <span>Запустити модуль</span>
+                        <span class="group-hover:translate-x-1 transition-transform">➔</span>
+                    </div>
+                </div>
+
+                <!-- Card 3: Ergonomics & Safety Inspector -->
+                <div onclick="startModule(3)" class="vector-card cursor-pointer bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 rounded-3xl p-6 flex flex-col justify-between space-y-4 group relative overflow-hidden shadow-lg">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-bl-full transition-transform group-hover:scale-110"></div>
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-3xl group-hover:bg-emerald-500 group-hover:text-black transition-colors">
+                                🛡️
+                            </div>
+                            <span id="badge-m3" class="text-xs bg-slate-800 text-slate-400 px-3 py-1 rounded-full border border-slate-700">Не пройдено</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white group-hover:text-emerald-400 transition-colors">3. Інспектор Безаварійного Кабінету</h3>
+                        <p class="text-slate-400 text-sm mt-2">
+                            Налаштуй безпечне робоче місце: виправляй поставу, контролюй 15-хвилинний таймер, світло та правила безпеки в інтернеті.
+                        </p>
+                    </div>
+                    <div class="flex items-center text-emerald-400 font-semibold text-sm gap-2 pt-2">
+                        <span>Запустити модуль</span>
+                        <span class="group-hover:translate-x-1 transition-transform">➔</span>
+                    </div>
+                </div>
+
+                <!-- Card 4: High-Speed CPU Processing Rush -->
+                <div onclick="startModule(4)" class="vector-card cursor-pointer bg-slate-900/90 border border-slate-800 hover:border-amber-500/50 rounded-3xl p-6 flex flex-col justify-between space-y-4 group relative overflow-hidden shadow-lg">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-bl-full transition-transform group-hover:scale-110"></div>
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-3xl group-hover:bg-amber-500 group-hover:text-black transition-colors">
+                                🧠
+                            </div>
+                            <span id="badge-m4" class="text-xs bg-slate-800 text-slate-400 px-3 py-1 rounded-full border border-slate-700">Не пройдено</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white group-hover:text-amber-400 transition-colors">4. Електронний Мозок (CPU Rush)</h3>
+                        <p class="text-slate-400 text-sm mt-2">
+                            Швидкісна операторська гра: обробляй вхідні імпульси даних та спрямовуй їх прямо у ядра процесора!
+                        </p>
+                    </div>
+                    <div class="flex items-center text-amber-400 font-semibold text-sm gap-2 pt-2">
+                        <span>Запустити модуль</span>
+                        <span class="group-hover:translate-x-1 transition-transform">➔</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- MODULE 1: DEVICES WIRE MATCHING -->
+        <section id="view-module-1" class="hidden space-y-6">
+            <!-- Header bar for game -->
+            <div class="flex items-center justify-between bg-slate-900 p-4 rounded-2xl border border-slate-800">
+                <div>
+                    <h2 class="text-xl font-bold text-cyan-400">🔌 Модуль 1: Пристрої та Мережі</h2>
+                    <p class="text-xs text-slate-400">З'єднай пристрій ліворуч із відповідним завданням праворуч</p>
+                </div>
+                <button onclick="switchTab('dashboard')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm px-4 py-2 rounded-xl transition">
+                    ✕ На головну
+                </button>
+            </div>
+
+            <div class="relative bg-slate-950 border border-slate-800 rounded-3xl p-6 min-h-[480px] flex flex-col justify-between shadow-2xl overflow-hidden" id="m1-container">
+                <!-- SVG Wiring Canvas -->
+                <svg id="m1-svg" class="wire-canvas z-10"></svg>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-24 relative z-20 my-auto">
+                    <!-- Left Column: Devices -->
+                    <div id="m1-left" class="space-y-4"></div>
+                    <!-- Right Column: Descriptions/Applications -->
+                    <div id="m1-right" class="space-y-4"></div>
+                </div>
+
+                <div class="flex items-center justify-between pt-4 border-t border-slate-800/80 z-20">
+                    <p class="text-xs text-slate-400">Натисни спочатку на пристрій, потім на його призначення</p>
+                    <button id="m1-submit" onclick="checkModule1()" class="bg-cyan-500 hover:bg-cyan-400 text-black font-bold px-6 py-2.5 rounded-xl shadow-glow transition">
+                        Перевірити з'єднання
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- MODULE 2: DATA & INPUT DEVICES ROUTER -->
+        <section id="view-module-2" class="hidden space-y-6">
+            <div class="flex items-center justify-between bg-slate-900 p-4 rounded-2xl border border-slate-800">
+                <div>
+                    <h2 class="text-xl font-bold text-purple-400">📡 Модуль 2: Сортувальник Потоку Даних</h2>
+                    <p class="text-xs text-slate-400">Розподіли елементи даних по відповідним пристроям введення або категоріям</p>
+                </div>
+                <button onclick="switchTab('dashboard')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm px-4 py-2 rounded-xl transition">
+                    ✕ На головну
+                </button>
+            </div>
+
+            <div class="bg-slate-950 border border-slate-800 rounded-3xl p-6 min-h-[480px] flex flex-col justify-between shadow-2xl space-y-6">
+                <!-- Conveyor Item Display -->
+                <div class="bg-slate-900 border-2 border-purple-500/40 rounded-2xl p-6 text-center relative overflow-hidden shadow-glow-purple">
+                    <span class="text-xs text-purple-400 uppercase tracking-widest font-semibold block mb-1">Поточний фрагмент даних</span>
+                    <div id="m2-current-item" class="text-2xl md:text-3xl font-extrabold text-white my-2">--</div>
+                    <div id="m2-current-sub" class="text-sm text-slate-400">--</div>
+                    <!-- Counter -->
+                    <div class="absolute top-4 right-4 bg-purple-950 text-purple-300 text-xs px-3 py-1 rounded-full border border-purple-800">
+                        Залишилось: <span id="m2-count">0</span>
+                    </div>
+                </div>
+
+                <!-- Input Device Target Slots Grid -->
+                <div id="m2-targets" class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <!-- Dynamic slots: Keyboard, Scanner, Microphone, Webcam, GPS/Geodata, Processor -->
+                </div>
+
+                <div class="flex items-center justify-between pt-2 text-xs text-slate-500">
+                    <span>Обирай правильний пристрій введення для кожного тип даних!</span>
+                    <span id="m2-status" class="font-bold text-purple-400">0 / 6 розпізнано</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- MODULE 3: SAFE COMPUTER WORK INSPECTOR -->
+        <section id="view-module-3" class="hidden space-y-6">
+            <div class="flex items-center justify-between bg-slate-900 p-4 rounded-2xl border border-slate-800">
+                <div>
+                    <h2 class="text-xl font-bold text-emerald-400">🛡️ Модуль 3: Інспектор Робочого Місця</h2>
+                    <p class="text-xs text-slate-400">Знайди та виправ порушення правил безпеки та ергономіки</p>
+                </div>
+                <button onclick="switchTab('dashboard')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm px-4 py-2 rounded-xl transition">
+                    ✕ На головну
+                </button>
+            </div>
+
+            <div class="bg-slate-950 border border-slate-800 rounded-3xl p-6 min-h-[480px] shadow-2xl relative">
+                <!-- Interactive Vector Scene Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Vector Desk Setup Graphic Display -->
+                    <div class="bg-slate-900 rounded-2xl border border-slate-800 p-6 flex flex-col justify-center items-center text-center relative overflow-hidden space-y-4">
+                        <div class="w-24 h-24 rounded-full bg-emerald-500/10 border-2 border-emerald-500/30 flex items-center justify-center text-5xl mb-2" id="desk-avatar">
+                            🖥️
+                        </div>
+                        <h3 class="text-lg font-bold text-white">Статус кабінету</h3>
+                        <div id="m3-health-bar" class="w-full bg-slate-800 h-4 rounded-full overflow-hidden p-0.5 border border-slate-700">
+                            <div id="m3-health-fill" class="bg-emerald-500 h-full rounded-full transition-all duration-300 w-1/4"></div>
+                        </div>
+                        <p id="m3-room-status" class="text-xs text-emerald-400 font-semibold">Потребує виправлення порушень!</p>
+                    </div>
+
+                    <!-- Toggle Checklist Items -->
+                    <div id="m3-checklist" class="space-y-3">
+                        <!-- Dynamic vector toggles -->
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-slate-800 flex justify-between items-center">
+                    <span class="text-xs text-slate-400">Натискай на блоки, щоб увімкнути безпечні режими</span>
+                    <button onclick="checkModule3()" class="bg-emerald-500 hover:bg-emerald-400 text-black font-bold px-6 py-2.5 rounded-xl shadow-glow-green transition">
+                        Затвердити кабінет
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- MODULE 4: CPU DATA RUSH -->
+        <section id="view-module-4" class="hidden space-y-6">
+            <div class="flex items-center justify-between bg-slate-900 p-4 rounded-2xl border border-slate-800">
+                <div>
+                    <h2 class="text-xl font-bold text-amber-400">🧠 Модуль 4: Електронний Мозок (CPU Rush)</h2>
+                    <p class="text-xs text-slate-400">Швидко розподіляй імпульси даних до відповідних залишків процесора!</p>
+                </div>
+                <button onclick="switchTab('dashboard')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm px-4 py-2 rounded-xl transition">
+                    ✕ На головну
+                </button>
+            </div>
+
+            <div class="bg-slate-950 border border-slate-800 rounded-3xl p-6 min-h-[480px] flex flex-col justify-between shadow-2xl relative">
+                <!-- CPU Game Screen -->
+                <div class="flex-1 flex flex-col items-center justify-center space-y-6">
+                    <!-- CPU Core Graphic -->
+                    <div class="relative w-36 h-36 bg-gradient-to-br from-amber-500 to-orange-600 rounded-3xl p-1 shadow-glow flex items-center justify-center text-center">
+                        <div class="w-full h-full bg-slate-950 rounded-[22px] flex flex-col items-center justify-center p-2 border border-amber-400/40">
+                            <span class="text-3xl">🧠</span>
+                            <span class="text-xs font-bold text-amber-300 mt-1">ПРОЦЕСОР</span>
+                            <span class="text-[10px] text-slate-400">Електронний мозок</span>
+                        </div>
+                    </div>
+
+                    <!-- Target Signal Container -->
+                    <div id="m4-signal-box" class="bg-slate-900 border-2 border-amber-500/50 rounded-2xl p-4 w-full max-w-md text-center transform transition-all">
+                        <div class="text-xs text-amber-400 uppercase font-semibold">Вхідний сигнал №<span id="m4-step">1</span></div>
+                        <div id="m4-signal-text" class="text-xl font-extrabold text-white my-2">--</div>
+                        <div id="m4-signal-type" class="text-xs text-slate-400">--</div>
+                    </div>
+
+                    <!-- CPU Core Action Channels -->
+                    <div id="m4-actions" class="grid grid-cols-2 md:grid-cols-3 gap-3 w-full max-w-lg">
+                        <!-- Action Buttons -->
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-4 border-t border-slate-800">
+                    <div class="text-xs text-slate-400">Опрацюй усі 5 сигналів процесора без помилок</div>
+                    <div id="m4-score-tracker" class="text-sm font-bold text-amber-400">Успіх: 0 / 5</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VICTORY MODAL -->
+        <div id="victory-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-slate-900 border-2 border-cyan-500 rounded-3xl p-6 md:p-8 max-w-md w-full text-center space-y-5 shadow-2xl relative overflow-hidden">
+                <div class="text-6xl animate-bounce">🎓</div>
+                <h3 class="text-2xl font-black text-white">Вітаємо, Експерте!</h3>
+                <p class="text-slate-300 text-sm leading-relaxed" id="victory-desc">
+                    Ти успішно засвоїв матеріал уроку "Інформація навколо нас. Дії з інформацією"!
+                </p>
+                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-2">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-400">Підсумковий рахунок:</span>
+                        <span id="final-score" class="font-bold text-amber-400">0 балів</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-400">Пройдені модулі:</span>
+                        <span id="final-modules" class="font-bold text-cyan-400">4 / 4</span>
+                    </div>
+                </div>
+                <button onclick="closeVictoryModal()" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-extrabold py-3 rounded-xl shadow-glow transition">
+                    Продовжити навчання
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        /* SOUND & SYNTHESIZER UTILITY (Web Audio API) */
+        let audioCtx = null;
+        let soundEnabled = true;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playTone(freq, type = 'sine', duration = 0.15) {
+            if (!soundEnabled) return;
+            initAudio();
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        function playSuccessSound() {
+            playTone(523.25, 'triangle', 0.1); // C5
+            setTimeout(() => playTone(659.25, 'triangle', 0.15), 100); // E5
+            setTimeout(() => playTone(783.99, 'triangle', 0.2), 200); // G5
+        }
+
+        function playErrorSound() {
+            playTone(220, 'sawtooth', 0.2); // A3
+            setTimeout(() => playTone(180, 'sawtooth', 0.25), 150);
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('sound-btn').innerText = soundEnabled ? '🔊' : '🔇';
+        }
+
+        /* GAME STATE */
+        const state = {
+            score: 0,
+            completedModules: new Set(),
+            m1: { selectedLeft: null, selectedRight: null, connections: [] },
+            m2: { items: [], currentIndex: 0, correctCount: 0 },
+            m3: { toggles: {} },
+            m4: { queue: [], index: 0, correct: 0 }
+        };
+
+        // Utility: Array Shuffle
+        function shuffle(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        /* NAVIGATION & UI */
+        function switchTab(viewId) {
+            ['dashboard', 'module-1', 'module-2', 'module-3', 'module-4'].forEach(id => {
+                const el = document.getElementById(`view-${id}`);
+                if (el) el.classList.add('hidden');
+            });
+            const target = document.getElementById(`view-${viewId}`);
+            if (target) target.classList.remove('hidden');
+
+            if (viewId === 'dashboard') {
+                updateDashboardBadges();
+            }
+        }
+
+        function updateScore(points) {
+            state.score += points;
+            document.getElementById('score-display').innerText = state.score;
+        }
+
+        function updateDashboardBadges() {
+            document.getElementById('progress-display').innerText = `${state.completedModules.size}/4`;
+            for (let i = 1; i <= 4; i++) {
+                const badge = document.getElementById(`badge-m${i}`);
+                if (state.completedModules.has(i)) {
+                    badge.innerText = 'Пройдено ✓';
+                    badge.className = 'text-xs bg-emerald-950 text-emerald-400 px-3 py-1 rounded-full border border-emerald-800 font-semibold';
+                }
+            }
+
+            if (state.completedModules.size === 4) {
+                showVictoryModal();
+            }
+        }
+
+        function startModule(num) {
+            switchTab(`module-${num}`);
+            if (num === 1) initModule1();
+            if (num === 2) initModule2();
+            if (num === 3) initModule3();
+            if (num === 4) initModule4();
+        }
+
+        /* MODULE 1 LOGIC: DEVICES MATCHING */
+        const m1Data = [
+            { id: 'super', leftName: '🚀 Суперкомп\'ютер', rightDesc: 'Розрахунок орбіти космічних станцій та складних обчислень' },
+            { id: 'server', leftName: '🌐 Сервер', rightDesc: 'Забезпечує роботу мережі та надає послуги іншим пристроям' },
+            { id: 'micro', leftName: '🧺 Мікрокомп\'ютер', rightDesc: 'Вбудовується всередину пральних машин, авто та літаків' },
+            { id: 'tablet', leftName: '📱 Планшет', rightDesc: 'Сенсорний екран для введення даних без клавіатури' },
+            { id: 'laptop', leftName: '💻 Ноутбук', rightDesc: 'Портативний ПК, що складається у вигляді книжки' }
+        ];
+
+        function initModule1() {
+            state.m1.selectedLeft = null;
+            state.m1.selectedRight = null;
+            state.m1.connections = [];
+
+            const leftContainer = document.getElementById('m1-left');
+            const rightContainer = document.getElementById('m1-right');
+
+            leftContainer.innerHTML = '';
+            rightContainer.innerHTML = '';
+
+            // Shuffle both sides independently
+            const leftList = shuffle(m1Data);
+            const rightList = shuffle(m1Data);
+
+            leftList.forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left bg-slate-900 border border-slate-700 hover:border-cyan-400 p-4 rounded-2xl text-slate-200 text-sm font-bold transition flex items-center justify-between m1-left-btn';
+                btn.dataset.id = item.id;
+                btn.innerHTML = `<span>${item.leftName}</span><span class="w-3 h-3 rounded-full bg-slate-700 pin"></span>`;
+                btn.onclick = () => selectM1Left(item.id, btn);
+                leftContainer.appendChild(btn);
+            });
+
+            rightList.forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left bg-slate-900 border border-slate-700 hover:border-cyan-400 p-4 rounded-2xl text-slate-300 text-xs leading-relaxed transition flex items-center justify-between m1-right-btn';
+                btn.dataset.id = item.id;
+                btn.innerHTML = `<span class="w-3 h-3 rounded-full bg-slate-700 pin mr-2 flex-shrink-0"></span><span>${item.rightDesc}</span>`;
+                btn.onclick = () => selectM1Right(item.id, btn);
+                rightContainer.appendChild(btn);
+            });
+
+            drawM1Wires();
+        }
+
+        function selectM1Left(id, btn) {
+            playTone(400, 'sine', 0.05);
+            document.querySelectorAll('.m1-left-btn').forEach(b => b.classList.remove('border-cyan-400', 'bg-cyan-950/40'));
+            btn.classList.add('border-cyan-400', 'bg-cyan-950/40');
+            state.m1.selectedLeft = id;
+            tryConnectM1();
+        }
+
+        function selectM1Right(id, btn) {
+            playTone(450, 'sine', 0.05);
+            document.querySelectorAll('.m1-right-btn').forEach(b => b.classList.remove('border-cyan-400', 'bg-cyan-950/40'));
+            btn.classList.add('border-cyan-400', 'bg-cyan-950/40');
+            state.m1.selectedRight = id;
+            tryConnectM1();
+        }
+
+        function tryConnectM1() {
+            if (state.m1.selectedLeft && state.m1.selectedRight) {
+                // Remove existing connection from left or right if present
+                state.m1.connections = state.m1.connections.filter(
+                    c => c.left !== state.m1.selectedLeft && c.right !== state.m1.selectedRight
+                );
+
+                state.m1.connections.push({
+                    left: state.m1.selectedLeft,
+                    right: state.m1.selectedRight
+                });
+
+                state.m1.selectedLeft = null;
+                state.m1.selectedRight = null;
+                document.querySelectorAll('.m1-left-btn, .m1-right-btn').forEach(b => b.classList.remove('border-cyan-400', 'bg-cyan-950/40'));
+
+                playTone(600, 'triangle', 0.1);
+                drawM1Wires();
+            }
+        }
+
+        function drawM1Wires() {
+            const svg = document.getElementById('m1-svg');
+            const container = document.getElementById('m1-container');
+            const rect = container.getBoundingClientRect();
+
+            svg.setAttribute('width', rect.width);
+            svg.setAttribute('height', rect.height);
+            svg.innerHTML = '';
+
+            state.m1.connections.forEach(conn => {
+                const leftEl = document.querySelector(`.m1-left-btn[data-id="${conn.left}"]`);
+                const rightEl = document.querySelector(`.m1-right-btn[data-id="${conn.right}"]`);
+
+                if (leftEl && rightEl) {
+                    const lPin = leftEl.querySelector('.pin').getBoundingClientRect();
+                    const rPin = rightEl.querySelector('.pin').getBoundingClientRect();
+
+                    const x1 = lPin.left + lPin.width/2 - rect.left;
+                    const y1 = lPin.top + lPin.height/2 - rect.top;
+                    const x2 = rPin.left + rPin.width/2 - rect.left;
+                    const y2 = rPin.top + rPin.height/2 - rect.top;
+
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    const dx = (x2 - x1) / 2;
+                    const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+
+                    line.setAttribute('d', d);
+                    line.setAttribute('stroke', '#00f0ff');
+                    line.setAttribute('stroke-width', '3');
+                    line.setAttribute('fill', 'none');
+                    line.setAttribute('stroke-dasharray', '6,6');
+                    svg.appendChild(line);
+                }
+            });
+        }
+
+        function checkModule1() {
+            if (state.m1.connections.length < m1Data.length) {
+                playErrorSound();
+                return;
+            }
+
+            let allCorrect = true;
+            state.m1.connections.forEach(c => {
+                if (c.left !== c.right) allCorrect = false;
+            });
+
+            if (allCorrect) {
+                playSuccessSound();
+                state.completedModules.add(1);
+                updateScore(100);
+                alert("Чудово! Всі пристрої з'єднано правильно!");
+                switchTab('dashboard');
+            } else {
+                playErrorSound();
+                alert("Є помилкові з'єднання! Перевірте логіку роботи пристроїв.");
+            }
+        }
+
+        /* MODULE 2 LOGIC: DATA TYPES & INPUT DEVICES */
+        const m2DataList = [
+            { id: 1, title: 'Назва товару "Молоко"', sub: 'Текстові дані (літери та слова)', target: 'kbd' },
+            { id: 2, title: 'Ціна товару "45 грн"', sub: 'Числові дані (цифри)', target: 'kbd' },
+            { id: 3, title: 'Малюнок котика у зошиті', sub: 'Графічні дані (зображення)', target: 'scan' },
+            { id: 4, title: 'Запис голосу диктора', sub: 'Звукові дані (звуки)', target: 'mic' },
+            { id: 5, title: 'Відеоурок з математики', sub: 'Відеодані (рухоме зображення)', target: 'cam' },
+            { id: 6, title: 'GPS-маршрут до школи', sub: 'Геодані (місцезнаходження)', target: 'gps' }
+        ];
+
+        const m2Targets = [
+            { id: 'kbd', name: '⌨️ Клавіатура', desc: 'Текстові та числові дані' },
+            { id: 'scan', name: '🖼️ Сканер', desc: 'Графічні дані' },
+            { id: 'mic', name: '🎙️ Мікрофон', desc: 'Звукові дані' },
+            { id: 'cam', name: '📹 Вебкамера', desc: 'Відеодані' },
+            { id: 'gps', name: '🗺️ Навігатор / GPS', desc: 'Геодані' },
+            { id: 'cpu', name: '🧠 Процесор', desc: 'Опрацювання даних' }
+        ];
+
+        function initModule2() {
+            state.m2.items = shuffle(m2DataList);
+            state.m2.currentIndex = 0;
+            state.m2.correctCount = 0;
+
+            renderM2Targets();
+            renderM2CurrentItem();
+        }
+
+        function renderM2Targets() {
+            const container = document.getElementById('m2-targets');
+            container.innerHTML = '';
+
+            const shuffledTargets = shuffle(m2Targets);
+            shuffledTargets.forEach(t => {
+                const btn = document.createElement('button');
+                btn.className = 'bg-slate-900 border border-slate-700 hover:border-purple-400 p-4 rounded-2xl flex flex-col items-center justify-center text-center space-y-1 transition group hover:bg-purple-950/20';
+                btn.onclick = () => routeM2Data(t.id);
+                btn.innerHTML = `
+                    <span class="text-xl font-bold text-white group-hover:scale-110 transition-transform">${t.name}</span>
+                    <span class="text-[11px] text-slate-400">${t.desc}</span>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        function renderM2CurrentItem() {
+            const countEl = document.getElementById('m2-count');
+            const itemEl = document.getElementById('m2-current-item');
+            const subEl = document.getElementById('m2-current-sub');
+            const statusEl = document.getElementById('m2-status');
+
+            const remaining = state.m2.items.length - state.m2.currentIndex;
+            countEl.innerText = remaining;
+            statusEl.innerText = `${state.m2.correctCount} / ${state.m2.items.length} розпізнано`;
+
+            if (state.m2.currentIndex < state.m2.items.length) {
+                const item = state.m2.items[state.m2.currentIndex];
+                itemEl.innerText = item.title;
+                subEl.innerText = item.sub;
+            } else {
+                itemEl.innerText = "Потік даних завершено!";
+                subEl.innerText = "";
+            }
+        }
+
+        function routeM2Data(targetId) {
+            if (state.m2.currentIndex >= state.m2.items.length) return;
+
+            const current = state.m2.items[state.m2.currentIndex];
+            if (current.target === targetId) {
+                playSuccessSound();
+                state.m2.correctCount++;
+                updateScore(20);
+            } else {
+                playErrorSound();
+            }
+
+            state.m2.currentIndex++;
+            renderM2CurrentItem();
+
+            if (state.m2.currentIndex >= state.m2.items.length) {
+                if (state.m2.correctCount >= 5) {
+                    state.completedModules.add(2);
+                    alert("Вітаємо! Усі дані відправлені за адресою!");
+                    switchTab('dashboard');
+                } else {
+                    alert("Спробуйте ще раз для кращого результату!");
+                    initModule2();
+                }
+            }
+        }
+
+        /* MODULE 3 LOGIC: SAFE WORKSTATION INSPECTOR */
+        const m3ToggleItems = [
+            { id: 'time', name: '⏳ Таймер роботи', bad: 'Робота понад 60 хвилин без перерви', good: 'Обмеження роботи до 15 хвилин', isGood: false },
+            { id: 'posture', name: '🪑 Поза за столом', bad: 'Зігнута спина та звисаючі лікті', good: 'Рівна спина та спеціальні меблі', isGood: false },
+            { id: 'light', name: '💡 Освітлення', bad: 'Темна кімната з відблисками на екрані', good: 'Якісне та правильне освітлення', isGood: false },
+            { id: 'games', name: '🎮 Час на ігри', bad: 'Необмежені ігри увесь день', good: 'Розумне обмеження часу для ігор', isGood: false },
+            { id: 'web', name: '🛡️ Інтернет-безпека', bad: 'Відкриття підозрілих посилань та чатів', good: 'Дотримання правил безпеки в мережі', isGood: false }
+        ];
+
+        function initModule3() {
+            const checklist = document.getElementById('m3-checklist');
+            checklist.innerHTML = '';
+
+            const shuffled = shuffle(m3ToggleItems);
+            shuffled.forEach(item => {
+                state.m3.toggles[item.id] = false; // default bad
+
+                const card = document.createElement('div');
+                card.id = `m3-card-${item.id}`;
+                card.className = 'bg-slate-900 border border-slate-700 hover:border-emerald-500/50 p-4 rounded-2xl flex items-center justify-between cursor-pointer transition select-none';
+                card.onclick = () => toggleM3Item(item, card);
+                card.innerHTML = `
+                    <div class="space-y-1">
+                        <div class="text-sm font-bold text-white">${item.name}</div>
+                        <div class="text-xs text-rose-400 status-desc">${item.bad}</div>
+                    </div>
+                    <div class="w-12 h-6 bg-slate-800 rounded-full p-1 transition-colors toggle-bg border border-slate-700 flex items-center">
+                        <div class="w-4 h-4 bg-slate-500 rounded-full transition-transform transform translate-x-0 toggle-dot"></div>
+                    </div>
+                `;
+                checklist.appendChild(card);
+            });
+
+            updateM3HealthBar();
+        }
+
+        function toggleM3Item(item, card) {
+            state.m3.toggles[item.id] = !state.m3.toggles[item.id];
+            const active = state.m3.toggles[item.id];
+
+            const desc = card.querySelector('.status-desc');
+            const toggleBg = card.querySelector('.toggle-bg');
+            const toggleDot = card.querySelector('.toggle-dot');
+
+            if (active) {
+                playTone(700, 'sine', 0.08);
+                desc.innerText = item.good;
+                desc.className = 'text-xs text-emerald-400 status-desc';
+                toggleBg.className = 'w-12 h-6 bg-emerald-500 rounded-full p-1 transition-colors toggle-bg flex items-center';
+                toggleDot.className = 'w-4 h-4 bg-black rounded-full transition-transform transform translate-x-6 toggle-dot';
+            } else {
+                playTone(300, 'sine', 0.08);
+                desc.innerText = item.bad;
+                desc.className = 'text-xs text-rose-400 status-desc';
+                toggleBg.className = 'w-12 h-6 bg-slate-800 rounded-full p-1 transition-colors toggle-bg border border-slate-700 flex items-center';
+                toggleDot.className = 'w-4 h-4 bg-slate-500 rounded-full transition-transform transform translate-x-0 toggle-dot';
+            }
+
+            updateM3HealthBar();
+        }
+
+        function updateM3HealthBar() {
+            const count = Object.values(state.m3.toggles).filter(Boolean).length;
+            const pct = (count / m3ToggleItems.length) * 100;
+
+            const fill = document.getElementById('m3-health-fill');
+            const text = document.getElementById('m3-room-status');
+            const avatar = document.getElementById('desk-avatar');
+
+            fill.style.width = `${pct}%`;
+
+            if (pct === 100) {
+                text.innerText = 'Кабінет повністю безпечний для здоров\'я!';
+                text.className = 'text-xs text-emerald-400 font-bold';
+                avatar.innerText = '❇️';
+            } else {
+                text.innerText = `Налаштовано ${count} з ${m3ToggleItems.length} факторів`;
+                text.className = 'text-xs text-amber-400 font-semibold';
+                avatar.innerText = '🖥️';
+            }
+        }
+
+        function checkModule3() {
+            const count = Object.values(state.m3.toggles).filter(Boolean).length;
+            if (count === m3ToggleItems.length) {
+                playSuccessSound();
+                state.completedModules.add(3);
+                updateScore(100);
+                alert("Чудово! Ви створили безпечне та ергономічне робоче місце!");
+                switchTab('dashboard');
+            } else {
+                playErrorSound();
+                alert("Залишились незахищені фактори! Увімкніть усі безпечні режими.");
+            }
+        }
+
+        /* MODULE 4 LOGIC: CPU RUSH */
+        const m4Signals = [
+            { text: 'Обчислення 32758680 + 434788', type: 'Числові дані', target: 'math' },
+            { text: 'Текст статті "Інформатика 405"', type: 'Текстові дані', target: 'text' },
+            { text: 'Графічний сканований фотоальбом', type: 'Графічні дані', target: 'gfx' },
+            { text: 'Аудіозапис пояснення вчителя', type: 'Звукові дані', target: 'sound' },
+            { text: 'Команда контролера пральної машини', type: 'Мікрокомп\'ютер', target: 'micro' }
+        ];
+
+        const m4ActionButtons = [
+            { id: 'math', name: '🔢 Арифметика' },
+            { id: 'text', name: '📝 Текст' },
+            { id: 'gfx', name: '🎨 Графіка' },
+            { id: 'sound', name: '🔊 Звук' },
+            { id: 'micro', name: '⚙️ Мікроконтроль' }
+        ];
+
+        function initModule4() {
+            state.m4.queue = shuffle(m4Signals);
+            state.m4.index = 0;
+            state.m4.correct = 0;
+
+            renderM4Actions();
+            renderM4Step();
+        }
+
+        function renderM4Actions() {
+            const container = document.getElementById('m4-actions');
+            container.innerHTML = '';
+
+            const shuffledBtns = shuffle(m4ActionButtons);
+            shuffledBtns.forEach(btn => {
+                const b = document.createElement('button');
+                b.className = 'bg-slate-900 border border-slate-700 hover:border-amber-400 p-3 rounded-xl text-xs font-bold text-slate-200 transition active:scale-95';
+                b.innerText = btn.name;
+                b.onclick = () => processM4Signal(btn.id);
+                container.appendChild(b);
+            });
+        }
+
+        function renderM4Step() {
+            const stepEl = document.getElementById('m4-step');
+            const textEl = document.getElementById('m4-signal-text');
+            const typeEl = document.getElementById('m4-signal-type');
+            const tracker = document.getElementById('m4-score-tracker');
+
+            tracker.innerText = `Успіх: ${state.m4.correct} / ${state.m4.queue.length}`;
+
+            if (state.m4.index < state.m4.queue.length) {
+                const item = state.m4.queue[state.m4.index];
+                stepEl.innerText = state.m4.index + 1;
+                textEl.innerText = item.text;
+                typeEl.innerText = item.type;
+            } else {
+                textEl.innerText = "Усі сигнали опрацьовано!";
+                typeEl.innerText = "";
+            }
+        }
+
+        function processM4Signal(actionId) {
+            if (state.m4.index >= state.m4.queue.length) return;
+
+            const current = state.m4.queue[state.m4.index];
+            if (current.target === actionId) {
+                playSuccessSound();
+                state.m4.correct++;
+                updateScore(20);
+            } else {
+                playErrorSound();
+            }
+
+            state.m4.index++;
+            renderM4Step();
+
+            if (state.m4.index >= state.m4.queue.length) {
+                if (state.m4.correct >= 4) {
+                    state.completedModules.add(4);
+                    alert("Процесор успішно виконал всі обчислення!");
+                    switchTab('dashboard');
+                } else {
+                    alert("Процесор перевантажено помилками. Спробуйте ще раз!");
+                    initModule4();
+                }
+            }
+        }
+
+        function showVictoryModal() {
+            document.getElementById('final-score').innerText = `${state.score} балів`;
+            document.getElementById('victory-modal').classList.remove('hidden');
+            playSuccessSound();
+        }
+
+        function closeVictoryModal() {
+            document.getElementById('victory-modal').classList.add('hidden');
+        }
+
+        // Handle window resize for canvas wiring
+        window.addEventListener('resize', () => {
+            if (!document.getElementById('view-module-1').classList.contains('hidden')) {
+                drawM1Wires();
+            }
+        });
+
+        // Initialize App on load
+        window.onload = function() {
+            switchTab('dashboard');
+        };
+    </script>
+</body>
+</html>
