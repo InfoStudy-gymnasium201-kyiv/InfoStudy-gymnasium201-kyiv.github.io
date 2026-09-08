@@ -86,7 +86,6 @@
         </svg>
     </div>
 
-    <!-- Header Navbar -->
     <header class="relative z-10 bg-slate-900/80 border-b border-indigo-900/50 backdrop-blur-md px-4 py-3 sticky top-0 shadow-lg">
         <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
             <div class="flex items-center gap-3 cursor-pointer" onclick="showScreen('hub')">
@@ -136,7 +135,6 @@
 
     <main class="relative z-10 max-w-6xl mx-auto px-4 py-6 flex-grow flex flex-col justify-center w-full">
 
-        <!-- ================= HUB SCREEN ================= -->
         <section id="screen-hub" class="space-y-8 animate-fadeIn">
             <!-- Hero Banner -->
             <div class="text-center space-y-3 max-w-2xl mx-auto">
@@ -189,7 +187,7 @@
                     </div>
                 </div>
 
-                <!-- Mini-Game 3 Card (UPDATED TO INPUT/OUTPUT/STORAGE DEVICES) -->
+                <!-- Mini-Game 3 Card -->
                 <div onclick="startMiniGame(3)" class="group cursor-pointer glass-panel rounded-2xl p-6 hover:border-emerald-500/80 transition-all duration-300 hover:-translate-y-1 shadow-xl relative overflow-hidden">
                     <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-emerald-600/10 rounded-full blur-2xl group-hover:bg-emerald-600/20 transition"></div>
                     <div class="flex items-start justify-between mb-4">
@@ -238,7 +236,6 @@
             </div>
         </section>
 
-        <!-- ================= MINI-GAME 1: CARRIER ERA CHRONOLOGY ================= -->
         <section id="screen-game-1" class="hidden space-y-6">
             <div class="flex flex-wrap items-center justify-between gap-4 glass-panel p-4 rounded-2xl">
                 <div>
@@ -311,7 +308,6 @@
             </div>
         </section>
 
-        <!-- ================= MINI-GAME 2: MESSAGE PRESENTATION ROUTER ================= -->
         <section id="screen-game-2" class="hidden space-y-6">
             <div class="flex flex-wrap items-center justify-between gap-4 glass-panel p-4 rounded-2xl">
                 <div>
@@ -374,7 +370,6 @@
             </div>
         </section>
 
-        <!-- ================= MINI-GAME 3: COMPUTER DEVICES SORT (INPUT / OUTPUT / STORAGE) ================= -->
         <section id="screen-game-3" class="hidden space-y-6">
             <div class="flex flex-wrap items-center justify-between gap-4 glass-panel p-4 rounded-2xl">
                 <div>
@@ -428,7 +423,6 @@
             </div>
         </section>
 
-        <!-- ================= MINI-GAME 4: DATA TYPES CLASSIFIER ================= -->
         <section id="screen-game-4" class="hidden space-y-6">
             <div class="flex flex-wrap items-center justify-between gap-4 glass-panel p-4 rounded-2xl">
                 <div>
@@ -473,7 +467,6 @@
             </div>
         </section>
 
-        <!-- Custom Modal Dialog (replaces alert/confirm) -->
         <div id="modal-overlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
             <div class="glass-panel p-6 rounded-3xl max-w-md w-full border-2 border-indigo-500/50 text-center space-y-4 shadow-2xl animate-pulse-subtle">
                 <div id="modal-icon" class="text-6xl">🏆</div>
@@ -495,7 +488,6 @@
     </footer>
 
     <script>
-        /* ================= AUDIO SYNTHESIS & SOUND EFFECTS ================= */
         let soundEnabled = true;
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         let audioCtx = null;
@@ -554,7 +546,6 @@
             document.getElementById('sound-icon-off').classList.toggle('hidden', soundEnabled);
         }
 
-        /* ================= GLOBAL STATE & NAVIGATION ================= */
         const gameState = {
             scores: { g1: 0, g2: 0, g3: 0, g4: 0 },
             completed: { g1: false, g2: false, g3: false, g4: false }
@@ -615,7 +606,6 @@
             return arr;
         }
 
-        /* ================= MINI-GAME 1 LOGIC ================= */
         const g1RawItems = [
             { id: 'm1', name: 'Каміння із зарубками', era: 'ancient', icon: '🪨' },
             { id: 'm2', name: 'Глиняні дощечки', era: 'ancient', icon: '🧱' },
@@ -626,7 +616,7 @@
             { id: 'm7', name: 'Жорсткий магнітний диск', era: 'electronic', icon: '💽' },
             { id: 'm8', name: 'Флеш-накопичувач', era: 'electronic', icon: '🔌' },
             { id: 'm9', name: 'Оптичний диск (CD)', era: 'electronic', icon: '💿' },
-            { id: 'm10', name: 'Карта пам\'яті SD', era: 'electronic', icon: '🎴' }
+            { id: 'm10', name: "Карта пам'яті SD", era: 'electronic', icon: '🎴' }
         ];
 
         let g1CurrentPool = [];
@@ -768,11 +758,10 @@
             }
         }
 
-        /* ================= MINI-GAME 2 LOGIC ================= */
         const g2RawCards = [
             { id: 's1', title: 'Скельний малюнок первісних людей', desc: 'Зарубки та кольорові зображення на стіні печери', type: 'graphic', icon: '🎨' },
             { id: 's2', title: 'Шкільний дзвоник на перерву', desc: 'Гучний тривалий звук на весь коридор', type: 'audio', icon: '🔔' },
-            { id: 's3', title: 'Лист другові на папері', desc: 'Записані слова, літери та розділові знаки', type: 'text', icon: '✉️' },
+            { id: 's3', title: 'Лист другові на папері', desc: 'Записані слова, літера та розділові знаки', type: 'text', icon: '✉️' },
             { id: 's4', title: 'Світлофор на перехресті', desc: 'Червоне світло забороняє рух водіям та пішоходам', type: 'gesture_light', icon: '🚦' },
             { id: 's5', title: 'Анімаційний мультфільм', desc: 'Відеоряд, текстові титри та озвучка персонажів', type: 'combined', icon: '🎬' },
             { id: 's6', title: 'Посмішка та кивок головою', desc: 'Вираз обличчя та рух для вираження згоди без слів', type: 'gesture_light', icon: '😊' },
@@ -840,16 +829,15 @@
             renderG2CurrentCard();
         }
 
-        /* ================= MINI-GAME 3 LOGIC (COMPUTER DEVICES) ================= */
         const g3RawDevices = [
-            { id: 'd1', title: 'Клавіатура', desc: 'Введення літер, чисел та команд у комп'ютер', type: 'input', icon: '⌨️' },
-            { id: 'd2', title: 'Колонки та Навушники', desc: 'Відтворення звуків та музики для людини', type: 'output', icon: '🎧' },
-            { id: 'd3', title: 'Флеш-накопичувач (Флешка)', desc: 'Зберігання файлів та документів на майбутнє', type: 'storage', icon: '🔌' },
-            { id: 'd4', title: 'Монітор (Екран)', desc: 'Відображення картинок, відео та тексту для користувача', type: 'output', icon: '🖥️' },
-            { id: 'd5', title: 'Комп'ютерна миша', desc: 'Введення вказівних команд та управління курсором', type: 'input', icon: '🖱️' },
-            { id: 'd6', title: 'Принтер', desc: 'Друк документів та малюнків на папір з комп'ютера', type: 'output', icon: '🖨️' },
-            { id: 'd7', title: 'Мікрофон', desc: 'Введення звуку та голосу людини у ПК', type: 'input', icon: '🎙️' },
-            { id: 'd8', title: 'Жорсткий диск (Hard Drive)', desc: 'Надійне постійне зберігання всіх програм і файлів', type: 'storage', icon: '💽' }
+            { id: 'd1', title: 'Клавіатура', desc: "Введення літер, чисел та команд у комп'ютер", type: 'input', icon: '⌨️' },
+            { id: 'd2', title: 'Колонки та Навушники', desc: "Відтворення звуків та музики для людини", type: 'output', icon: '🎧' },
+            { id: 'd3', title: 'Флеш-накопичувач (Флешка)', desc: "Зберігання файлів та документів на майбутнє", type: 'storage', icon: '🔌' },
+            { id: 'd4', title: 'Монітор (Екран)', desc: "Відображення картинок, відео та тексту для користувача", type: 'output', icon: '🖥️' },
+            { id: 'd5', title: "Комп'ютерна миша", desc: "Введення вказівних команд та управління курсором", type: 'input', icon: '🖱️' },
+            { id: 'd6', title: 'Принтер', desc: "Друк документів та малюнків на папір з комп'ютера", type: 'output', icon: '🖨️' },
+            { id: 'd7', title: 'Мікрофон', desc: "Введення звуку та голосу людини у ПК", type: 'input', icon: '🎙️' },
+            { id: 'd8', title: 'Жорсткий диск (Hard Drive)', desc: "Надійне постійне зберігання всіх програм і файлів", type: 'storage', icon: '💽' }
         ];
 
         let g3Devices = [];
@@ -912,9 +900,8 @@
             renderG3CurrentDevice();
         }
 
-        /* ================= MINI-GAME 4 LOGIC ================= */
         const g4RawItems = [
-            { id: 'd1', content: '«Привіт, як справи?»', type: 'text', hint: 'Текст із літер та розділових знаков' },
+            { id: 'd1', content: '«Привіт, як справи?»', type: 'text', hint: 'Текст із літер та розділових знаків' },
             { id: 'd2', content: '🖼️ Схема мікросхеми ПК', type: 'graphic', hint: 'Кольорове схематичне зображення' },
             { id: 'd3', content: '42 учні в класі', type: 'numeric', hint: 'Число, що позначає кількість' },
             { id: 'd4', content: '«Інформатика 2026»', type: 'text', hint: 'Назва предмета у вигляді слів' },
