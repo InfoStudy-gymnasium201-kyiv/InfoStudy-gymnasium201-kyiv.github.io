@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пригоди в Країні Інформації - Інформатика 2 Клас</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;700&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            user-select: none;
+            overflow-x: hidden;
+        }
+
+        .heading-font {
+            font-family: 'Comfortaa', cursive;
+        }
+
+        /* Glassmorphism panel styles */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            border-color: rgba(129, 140, 248, 0.8);
+            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Custom Drag and Drop styling */
+        .draggable {
+            cursor: grab;
+            touch-action: none;
+        }
+        .draggable:active {
+            cursor: grabbing;
+            transform: scale(1.08) rotate(2deg);
+            z-index: 50;
+        }
+
+        .drop-target {
+            transition: all 0.2s ease;
+        }
+
+        .drop-target.drag-over {
+            transform: scale(1.05);
+            border-color: #38bdf8 !important;
+            background: rgba(56, 189, 248, 0.2) !important;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+        }
+
+        /* Conveyor belt animation */
+        @keyframes conveyorMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 50px 0; }
+        }
+
+        .conveyor-belt {
+            background: repeating-linear-gradient(
+                90deg,
+                #334155,
+                #334155 20px,
+                #1e293b 20px,
+                #1e293b 40px
+            );
+            animation: conveyorMove 2s linear infinite;
+        }
+
+        /* Custom button animations */
+        .btn-bounce {
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .btn-bounce:active {
+            transform: scale(0.95);
+        }
+
+        /* Shimmer effect for stars */
+        @keyframes starPop {
+            0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+            80% { transform: scale(1.2) rotate(10deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        .star-animated {
+            animation: starPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* Flashlight effect mask */
+        .flashlight-overlay {
+            background: radial-gradient(circle 100px at var(--x, 50%) var(--y, 50%), transparent 0%, rgba(15, 23, 42, 0.96) 120px);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <header class="w-full bg-slate-900/80 backdrop-blur-md border-b border-slate-700/50 px-4 py-3 sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchGameMode('menu')">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-lg text-xl">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
+                <div>
+                    <h1 class="heading-font font-bold text-lg md:text-xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300">
+                        Інфо-Лабораторія
+                    </h1>
+                    <p class="text-xs text-slate-400">Інформатика • 2 клас</p>
+                </div>
+            </div>
+
+            <!-- Score and Stars Display -->
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-1.5 bg-slate-800/80 px-3 py-1.5 rounded-full border border-amber-500/30">
+                    <i class="fa-solid fa-star text-amber-400 text-lg"></i>
+                    <span id="total-stars" class="font-extrabold text-amber-300 text-lg">0</span>
+                </div>
+                <button id="sound-toggle" onclick="toggleAudio()" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-600 flex items-center justify-center text-slate-300 transition-colors">
+                    <i class="fa-solid fa-volume-high" id="sound-icon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center p-3 md:p-6 max-w-6xl w-full mx-auto relative">
+
+        <!-- Main Menu Section -->
+        <section id="screen-menu" class="w-full flex flex-col items-center text-center py-4">
+            <div class="relative mb-8 text-center max-w-2xl">
+                <div class="inline-block p-3 rounded-full bg-indigo-500/10 border border-indigo-400/30 mb-3">
+                    <span class="text-xs font-bold tracking-widest uppercase text-indigo-300 px-3 py-1">Тема: Сприймання інформації</span>
+                </div>
+                <h2 class="heading-font text-3xl md:text-5xl font-extrabold text-white mb-4 leading-tight">
+                    Як ми пізнаємо <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400">наш світ?</span>
+                </h2>
+                <p class="text-slate-300 text-sm md:text-base leading-relaxed">
+                    Обирай випробування, тренуй свої супергеройські органи чуття та дізнавайся, як люди отримують і передають інформацію!
+                </p>
+            </div>
+
+            <!-- Mini-Games Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 w-full max-w-4xl">
+
+                <div onclick="startGame(1)" class="glass-card rounded-3xl p-6 text-left cursor-pointer group border border-slate-700/60 hover:border-indigo-400/80 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-14 h-14 rounded-2xl bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center text-indigo-300 text-2xl group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-hand-pointer"></i>
+                            </div>
+                            <span class="text-xs font-bold bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30">Гра 1</span>
+                        </div>
+                        <h3 class="heading-font text-xl font-bold text-white mb-2 group-hover:text-indigo-300 transition-colors">
+                            Супер-Органи Чуття
+                        </h3>
+                        <p class="text-slate-400 text-xs md:text-sm leading-relaxed mb-4">
+                            Перетягуй об'єкти до правильного органу чуття (очі, вуха, ніс, язик чи шкіра).
+                        </p>
+                    </div>
+                    <div class="flex justify-between items-center pt-3 border-t border-slate-700/50">
+                        <span class="text-xs text-indigo-400 font-semibold"><i class="fa-solid fa-arrows-up-down-left-right mr-1"></i> Перетягування</span>
+                        <div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center group-hover:translate-x-1 transition-transform">
+                            <i class="fa-solid fa-arrow-right text-sm"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div onclick="startGame(2)" class="glass-card rounded-3xl p-6 text-left cursor-pointer group border border-slate-700/60 hover:border-purple-400/80 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-14 h-14 rounded-2xl bg-purple-500/20 border border-purple-400/40 flex items-center justify-center text-purple-300 text-2xl group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-plug"></i>
+                            </div>
+                            <span class="text-xs font-bold bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full border border-purple-500/30">Гра 2</span>
+                        </div>
+                        <h3 class="heading-font text-xl font-bold text-white mb-2 group-hover:text-purple-300 transition-colors">
+                            Кабельний З'єднувач
+                        </h3>
+                        <p class="text-slate-400 text-xs md:text-sm leading-relaxed mb-4">
+                            З'єднуй повідомлення з їхніми видами (текстові, числові, графічні, звукові, комбіновані).
+                        </p>
+                    </div>
+                    <div class="flex justify-between items-center pt-3 border-t border-slate-700/50">
+                        <span class="text-xs text-purple-400 font-semibold"><i class="fa-solid fa-link mr-1"></i> З'єднання кабелів</span>
+                        <div class="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center group-hover:translate-x-1 transition-transform">
+                            <i class="fa-solid fa-arrow-right text-sm"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div onclick="startGame(3)" class="glass-card rounded-3xl p-6 text-left cursor-pointer group border border-slate-700/60 hover:border-emerald-400/80 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300 text-2xl group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-flashlight"></i>
+                            </div>
+                            <span class="text-xs font-bold bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full border border-emerald-500/30">Гра 3</span>
+                        </div>
+                        <h3 class="heading-font text-xl font-bold text-white mb-2 group-hover:text-emerald-300 transition-colors">
+                            Ліхтарик Детектива
+                        </h3>
+                        <p class="text-slate-400 text-xs md:text-sm leading-relaxed mb-4">
+                            Шукай заховані предмети в темряві за допомогою ліхтарика та розгадуй їхні властивості.
+                        </p>
+                    </div>
+                    <div class="flex justify-between items-center pt-3 border-t border-slate-700/50">
+                        <span class="text-xs text-emerald-400 font-semibold"><i class="fa-solid fa-magnifying-glass mr-1"></i> Дослідження</span>
+                        <div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center group-hover:translate-x-1 transition-transform">
+                            <i class="fa-solid fa-arrow-right text-sm"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div onclick="startGame(4)" class="glass-card rounded-3xl p-6 text-left cursor-pointer group border border-slate-700/60 hover:border-amber-400/80 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-300 text-2xl group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-industry"></i>
+                            </div>
+                            <span class="text-xs font-bold bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full border border-amber-500/30">Гра 4</span>
+                        </div>
+                        <h3 class="heading-font text-xl font-bold text-white mb-2 group-hover:text-amber-300 transition-colors">
+                            Сортувальний Конвеєр
+                        </h3>
+                        <p class="text-slate-400 text-xs md:text-sm leading-relaxed mb-4">
+                            Швидко розподіляй рухомі об'єкти по правильних кошиках на фабриці інформації!
+                        </p>
+                    </div>
+                    <div class="flex justify-between items-center pt-3 border-t border-slate-700/50">
+                        <span class="text-xs text-amber-400 font-semibold"><i class="fa-solid fa-bolt mr-1"></i> Динамічна гра</span>
+                        <div class="w-8 h-8 rounded-full bg-amber-600 text-white flex items-center justify-center group-hover:translate-x-1 transition-transform">
+                            <i class="fa-solid fa-arrow-right text-sm"></i>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="screen-game-1" class="w-full hidden flex-col items-center">
+            <div class="w-full flex justify-between items-center mb-4 glass-panel p-4 rounded-2xl">
+                <div>
+                    <h2 class="heading-font font-bold text-lg text-indigo-300"><i class="fa-solid fa-hand-pointer mr-2"></i>Супер-Органи Чуття</h2>
+                    <p class="text-xs text-slate-300">Перетягни кожну картку до відповідного органу чуття!</p>
+                </div>
+                <button onclick="switchGameMode('menu')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold border border-slate-600 transition-colors">
+                    <i class="fa-solid fa-house mr-1"></i> Меню
+                </button>
+            </div>
+
+            <div id="g1-targets" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 w-full mb-6"></div>
+
+            <div class="w-full glass-panel p-5 rounded-3xl min-h-[160px]">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Картки для сортування:</span>
+                    <span id="g1-counter" class="text-xs bg-indigo-500/20 text-indigo-300 px-2.5 py-1 rounded-full font-bold">Залишилося: 0</span>
+                </div>
+                <div id="g1-pool" class="flex flex-wrap gap-3 justify-center items-center min-h-[100px]"></div>
+            </div>
+        </section>
+
+        <section id="screen-game-2" class="w-full hidden flex-col items-center relative">
+            <div class="w-full flex justify-between items-center mb-4 glass-panel p-4 rounded-2xl z-10">
+                <div>
+                    <h2 class="heading-font font-bold text-lg text-purple-300"><i class="fa-solid fa-plug mr-2"></i>Кабельний З'єднувач</h2>
+                    <p class="text-xs text-slate-300">Клацни спочатку на прикладі ліворуч, потім на відповідному виді праворуч!</p>
+                </div>
+                <button onclick="switchGameMode('menu')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold border border-slate-600 transition-colors">
+                    <i class="fa-solid fa-house mr-1"></i> Меню
+                </button>
+            </div>
+
+            <svg id="g2-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-visible"></svg>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 w-full z-10 my-auto">
+                <div id="g2-left-col" class="flex flex-col space-y-3"></div>
+                <div id="g2-right-col" class="flex flex-col space-y-3"></div>
+            </div>
+        </section>
+
+        <section id="screen-game-3" class="w-full hidden flex-col items-center">
+            <div class="w-full flex justify-between items-center mb-4 glass-panel p-4 rounded-2xl">
+                <div>
+                    <h2 class="heading-font font-bold text-lg text-emerald-300"><i class="fa-solid fa-flashlight mr-2"></i>Ліхтарик Детектива</h2>
+                    <p class="text-xs text-slate-300">Води курсором/пальцем у темному кімнатному куточку та знайди всі об'єкти!</p>
+                </div>
+                <button onclick="switchGameMode('menu')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold border border-slate-600 transition-colors">
+                    <i class="fa-solid fa-house mr-1"></i> Меню
+                </button>
+            </div>
+
+            <div class="relative w-full max-w-3xl h-[380px] rounded-3xl overflow-hidden glass-panel border-2 border-slate-700" id="g3-room">
+                <div id="g3-overlay" class="absolute inset-0 flashlight-overlay z-20 cursor-crosshair"></div>
+                <div id="g3-objects-layer" class="absolute inset-0 z-10"></div>
+            </div>
+
+            <div id="g3-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+                <div class="glass-panel p-6 rounded-3xl max-w-md w-full text-center border-2 border-emerald-500/40">
+                    <div id="g3-modal-icon" class="text-5xl mb-3 text-emerald-400"></div>
+                    <h3 id="g3-modal-title" class="heading-font text-xl font-bold text-white mb-2"></h3>
+                    <p id="g3-modal-desc" class="text-sm text-slate-300 mb-5"></p>
+                    <div id="g3-modal-options" class="grid grid-cols-1 gap-2.5"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="screen-game-4" class="w-full hidden flex-col items-center">
+            <div class="w-full flex justify-between items-center mb-4 glass-panel p-4 rounded-2xl">
+                <div>
+                    <h2 class="heading-font font-bold text-lg text-amber-300"><i class="fa-solid fa-industry mr-2"></i>Сортувальний Конвеєр</h2>
+                    <p class="text-xs text-slate-300">Спрямуй об'єкт на конвеєрі у відповідний контейнер органу чуття!</p>
+                </div>
+                <button onclick="switchGameMode('menu')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold border border-slate-600 transition-colors">
+                    <i class="fa-solid fa-house mr-1"></i> Меню
+                </button>
+            </div>
+
+            <div class="w-full max-w-3xl flex flex-col items-center">
+                <div class="relative w-full h-44 rounded-3xl overflow-hidden glass-panel flex flex-col items-center justify-center mb-6 border-2 border-amber-500/30">
+                    <div class="conveyor-belt absolute bottom-0 w-full h-8 border-t border-slate-600/50"></div>
+                    <div id="g4-current-item" class="relative z-10 flex flex-col items-center justify-center p-4 rounded-2xl glass-card border border-amber-400/50 min-w-[180px] transition-all transform scale-100"></div>
+                </div>
+                <div id="g4-bins" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 w-full"></div>
+            </div>
+        </section>
+
+        <div id="victory-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-lg z-50 hidden flex items-center justify-center p-4">
+            <div class="glass-panel p-8 rounded-3xl max-w-lg w-full text-center border-2 border-indigo-500/50 shadow-2xl relative overflow-hidden">
+                <canvas id="confetti-canvas" class="absolute inset-0 pointer-events-none"></canvas>
+
+                <div class="w-20 h-20 mx-auto rounded-full bg-gradient-to-tr from-amber-400 to-yellow-300 flex items-center justify-center text-slate-900 text-4xl mb-4 shadow-lg shadow-amber-500/30">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+
+                <h2 class="heading-font text-3xl font-extrabold text-white mb-2">Чудова Робота!</h2>
+                <p id="victory-message" class="text-slate-300 text-sm mb-6">Ти успішно пройшов усі завдання міні-гри!</p>
+
+                <div class="flex justify-center items-center space-x-2 mb-6">
+                    <i class="fa-solid fa-star text-amber-400 text-3xl star-animated" style="animation-delay: 0.1s;"></i>
+                    <i class="fa-solid fa-star text-amber-400 text-4xl star-animated" style="animation-delay: 0.25s;"></i>
+                    <i class="fa-solid fa-star text-amber-400 text-3xl star-animated" style="animation-delay: 0.4s;"></i>
+                </div>
+
+                <div class="flex space-x-3 justify-center">
+                    <button onclick="restartCurrentGame()" class="px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm btn-bounce shadow-lg shadow-indigo-600/30">
+                        <i class="fa-solid fa-rotate-right mr-2"></i> Ще раз
+                    </button>
+                    <button onclick="switchGameMode('menu')" class="px-5 py-3 rounded-2xl bg-slate-700 hover:bg-slate-600 text-slate-100 font-bold text-sm btn-bounce">
+                        <i class="fa-solid fa-list mr-2"></i> Меню ігор
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="w-full text-center py-3 text-xs text-slate-500 border-t border-slate-800/80">
+        Урок інформатики 2 клас • Тема: «Сприймання людиною інформації»
+    </footer>
+
+    <script>
+        /* Web Audio API Synthesizer for Fun Sound Effects without external files */
+        let audioCtx = null;
+        let soundEnabled = true;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            initAudio();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'pop') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            } else if (type === 'success') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.setValueAtTime(659.25, now + 0.08);
+                osc.frequency.setValueAtTime(783.99, now + 0.16);
+                osc.frequency.setValueAtTime(1046.50, now + 0.24);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } else if (type === 'error') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.linearRampToValueAtTime(140, now + 0.2);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            } else if (type === 'win') {
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const subOsc = audioCtx.createOscillator();
+                    const subGain = audioCtx.createGain();
+                    subOsc.type = 'sine';
+                    subOsc.frequency.setValueAtTime(freq, now + idx * 0.1);
+                    subGain.gain.setValueAtTime(0.25, now + idx * 0.1);
+                    subGain.gain.linearRampToValueAtTime(0.01, now + idx * 0.1 + 0.25);
+                    subOsc.connect(subGain);
+                    subGain.connect(audioCtx.destination);
+                    subOsc.start(now + idx * 0.1);
+                    subOsc.stop(now + idx * 0.1 + 0.25);
+                });
+            }
+        }
+
+        function toggleAudio() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            if (soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high';
+                playSound('pop');
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark';
+            }
+        }
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            const newArr = [...array];
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [newArr[currentIndex], newArr[randomIndex]] = [newArr[randomIndex], newArr[currentIndex]];
+            }
+            return newArr;
+        }
+
+        let currentGame = 0;
+        let totalStars = 0;
+
+        function updateStars(amount) {
+            totalStars += amount;
+            document.getElementById('total-stars').innerText = totalStars;
+        }
+
+        function switchGameMode(screen) {
+            playSound('pop');
+            document.getElementById('screen-menu').classList.add('hidden');
+            document.getElementById('screen-game-1').classList.add('hidden');
+            document.getElementById('screen-game-2').classList.add('hidden');
+            document.getElementById('screen-game-3').classList.add('hidden');
+            document.getElementById('screen-game-4').classList.add('hidden');
+            document.getElementById('victory-modal').classList.add('hidden');
+
+            if (screen === 'menu') {
+                currentGame = 0;
+                document.getElementById('screen-menu').classList.remove('hidden');
+            } else {
+                document.getElementById(`screen-game-${screen}`).classList.remove('hidden');
+            }
+        }
+
+        function startGame(id) {
+            currentGame = id;
+            switchGameMode(id);
+
+            if (id === 1) initGame1();
+            if (id === 2) initGame2();
+            if (id === 3) initGame3();
+            if (id === 4) initGame4();
+        }
+
+        function restartCurrentGame() {
+            document.getElementById('victory-modal').classList.add('hidden');
+            if (currentGame > 0) startGame(currentGame);
+        }
+
+        function showVictory(msg = "Ти відмінно виконав усі завдання!") {
+            playSound('win');
+            document.getElementById('victory-message').innerText = msg;
+            document.getElementById('victory-modal').classList.remove('hidden');
+            updateStars(5);
+            triggerConfetti();
+        }
+
+        const ORGANS_DATA = [
+            { id: 'eyes', name: 'Очі (Зір)', icon: 'fa-eye', color: 'border-blue-400 text-blue-300 bg-blue-500/20' },
+            { id: 'ears', name: 'Вуха (Слух)', icon: 'fa-ear-listen', color: 'border-purple-400 text-purple-300 bg-purple-500/20' },
+            { id: 'nose', name: 'Ніс (Нюх)', icon: 'fa-wind', color: 'border-emerald-400 text-emerald-300 bg-emerald-500/20' },
+            { id: 'tongue', name: 'Язик (Смак)', icon: 'fa-face-smile-wink', color: 'border-rose-400 text-rose-300 bg-rose-500/20' },
+            { id: 'skin', name: 'Шкіра (Дотик)', icon: 'fa-hand', color: 'border-amber-400 text-amber-300 bg-amber-500/20' }
+        ];
+
+        const SENSE_ITEMS_POOL = [
+            { id: 1, target: 'eyes', label: "Кольоровий метелик", icon: 'fa-bug', color: 'text-amber-400' },
+            { id: 2, target: 'eyes', label: "Червоне яблуко", icon: 'fa-apple-whole', color: 'text-red-400' },
+            { id: 3, target: 'ears', label: "Спів пташки", icon: 'fa-dove', color: 'text-sky-300' },
+            { id: 4, target: 'ears', label: "Шкільний дзвінок", icon: 'fa-bell', color: 'text-yellow-400' },
+            { id: 5, target: 'nose', label: "Запах пиріжка", icon: 'fa-bread-slice', color: 'text-amber-300' },
+            { id: 6, target: 'nose', label: "Аромат квітів", icon: 'fa-fan', color: 'text-pink-400' },
+            { id: 7, target: 'tongue', label: "Кислий лимон", icon: 'fa-lemon', color: 'text-yellow-300' },
+            { id: 8, target: 'tongue', label: "Солодка цукерка", icon: 'fa-candy-cane', color: 'text-pink-300' },
+            { id: 9, target: 'skin', label: "Пухнастий котик", icon: 'fa-cat', color: 'text-orange-300' },
+            { id: 10, target: 'skin', label: "М'який м'яч", icon: 'fa-football', color: 'text-teal-300' }
+        ];
+
+        let g1Remaining = 0;
+
+        function initGame1() {
+            const targetsContainer = document.getElementById('g1-targets');
+            const poolContainer = document.getElementById('g1-pool');
+
+            targetsContainer.innerHTML = '';
+            poolContainer.innerHTML = '';
+
+            ORGANS_DATA.forEach(organ => {
+                const organEl = document.createElement('div');
+                organEl.className = `drop-target glass-card p-3 rounded-2xl flex flex-col items-center justify-center text-center border-2 ${organ.color} min-h-[110px]`;
+                organEl.dataset.organId = organ.id;
+                organEl.innerHTML = `
+                    <i class="fa-solid ${organ.icon} text-3xl mb-1"></i>
+                    <span class="font-bold text-xs">${organ.name}</span>
+                    <div class="organ-slot flex flex-wrap gap-1 justify-center mt-2 w-full"></div>
+                `;
+
+                organEl.addEventListener('dragover', (e) => { e.preventDefault(); organEl.classList.add('drag-over'); });
+                organEl.addEventListener('dragleave', () => organEl.classList.remove('drag-over'));
+                organEl.addEventListener('drop', (e) => handleG1Drop(e, organ.id, organEl));
+
+                targetsContainer.appendChild(organEl);
+            });
+
+            const selectedItems = shuffle(SENSE_ITEMS_POOL).slice(0, 7);
+            g1Remaining = selectedItems.length;
+            document.getElementById('g1-counter').innerText = `Залишилося: ${g1Remaining}`;
+
+            selectedItems.forEach(item => {
+                const card = document.createElement('div');
+                card.id = `g1-card-${item.id}`;
+                card.draggable = true;
+                card.dataset.itemId = item.id;
+                card.dataset.target = item.target;
+                card.className = 'draggable glass-card px-3.5 py-2.5 rounded-xl border border-slate-600 flex items-center space-x-2 text-xs font-semibold shadow-md active:opacity-50 hover:bg-slate-700/80';
+                card.innerHTML = `
+                    <i class="fa-solid ${item.icon} ${item.color} text-lg"></i>
+                    <span>${item.label}</span>
+                `;
+
+                card.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', JSON.stringify(item));
+                    playSound('pop');
+                });
+
+                setupTouchDragG1(card, item);
+                poolContainer.appendChild(card);
+            });
+        }
+
+        function handleG1Drop(e, organId, targetEl) {
+            e.preventDefault();
+            targetEl.classList.remove('drag-over');
+
+            const itemDataRaw = e.dataTransfer.getData('text/plain');
+            if (!itemDataRaw) return;
+            const item = JSON.parse(itemDataRaw);
+
+            processG1Placement(item, organId, targetEl);
+        }
+
+        function processG1Placement(item, organId, targetEl) {
+            const cardEl = document.getElementById(`g1-card-${item.id}`);
+            if (!cardEl) return;
+
+            if (item.target === organId) {
+                playSound('success');
+                cardEl.draggable = false;
+                cardEl.className = 'px-2 py-1 bg-slate-900/60 rounded-lg text-[10px] text-emerald-300 font-bold border border-emerald-500/40 flex items-center space-x-1';
+                cardEl.innerHTML = `<i class="fa-solid ${item.icon} text-xs"></i> <span>${item.label}</span>`;
+                targetEl.querySelector('.organ-slot').appendChild(cardEl);
+
+                g1Remaining--;
+                document.getElementById('g1-counter').innerText = `Залишилося: ${g1Remaining}`;
+
+                if (g1Remaining === 0) {
+                    setTimeout(() => showVictory("Супер! Всі органи чуття задоволені!"), 500);
+                }
+            } else {
+                playSound('error');
+                targetEl.classList.add('animate-bounce');
+                setTimeout(() => targetEl.classList.remove('animate-bounce'), 500);
+            }
+        }
+
+        function setupTouchDragG1(element, item) {
+            element.addEventListener('touchstart', () => {
+                playSound('pop');
+            }, { passive: true });
+
+            element.addEventListener('touchend', (e) => {
+                const touch = e.changedTouches[0];
+                const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+                const organEl = dropTarget ? dropTarget.closest('.drop-target') : null;
+
+                if (organEl) {
+                    const organId = organEl.dataset.organId;
+                    processG1Placement(item, organId, organEl);
+                }
+            });
+        }
+
+        const G2_PAIR_DATA = [
+            { id: 'g2-1', example: 'Казка «Колобок» у книжці', type: 'Текстове', icon: 'fa-book-open', color: 'text-indigo-400' },
+            { id: 'g2-2', example: 'Приклади 5 + 3 = 8', type: 'Числове', icon: 'fa-calculator', color: 'text-cyan-400' },
+            { id: 'g2-3', example: 'Фотографія татової машини', type: 'Графічне', icon: 'fa-image', color: 'text-emerald-400' },
+            { id: 'g2-4', example: 'Музика у навушниках', type: 'Звукове', icon: 'fa-music', color: 'text-amber-400' },
+            { id: 'g2-5', example: 'Мультфільм по телевізору', type: 'Комбіноване', icon: 'fa-film', color: 'text-rose-400' }
+        ];
+
+        let g2SelectedLeft = null;
+        let g2Connections = [];
+
+        function initGame2() {
+            g2SelectedLeft = null;
+            g2Connections = [];
+            const leftCol = document.getElementById('g2-left-col');
+            const rightCol = document.getElementById('g2-right-col');
+            const svgCanvas = document.getElementById('g2-canvas');
+
+            leftCol.innerHTML = '';
+            rightCol.innerHTML = '';
+            svgCanvas.innerHTML = '';
+
+            const shuffledLeft = shuffle(G2_PAIR_DATA);
+            const shuffledRight = shuffle(G2_PAIR_DATA);
+
+            shuffledLeft.forEach(item => {
+                const btn = document.createElement('button');
+                btn.id = `g2-left-${item.id}`;
+                btn.className = 'glass-card p-4 rounded-2xl flex items-center space-x-3 text-left border border-slate-600 hover:border-purple-400 text-sm font-semibold btn-bounce w-full';
+                btn.innerHTML = `
+                    <div class="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center ${item.color} text-lg font-bold">
+                        <i class="fa-solid ${item.icon}"></i>
+                    </div>
+                    <span>${item.example}</span>
+                `;
+                btn.onclick = () => selectG2Left(item, btn);
+                leftCol.appendChild(btn);
+            });
+
+            shuffledRight.forEach(item => {
+                const btn = document.createElement('button');
+                btn.id = `g2-right-${item.id}`;
+                btn.className = 'glass-card p-4 rounded-2xl flex items-center justify-between text-left border border-slate-600 hover:border-purple-400 text-sm font-bold btn-bounce w-full';
+                btn.innerHTML = `
+                    <span>Повідомлення: ${item.type}</span>
+                    <i class="fa-solid fa-circle-dot text-slate-500"></i>
+                `;
+                btn.onclick = () => selectG2Right(item, btn);
+                rightCol.appendChild(btn);
+            });
+        }
+
+        function selectG2Left(item, btn) {
+            playSound('pop');
+            document.querySelectorAll('#g2-left-col button').forEach(b => b.classList.remove('ring-2', 'ring-purple-400', 'bg-purple-500/20'));
+
+            g2SelectedLeft = item;
+            btn.classList.add('ring-2', 'ring-purple-400', 'bg-purple-500/20');
+        }
+
+        function selectG2Right(item, btn) {
+            if (!g2SelectedLeft) {
+                playSound('error');
+                return;
+            }
+
+            if (g2SelectedLeft.id === item.id) {
+                playSound('success');
+                const leftBtn = document.getElementById(`g2-left-${g2SelectedLeft.id}`);
+                leftBtn.className = 'glass-card p-4 rounded-2xl flex items-center space-x-3 text-left border-2 border-emerald-500 bg-emerald-500/20 text-emerald-200 text-sm font-semibold w-full pointer-events-none';
+                btn.className = 'glass-card p-4 rounded-2xl flex items-center justify-between text-left border-2 border-emerald-500 bg-emerald-500/20 text-emerald-200 text-sm font-bold w-full pointer-events-none';
+
+                drawSVGLine(leftBtn, btn);
+
+                g2Connections.push(item.id);
+                g2SelectedLeft = null;
+
+                if (g2Connections.length === G2_PAIR_DATA.length) {
+                    setTimeout(() => showVictory("Вітаємо! Всі кабелі повідомлень підключено правильно!"), 500);
+                }
+            } else {
+                playSound('error');
+                btn.classList.add('animate-shake');
+                setTimeout(() => btn.classList.remove('animate-shake'), 400);
+            }
+        }
+
+        function drawSVGLine(el1, el2) {
+            const svg = document.getElementById('g2-canvas');
+            const rect1 = el1.getBoundingClientRect();
+            const rect2 = el2.getBoundingClientRect();
+            const containerRect = svg.getBoundingClientRect();
+
+            const x1 = rect1.right - containerRect.left;
+            const y1 = rect1.top + rect1.height / 2 - containerRect.top;
+            const x2 = rect2.left - containerRect.left;
+            const y2 = rect2.top + rect2.height / 2 - containerRect.top;
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const dx = (x2 - x1) / 2;
+            const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+
+            path.setAttribute('d', d);
+            path.setAttribute('stroke', '#10b981');
+            path.setAttribute('stroke-width', '4');
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke-dasharray', '8 4');
+
+            svg.appendChild(path);
+        }
+
+        const G3_ROOM_OBJECTS = [
+            { id: 1, name: 'Квітка вазон', icon: 'fa-plant-wilt', left: '15%', top: '25%', q: 'Яким органом чуття ми відчуємо ПРИЄМНИЙ ЗАПАХ квітки?', options: [{ text: 'Ніс (Нюх)', correct: true }, { text: 'Вуха (Слух)', correct: false }, { text: 'Шкіра (Дотик)', correct: false }] },
+            { id: 2, name: 'Колонки', icon: 'fa-volume-high', left: '75%', top: '20%', q: 'Яким органом ми чуємо ГУЧНУ МУЗИКУ з колонок?', options: [{ text: 'Очі (Зір)', correct: false }, { text: 'Вуха (Слух)', correct: true }, { text: 'Язик (Смак)', correct: false }] },
+            { id: 3, name: 'Гарячий чай', icon: 'fa-mug-hot', left: '45%', top: '65%', q: 'Яким органом чуття ми відчуємо, що чашка ГАРЯЧА?', options: [{ text: 'Шкіра (Дотик)', correct: true }, { text: 'Очі (Зір)', correct: false }, { text: 'Ніс (Нюх)', correct: false }] },
+            { id: 4, name: 'Лимон', icon: 'fa-lemon', left: '20%', top: '70%', q: 'Який орган підкаже нам, що лимон КИСЛИЙ?', options: [{ text: 'Язик (Смак)', correct: true }, { text: 'Вуха (Слух)', correct: false }, { text: 'Шкіра (Дотик)', correct: false }] },
+            { id: 5, name: 'Картина', icon: 'fa-palette', left: '50%', top: '20%', q: 'Яким органом ми бачимо ЯСКРАВІ КОЛЬОРИ картини?', options: [{ text: 'Ніс (Нюх)', correct: false }, { text: 'Очі (Зір)', correct: true }, { text: 'Язик (Смак)', correct: false }] }
+        ];
+
+        let g3FoundCount = 0;
+
+        function initGame3() {
+            g3FoundCount = 0;
+            const objectsLayer = document.getElementById('g3-objects-layer');
+            const room = document.getElementById('g3-room');
+            const overlay = document.getElementById('g3-overlay');
+
+            objectsLayer.innerHTML = '';
+
+            G3_ROOM_OBJECTS.forEach(obj => {
+                const item = document.createElement('div');
+                item.id = `g3-obj-${obj.id}`;
+                item.className = 'absolute cursor-pointer p-3 rounded-2xl bg-emerald-500/20 border border-emerald-400/50 hover:scale-125 transition-transform flex flex-col items-center justify-center text-emerald-300';
+                item.style.left = obj.left;
+                item.style.top = obj.top;
+                item.innerHTML = `<i class="fa-solid ${obj.icon} text-3xl"></i>`;
+                item.onclick = () => openG3Question(obj);
+                objectsLayer.appendChild(item);
+            });
+
+            const updateFlashlight = (x, y) => {
+                const rect = room.getBoundingClientRect();
+                const relX = x - rect.left;
+                const relY = y - rect.top;
+                overlay.style.setProperty('--x', `${relX}px`);
+                overlay.style.setProperty('--y', `${relY}px`);
+            };
+
+            room.onmousemove = (e) => updateFlashlight(e.clientX, e.clientY);
+            room.ontouchmove = (e) => {
+                if (e.touches.length > 0) {
+                    updateFlashlight(e.touches[0].clientX, e.touches[0].clientY);
+                }
+            };
+        }
+
+        function openG3Question(obj) {
+            playSound('pop');
+            const modal = document.getElementById('g3-modal');
+            document.getElementById('g3-modal-icon').innerHTML = `<i class="fa-solid ${obj.icon}"></i>`;
+            document.getElementById('g3-modal-title').innerText = obj.name;
+            document.getElementById('g3-modal-desc').innerText = obj.q;
+
+            const optsContainer = document.getElementById('g3-modal-options');
+            optsContainer.innerHTML = '';
+
+            const shuffledOpts = shuffle(obj.options);
+
+            shuffledOpts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'p-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-bold text-sm btn-bounce text-left w-full flex items-center justify-between';
+                btn.innerHTML = `<span>${opt.text}</span> <i class="fa-regular fa-circle text-slate-500"></i>`;
+                btn.onclick = () => {
+                    if (opt.correct) {
+                        playSound('success');
+                        btn.className = 'p-3.5 rounded-xl bg-emerald-600 text-white font-bold text-sm w-full flex items-center justify-between border-2 border-emerald-400';
+                        btn.innerHTML = `<span>${opt.text}</span> <i class="fa-solid fa-check text-white"></i>`;
+
+                        setTimeout(() => {
+                            modal.classList.add('hidden');
+                            const objEl = document.getElementById(`g3-obj-${obj.id}`);
+                            if (objEl) {
+                                objEl.className = 'absolute p-3 rounded-2xl bg-emerald-500 text-slate-900 border-2 border-emerald-300 opacity-80 pointer-events-none flex flex-col items-center justify-center';
+                            }
+                            g3FoundCount++;
+                            if (g3FoundCount === G3_ROOM_OBJECTS.length) {
+                                showVictory("Детектив! Ти успішно знайшов та дослідив усі об'єкти кімнати!");
+                            }
+                        }, 700);
+                    } else {
+                        playSound('error');
+                        btn.className = 'p-3.5 rounded-xl bg-rose-600/40 text-rose-200 font-bold text-sm w-full flex items-center justify-between border border-rose-500 animate-shake';
+                    }
+                };
+                optsContainer.appendChild(btn);
+            });
+
+            modal.classList.remove('hidden');
+        }
+
+        const G4_ITEMS = [
+            { id: 1, label: 'Спів пташки', target: 'ears', icon: 'fa-dove', color: 'text-sky-300' },
+            { id: 2, label: 'Барвиста веселка', target: 'eyes', icon: 'fa-rainbow', color: 'text-pink-400' },
+            { id: 3, label: 'Ароматна кава', target: 'nose', icon: 'fa-mug-saucer', color: 'text-amber-500' },
+            { id: 4, label: 'Солодка морозиво', target: 'tongue', icon: 'fa-ice-cream', color: 'text-rose-300' },
+            { id: 5, label: 'Холодний лід', target: 'skin', icon: 'fa-snowflake', color: 'text-cyan-300' },
+            { id: 6, label: 'Гучний сміх', target: 'ears', icon: 'fa-face-laugh-beam', color: 'text-yellow-300' },
+            { id: 7, label: 'Малюнок в альбомі', target: 'eyes', icon: 'fa-image', color: 'text-emerald-300' }
+        ];
+
+        let g4Queue = [];
+        let g4Current = null;
+
+        function initGame4() {
+            g4Queue = shuffle(G4_ITEMS);
+
+            const binsContainer = document.getElementById('g4-bins');
+            binsContainer.innerHTML = '';
+
+            ORGANS_DATA.forEach(organ => {
+                const bin = document.createElement('button');
+                bin.className = `glass-card p-3 rounded-2xl flex flex-col items-center justify-center text-center border-2 ${organ.color} btn-bounce min-h-[90px]`;
+                bin.innerHTML = `
+                    <i class="fa-solid ${organ.icon} text-2xl mb-1"></i>
+                    <span class="font-bold text-xs">${organ.name}</span>
+                `;
+                bin.onclick = () => selectG4Bin(organ.id, bin);
+                binsContainer.appendChild(bin);
+            });
+
+            loadNextG4Item();
+        }
+
+        function loadNextG4Item() {
+            if (g4Queue.length === 0) {
+                showVictory("Супер фабрика! Всі інформаційні об'єкти відсортовано без помилок!");
+                return;
+            }
+
+            g4Current = g4Queue.pop();
+            const itemDisplay = document.getElementById('g4-current-item');
+            itemDisplay.innerHTML = `
+                <i class="fa-solid ${g4Current.icon} ${g4Current.color} text-4xl mb-2 animate-bounce"></i>
+                <span class="font-bold text-sm text-slate-100">${g4Current.label}</span>
+            `;
+        }
+
+        function selectG4Bin(organId, binEl) {
+            if (!g4Current) return;
+
+            if (g4Current.target === organId) {
+                playSound('success');
+                binEl.classList.add('bg-emerald-500/30', 'border-emerald-400');
+                setTimeout(() => {
+                    binEl.classList.remove('bg-emerald-500/30', 'border-emerald-400');
+                    loadNextG4Item();
+                }, 300);
+            } else {
+                playSound('error');
+                binEl.classList.add('animate-shake', 'border-rose-500');
+                setTimeout(() => binEl.classList.remove('animate-shake', 'border-rose-500'), 400);
+            }
+        }
+
+        function triggerConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+
+            const pieces = [];
+            const colors = ['#f59e0b', '#10b981', '#6366f1', '#ec4899', '#3b82f6'];
+
+            for (let i = 0; i < 60; i++) {
+                pieces.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speedY: Math.random() * 3 + 2,
+                    speedX: Math.random() * 2 - 1
+                });
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                pieces.forEach(p => {
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    p.y += p.speedY;
+                    p.x += p.speedX;
+                });
+
+                if (pieces.some(p => p.y < canvas.height)) {
+                    requestAnimationFrame(draw);
+                }
+            }
+
+            draw();
+        }
+
+        window.onload = function() {
+            switchGameMode('menu');
+        };
+    </script>
+</body>
+</html>
