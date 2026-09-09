@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Світ Інформатики - 3 Клас</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            purple: '#6C5CE7',
+                            pink: '#FD79A8',
+                            yellow: '#FDCB6E',
+                            green: '#00B894',
+                            blue: '#0984E3',
+                            orange: '#E17055',
+                            dark: '#2D3436',
+                            bg: '#F0F3F8'
+                        }
+                    },
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        nunito: ['Nunito', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #EBF3FA;
+            background-image: radial-gradient(#CBD5E1 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        .heading-font {
+            font-family: 'Fredoka', cursive;
+        }
+
+        /* Vector Card Styling */
+        .vector-card {
+            background: #ffffff;
+            border: 3px solid #2D3436;
+            box-shadow: 5px 5px 0px #2D3436;
+            border-radius: 20px;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .vector-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 7px 7px 0px #2D3436;
+        }
+
+        .vector-card:active {
+            transform: translateY(2px);
+            box-shadow: 2px 2px 0px #2D3436;
+        }
+
+        .vector-btn {
+            border: 3px solid #2D3436;
+            box-shadow: 4px 4px 0px #2D3436;
+            border-radius: 16px;
+            font-weight: 800;
+            transition: all 0.1s ease;
+        }
+
+        .vector-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 6px 6px 0px #2D3436;
+        }
+
+        .vector-btn:active {
+            transform: translateY(2px);
+            box-shadow: 1px 1px 0px #2D3436;
+        }
+
+        .drop-zone {
+            border: 3px dashed #A0AEC0;
+            transition: all 0.2s ease;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #6C5CE7;
+            background-color: #F3E8FF !important;
+            transform: scale(1.02);
+        }
+
+        .draggable-item {
+            cursor: grab;
+            touch-action: none;
+        }
+
+        .draggable-item:active {
+            cursor: grabbing;
+        }
+
+        .shake {
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+            40%, 60% { transform: translate3d(6px, 0, 0); }
+        }
+
+        .pop-in {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #E2E8F0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94A3B8;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between p-3 sm:p-6 overflow-x-hidden">
+
+    <!-- TOP HEADER BAR -->
+    <header class="max-w-6xl w-full mx-auto bg-white border-4 border-slate-800 rounded-2xl p-4 shadow-[6px_6px_0px_#2D3436] flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="showHub()">
+            <div class="w-12 h-12 bg-yellow-400 border-2 border-slate-800 rounded-xl flex items-center justify-center text-2xl shadow-[2px_2px_0px_#2D3436]">
+                💻
+            </div>
+            <div>
+                <h1 class="heading-font text-2xl font-bold text-slate-800 leading-tight">ІнфоСвіт 3 клас</h1>
+                <p class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Роль інформації & Дії з нею</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3 sm:gap-6">
+            <!-- Score Counter -->
+            <div class="bg-amber-100 border-2 border-slate-800 px-4 py-2 rounded-xl flex items-center gap-2 shadow-[2px_2px_0px_#2D3436]">
+                <span class="text-xl">⭐</span>
+                <span id="score-display" class="heading-font text-xl font-bold text-amber-800">0</span>
+            </div>
+
+            <!-- Sound Button -->
+            <button id="sound-btn" onclick="toggleSound()" class="vector-btn bg-sky-300 p-2.5 text-slate-800 text-lg flex items-center justify-center">
+                🔊
+            </button>
+
+            <!-- Home Menu Button -->
+            <button onclick="showHub()" class="vector-btn bg-purple-400 hover:bg-purple-500 text-white px-4 py-2 flex items-center gap-2 font-bold text-sm sm:text-base">
+                <span>🏠</span> Меню
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-6xl w-full mx-auto flex-1 flex flex-col justify-center">
+
+        <!-- MENU HUB VIEW -->
+        <div id="view-hub" class="space-y-6">
+            <div class="text-center space-y-2 mb-8">
+                <h2 class="heading-font text-3xl sm:text-4xl font-extrabold text-slate-800">Обирай міні-гру та досліджуй!</h2>
+                <p class="text-slate-600 font-semibold text-sm sm:text-base">Пройди всі 4 рівні, щоб стати справжнім Майстром Інформатики!</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Level 1 Card -->
+                <div onclick="startLevel(1)" class="vector-card p-6 bg-gradient-to-br from-pink-100 to-rose-50 border-4 border-slate-800 cursor-pointer flex gap-4 items-start group">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 bg-pink-400 border-3 border-slate-800 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl shadow-[3px_3px_0px_#2D3436] shrink-0 group-hover:scale-105 transition-transform">
+                        👁️
+                    </div>
+                    <div class="space-y-1">
+                        <span class="bg-pink-200 border border-slate-800 text-pink-900 text-xs font-black px-2.5 py-0.5 rounded-full uppercase">Рівень 1</span>
+                        <h3 class="heading-font text-xl sm:text-2xl font-bold text-slate-800">Органи Чуття</h3>
+                        <p class="text-xs sm:text-sm text-slate-600 font-bold">Розподіли повідомлення за допомогою яких органів чуття ми їх сприймаємо.</p>
+                        <div class="pt-2 flex items-center gap-1 text-xs font-black text-pink-600">
+                            <span>Тактильний перетяг</span> ➔
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Level 2 Card -->
+                <div onclick="startLevel(2)" class="vector-card p-6 bg-gradient-to-br from-amber-100 to-yellow-50 border-4 border-slate-800 cursor-pointer flex gap-4 items-start group">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 bg-amber-400 border-3 border-slate-800 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl shadow-[3px_3px_0px_#2D3436] shrink-0 group-hover:scale-105 transition-transform">
+                        ⚙️
+                    </div>
+                    <div class="space-y-1">
+                        <span class="bg-amber-200 border border-slate-800 text-amber-900 text-xs font-black px-2.5 py-0.5 rounded-full uppercase">Рівень 2</span>
+                        <h3 class="heading-font text-xl sm:text-2xl font-bold text-slate-800">Фабрика Процесів</h3>
+                        <p class="text-xs sm:text-sm text-slate-600 font-bold">Визнач інформаційну дію: Отримання, Зберігання, Опрацювання чи Передавання.</p>
+                        <div class="pt-2 flex items-center gap-1 text-xs font-black text-amber-700">
+                            <span>Сортування на конвеєрі</span> ➔
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Level 3 Card -->
+                <div onclick="startLevel(3)" class="vector-card p-6 bg-gradient-to-br from-cyan-100 to-sky-50 border-4 border-slate-800 cursor-pointer flex gap-4 items-start group">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 bg-cyan-400 border-3 border-slate-800 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl shadow-[3px_3px_0px_#2D3436] shrink-0 group-hover:scale-105 transition-transform">
+                        🖥️
+                    </div>
+                    <div class="space-y-1">
+                        <span class="bg-cyan-200 border border-slate-800 text-cyan-900 text-xs font-black px-2.5 py-0.5 rounded-full uppercase">Рівень 3</span>
+                        <h3 class="heading-font text-xl sm:text-2xl font-bold text-slate-800">Лабораторія ПК</h3>
+                        <p class="text-xs sm:text-sm text-slate-600 font-bold">Розподіли пристрої комп'ютера на Введення, Виведення та Опрацювання.</p>
+                        <div class="pt-2 flex items-center gap-1 text-xs font-black text-sky-700">
+                            <span>Підключення блоків</span> ➔
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Level 4 Card -->
+                <div onclick="startLevel(4)" class="vector-card p-6 bg-gradient-to-br from-emerald-100 to-green-50 border-4 border-slate-800 cursor-pointer flex gap-4 items-start group">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-400 border-3 border-slate-800 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl shadow-[3px_3px_0px_#2D3436] shrink-0 group-hover:scale-105 transition-transform">
+                        🧩
+                    </div>
+                    <div class="space-y-1">
+                        <span class="bg-emerald-200 border border-slate-800 text-emerald-900 text-xs font-black px-2.5 py-0.5 rounded-full uppercase">Рівень 4</span>
+                        <h3 class="heading-font text-xl sm:text-2xl font-bold text-slate-800">Ланцюжок Подій</h3>
+                        <p class="text-xs sm:text-sm text-slate-600 font-bold">Збери правильний порядок дій з інформацією в життєвих ситуаціях.</p>
+                        <div class="pt-2 flex items-center gap-1 text-xs font-black text-emerald-700">
+                            <span>Конструктор послідовності</span> ➔
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GAME LEVEL CONTAINER VIEW -->
+        <div id="view-game" class="hidden space-y-4">
+            <!-- Level Bar -->
+            <div class="flex items-center justify-between bg-white border-3 border-slate-800 rounded-xl p-3 shadow-[4px_4px_0px_#2D3436]">
+                <div class="flex items-center gap-2">
+                    <span id="level-badge" class="bg-indigo-500 text-white font-black text-xs px-3 py-1 rounded-lg uppercase border border-slate-800">Рівень 1</span>
+                    <h2 id="level-title" class="heading-font text-lg sm:text-xl font-bold text-slate-800">Назва рівню</h2>
+                </div>
+                <div id="level-progress-text" class="font-black text-slate-600 text-sm">
+                    Прогрес: 0/0
+                </div>
+            </div>
+
+            <!-- Dynamic Game Stage Area -->
+            <div id="game-stage" class="min-h-[420px] bg-white border-4 border-slate-800 rounded-2xl p-4 sm:p-6 shadow-[6px_6px_0px_#2D3436] relative overflow-hidden flex flex-col justify-between">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+
+        <!-- LEVEL COMPLETE MODAL -->
+        <div id="modal-success" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+            <div class="vector-card bg-white max-w-md w-full p-6 text-center space-y-5 border-4 border-slate-800 pop-in">
+                <div class="w-20 h-20 bg-yellow-300 border-4 border-slate-800 rounded-3xl mx-auto flex items-center justify-center text-5xl shadow-[4px_4px_0px_#2D3436] animate-bounce">
+                    🏆
+                </div>
+                <div class="space-y-1">
+                    <h3 class="heading-font text-3xl font-black text-slate-800">Чудова Робота!</h3>
+                    <p class="text-slate-600 font-bold text-sm">Ти успішно пройшов цей рівень і проявив справжні знання з інформатики!</p>
+                </div>
+
+                <div class="bg-amber-50 border-2 border-slate-800 p-4 rounded-xl flex justify-around items-center">
+                    <div>
+                        <div class="text-xs text-slate-500 font-black uppercase">Зароблено очок</div>
+                        <div id="modal-score" class="heading-font text-2xl font-black text-amber-600">+100</div>
+                    </div>
+                    <div class="h-8 w-0.5 bg-slate-300"></div>
+                    <div>
+                        <div class="text-xs text-slate-500 font-black uppercase">Точність</div>
+                        <div id="modal-accuracy" class="heading-font text-2xl font-black text-emerald-600">100%</div>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button onclick="showHub()" class="vector-btn bg-slate-200 hover:bg-slate-300 text-slate-800 flex-1 py-3 text-base">
+                        📍 Меню
+                    </button>
+                    <button id="modal-next-btn" onclick="nextLevel()" class="vector-btn bg-green-400 hover:bg-green-500 text-slate-900 flex-1 py-3 text-base">
+                        Далі ➔
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="max-w-6xl w-full mx-auto text-center py-4 text-xs font-bold text-slate-500">
+        Урок Інформатики 3 Клас • Тема: "Роль інформації в житті людини. Дії з інформацією"
+    </footer>
+
+    <script>
+        /* SOUND SYNTHESIZER (Web Audio API - Standalone) */
+        let audioCtx = null;
+        let soundEnabled = true;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('sound-btn');
+            btn.innerHTML = soundEnabled ? '🔊' : '🔇';
+            btn.classList.toggle('bg-sky-300', soundEnabled);
+            btn.classList.toggle('bg-slate-300', !soundEnabled);
+        }
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            initAudio();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'click') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            } else if (type === 'success') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+                osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now); // A3
+                osc.frequency.setValueAtTime(160, now + 0.1);
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            } else if (type === 'victory') {
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const noteOsc = audioCtx.createOscillator();
+                    const noteGain = audioCtx.createGain();
+                    noteOsc.connect(noteGain);
+                    noteGain.connect(audioCtx.destination);
+                    noteOsc.frequency.setValueAtTime(freq, now + idx * 0.1);
+                    noteGain.gain.setValueAtTime(0.2, now + idx * 0.1);
+                    noteGain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.1 + 0.25);
+                    noteOsc.start(now + idx * 0.1);
+                    noteOsc.stop(now + idx * 0.1 + 0.25);
+                });
+            }
+        }
+
+        let totalScore = 0;
+        let currentLevel = 1;
+        let levelData = {};
+
+        function addScore(points) {
+            totalScore += points;
+            document.getElementById('score-display').innerText = totalScore;
+        }
+
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function showHub() {
+            playSound('click');
+            document.getElementById('view-hub').classList.remove('hidden');
+            document.getElementById('view-game').classList.add('hidden');
+            document.getElementById('modal-success').classList.add('hidden');
+        }
+
+        function startLevel(lvl) {
+            playSound('click');
+            currentLevel = lvl;
+            document.getElementById('view-hub').classList.add('hidden');
+            document.getElementById('view-game').classList.remove('hidden');
+            document.getElementById('modal-success').classList.add('hidden');
+
+            const stage = document.getElementById('game-stage');
+            stage.innerHTML = '';
+
+            if (lvl === 1) renderLevel1();
+            else if (lvl === 2) renderLevel2();
+            else if (lvl === 3) renderLevel3();
+            else if (lvl === 4) renderLevel4();
+        }
+
+        function nextLevel() {
+            if (currentLevel < 4) {
+                startLevel(currentLevel + 1);
+            } else {
+                showHub();
+            }
+        }
+
+        function triggerWin(earnedScore, accuracy = '100%') {
+            playSound('victory');
+            confetti({
+                particleCount: 80,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+
+            document.getElementById('modal-score').innerText = '+' + earnedScore;
+            document.getElementById('modal-accuracy').innerText = accuracy;
+            
+            const nextBtn = document.getElementById('modal-next-btn');
+            if (currentLevel === 4) {
+                nextBtn.innerText = 'Завершити 🎓';
+            } else {
+                nextBtn.innerText = 'Далі ➔';
+            }
+
+            document.getElementById('modal-success').classList.remove('hidden');
+        }
+
+        /* ===================================================
+           LEVEL 1: ORGAN SENSES (Органи Чуття)
+           Tactile Drag & Drop to matching Organs
+           =================================================== */
+        const level1Items = [
+            { id: '1', text: 'Яскрава веселка', icon: '🌈', organ: 'зір' },
+            { id: '2', text: 'Гучний дзвінок', icon: '🔔', organ: 'слух' },
+            { id: '3', text: 'Ароматна квітка', icon: '🌸', organ: 'нюх' },
+            { id: '4', text: 'Солодка цукерка', icon: '🍬', organ: 'смак' },
+            { id: '5', text: 'М\'який котик', icon: '🐱', organ: 'дотик' },
+            { id: '6', text: 'Цікавий мультфільм', icon: '🎬', organ: 'зір' },
+            { id: '7', text: 'Весела пісня', icon: '🎵', organ: 'слух' },
+            { id: '8', text: 'Запах піци', icon: '🍕', organ: 'нюх' },
+            { id: '9', text: 'Кислий лимон', icon: '🍋', organ: 'смак' },
+            { id: '10', text: 'Холодний лід', icon: '🧊', organ: 'дотик' }
+        ];
+
+        const organsConfig = [
+            { key: 'зір', title: 'Зір', icon: '👁️', color: 'bg-blue-100 border-blue-400 text-blue-900' },
+            { key: 'слух', title: 'Слух', icon: '👂', color: 'bg-purple-100 border-purple-400 text-purple-900' },
+            { key: 'нюх', title: 'Нюх', icon: '👃', color: 'bg-green-100 border-green-400 text-green-900' },
+            { key: 'смак', title: 'Смак', icon: '👅', color: 'bg-pink-100 border-pink-400 text-pink-900' },
+            { key: 'дотик', title: 'Дотик', icon: '✋', color: 'bg-amber-100 border-amber-400 text-amber-900' }
+        ];
+
+        let l1State = {
+            total: 0,
+            completed: 0,
+            items: []
+        };
+
+        function renderLevel1() {
+            document.getElementById('level-badge').innerText = 'Рівень 1';
+            document.getElementById('level-title').innerText = 'Органи Чуття & Сприйняття';
+
+            // Select 6 randomized items without hints
+            l1State.items = shuffleArray(level1Items).slice(0, 6);
+            l1State.total = l1State.items.length;
+            l1State.completed = 0;
+
+            updateL1Progress();
+
+            const stage = document.getElementById('game-stage');
+            stage.innerHTML = `
+                <div class="space-y-4">
+                    <p class="text-slate-600 font-bold text-center text-sm sm:text-base">
+                        Перетягни кожен предмет до відповідного органу чуття, яким ми його сприймаємо:
+                    </p>
+
+                    <!-- Target Organs Containers -->
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
+                        ${organsConfig.map(o => `
+                            <div data-organ="${o.key}" class="drop-zone organ-drop-zone p-3 rounded-2xl border-3 border-slate-800 ${o.color} flex flex-col items-center justify-center text-center min-h-[110px] space-y-1">
+                                <span class="text-3xl">${o.icon}</span>
+                                <span class="heading-font font-bold text-sm sm:text-base">${o.title}</span>
+                                <div class="organ-slot w-full pt-1 flex flex-wrap gap-1 justify-center"></div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <!-- Draggable Cards Pool -->
+                    <div class="mt-6 pt-4 border-t-2 border-slate-200">
+                        <div class="text-xs font-black text-slate-400 uppercase tracking-wider text-center mb-3">
+                            Предмети для розподілу (Перетягуй їх нагору):
+                        </div>
+                        <div id="l1-pool" class="flex flex-wrap justify-center gap-3 min-h-[90px]">
+                            ${l1State.items.map(item => `
+                                <div id="l1-item-${item.id}" draggable="true" data-id="${item.id}" data-organ="${item.organ}" 
+                                     class="draggable-item vector-btn bg-white hover:bg-slate-50 px-3.5 py-2.5 flex items-center gap-2 text-slate-800 text-sm font-bold cursor-grab active:cursor-grabbing border-2 border-slate-800 shadow-[3px_3px_0px_#2D3436]">
+                                    <span class="text-xl">${item.icon}</span>
+                                    <span>${item.text}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            attachL1Events();
+        }
+
+        function updateL1Progress() {
+            document.getElementById('level-progress-text').innerText = `Прогрес: ${l1State.completed}/${l1State.total}`;
+        }
+
+        function attachL1Events() {
+            const draggables = document.querySelectorAll('#l1-pool .draggable-item');
+            const dropZones = document.querySelectorAll('.organ-drop-zone');
+
+            let draggedItem = null;
+
+            draggables.forEach(item => {
+                item.addEventListener('dragstart', (e) => {
+                    draggedItem = item;
+                    e.dataTransfer.setData('text/plain', item.dataset.id);
+                    setTimeout(() => item.classList.add('opacity-40'), 0);
+                });
+
+                item.addEventListener('dragend', () => {
+                    if (draggedItem) draggedItem.classList.remove('opacity-40');
+                    draggedItem = null;
+                });
+
+                // Touch handling support
+                setupTouchDrag(item, (targetZone) => {
+                    if (targetZone && targetZone.classList.contains('organ-drop-zone')) {
+                        checkL1Match(item, targetZone);
+                    }
+                });
+            });
+
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    zone.classList.add('drag-over');
+                });
+
+                zone.addEventListener('dragleave', () => {
+                    zone.classList.remove('drag-over');
+                });
+
+                zone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    zone.classList.remove('drag-over');
+                    if (draggedItem) {
+                        checkL1Match(draggedItem, zone);
+                    }
+                });
+            });
+        }
+
+        function checkL1Match(itemEl, zoneEl) {
+            const itemOrgan = itemEl.dataset.organ;
+            const targetOrgan = zoneEl.dataset.organ;
+
+            if (itemOrgan === targetOrgan) {
+                playSound('success');
+                zoneEl.querySelector('.organ-slot').appendChild(itemEl);
+                itemEl.draggable = false;
+                itemEl.classList.remove('cursor-grab', 'hover:bg-slate-50', 'shadow-[3px_3px_0px_#2D3436]');
+                itemEl.classList.add('bg-green-200', 'border-green-600', 'text-green-950', 'text-xs', 'py-1', 'px-2', 'pop-in');
+
+                l1State.completed++;
+                addScore(20);
+                updateL1Progress();
+
+                if (l1State.completed >= l1State.total) {
+                    setTimeout(() => triggerWin(l1State.total * 20), 400);
+                }
+            } else {
+                playSound('wrong');
+                zoneEl.classList.add('shake');
+                setTimeout(() => zoneEl.classList.remove('shake'), 400);
+            }
+        }
+
+        /* ===================================================
+           LEVEL 2: INFORMATION PROCESSES (Дії з Інформацією)
+           Tactile Conveyor Sorting Game
+           =================================================== */
+        const level2Scenarios = [
+            { text: 'Слухати розповідь вчителя', type: 'отримання', icon: '🎧' },
+            { text: 'Виміряти довжину лінійкою', type: 'отримання', icon: '📏' },
+            { text: 'Записати номер у щоденник', type: 'зберігання', icon: '📓' },
+            { text: 'Зберегти фото на флешку', type: 'зберігання', icon: '💾' },
+            { text: 'Розв\'язати задачу з математики', type: 'опрацювання', icon: '🧮' },
+            { text: 'Порахувати кількість дощок', type: 'опрацювання', icon: '📐' },
+            { text: 'Надіслати смс-повідомлення', type: 'передавання', icon: '📱' },
+            { text: 'Розповісти другу про фільм', type: 'передавання', icon: '🗣️' },
+            { text: 'Подивитися відео на уроці', type: 'отримання', icon: '📺' },
+            { text: 'Сфотографувати розклад', type: 'зберігання', icon: '📸' }
+        ];
+
+        let l2Queue = [];
+        let l2CurrentIndex = 0;
+        let l2Score = 0;
+
+        function renderLevel2() {
+            document.getElementById('level-badge').innerText = 'Рівень 2';
+            document.getElementById('level-title').innerText = 'Конвеєр Інформаційних Процесів';
+
+            l2Queue = shuffleArray(level2Scenarios).slice(0, 6);
+            l2CurrentIndex = 0;
+            l2Score = 0;
+
+            updateL2Progress();
+
+            const stage = document.getElementById('game-stage');
+            stage.innerHTML = `
+                <div class="flex flex-col h-full justify-between space-y-6">
+                    <p class="text-slate-600 font-bold text-center text-sm sm:text-base">
+                        Прочитай ситуацію та натисни на правильний бік конвеєра (Який це інформаційний процес?):
+                    </p>
+
+                    <!-- Active Central Card (Conveyor) -->
+                    <div class="flex justify-center items-center my-2">
+                        <div id="l2-card" class="vector-card bg-amber-50 border-4 border-slate-800 p-6 sm:p-8 max-w-md w-full text-center space-y-3 pop-in shadow-[6px_6px_0px_#2D3436]">
+                            <div id="l2-icon" class="text-5xl sm:text-6xl animate-bounce">❓</div>
+                            <div id="l2-text" class="heading-font text-lg sm:text-xl font-bold text-slate-800">
+                                Завантаження...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Process Selection Buttons Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <button onclick="submitL2Answer('отримання')" class="vector-btn bg-blue-300 hover:bg-blue-400 text-slate-900 p-3 sm:p-4 text-center space-y-1">
+                            <div class="text-2xl">📥</div>
+                            <div class="heading-font font-bold text-sm sm:text-base">Отримання</div>
+                        </button>
+                        <button onclick="submitL2Answer('зберігання')" class="vector-btn bg-purple-300 hover:bg-purple-400 text-slate-900 p-3 sm:p-4 text-center space-y-1">
+                            <div class="text-2xl">📦</div>
+                            <div class="heading-font font-bold text-sm sm:text-base">Зберігання</div>
+                        </button>
+                        <button onclick="submitL2Answer('опрацювання')" class="vector-btn bg-amber-300 hover:bg-amber-400 text-slate-900 p-3 sm:p-4 text-center space-y-1">
+                            <div class="text-2xl">🧠</div>
+                            <div class="heading-font font-bold text-sm sm:text-base">Опрацювання</div>
+                        </button>
+                        <button onclick="submitL2Answer('передавання')" class="vector-btn bg-emerald-300 hover:bg-emerald-400 text-slate-900 p-3 sm:p-4 text-center space-y-1">
+                            <div class="text-2xl">📡</div>
+                            <div class="heading-font font-bold text-sm sm:text-base">Передавання</div>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            showL2CurrentCard();
+        }
+
+        function updateL2Progress() {
+            document.getElementById('level-progress-text').innerText = `Прогрес: ${l2CurrentIndex}/${l2Queue.length}`;
+        }
+
+        function showL2CurrentCard() {
+            if (l2CurrentIndex >= l2Queue.length) {
+                setTimeout(() => triggerWin(l2Score), 300);
+                return;
+            }
+
+            const current = l2Queue[l2CurrentIndex];
+            const card = document.getElementById('l2-card');
+            card.classList.remove('pop-in');
+            void card.offsetWidth; // trigger reflow
+            card.classList.add('pop-in');
+
+            document.getElementById('l2-icon').innerText = current.icon;
+            document.getElementById('l2-text').innerText = current.text;
+        }
+
+        function submitL2Answer(selectedType) {
+            const current = l2Queue[l2CurrentIndex];
+            const card = document.getElementById('l2-card');
+
+            if (selectedType === current.type) {
+                playSound('success');
+                addScore(25);
+                l2Score += 25;
+                l2CurrentIndex++;
+                updateL2Progress();
+                showL2CurrentCard();
+            } else {
+                playSound('wrong');
+                card.classList.add('shake');
+                setTimeout(() => card.classList.remove('shake'), 400);
+            }
+        }
+
+        /* ===================================================
+           LEVEL 3: COMPUTER DEVICES (Пристрої Комп'ютера)
+           Tactile Socket Connector Game
+           =================================================== */
+        const level3Devices = [
+            { name: 'Клавіатура', type: 'введення', icon: '⌨️' },
+            { name: 'Мишка', type: 'введення', icon: '🖱️' },
+            { name: 'Мікрофон', type: 'введення', icon: '🎙️' },
+            { name: 'Веб-камера', type: 'введення', icon: '📷' },
+            { name: 'Системний блок', type: 'опрацювання', icon: '🖥️' },
+            { name: 'Процесор і Пам\'ять', type: 'опрацювання', icon: '⚡' },
+            { name: 'Монітор', type: 'виведення', icon: '🖥️' },
+            { name: 'Принтер', type: 'виведення', icon: '🖨️' },
+            { name: 'Навушники', type: 'виведення', icon: '🎧' },
+            { name: 'Колонки', type: 'виведення', icon: '🔊' }
+        ];
+
+        let l3SelectedDevice = null;
+        let l3DevicesQueue = [];
+        let l3CompletedCount = 0;
+
+        function renderLevel3() {
+            document.getElementById('level-badge').innerText = 'Рівень 3';
+            document.getElementById('level-title').innerText = 'Лабораторія ПК: Пристрої Введення/Виведення';
+
+            l3DevicesQueue = shuffleArray(level3Devices).slice(0, 6);
+            l3CompletedCount = 0;
+            l3SelectedDevice = null;
+
+            updateL3Progress();
+
+            const stage = document.getElementById('game-stage');
+            stage.innerHTML = `
+                <div class="space-y-6">
+                    <p class="text-slate-600 font-bold text-center text-sm sm:text-base">
+                        Обери пристрій, а потім натисни на правильний блок призначення комп'ютера:
+                    </p>
+
+                    <!-- Device Selector Rack -->
+                    <div class="bg-slate-100 p-4 border-3 border-slate-800 rounded-2xl">
+                        <div class="text-xs font-black text-slate-400 uppercase text-center mb-2">Непідключені пристрої:</div>
+                        <div id="l3-rack" class="flex flex-wrap justify-center gap-2">
+                            ${l3DevicesQueue.map((dev, idx) => `
+                                <button id="l3-dev-${idx}" onclick="selectL3Device(${idx})" class="vector-btn bg-white hover:bg-yellow-100 px-3 py-2 text-slate-800 text-xs sm:text-sm flex items-center gap-2">
+                                    <span class="text-lg">${dev.icon}</span>
+                                    <span>${dev.name}</span>
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Hardware Computer Zones -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                        <!-- Input Zone -->
+                        <div onclick="connectL3ToZone('введення')" class="drop-zone bg-indigo-50 hover:bg-indigo-100 border-3 border-slate-800 rounded-2xl p-4 text-center cursor-pointer min-h-[140px] flex flex-col justify-between">
+                            <div>
+                                <div class="text-3xl mb-1">⌨️ 🖱️</div>
+                                <h4 class="heading-font text-indigo-900 font-bold text-base">Пристрої Введення</h4>
+                                <p class="text-xs text-indigo-700 font-semibold">(Передають інформацію в ПК)</p>
+                            </div>
+                            <div id="l3-slot-введення" class="pt-2 flex flex-wrap gap-1 justify-center"></div>
+                        </div>
+
+                        <!-- Processing Zone -->
+                        <div onclick="connectL3ToZone('опрацювання')" class="drop-zone bg-amber-50 hover:bg-amber-100 border-3 border-slate-800 rounded-2xl p-4 text-center cursor-pointer min-h-[140px] flex flex-col justify-between">
+                            <div>
+                                <div class="text-3xl mb-1">🖥️ ⚡</div>
+                                <h4 class="heading-font text-amber-900 font-bold text-base">Опрацювання та Зберігання</h4>
+                                <p class="text-xs text-amber-700 font-semibold">(Системний блок / мозок)</p>
+                            </div>
+                            <div id="l3-slot-опрацювання" class="pt-2 flex flex-wrap gap-1 justify-center"></div>
+                        </div>
+
+                        <!-- Output Zone -->
+                        <div onclick="connectL3ToZone('виведення')" class="drop-zone bg-emerald-50 hover:bg-emerald-100 border-3 border-slate-800 rounded-2xl p-4 text-center cursor-pointer min-h-[140px] flex flex-col justify-between">
+                            <div>
+                                <div class="text-3xl mb-1">📺 🖨️</div>
+                                <h4 class="heading-font text-emerald-900 font-bold text-base">Пристрої Виведення</h4>
+                                <p class="text-xs text-emerald-700 font-semibold">(Показують/видають результат)</p>
+                            </div>
+                            <div id="l3-slot-виведення" class="pt-2 flex flex-wrap gap-1 justify-center"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateL3Progress() {
+            document.getElementById('level-progress-text').innerText = `Прогрес: ${l3CompletedCount}/${l3DevicesQueue.length}`;
+        }
+
+        function selectL3Device(idx) {
+            playSound('click');
+            l3SelectedDevice = idx;
+
+            l3DevicesQueue.forEach((_, i) => {
+                const btn = document.getElementById(`l3-dev-${i}`);
+                if (btn) {
+                    if (i === idx) {
+                        btn.classList.add('ring-4', 'ring-purple-500', 'bg-yellow-200');
+                    } else {
+                        btn.classList.remove('ring-4', 'ring-purple-500', 'bg-yellow-200');
+                    }
+                }
+            });
+        }
+
+        function connectL3ToZone(zoneType) {
+            if (l3SelectedDevice === null) return;
+
+            const dev = l3DevicesQueue[l3SelectedDevice];
+            const btn = document.getElementById(`l3-dev-${l3SelectedDevice}`);
+
+            if (dev.type === zoneType) {
+                playSound('success');
+                const slot = document.getElementById(`l3-slot-${zoneType}`);
+                
+                const chip = document.createElement('span');
+                chip.className = 'bg-white border border-slate-800 px-2 py-1 rounded-lg text-xs font-bold shadow-sm pop-in flex items-center gap-1';
+                chip.innerHTML = `${dev.icon} ${dev.name}`;
+                slot.appendChild(chip);
+
+                btn.remove();
+                l3SelectedDevice = null;
+                l3CompletedCount++;
+                addScore(25);
+                updateL3Progress();
+
+                if (l3CompletedCount >= l3DevicesQueue.length) {
+                    setTimeout(() => triggerWin(l3DevicesQueue.length * 25), 400);
+                }
+            } else {
+                playSound('wrong');
+                const zoneContainer = document.getElementById(`l3-slot-${zoneType}`).parentElement;
+                zoneContainer.classList.add('shake');
+                setTimeout(() => zoneContainer.classList.remove('shake'), 400);
+            }
+        }
+
+        /* ===================================================
+           LEVEL 4: INFORMATION FLOW CHAIN (Ланцюжок Інформації)
+           Tactile Flowchart Logic Builder
+           =================================================== */
+        const level4Scenarios = [
+            {
+                title: 'Будівництво Пісочниці',
+                context: 'Постав кроки роботи з інформацією у правильному порядку:',
+                steps: [
+                    { label: 'Отримання', text: 'Виміряти розміри майбутньої пісочниці', icon: '📏' },
+                    { label: 'Зберігання', text: 'Записати розміри у записник', icon: '✏️' },
+                    { label: 'Опрацювання', text: 'Розрахувати кількість необхідних дощок', icon: '🧮' },
+                    { label: 'Передавання', text: 'Розповісти татові скільки дощок купити', icon: '🗣️' }
+                ]
+            },
+            {
+                title: 'Підготовка до Походу',
+                context: 'Впорядкуй ланцюжок дій з інформацією:',
+                steps: [
+                    { label: 'Отримання', text: 'Подивитися прогноз погоди в інтернеті', icon: '☀️' },
+                    { label: 'Зберігання', text: 'Зановити список речей у телефон', icon: '📱' },
+                    { label: 'Опрацювання', text: 'Розрахувати час виходу та маршрут', icon: '🗺️' },
+                    { label: 'Передавання', text: 'Надіслати повідомлення друзям про час збору', icon: '📩' }
+                ]
+            }
+        ];
+
+        let l4CurrentScenario = null;
+        let l4UserSequence = [];
+
+        function renderLevel4() {
+            document.getElementById('level-badge').innerText = 'Рівень 4';
+            document.getElementById('level-title').innerText = 'Ланцюжок Подій з Інформацією';
+
+            l4CurrentScenario = level4Scenarios[Math.floor(Math.random() * level4Scenarios.length)];
+            l4UserSequence = [];
+
+            updateL4Progress();
+
+            // Shuffle available steps strictly without hints!
+            const shuffledSteps = shuffleArray(l4CurrentScenario.steps);
+
+            const stage = document.getElementById('game-stage');
+            stage.innerHTML = `
+                <div class="space-y-5">
+                    <div class="text-center space-y-1">
+                        <span class="bg-emerald-100 border border-emerald-400 text-emerald-900 text-xs font-black px-3 py-1 rounded-full uppercase">Ситуація</span>
+                        <h3 class="heading-font text-2xl font-black text-slate-800">${l4CurrentScenario.title}</h3>
+                        <p class="text-slate-600 font-bold text-sm">${l4CurrentScenario.context}</p>
+                    </div>
+
+                    <!-- Flow Construction Line -->
+                    <div class="bg-slate-50 border-3 border-slate-800 rounded-2xl p-4 min-h-[120px] flex items-center justify-center">
+                        <div id="l4-slots-container" class="flex flex-wrap items-center justify-center gap-2 w-full">
+                            <span class="text-slate-400 font-bold text-xs italic">Натискай на блоки нижче, щоб побудувати ланцюжок 1 ➔ 2 ➔ 3 ➔ 4</span>
+                        </div>
+                    </div>
+
+                    <!-- Available Shuffled Steps Rack -->
+                    <div class="space-y-2">
+                        <div class="text-xs font-black text-slate-400 uppercase text-center">Переплутані кроки (Обери послідовність):</div>
+                        <div id="l4-rack" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            ${shuffledSteps.map((step, idx) => `
+                                <div id="l4-step-${idx}" onclick="addStepToL4Sequence(${idx}, ${JSON.stringify(step).replace(/"/g, '&quot;')})" 
+                                     class="vector-btn bg-white hover:bg-emerald-50 p-3 flex items-center gap-3 cursor-pointer text-left border-2 border-slate-800 shadow-[3px_3px_0px_#2D3436]">
+                                    <span class="text-2xl">${step.icon}</span>
+                                    <div>
+                                        <div class="text-xs font-black text-slate-400 uppercase">${step.label}</div>
+                                        <div class="font-bold text-slate-800 text-xs sm:text-sm">${step.text}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-2">
+                        <button onclick="resetL4Sequence()" class="vector-btn bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-2 text-xs font-bold">
+                            🔄 Скинути
+                        </button>
+                        <button onclick="verifyL4Sequence()" class="vector-btn bg-emerald-400 hover:bg-emerald-500 text-slate-900 px-6 py-2.5 text-sm font-black">
+                            Перевірити Ланцюжок ✅
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateL4Progress() {
+            document.getElementById('level-progress-text').innerText = `Кроків: ${l4UserSequence.length}/4`;
+        }
+
+        function addStepToL4Sequence(idx, stepObj) {
+            if (l4UserSequence.find(s => s.idx === idx)) return;
+
+            playSound('click');
+            l4UserSequence.push({ idx, ...stepObj });
+
+            document.getElementById(`l4-step-${idx}`).classList.add('opacity-30', 'pointer-events-none');
+
+            renderL4Slots();
+            updateL4Progress();
+        }
+
+        function renderL4Slots() {
+            const container = document.getElementById('l4-slots-container');
+            if (l4UserSequence.length === 0) {
+                container.innerHTML = `<span class="text-slate-400 font-bold text-xs italic">Натискай на блоки нижче, щоб побудувати ланцюжок 1 ➔ 2 ➔ 3 ➔ 4</span>`;
+                return;
+            }
+
+            container.innerHTML = l4UserSequence.map((step, i) => `
+                <div class="bg-white border-2 border-slate-800 rounded-xl p-2 px-3 shadow-[2px_2px_0px_#2D3436] flex items-center gap-2 pop-in">
+                    <span class="w-5 h-5 bg-emerald-400 border border-slate-800 rounded-full flex items-center justify-center text-xs font-black text-slate-900">${i + 1}</span>
+                    <span class="text-lg">${step.icon}</span>
+                    <span class="text-xs font-black text-slate-800">${step.label}</span>
+                </div>
+                ${i < l4UserSequence.length - 1 ? '<span class="text-slate-400 font-black">➔</span>' : ''}
+            `).join('');
+        }
+
+        function resetL4Sequence() {
+            playSound('click');
+            l4UserSequence = [];
+            l4CurrentScenario.steps.forEach((_, idx) => {
+                const el = document.getElementById(`l4-step-${idx}`);
+                if (el) el.classList.remove('opacity-30', 'pointer-events-none');
+            });
+            renderL4Slots();
+            updateL4Progress();
+        }
+
+        function verifyL4Sequence() {
+            if (l4UserSequence.length < 4) {
+                playSound('wrong');
+                alert('Будь ласка, обери всі 4 кроки послідовності перед перевіркою!');
+                return;
+            }
+
+            // Correct order: Отримання -> Зберігання -> Опрацювання -> Передавання
+            const correctOrder = ['Отримання', 'Зберігання', 'Опрацювання', 'Передавання'];
+            const isCorrect = l4UserSequence.every((step, i) => step.label === correctOrder[i]);
+
+            if (isCorrect) {
+                playSound('success');
+                addScore(100);
+                setTimeout(() => triggerWin(100), 300);
+            } else {
+                playSound('wrong');
+                const container = document.getElementById('l4-slots-container').parentElement;
+                container.classList.add('shake');
+                setTimeout(() => container.classList.remove('shake'), 400);
+            }
+        }
+
+        function setupTouchDrag(element, onDropCallback) {
+            let touchStartX = 0;
+            let touchStartY = 0;
+            let clone = null;
+
+            element.addEventListener('touchstart', (e) => {
+                const touch = e.touches[0];
+                touchStartX = touch.clientX;
+                touchStartY = touch.clientY;
+
+                clone = element.cloneNode(true);
+                clone.style.position = 'fixed';
+                clone.style.left = touch.clientX - 40 + 'px';
+                clone.style.top = touch.clientY - 20 + 'px';
+                clone.style.zIndex = '1000';
+                clone.style.opacity = '0.8';
+                clone.style.pointerEvents = 'none';
+                document.body.appendChild(clone);
+            }, { passive: true });
+
+            element.addEventListener('touchmove', (e) => {
+                if (!clone) return;
+                const touch = e.touches[0];
+                clone.style.left = touch.clientX - 40 + 'px';
+                clone.style.top = touch.clientY - 20 + 'px';
+            }, { passive: true });
+
+            element.addEventListener('touchend', (e) => {
+                if (!clone) return;
+                const touch = e.changedTouches[0];
+                clone.remove();
+                clone = null;
+
+                const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+                if (targetEl) {
+                    const dropZone = targetEl.closest('.drop-zone');
+                    if (dropZone) {
+                        onDropCallback(dropZone);
+                    }
+                }
+            });
+        }
+
+        // Initialize view on page load
+        window.onload = function() {
+            showHub();
+        };
+    </script>
+</body>
+</html>
