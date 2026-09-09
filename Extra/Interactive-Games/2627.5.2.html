@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="uk" class="h-full bg-slate-900 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ІнфоКвест: Світ Інформатики та Комп'ютерних Систем</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      user-select: none;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+
+    /* Animations & Glassmorphism */
+    .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .glass-nav {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .pulse-glow {
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.35);
+    }
+
+    .drag-over {
+      border-color: #6366f1 !important;
+      background-color: rgba(99, 102, 241, 0.15) !important;
+      transform: scale(1.02);
+    }
+
+    /* Hardware Socket Glow */
+    .socket-target {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .socket-target:hover {
+      border-color: #38bdf8;
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
+    }
+
+    /* Canvas Grid Background */
+    .bg-grid-pattern {
+      background-size: 30px 30px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    }
+
+    /* Patch Cable SVG Line styling */
+    .cable-line {
+      stroke-dasharray: 8;
+      animation: dash 1s linear infinite;
+    }
+    @keyframes dash {
+      to {
+        stroke-dashoffset: -16;
+      }
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col bg-slate-950 bg-grid-pattern text-slate-100 overflow-x-hidden">
+
+  <!-- Header Navigation Bar -->
+  <header class="glass-nav sticky top-0 z-50 px-4 py-3 md:px-8">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('dashboard')">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-cyan-400 flex items-center justify-center text-slate-900 font-extrabold text-xl shadow-lg shadow-indigo-500/20">
+          <i class="fa-solid fa-microchip"></i>
+        </div>
+        <div>
+          <h1 class="font-extrabold text-lg md:text-xl bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 via-cyan-200 to-white">
+            ІнфоКвест
+          </h1>
+          <p class="text-xs text-slate-400 font-medium">Інформатика 5 клас • Інформаційні системи</p>
+        </div>
+      </div>
+
+      <!-- Overall Score & Progress Indicator -->
+      <div class="flex items-center gap-4">
+        <div class="bg-slate-900/80 border border-slate-800 px-4 py-1.5 rounded-full flex items-center gap-3">
+          <div class="flex items-center gap-1.5 text-amber-400 font-bold text-sm">
+            <i class="fa-solid fa-star"></i>
+            <span id="total-stars">0 / 15</span>
+          </div>
+          <div class="h-4 w-[1px] bg-slate-700"></div>
+          <div class="flex items-center gap-1.5 text-cyan-400 font-bold text-sm">
+            <i class="fa-solid fa-trophy"></i>
+            <span id="total-score">0 балів</span>
+          </div>
+        </div>
+
+        <button onclick="toggleAudio()" id="audio-btn" class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition border border-slate-700">
+          <i class="fa-solid fa-volume-high"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main View Area -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col justify-center">
+    
+    <!-- DASHBOARD VIEW -->
+    <section id="view-dashboard" class="space-y-6">
+      <div class="text-center max-w-2xl mx-auto space-y-2 py-4">
+        <span class="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-indigo-400 bg-indigo-950/80 border border-indigo-800/50 rounded-full">
+          Інтерактивний навчальний тренажер
+        </span>
+        <h2 class="text-3xl md:text-4xl font-extrabold text-slate-100">
+          Обирай роздел та підтверджуй знання!
+        </h2>
+        <p class="text-slate-400 text-sm md:text-base">
+          Пройди 5 інтерактивних міні-ігор зрізу знань. Варіанти переплутані, підказки відсутні — покладайся на власний розум!
+        </p>
+      </div>
+
+      <!-- Mini Games Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        
+        <!-- Game Card 1 -->
+        <div onclick="startMiniGame('game1')" class="glass-card rounded-2xl p-6 border border-slate-800 hover:border-indigo-500/50 hover:bg-slate-800/60 transition cursor-pointer group flex flex-col justify-between relative overflow-hidden">
+          <div class="absolute -right-6 -top-6 w-24 h-24 bg-indigo-500/10 rounded-full blur-xl group-hover:bg-indigo-500/20 transition"></div>
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl font-bold mb-4 border border-indigo-500/30">
+              <i class="fa-solid fa-sitemap"></i>
+            </div>
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="font-bold text-lg text-slate-100 group-hover:text-indigo-300 transition">1. Класифікатор Систем</h3>
+              <span id="stars-game1" class="text-amber-400 text-sm font-semibold"><i class="fa-regular fa-star"></i> 0/3</span>
+            </div>
+            <p class="text-slate-400 text-xs leading-relaxed">
+              Розподіли об'єкти за типами інформаційних систем: Технічні, Біологічні та Соціальні.
+            </p>
+          </div>
+          <div class="mt-6 flex items-center justify-between pt-4 border-t border-slate-800/80">
+            <span class="text-xs font-semibold text-slate-500">МЕХАНІКА: ДРАГ-ЕНД-ДРОП</span>
+            <span class="text-indigo-400 font-semibold text-sm group-hover:translate-x-1 transition-transform flex items-center gap-1">
+              Грати <i class="fa-solid fa-arrow-right text-xs"></i>
+            </span>
+          </div>
+        </div>
+
+        <!-- Game Card 2 -->
+        <div onclick="startMiniGame('game2')" class="glass-card rounded-2xl p-6 border border-slate-800 hover:border-cyan-500/50 hover:bg-slate-800/60 transition cursor-pointer group flex flex-col justify-between relative overflow-hidden">
+          <div class="absolute -right-6 -top-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-xl group-hover:bg-cyan-500/20 transition"></div>
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xl font-bold mb-4 border border-cyan-500/30">
+              <i class="fa-solid fa-memory"></i>
+            </div>
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="font-bold text-lg text-slate-100 group-hover:text-cyan-300 transition">2. Конструктор ПК</h3>
+              <span id="stars-game2" class="text-amber-400 text-sm font-semibold"><i class="fa-regular fa-star"></i> 0/3</span>
+            </div>
+            <p class="text-slate-400 text-xs leading-relaxed">
+              Встановлюй складові комп'ютера у відповідні слоти (Введення, Виведення, Пам'ять, Платформа тощо).
+            </p>
+          </div>
+          <div class="mt-6 flex items-center justify-between pt-4 border-t border-slate-800/80">
+            <span class="text-xs font-semibold text-slate-500">МЕХАНІКА: СЛОТИНГ / МОНТАЖ</span>
+            <span class="text-cyan-400 font-semibold text-sm group-hover:translate-x-1 transition-transform flex items-center gap-1">
+              Грати <i class="fa-solid fa-arrow-right text-xs"></i>
+            </span>
+          </div>
+        </div>
+
+        <!-- Game Card 3 -->
+        <div onclick="startMiniGame('game3')" class="glass-card rounded-2xl p-6 border border-slate-800 hover:border-emerald-500/50 hover:bg-slate-800/60 transition cursor-pointer group flex flex-col justify-between relative overflow-hidden">
+          <div class="absolute -right-6 -top-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl group-hover:bg-emerald-500/20 transition"></div>
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl font-bold mb-4 border border-emerald-500/30">
+              <i class="fa-solid fa-network-wired"></i>
+            </div>
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="font-bold text-lg text-slate-100 group-hover:text-emerald-300 transition">3. Маршрутизатор Процесів</h3>
+              <span id="stars-game3" class="text-amber-400 text-sm font-semibold"><i class="fa-regular fa-star"></i> 0/3</span>
+            </div>
+            <p class="text-slate-400 text-xs leading-relaxed">
+              Направляй потоки інформаційних пакетів у відповідні канали (Отримання, Обробка, Захист, Пам’ять...).
+            </p>
+          </div>
+          <div class="mt-6 flex items-center justify-between pt-4 border-t border-slate-800/80">
+            <span class="text-xs font-semibold text-slate-500">МЕХАНІКА: ПОТОКОВИЙ МАРШРУТ</span>
+            <span class="text-emerald-400 font-semibold text-sm group-hover:translate-x-1 transition-transform flex items-center gap-1">
+              Грати <i class="fa-solid fa-arrow-right text-xs"></i>
+            </span>
+          </div>
+        </div>
+
+        <!-- Game Card 4 -->
+        <div onclick="startMiniGame('game4')" class="glass-card rounded-2xl p-6 border border-slate-800 hover:border-purple-500/50 hover:bg-slate-800/60 transition cursor-pointer group flex flex-col justify-between relative overflow-hidden">
+          <div class="absolute -right-6 -top-6 w-24 h-24 bg-purple-500/10 rounded-full blur-xl group-hover:bg-purple-500/20 transition"></div>
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-xl font-bold mb-4 border border-purple-500/30">
+              <i class="fa-solid fa-laptop-code"></i>
+            </div>
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="font-bold text-lg text-slate-100 group-hover:text-purple-300 transition">4. Радар Гаджетів</h3>
+              <span id="stars-game4" class="text-amber-400 text-sm font-semibold"><i class="fa-regular fa-star"></i> 0/3</span>
+            </div>
+            <p class="text-slate-400 text-xs leading-relaxed">
+              Розподіли сучасні комп’ютерні пристрої за формою: Стаціонарні, Переносні, Мобільні, Носимі.
+            </p>
+          </div>
+          <div class="mt-6 flex items-center justify-between pt-4 border-t border-slate-800/80">
+            <span class="text-xs font-semibold text-slate-500">МЕХАНІКА: РАДАР СВАЙП/КЛІК</span>
+            <span class="text-purple-400 font-semibold text-sm group-hover:translate-x-1 transition-transform flex items-center gap-1">
+              Грати <i class="fa-solid fa-arrow-right text-xs"></i>
+            </span>
+          </div>
+        </div>
+
+        <!-- Game Card 5 -->
+        <div onclick="startMiniGame('game5')" class="glass-card rounded-2xl p-6 border border-slate-800 hover:border-amber-500/50 hover:bg-slate-800/60 transition cursor-pointer group flex flex-col justify-between relative overflow-hidden">
+          <div class="absolute -right-6 -top-6 w-24 h-24 bg-amber-500/10 rounded-full blur-xl group-hover:bg-amber-500/20 transition"></div>
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl font-bold mb-4 border border-amber-500/30">
+              <i class="fa-solid fa-compact-disc"></i>
+            </div>
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="font-bold text-lg text-slate-100 group-hover:text-amber-300 transition">5. IT-Словник & Історія</h3>
+              <span id="stars-game5" class="text-amber-400 text-sm font-semibold"><i class="fa-regular fa-star"></i> 0/3</span>
+            </div>
+            <p class="text-slate-400 text-xs leading-relaxed">
+              З’єднай кабелями термині UA-EN та розгадай історичне відкриття В'ячеслава Петрова!
+            </p>
+          </div>
+          <div class="mt-6 flex items-center justify-between pt-4 border-t border-slate-800/80">
+            <span class="text-xs font-semibold text-slate-500">МЕХАНІКА: ПАТЧ-ПАНЕЛЬ + ПАЗЛ</span>
+            <span class="text-amber-400 font-semibold text-sm group-hover:translate-x-1 transition-transform flex items-center gap-1">
+              Грати <i class="fa-solid fa-arrow-right text-xs"></i>
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- MINI GAME PLAY CONTAINER (hidden by default) -->
+    <section id="view-game" class="hidden space-y-4">
+      <div class="flex items-center justify-between bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+        <button onclick="switchTab('dashboard')" class="text-slate-400 hover:text-white flex items-center gap-2 text-sm font-semibold transition">
+          <i class="fa-solid fa-arrow-left"></i> Меню розділів
+        </button>
+        <div id="game-title" class="font-extrabold text-indigo-300 text-lg">Назва Міні-гри</div>
+        <button onclick="resetCurrentGame()" class="text-slate-400 hover:text-indigo-400 text-sm font-medium flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 transition">
+          <i class="fa-solid fa-rotate-right"></i> Перезапуск
+        </button>
+      </div>
+
+      <!-- Dynamic Mini-Game Slot -->
+      <div id="game-stage" class="glass-card rounded-2xl p-4 md:p-6 border border-slate-800 min-h-[500px] flex flex-col justify-between">
+        <!-- Content injected dynamically -->
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    /* GAME STATE MANAGEMENT */
+    const gameState = {
+      score: 0,
+      stars: {
+        game1: 0,
+        game2: 0,
+        game3: 0,
+        game4: 0,
+        game5: 0
+      },
+      currentGameId: null,
+      soundEnabled: true
+    };
+
+    /* AUDIO SYNTHESIZER (Web Audio API) */
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playSound(type) {
+      if (!gameState.soundEnabled) return;
+      try {
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+
+        if (type === 'success') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, now); // C5
+          osc.frequency.exponentialRampToValueAtTime(880, now + 0.15); // A5
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+          osc.start(now);
+          osc.stop(now + 0.3);
+        } else if (type === 'error') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(180, now);
+          osc.frequency.setValueAtTime(110, now + 0.1);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        } else if (type === 'click') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(400, now);
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+          osc.start(now);
+          osc.stop(now + 0.05);
+        } else if (type === 'win') {
+          // Victory fan-fare
+          const notes = [523.25, 659.25, 783.99, 1046.50];
+          notes.forEach((f, i) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            o.frequency.value = f;
+            g.gain.setValueAtTime(0.1, now + i * 0.1);
+            g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.25);
+            o.start(now + i * 0.1);
+            o.stop(now + i * 0.1 + 0.25);
+          });
+        }
+      } catch (e) {
+        console.log('Audio playback error', e);
+      }
+    }
+
+    function toggleAudio() {
+      gameState.soundEnabled = !gameState.soundEnabled;
+      const btn = document.getElementById('audio-btn');
+      btn.innerHTML = gameState.soundEnabled 
+        ? '<i class="fa-solid fa-volume-high"></i>' 
+        : '<i class="fa-solid fa-volume-xmark text-slate-500"></i>';
+    }
+
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function switchTab(viewName) {
+      playSound('click');
+      document.getElementById('view-dashboard').classList.add('hidden');
+      document.getElementById('view-game').classList.add('hidden');
+
+      if (viewName === 'dashboard') {
+        document.getElementById('view-dashboard').classList.remove('hidden');
+        updateHeaderStats();
+      } else if (viewName === 'game') {
+        document.getElementById('view-game').classList.remove('hidden');
+      }
+    }
+
+    function updateHeaderStats() {
+      const totalStarsCount = Object.values(gameState.stars).reduce((a, b) => a + b, 0);
+      document.getElementById('total-stars').innerText = `${totalStarsCount} / 15`;
+      document.getElementById('total-score').innerText = `${gameState.score} балів`;
+
+      // Update Dashboard Star badges
+      for (let key in gameState.stars) {
+        const el = document.getElementById(`stars-${key}`);
+        if (el) {
+          el.innerHTML = `<i class="fa-solid fa-star text-amber-400"></i> ${gameState.stars[key]}/3`;
+        }
+      }
+    }
+
+    function startMiniGame(gameId) {
+      gameState.currentGameId = gameId;
+      switchTab('game');
+      
+      const titles = {
+        game1: '1. Класифікатор Систем (Технічні, Біологічні, Соціальні)',
+        game2: '2. Конструктор ПК (Монтаж системних блоків)',
+        game3: '3. Маршрутизатор Інформаційних Процесів',
+        game4: '4. Радар Сучасних Комп’ютерних Гаджетів',
+        game5: '5. Патч-Панель Термінів & Відкриття В. Петрова'
+      };
+      document.getElementById('game-title').innerText = titles[gameId] || 'Міні-гра';
+
+      if (gameId === 'game1') renderGame1();
+      else if (gameId === 'game2') renderGame2();
+      else if (gameId === 'game3') renderGame3();
+      else if (gameId === 'game4') renderGame4();
+      else if (gameId === 'game5') renderGame5();
+    }
+
+    function resetCurrentGame() {
+      if (gameState.currentGameId) {
+        startMiniGame(gameState.currentGameId);
+      }
+    }
+
+    /* ========================================================
+       MINI-GAME 1: SYSTEM CLASSIFIER (Drag & Drop)
+       ======================================================== */
+    const game1Data = [
+      { id: 1, name: "Персональний комп'ютер", type: "tech", icon: "fa-desktop" },
+      { id: 2, name: "Пожежна сигналізація", type: "tech", icon: "fa-bell text-red-400" },
+      { id: 3, name: "Ігровий автомат", type: "tech", icon: "fa-gamepad text-purple-400" },
+      { id: 4, name: "Телевізор", type: "tech", icon: "fa-tv text-cyan-400" },
+      { id: 5, name: "Мурашник", type: "bio", icon: "fa-bugs text-amber-500" },
+      { id: 6, name: "Жива істота (Людина)", type: "bio", icon: "fa-user-ninja text-emerald-400" },
+      { id: 7, name: "Біологічна клітина", type: "bio", icon: "fa-dna text-teal-300" },
+      { id: 8, name: "Шкільний клас 5-В", type: "social", icon: "fa-graduation-cap text-indigo-400" },
+      { id: 9, name: "Фан-клуб спортивної команди", type: "social", icon: "fa-users-line text-yellow-400" },
+      { id: 10, name: "Театральна група", type: "social", icon: "fa-masks-theater text-pink-400" }
+    ];
+
+    function renderGame1() {
+      const stage = document.getElementById('game-stage');
+      const shuffledItems = shuffleArray(game1Data);
+
+      stage.innerHTML = `
+        <div class="space-y-4">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+            <p class="text-xs md:text-sm text-slate-300">
+              <i class="fa-solid fa-circle-info text-indigo-400 mr-1"></i>
+              Перетягни або натисни на об'єкт, щоб відправити його у правильний тип Інформаційної системи.
+            </p>
+            <div id="g1-progress" class="text-xs font-bold text-indigo-400 bg-indigo-950/80 px-3 py-1 rounded-full border border-indigo-800/60">
+              Залишилось: ${shuffledItems.length}
+            </div>
+          </div>
+
+          <!-- Target Zones -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 min-h-[220px]">
+            <!-- Tech Dropzone -->
+            <div id="drop-tech" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'tech')"
+                 class="dropzone bg-slate-900/50 border-2 border-dashed border-cyan-500/30 rounded-xl p-4 flex flex-col items-center gap-3 transition">
+              <div class="flex items-center gap-2 text-cyan-400 font-bold text-base">
+                <i class="fa-solid fa-microchip"></i> Технічні ІС
+              </div>
+              <p class="text-[11px] text-slate-500 text-center">Комп'ютери, прилади, автомати</p>
+              <div class="w-full space-y-2 text-container flex-1"></div>
+            </div>
+
+            <!-- Bio Dropzone -->
+            <div id="drop-bio" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'bio')"
+                 class="dropzone bg-slate-900/50 border-2 border-dashed border-emerald-500/30 rounded-xl p-4 flex flex-col items-center gap-3 transition">
+              <div class="flex items-center gap-2 text-emerald-400 font-bold text-base">
+                <i class="fa-solid fa-leaf"></i> Біологічні ІС
+              </div>
+              <p class="text-[11px] text-slate-500 text-center">Організми, клітини, популяції</p>
+              <div class="w-full space-y-2 text-container flex-1"></div>
+            </div>
+
+            <!-- Social Dropzone -->
+            <div id="drop-social" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'social')"
+                 class="dropzone bg-slate-900/50 border-2 border-dashed border-pink-500/30 rounded-xl p-4 flex flex-col items-center gap-3 transition">
+              <div class="flex items-center gap-2 text-pink-400 font-bold text-base">
+                <i class="fa-solid fa-people-group"></i> Соціальні ІС
+              </div>
+              <p class="text-[11px] text-slate-500 text-center">Групи людей, колективи, клуби</p>
+              <div class="w-full space-y-2 text-container flex-1"></div>
+            </div>
+          </div>
+
+          <!-- Source Cards Area -->
+          <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-xl">
+            <h4 class="text-xs uppercase font-bold text-slate-400 mb-3 tracking-wider">Нерозподілені об'єкти:</h4>
+            <div id="g1-source-pool" class="flex flex-wrap gap-2.5 min-h-[90px]">
+              ${shuffledItems.map(item => `
+                <div id="g1-card-${item.id}" draggable="true" ondragstart="handleDragStart(event, ${item.id})"
+                     class="draggable-card bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl px-3.5 py-2 flex items-center gap-2.5 cursor-grab active:cursor-grabbing text-xs font-semibold text-slate-200 transition shadow-md">
+                  <i class="fa-solid ${item.icon} text-sm"></i>
+                  <span>${item.name}</span>
+                  <div class="ml-2 flex items-center gap-1 opacity-60 hover:opacity-100">
+                    <button onclick="directMoveG1(${item.id}, 'tech')" title="В Технічні" class="text-cyan-400 px-1 hover:scale-125">Т</button>
+                    <button onclick="directMoveG1(${item.id}, 'bio')" title="В Біологічні" class="text-emerald-400 px-1 hover:scale-125">Б</button>
+                    <button onclick="directMoveG1(${item.id}, 'social')" title="В Соціальні" class="text-pink-400 px-1 hover:scale-125">С</button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    let draggedItemId = null;
+    function handleDragStart(e, itemId) {
+      draggedItemId = itemId;
+      e.dataTransfer.setData('text/plain', itemId);
+    }
+
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.currentTarget.classList.add('drag-over');
+    }
+
+    function handleDragLeave(e) {
+      e.currentTarget.classList.remove('drag-over');
+    }
+
+    function handleDrop(e, targetCategory) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+      if (draggedItemId) {
+        processG1Placement(draggedItemId, targetCategory);
+        draggedItemId = null;
+      }
+    }
+
+    function directMoveG1(itemId, category) {
+      processG1Placement(itemId, category);
+    }
+
+    function processG1Placement(itemId, targetCategory) {
+      const item = game1Data.find(x => x.id === itemId);
+      const cardEl = document.getElementById(`g1-card-${itemId}`);
+      if (!cardEl || !item) return;
+
+      if (item.type === targetCategory) {
+        // Correct match
+        playSound('success');
+        const container = document.querySelector(`#drop-${targetCategory} .text-container`);
+        cardEl.removeAttribute('draggable');
+        cardEl.classList.remove('cursor-grab', 'hover:bg-slate-700');
+        cardEl.classList.add('bg-emerald-950/60', 'border-emerald-500/50', 'text-emerald-200', 'w-full');
+        cardEl.querySelector('.ml-2')?.remove(); // remove mini buttons
+        container.appendChild(cardEl);
+      } else {
+        // Wrong match
+        playSound('error');
+        cardEl.classList.add('animate-bounce', 'border-red-500');
+        setTimeout(() => {
+          cardEl.classList.remove('animate-bounce', 'border-red-500');
+        }, 600);
+      }
+
+      checkGame1Completion();
+    }
+
+    function checkGame1Completion() {
+      const sourcePool = document.getElementById('g1-source-pool');
+      const remaining = sourcePool.children.length;
+      document.getElementById('g1-progress').innerText = `Залишилось: ${remaining}`;
+
+      if (remaining === 0) {
+        playSound('win');
+        gameState.stars.game1 = 3;
+        gameState.score += 100;
+        updateHeaderStats();
+        
+        setTimeout(() => {
+          showVictoryModal("Чудова робота!", "Ти ідеально класифікував усі види інформаційних систем!");
+        }, 400);
+      }
+    }
+
+    /* ========================================================
+       MINI-GAME 2: PC HARDWARE ARCHITECT & SOCKETING
+       ======================================================== */
+    const game2Sockets = [
+      { id: "input", title: "Пристрої Введення", desc: "Передають дані від людини/довкілля до ПК", color: "border-cyan-500/40" },
+      { id: "processing", title: "Опрацювання (Процесор)", desc: "Керує пристроями та виконує обчислення", color: "border-indigo-500/40" },
+      { id: "internal_mem", title: "Внутрішня Пам'ять", desc: "Оперативна (ОЗУ) та Постійна (ROM)", color: "border-emerald-500/40" },
+      { id: "external_mem", title: "Зовнішня Пам'ять", desc: "SSD/HDD, флешка, оптичні диски", color: "border-amber-500/40" },
+      { id: "output", title: "Пристрої Виведення", desc: "Відображають або відтворюють опрацьовані дані", color: "border-purple-500/40" },
+      { id: "base_platform", title: "Базова Платформа", desc: "Материнська плата, блок живлення, відеокарта", color: "border-rose-500/40" }
+    ];
+
+    const game2Items = [
+      { id: 101, name: "Клавіатура & Миша", category: "input", icon: "fa-keyboard" },
+      { id: 102, name: "Сканер & Вебкамера", category: "input", icon: "fa-camera" },
+      { id: 103, name: "Мікрофон", category: "input", icon: "fa-microphone" },
+      { id: 104, name: "Процесор (CPU)", category: "processing", icon: "fa-microchip" },
+      { id: 105, name: "Оперативна пам'ять (ОЗУ)", category: "internal_mem", icon: "fa-memory" },
+      { id: 106, name: "Постійна пам'ять (ROM/BIOS)", category: "internal_mem", icon: "fa-database" },
+      { id: 107, name: "SSD / Жорсткий диск", category: "external_mem", icon: "fa-hard-drive" },
+      { id: 108, name: "Флешка & CD/DVD диск", category: "external_mem", icon: "fa-compact-disc" },
+      { id: 109, name: "Монітор", category: "output", icon: "fa-desktop" },
+      { id: 110, name: "Принтер / Колонки", category: "output", icon: "fa-print" },
+      { id: 111, name: "Материнська плата", category: "base_platform", icon: "fa-circuit-board" },
+      { id: 112, name: "Блок живлення & Відеокарта", category: "base_platform", icon: "fa-plug" }
+    ];
+
+    function renderGame2() {
+      const stage = document.getElementById('game-stage');
+      const shuffledItems = shuffleArray(game2Items);
+
+      stage.innerHTML = `
+        <div class="space-y-4">
+          <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
+            <p class="text-xs md:text-sm text-slate-300">
+              <i class="fa-solid fa-wrench text-cyan-400 mr-1"></i>
+              Збери комп'ютерну систему! Клікни деталь, а потім обери правильний модуль/слот для встановлення.
+            </p>
+            <div id="g2-status" class="text-xs font-bold text-cyan-400 bg-cyan-950/80 px-3 py-1 rounded-full border border-cyan-800/60">
+              Встановлено: 0 / ${game2Items.length}
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            ${game2Sockets.map(sock => `
+              <div id="socket-${sock.id}" onclick="placeSelectedInSocket('${sock.id}')"
+                   class="socket-target bg-slate-900/70 border-2 ${sock.color} rounded-xl p-3 min-h-[140px] flex flex-col justify-start cursor-pointer hover:bg-slate-800/50 relative">
+                <div class="font-bold text-xs md:text-sm text-slate-200 mb-1 flex items-center justify-between">
+                  <span>${sock.title}</span>
+                  <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full count-tag">0</span>
+                </div>
+                <p class="text-[10px] text-slate-500 mb-2">${sock.desc}</p>
+                <div class="installed-list space-y-1.5 flex-1"></div>
+              </div>
+            `).join('')}
+          </div>
+
+          <!-- Unplaced Components Toolbox -->
+          <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-xl">
+            <h4 class="text-xs font-bold uppercase text-slate-400 mb-3 tracking-wider">Склад комп'ютерних компонентів:</h4>
+            <div id="g2-items-pool" class="flex flex-wrap gap-2.5">
+              ${shuffledItems.map(item => `
+                <button id="g2-item-${item.id}" onclick="selectG2Item(${item.id})"
+                        class="g2-item-btn bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-3 py-2 rounded-xl text-xs font-medium flex items-center gap-2 transition">
+                  <i class="fa-solid ${item.icon} text-cyan-400"></i>
+                  <span>${item.name}</span>
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    let selectedG2ItemId = null;
+    function selectG2Item(id) {
+      playSound('click');
+      selectedG2ItemId = id;
+      
+      document.querySelectorAll('.g2-item-btn').forEach(btn => {
+        btn.classList.remove('ring-2', 'ring-cyan-400', 'bg-cyan-950');
+      });
+
+      const activeBtn = document.getElementById(`g2-item-${id}`);
+      if (activeBtn) {
+        activeBtn.classList.add('ring-2', 'ring-cyan-400', 'bg-cyan-950');
+      }
+    }
+
+    function placeSelectedInSocket(socketCategory) {
+      if (!selectedG2ItemId) {
+        playSound('error');
+        return;
+      }
+
+      const item = game2Items.find(x => x.id === selectedG2ItemId);
+      if (!item) return;
+
+      if (item.category === socketCategory) {
+        playSound('success');
+        // Correct Socket
+        const socketEl = document.getElementById(`socket-${socketCategory}`);
+        const installedList = socketEl.querySelector('.installed-list');
+        const countTag = socketEl.querySelector('.count-tag');
+
+        const badge = document.createElement('div');
+        badge.className = "bg-cyan-950/80 border border-cyan-500/40 text-cyan-200 px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-2 animate-fade-in";
+        badge.innerHTML = `<i class="fa-solid ${item.icon} text-cyan-400 text-xs"></i> <span>${item.name}</span>`;
+        installedList.appendChild(badge);
+
+        // Update count tag
+        countTag.innerText = installedList.children.length;
+
+        // Remove item button
+        document.getElementById(`g2-item-${selectedG2ItemId}`)?.remove();
+        selectedG2ItemId = null;
+
+        checkGame2Completion();
+      } else {
+        // Wrong Socket
+        playSound('error');
+        const socketEl = document.getElementById(`socket-${socketCategory}`);
+        socketEl.classList.add('border-red-500');
+        setTimeout(() => socketEl.classList.remove('border-red-500'), 500);
+      }
+    }
+
+    function checkGame2Completion() {
+      const remaining = document.getElementById('g2-items-pool').children.length;
+      const placedCount = game2Items.length - remaining;
+      document.getElementById('g2-status').innerText = `Встановлено: ${placedCount} / ${game2Items.length}`;
+
+      if (remaining === 0) {
+        playSound('win');
+        gameState.stars.game2 = 3;
+        gameState.score += 120;
+        updateHeaderStats();
+
+        setTimeout(() => {
+          showVictoryModal("Складання завершено!", "Ти чудово знаєш пристрої та структуру комп’ютерної системи!");
+        }, 400);
+      }
+    }
+
+    /* ========================================================
+       MINI-GAME 3: PROCESS ROUTER (Real-time Pipeline)
+       ======================================================== */
+    const game3Processes = [
+      { id: "get", name: "Отримання (Сприйняття, Пошук, Збирання)", icon: "fa-magnifying-glass", color: "bg-blue-500/20 text-blue-400 border-blue-500/40" },
+      { id: "proc", name: "Опрацювання (Обробка, Перетворення)", icon: "fa-gears", color: "bg-indigo-500/20 text-indigo-400 border-indigo-500/40" },
+      { id: "store", name: "Зберігання (Запам'ятовування)", icon: "fa-floppy-disk", color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/40" },
+      { id: "send", name: "Передавання (Поширення)", icon: "fa-paper-plane", color: "bg-amber-500/20 text-amber-400 border-amber-500/40" },
+      { id: "protect", name: "Захист (Кодування, Шифрування)", icon: "fa-shield-halved", color: "bg-rose-500/20 text-rose-400 border-rose-500/40" }
+    ];
+
+    const game3Tasks = [
+      { text: "Пошук реферату в інтернет-пошуковику Google", target: "get" },
+      { text: "Переклад тексту з англійської мови онлайн-перекладачем", target: "proc" },
+      { text: "Збереження фотографії на SSD-флешку", target: "store" },
+      { text: "Відправка електронного листа вчителю", target: "send" },
+      { text: "Встановлення паролю на особистий смартфон", target: "protect" },
+      { text: "Сканування фотографії веб-камерою", target: "get" },
+      { text: "Обчислення суми чисел у таблиці Excel", target: "proc" },
+      { text: "Запис пісні у пам'ять плеєра", target: "store" },
+      { text: "Трансляція відеоуроку в Zoom", target: "send" },
+      { text: "Шифрування банківських даних при оплаті", target: "protect" }
+    ];
+
+    let g3CurrentIndex = 0;
+    let g3TasksShuffled = [];
+
+    function renderGame3() {
+      g3CurrentIndex = 0;
+      g3TasksShuffled = shuffleArray(game3Tasks);
+
+      const stage = document.getElementById('game-stage');
+      stage.innerHTML = `
+        <div class="space-y-6">
+          <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
+            <p class="text-xs md:text-sm text-slate-300">
+              <i class="fa-solid fa-route text-emerald-400 mr-1"></i>
+              Прочитай ситуацію та направ інформаційний пакет у правильний процес!
+            </p>
+            <div id="g3-counter" class="text-xs font-bold text-emerald-400 bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-800/60">
+              Пакет 1 / ${g3TasksShuffled.length}
+            </div>
+          </div>
+
+          <!-- Active Packet Card -->
+          <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-6 rounded-2xl border-2 border-indigo-500/50 shadow-xl text-center space-y-3 relative overflow-hidden">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-bold uppercase tracking-wider">
+              <i class="fa-solid fa-box-archive"></i> Інформаційний пакет
+            </div>
+            <h3 id="g3-task-text" class="text-lg md:text-2xl font-extrabold text-white max-w-2xl mx-auto min-h-[60px] flex items-center justify-center">
+              ${g3TasksShuffled[0].text}
+            </h3>
+          </div>
+
+          <!-- Destination Process Routers -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            ${game3Processes.map(p => `
+              <button onclick="routeG3Packet('${p.id}')"
+                      class="p-4 rounded-xl border ${p.color} hover:scale-105 active:scale-95 transition flex flex-col items-center text-center gap-2 group">
+                <i class="fa-solid ${p.icon} text-2xl group-hover:rotate-12 transition-transform"></i>
+                <span class="font-bold text-xs text-slate-100">${p.name}</span>
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function routeG3Packet(selectedProcessId) {
+      const currentTask = g3TasksShuffled[g3CurrentIndex];
+      
+      if (selectedProcessId === currentTask.target) {
+        playSound('success');
+        g3CurrentIndex++;
+
+        if (g3CurrentIndex >= g3TasksShuffled.length) {
+          playSound('win');
+          gameState.stars.game3 = 3;
+          gameState.score += 100;
+          updateHeaderStats();
+
+          setTimeout(() => {
+            showVictoryModal("Маршрутизація успішна!", "Ти бездоганно розумієш усі 5 основних інформаційних процесів!");
+          }, 300);
+        } else {
+          // Render next task
+          document.getElementById('g3-task-text').innerText = g3TasksShuffled[g3CurrentIndex].text;
+          document.getElementById('g3-counter').innerText = `Пакет ${g3CurrentIndex + 1} / ${g3TasksShuffled.length}`;
+        }
+      } else {
+        playSound('error');
+        const card = document.getElementById('g3-task-text');
+        card.classList.add('text-red-400');
+        setTimeout(() => card.classList.remove('text-red-400'), 500);
+      }
+    }
+
+    /* ========================================================
+       MINI-GAME 4: DEVICE RADAR (Stationary, Portable, Mobile, Wearable)
+       ======================================================== */
+    const game4Devices = [
+      { id: 1, name: "Персональний комп'ютер (ПК)", cat: "stat", icon: "fa-desktop" },
+      { id: 2, name: "Моноблок (iMac)", cat: "stat", icon: "fa-tv" },
+      { id: 3, name: "Ноутбук", cat: "port", icon: "fa-laptop" },
+      { id: 4, name: "Ультрабук / Хромбук", cat: "port", icon: "fa-laptop-code" },
+      { id: 5, name: "Ноутбук-трансформер", cat: "port", icon: "fa-laptop-file" },
+      { id: 6, name: "Смартфон (iPhone)", cat: "mob", icon: "fa-mobile-screen-button" },
+      { id: 7, name: "Планшет (iPad)", cat: "mob", icon: "fa-tablet-screen-button" },
+      { id: 8, name: "Смартгодинник", cat: "wear", icon: "fa-stopwatch" },
+      { id: 9, name: "Фітнес-браслет", cat: "wear", icon: "fa-clock text-emerald-400" }
+    ];
+
+    let g4Queue = [];
+
+    function renderGame4() {
+      g4Queue = shuffleArray(game4Devices);
+      const stage = document.getElementById('game-stage');
+
+      stage.innerHTML = `
+        <div class="space-y-4">
+          <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
+            <p class="text-xs md:text-sm text-slate-300">
+              <i class="fa-solid fa-radar text-purple-400 mr-1"></i>
+              Класифікуй пристрій у центрі радара, обравши один із 4 секторів!
+            </p>
+            <div id="g4-counter" class="text-xs font-bold text-purple-400 bg-purple-950/80 px-3 py-1 rounded-full border border-purple-800/60">
+              Залишилось: ${g4Queue.length}
+            </div>
+          </div>
+
+          <!-- Central Radar Canvas / Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <!-- Target Quadrants -->
+            <button onclick="dispatchG4('stat')" class="p-5 rounded-2xl bg-slate-900/80 border-2 border-indigo-500/30 hover:border-indigo-400 transition flex items-center gap-4 text-left group">
+              <div class="w-12 h-12 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl group-hover:scale-110 transition">
+                <i class="fa-solid fa-desktop"></i>
+              </div>
+              <div>
+                <h4 class="font-extrabold text-indigo-300 text-sm md:text-base">Стаціонарні ПК</h4>
+                <p class="text-xs text-slate-400">Системний блок + монітор, моноблоки</p>
+              </div>
+            </button>
+
+            <button onclick="dispatchG4('port')" class="p-5 rounded-2xl bg-slate-900/80 border-2 border-cyan-500/30 hover:border-cyan-400 transition flex items-center gap-4 text-left group">
+              <div class="w-12 h-12 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xl group-hover:scale-110 transition">
+                <i class="fa-solid fa-laptop"></i>
+              </div>
+              <div>
+                <h4 class="font-extrabold text-cyan-300 text-sm md:text-base">Переносні пристрої</h4>
+                <p class="text-xs text-slate-400">Ноутбуки, хромбуки, трансформери</p>
+              </div>
+            </button>
+
+            <button onclick="dispatchG4('mob')" class="p-5 rounded-2xl bg-slate-900/80 border-2 border-emerald-500/30 hover:border-emerald-400 transition flex items-center gap-4 text-left group">
+              <div class="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl group-hover:scale-110 transition">
+                <i class="fa-solid fa-mobile-screen"></i>
+              </div>
+              <div>
+                <h4 class="font-extrabold text-emerald-300 text-sm md:text-base">Мобільні & Компактні</h4>
+                <p class="text-xs text-slate-400">Смартфони, планшети</p>
+              </div>
+            </button>
+
+            <button onclick="dispatchG4('wear')" class="p-5 rounded-2xl bg-slate-900/80 border-2 border-purple-500/30 hover:border-purple-400 transition flex items-center gap-4 text-left group">
+              <div class="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-xl group-hover:scale-110 transition">
+                <i class="fa-solid fa-stopwatch"></i>
+              </div>
+              <div>
+                <h4 class="font-extrabold text-purple-300 text-sm md:text-base">Носимі гаджети</h4>
+                <p class="text-xs text-slate-400">Смартгодинники, фітнес-браслети</p>
+              </div>
+            </button>
+
+          </div>
+
+          <!-- Active Target Radar Display -->
+          <div class="bg-gradient-to-tr from-slate-900 via-purple-950/30 to-slate-900 border-2 border-purple-500/40 rounded-2xl p-6 text-center space-y-3">
+            <span class="text-xs font-bold uppercase text-purple-400 tracking-wider">Пристрій на сканері:</span>
+            <div id="g4-active-card" class="text-2xl md:text-3xl font-extrabold text-white flex items-center justify-center gap-3 py-2">
+              <i class="fa-solid ${g4Queue[0].icon} text-purple-400"></i>
+              <span>${g4Queue[0].name}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function dispatchG4(category) {
+      if (g4Queue.length === 0) return;
+      const current = g4Queue[0];
+
+      if (current.cat === category) {
+        playSound('success');
+        g4Queue.shift();
+
+        if (g4Queue.length === 0) {
+          playSound('win');
+          gameState.stars.game4 = 3;
+          gameState.score += 100;
+          updateHeaderStats();
+
+          setTimeout(() => {
+            showVictoryModal("Радар очищено!", "Ти досконало орієнтуєшся у різновидах сучасних комп'ютерних гаджетів!");
+          }, 300);
+        } else {
+          // Render next item
+          const activeCard = document.getElementById('g4-active-card');
+          activeCard.innerHTML = `
+            <i class="fa-solid ${g4Queue[0].icon} text-purple-400"></i>
+            <span>${g4Queue[0].name}</span>
+          `;
+          document.getElementById('g4-counter').innerText = `Залишилось: ${g4Queue.length}`;
+        }
+      } else {
+        playSound('error');
+        const activeCard = document.getElementById('g4-active-card');
+        activeCard.classList.add('text-red-400');
+        setTimeout(() => activeCard.classList.remove('text-red-400'), 500);
+      }
+    }
+
+    /* ========================================================
+       MINI-GAME 5: VOCABULARY CABLE PATCH & HISTORICAL SECRET
+       ======================================================== */
+    const g5Pairs = [
+      { ua: "Процесор", en: "Processor" },
+      { ua: "Материнська плата", en: "Motherboard" },
+      { ua: "Системний блок", en: "System unit" },
+      { ua: "Оперативна пам'ять", en: "Flash / RAM memory" },
+      { ua: "Клавіатура & Миша", en: "Keyboard & Mouse" },
+      { ua: "Монітор", en: "Monitor" }
+    ];
+
+    let selectedUaIndex = null;
+    let connectedG5Count = 0;
+
+    function renderGame5() {
+      connectedG5Count = 0;
+      selectedUaIndex = null;
+
+      const uaList = shuffleArray(g5Pairs.map((p, i) => ({ text: p.ua, originalIndex: i })));
+      const enList = shuffleArray(g5Pairs.map((p, i) => ({ text: p.en, originalIndex: i })));
+
+      const stage = document.getElementById('game-stage');
+      stage.innerHTML = `
+        <div class="space-y-6">
+          <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
+            <p class="text-xs md:text-sm text-slate-300">
+              <i class="fa-solid fa-plug text-amber-400 mr-1"></i>
+              Крок 1: З'єднай українські терміни з їхніми англійськими відповідниками!
+            </p>
+            <div id="g5-counter" class="text-xs font-bold text-amber-400 bg-amber-950/80 px-3 py-1 rounded-full border border-amber-800/60">
+              З'єднано: 0 / ${g5Pairs.length}
+            </div>
+          </div>
+
+          <!-- Cable Patch Area -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
+            <!-- UA Terms -->
+            <div class="space-y-2.5">
+              <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Українські терміни</h4>
+              ${uaList.map((item, idx) => `
+                <button id="g5-ua-${item.originalIndex}" onclick="selectG5Ua(${item.originalIndex})"
+                        class="w-full p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-amber-500/50 text-left font-bold text-sm text-slate-200 transition flex items-center justify-between group">
+                  <span>${item.text}</span>
+                  <i class="fa-solid fa-circle-dot text-slate-600 group-hover:text-amber-400"></i>
+                </button>
+              `).join('')}
+            </div>
+
+            <!-- EN Terms -->
+            <div class="space-y-2.5">
+              <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">English Terms</h4>
+              ${enList.map((item, idx) => `
+                <button id="g5-en-${item.originalIndex}" onclick="selectG5En(${item.originalIndex})"
+                        class="w-full p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-amber-500/50 text-left font-bold text-sm text-slate-200 transition flex items-center justify-between group">
+                  <i class="fa-solid fa-circle-dot text-slate-600 group-hover:text-amber-400"></i>
+                  <span>${item.text}</span>
+                </button>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Secret Historical Discovery Lock Container -->
+          <div id="g5-secret-box" class="hidden bg-gradient-to-r from-amber-950/40 via-slate-900 to-amber-950/40 border-2 border-amber-500/50 p-6 rounded-2xl text-center space-y-4">
+            <div class="w-14 h-14 rounded-full bg-amber-500/20 text-amber-400 mx-auto flex items-center justify-center text-2xl border border-amber-500/40">
+              <i class="fa-solid fa-award"></i>
+            </div>
+            <h3 class="text-xl font-extrabold text-amber-200">Україна пишається! Історичний факт</h3>
+            <p class="text-sm text-slate-300 max-w-xl mx-auto leading-relaxed">
+              Чи знаєте ви, що перший прообраз сучасного компакт-диска (CD) наприкінці 1960-х років розробив аспірант Київського інституту кібернетики <strong class="text-amber-300">В'ячеслав Петров</strong>?
+            </p>
+            <button onclick="finishGame5()" class="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-sm transition shadow-lg shadow-amber-500/20">
+              Підтвердити відкриття!
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function selectG5Ua(origIdx) {
+      playSound('click');
+      selectedUaIndex = origIdx;
+
+      document.querySelectorAll('[id^="g5-ua-"]').forEach(btn => {
+        if (!btn.disabled) btn.classList.remove('ring-2', 'ring-amber-400', 'bg-amber-950/40');
+      });
+
+      const btn = document.getElementById(`g5-ua-${origIdx}`);
+      if (btn && !btn.disabled) {
+        btn.classList.add('ring-2', 'ring-amber-400', 'bg-amber-950/40');
+      }
+    }
+
+    function selectG5En(origIdx) {
+      if (selectedUaIndex === null) {
+        playSound('error');
+        return;
+      }
+
+      if (selectedUaIndex === origIdx) {
+        playSound('success');
+        // Match!
+        const uaBtn = document.getElementById(`g5-ua-${selectedUaIndex}`);
+        const enBtn = document.getElementById(`g5-en-${origIdx}`);
+
+        uaBtn.disabled = true;
+        enBtn.disabled = true;
+
+        uaBtn.className = "w-full p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/50 text-left font-bold text-sm text-emerald-200 flex items-center justify-between";
+        enBtn.className = "w-full p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/50 text-left font-bold text-sm text-emerald-200 flex items-center justify-between";
+
+        uaBtn.innerHTML = `<span>${g5Pairs[origIdx].ua}</span> <i class="fa-solid fa-check text-emerald-400"></i>`;
+        enBtn.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> <span>${g5Pairs[origIdx].en}</span>`;
+
+        selectedUaIndex = null;
+        connectedG5Count++;
+        document.getElementById('g5-counter').innerText = `З'єднано: ${connectedG5Count} / ${g5Pairs.length}`;
+
+        if (connectedG5Count === g5Pairs.length) {
+          playSound('win');
+          document.getElementById('g5-secret-box').classList.remove('hidden');
+        }
+      } else {
+        playSound('error');
+        const enBtn = document.getElementById(`g5-en-${origIdx}`);
+        enBtn.classList.add('border-red-500');
+        setTimeout(() => enBtn.classList.remove('border-red-500'), 500);
+      }
+    }
+
+    function finishGame5() {
+      gameState.stars.game5 = 3;
+      gameState.score += 100;
+      updateHeaderStats();
+      showVictoryModal("Словник та Історію засвоєно!", "Вітаємо! Ти дізнався про видатного українського вченого В'ячеслава Петрова!");
+    }
+
+    /* ========================================================
+       VICTORY MODAL & UTILS
+       ======================================================== */
+    function showVictoryModal(title, desc) {
+      const modal = document.createElement('div');
+      modal.id = 'victory-modal';
+      modal.className = "fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in";
+      modal.innerHTML = `
+        <div class="glass-card max-w-md w-full rounded-2xl p-6 border border-amber-500/40 text-center space-y-5 shadow-2xl">
+          <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-400 to-yellow-300 text-slate-950 mx-auto flex items-center justify-center text-3xl font-extrabold shadow-lg shadow-amber-500/30">
+            <i class="fa-solid fa-trophy"></i>
+          </div>
+          <div>
+            <h3 class="text-2xl font-extrabold text-white">${title}</h3>
+            <p class="text-slate-300 text-sm mt-2 leading-relaxed">${desc}</p>
+          </div>
+          <div class="flex justify-center gap-1 text-amber-400 text-2xl py-1">
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+          </div>
+          <button onclick="closeVictoryModal()" class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-400 hover:to-cyan-400 text-slate-950 font-extrabold text-sm transition shadow-lg">
+            Повернутися до Меню
+          </button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    function closeVictoryModal() {
+      playSound('click');
+      document.getElementById('victory-modal')?.remove();
+      switchTab('dashboard');
+    }
+
+    // Initialize application
+    window.onload = function() {
+      updateHeaderStats();
+    };
+  </script>
+</body>
+</html>
