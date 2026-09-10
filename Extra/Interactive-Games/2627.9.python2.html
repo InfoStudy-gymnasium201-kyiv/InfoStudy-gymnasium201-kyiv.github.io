@@ -37,12 +37,13 @@
             color: #f8fafc;
             user-select: none;
             -webkit-user-select: none;
+            touch-action: manipulation;
         }
 
         /* Custom scrollbar */
         ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
         }
         ::-webkit-scrollbar-track {
             background: #0f172a;
@@ -81,12 +82,19 @@
         /* Tactile interactive elements */
         .interactive-card {
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            touch-action: manipulation;
         }
         .interactive-card:hover {
-            transform: translateY(-3px) scale(1.02);
+            transform: translateY(-2px) scale(1.01);
         }
-        .interactive-card:active {
+        .interactive-card:active, .interactive-card.selected-item {
             transform: translateY(1px) scale(0.98);
+        }
+
+        .selected-item {
+            border-color: #38bdf8 !important;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+            background-color: #0f2b48 !important;
         }
 
         .dragging {
@@ -112,64 +120,64 @@
 <body class="animated-bg min-h-screen flex flex-col font-sans overflow-x-hidden">
 
     <!-- TOP NAVIGATION BAR -->
-    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50 px-4 py-3">
-        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50 px-3 sm:px-4 py-2.5 sm:py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2 sm:gap-4">
             <!-- Brand -->
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-sky-500/20">
+            <div class="flex items-center gap-2.5 sm:gap-3">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white text-lg sm:text-xl font-bold shadow-lg shadow-sky-500/20">
                     <i class="fa-brands fa-python"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-lg text-white leading-tight flex items-center gap-2">
+                    <h1 class="font-bold text-sm sm:text-lg text-white leading-tight flex items-center gap-1.5 sm:gap-2">
                         Майстер Списків
-                        <span class="text-xs bg-sky-500/20 text-sky-400 border border-sky-500/30 px-2 py-0.5 rounded-full font-mono">Python 3</span>
+                        <span class="text-[10px] sm:text-xs bg-sky-500/20 text-sky-400 border border-sky-500/30 px-1.5 sm:px-2 py-0.5 rounded-full font-mono">Python 3</span>
                     </h1>
-                    <p class="text-xs text-slate-400">Інтерактивний практикум з програмування</p>
+                    <p class="text-[10px] sm:text-xs text-slate-400">Інтерактивний практикум</p>
                 </div>
             </div>
 
             <!-- Global Score & Progress Bar -->
-            <div class="flex items-center gap-6">
-                <div class="flex items-center gap-2 bg-slate-800/80 border border-slate-700/60 px-3 py-1.5 rounded-lg">
+            <div class="flex items-center gap-2 sm:gap-6 ml-auto">
+                <div class="flex items-center gap-1.5 sm:gap-2 bg-slate-800/80 border border-slate-700/60 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-xs sm:text-sm">
                     <i class="fa-solid fa-trophy text-amber-400"></i>
-                    <span class="text-xs text-slate-400">Очки:</span>
-                    <span id="global-score" class="font-mono font-bold text-amber-400 text-base">0</span>
+                    <span class="hidden sm:inline text-xs text-slate-400">Очки:</span>
+                    <span id="global-score" class="font-mono font-bold text-amber-400 text-sm sm:text-base">0</span>
                 </div>
 
-                <div class="flex items-center gap-2 bg-slate-800/80 border border-slate-700/60 px-3 py-1.5 rounded-lg">
+                <div class="flex items-center gap-1.5 sm:gap-2 bg-slate-800/80 border border-slate-700/60 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-xs sm:text-sm">
                     <i class="fa-solid fa-star text-purple-400"></i>
-                    <span class="text-xs text-slate-400">Прогрес:</span>
-                    <span id="level-progress-text" class="font-mono font-bold text-purple-400 text-base">0/5</span>
+                    <span class="hidden sm:inline text-xs text-slate-400">Прогрес:</span>
+                    <span id="level-progress-text" class="font-mono font-bold text-purple-400 text-sm sm:text-base">0/5</span>
                 </div>
 
                 <!-- Sound Toggle -->
-                <button id="sound-btn" onclick="toggleSound()" class="w-9 h-9 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-700 transition">
-                    <i id="sound-icon" class="fa-solid fa-volume-high"></i>
+                <button id="sound-btn" onclick="toggleSound()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-700 transition">
+                    <i id="sound-icon" class="fa-solid fa-volume-high text-xs sm:text-sm"></i>
                 </button>
             </div>
         </div>
     </header>
 
     <!-- NAVIGATION TABS FOR MINI-GAMES -->
-    <nav class="bg-slate-950/60 border-b border-slate-800/80 px-4 py-2 overflow-x-auto">
+    <nav class="bg-slate-950/60 border-b border-slate-800/80 px-2 sm:px-4 py-2 overflow-x-auto no-scrollbar">
         <div class="max-w-7xl mx-auto flex items-center gap-2 min-w-max">
-            <button onclick="switchTab(0)" class="tab-btn active px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition bg-sky-500/20 text-sky-300 border border-sky-500/40">
+            <button onclick="switchTab(0)" class="tab-btn active px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 sm:gap-2 transition bg-sky-500/20 text-sky-300 border border-sky-500/40">
                 <span class="w-5 h-5 rounded-full bg-sky-500/30 text-sky-300 flex items-center justify-center text-[10px] font-mono">1</span>
                 <span>Створення Списків</span>
             </button>
-            <button onclick="switchTab(1)" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition text-slate-400 hover:bg-slate-800 border border-transparent">
+            <button onclick="switchTab(1)" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 sm:gap-2 transition text-slate-400 hover:bg-slate-800 border border-transparent">
                 <span class="w-5 h-5 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center text-[10px] font-mono">2</span>
                 <span>Індексація [i]</span>
             </button>
-            <button onclick="switchTab(2)" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition text-slate-400 hover:bg-slate-800 border border-transparent">
+            <button onclick="switchTab(2)" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 sm:gap-2 transition text-slate-400 hover:bg-slate-800 border border-transparent">
                 <span class="w-5 h-5 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center text-[10px] font-mono">3</span>
                 <span>Лазерні Зрізи [a:b]</span>
             </button>
-            <button onclick="switchTab(3)" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition text-slate-400 hover:bg-slate-800 border border-transparent">
+            <button onclick="switchTab(3)" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 sm:gap-2 transition text-slate-400 hover:bg-slate-800 border border-transparent">
                 <span class="w-5 h-5 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center text-[10px] font-mono">4</span>
                 <span>Лабораторія Мутацій</span>
             </button>
-            <button onclick="switchTab(4)" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition text-slate-400 hover:bg-slate-800 border border-transparent">
+            <button onclick="switchTab(4)" class="tab-btn px-3 sm:px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 sm:gap-2 transition text-slate-400 hover:bg-slate-800 border border-transparent">
                 <span class="w-5 h-5 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center text-[10px] font-mono">5</span>
                 <span>Детектив Пам'яті</span>
             </button>
@@ -203,57 +211,57 @@
             </div>
 
             <!-- Tactile Sorting Workbench -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 flex-1">
                 <!-- Source Code Items Palette -->
-                <div class="lg:col-span-5 bg-slate-900/60 border border-slate-800 p-5 rounded-2xl flex flex-col gap-4">
-                    <h3 class="text-sm font-semibold text-slate-300 flex items-center gap-2">
-                        <i class="fa-solid fa-hand-pointer text-sky-400"></i> Перетягніть блоки у потрібний кошик:
+                <div class="lg:col-span-5 bg-slate-900/60 border border-slate-800 p-4 sm:p-5 rounded-2xl flex flex-col gap-3 sm:gap-4">
+                    <h3 class="text-xs sm:text-sm font-semibold text-slate-300 flex items-center gap-2">
+                        <i class="fa-solid fa-hand-pointer text-sky-400"></i> Торкніться або перетягніть блок:
                     </h3>
-                    <div id="mg1-items-container" class="flex flex-col gap-3 flex-1 justify-center min-h-[280px]">
+                    <div id="mg1-items-container" class="flex flex-col gap-2.5 sm:gap-3 flex-1 justify-center min-h-[200px] sm:min-h-[280px]">
                         <!-- Dynamic code items spawned here -->
                     </div>
                 </div>
 
                 <!-- Drop Target Categories -->
-                <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <!-- Drop Basket 1: Empty List -->
-                    <div data-category="empty" class="mg1-dropzone bg-slate-900/80 border-2 border-dashed border-slate-700/80 hover:border-sky-500/50 p-4 rounded-2xl flex flex-col items-center justify-start text-center transition min-h-[140px]">
-                        <div class="w-10 h-10 rounded-xl bg-slate-800 text-sky-400 flex items-center justify-center text-lg mb-2">
+                    <div data-category="empty" class="mg1-dropzone cursor-pointer bg-slate-900/80 border-2 border-dashed border-slate-700/80 hover:border-sky-500/50 p-3 sm:p-4 rounded-2xl flex flex-col items-center justify-start text-center transition min-h-[120px] sm:min-h-[140px]">
+                        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-800 text-sky-400 flex items-center justify-center text-base sm:text-lg mb-1.5">
                             <i class="fa-regular fa-square"></i>
                         </div>
-                        <h4 class="font-bold text-sm text-slate-200">Порожній список</h4>
-                        <p class="text-[11px] text-slate-400 mt-0.5 font-mono">empty_list = []</p>
-                        <div class="mg1-slots-container w-full mt-3 flex flex-col gap-2"></div>
+                        <h4 class="font-bold text-xs sm:text-sm text-slate-200">Порожній список</h4>
+                        <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 font-mono">empty_list = []</p>
+                        <div class="mg1-slots-container w-full mt-2.5 sm:mt-3 flex flex-col gap-1.5"></div>
                     </div>
 
                     <!-- Drop Basket 2: Strings List -->
-                    <div data-category="strings" class="mg1-dropzone bg-slate-900/80 border-2 border-dashed border-slate-700/80 hover:border-sky-500/50 p-4 rounded-2xl flex flex-col items-center justify-start text-center transition min-h-[140px]">
-                        <div class="w-10 h-10 rounded-xl bg-slate-800 text-emerald-400 flex items-center justify-center text-lg mb-2">
+                    <div data-category="strings" class="mg1-dropzone cursor-pointer bg-slate-900/80 border-2 border-dashed border-slate-700/80 hover:border-sky-500/50 p-3 sm:p-4 rounded-2xl flex flex-col items-center justify-start text-center transition min-h-[120px] sm:min-h-[140px]">
+                        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-800 text-emerald-400 flex items-center justify-center text-base sm:text-lg mb-1.5">
                             <i class="fa-solid fa-font"></i>
                         </div>
-                        <h4 class="font-bold text-sm text-slate-200">Список рядків</h4>
-                        <p class="text-[11px] text-slate-400 mt-0.5 font-mono">['a', 'b', 'c']</p>
-                        <div class="mg1-slots-container w-full mt-3 flex flex-col gap-2"></div>
+                        <h4 class="font-bold text-xs sm:text-sm text-slate-200">Список рядків</h4>
+                        <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 font-mono">['a', 'b', 'c']</p>
+                        <div class="mg1-slots-container w-full mt-2.5 sm:mt-3 flex flex-col gap-1.5"></div>
                     </div>
 
                     <!-- Drop Basket 3: Mixed List -->
-                    <div data-category="mixed" class="mg1-dropzone bg-slate-900/80 border-2 border-dashed border-slate-700/80 hover:border-sky-500/50 p-4 rounded-2xl flex flex-col items-center justify-start text-center transition min-h-[140px]">
-                        <div class="w-10 h-10 rounded-xl bg-slate-800 text-amber-400 flex items-center justify-center text-lg mb-2">
+                    <div data-category="mixed" class="mg1-dropzone cursor-pointer bg-slate-900/80 border-2 border-dashed border-slate-700/80 hover:border-sky-500/50 p-3 sm:p-4 rounded-2xl flex flex-col items-center justify-start text-center transition min-h-[120px] sm:min-h-[140px]">
+                        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-800 text-amber-400 flex items-center justify-center text-base sm:text-lg mb-1.5">
                             <i class="fa-solid fa-cubes"></i>
                         </div>
-                        <h4 class="font-bold text-sm text-slate-200">Мішаний список</h4>
-                        <p class="text-[11px] text-slate-400 mt-0.5 font-mono">['Oksana', 15, 165.5]</p>
-                        <div class="mg1-slots-container w-full mt-3 flex flex-col gap-2"></div>
+                        <h4 class="font-bold text-xs sm:text-sm text-slate-200">Мішаний список</h4>
+                        <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 font-mono">['Oksana', 15, 165.5]</p>
+                        <div class="mg1-slots-container w-full mt-2.5 sm:mt-3 flex flex-col gap-1.5"></div>
                     </div>
 
                     <!-- Drop Basket 4: Nested Matrix -->
-                    <div data-category="matrix" class="mg1-dropzone bg-slate-900/80 border-2 border-dashed border-slate-700/80 hover:border-sky-500/50 p-4 rounded-2xl flex flex-col items-center justify-start text-center transition min-h-[140px]">
-                        <div class="w-10 h-10 rounded-xl bg-slate-800 text-purple-400 flex items-center justify-center text-lg mb-2">
+                    <div data-category="matrix" class="mg1-dropzone cursor-pointer bg-slate-900/80 border-2 border-dashed border-slate-700/80 hover:border-sky-500/50 p-3 sm:p-4 rounded-2xl flex flex-col items-center justify-start text-center transition min-h-[120px] sm:min-h-[140px]">
+                        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-800 text-purple-400 flex items-center justify-center text-base sm:text-lg mb-1.5">
                             <i class="fa-solid fa-border-all"></i>
                         </div>
-                        <h4 class="font-bold text-sm text-slate-200">Вкладений список</h4>
-                        <p class="text-[11px] text-slate-400 mt-0.5 font-mono">[[0, 1], [1, 0]]</p>
-                        <div class="mg1-slots-container w-full mt-3 flex flex-col gap-2"></div>
+                        <h4 class="font-bold text-xs sm:text-sm text-slate-200">Вкладений список</h4>
+                        <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 font-mono">[[0, 1], [1, 0]]</p>
+                        <div class="mg1-slots-container w-full mt-2.5 sm:mt-3 flex flex-col gap-1.5"></div>
                     </div>
                 </div>
             </div>
@@ -566,16 +574,135 @@
     </main>
 
     <script>
-        /* ===================================================================
-           SOUND SYNTHESIZER (Web Audio API - No external assets required)
-           =================================================================== */
         let soundEnabled = true;
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
         let audioCtx = null;
 
         function initAudio() {
             if (!audioCtx) {
-                audioCtx = new AudioContext();
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        /* ===================================================================
+           MINI-GAME 1 LOGIC (Створення Списків & Категорії + Touch Support)
+           =================================================================== */
+        const mg1RawData = [
+            { id: 0, code: "empty_list = []", category: "empty" },
+            { id: 1, code: "weekdays = ['Monday', 'Tuesday', 'Friday']", category: "strings" },
+            { id: 2, code: "mix = ['Oksana', 15, 165.5]", category: "mixed" },
+            { id: 3, code: "matrix = [[0, 0, 1], [0, 1, 0]]", category: "matrix" }
+        ];
+
+        let mg1PlacedCount = 0;
+        let selectedMg1Item = null;
+
+        function initMG1() {
+            mg1PlacedCount = 0;
+            selectedMg1Item = null;
+            const container = document.getElementById('mg1-items-container');
+            container.innerHTML = '';
+            
+            // Clean up dropzones
+            document.querySelectorAll('.mg1-slots-container').forEach(c => c.innerHTML = '');
+
+            const shuffledData = shuffle(mg1RawData);
+
+            shuffledData.forEach((item) => {
+                const el = document.createElement('div');
+                el.className = "interactive-card bg-slate-950 border border-slate-700/80 p-3 rounded-xl font-mono text-xs text-sky-300 cursor-pointer flex items-center justify-between shadow-md select-none";
+                el.draggable = true;
+                el.id = `mg1-item-${item.id}`;
+                el.dataset.category = item.category;
+                el.dataset.itemId = item.id;
+                el.dataset.code = item.code;
+                el.innerHTML = `
+                    <span class="break-all">${item.code}</span>
+                    <i class="fa-solid fa-hand-pointer text-slate-500 text-xs ml-2"></i>
+                `;
+
+                // Mobile Tap-to-select support
+                el.addEventListener('click', () => {
+                    playSound('click');
+                    document.querySelectorAll('#mg1-items-container > div').forEach(card => card.classList.remove('selected-item'));
+                    if (selectedMg1Item && selectedMg1Item.id === item.id) {
+                        selectedMg1Item = null;
+                    } else {
+                        selectedMg1Item = item;
+                        el.classList.add('selected-item');
+                    }
+                });
+
+                // Drag Events
+                el.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', JSON.stringify(item));
+                    el.classList.add('dragging');
+                });
+
+                el.addEventListener('dragend', () => {
+                    el.classList.remove('dragging');
+                });
+
+                container.appendChild(el);
+            });
+
+            // Set up Dropzones with Tap and Drag Support
+            const dropzones = document.querySelectorAll('.mg1-dropzone');
+            dropzones.forEach(dz => {
+                // Click handler for Tap-to-Place on Mobile
+                dz.addEventListener('click', () => {
+                    if (selectedMg1Item) {
+                        attemptPlaceMg1Item(selectedMg1Item, dz);
+                    }
+                });
+
+                dz.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dz.classList.add('drop-target-active');
+                });
+
+                dz.addEventListener('dragleave', () => {
+                    dz.classList.remove('drop-target-active');
+                });
+
+                dz.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dz.classList.remove('drop-target-active');
+                    const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                    attemptPlaceMg1Item(data, dz);
+                });
+            });
+        }
+
+        function attemptPlaceMg1Item(data, dropzoneEl) {
+            const container = document.getElementById('mg1-items-container');
+            const targetCategory = dropzoneEl.dataset.category;
+
+            if (data.category === targetCategory) {
+                playSound('success');
+                
+                // Find element and place into slot
+                const placedEl = document.getElementById(`mg1-item-${data.id}`);
+                if (placedEl && placedEl.parentElement === container) {
+                    container.removeChild(placedEl);
+                    
+                    const slot = document.createElement('div');
+                    slot.className = "bg-emerald-950/60 border border-emerald-500/40 px-2 py-1.5 rounded-lg text-[11px] font-mono text-emerald-300 w-full text-center break-all";
+                    slot.textContent = data.code;
+                    dropzoneEl.querySelector('.mg1-slots-container').appendChild(slot);
+
+                    selectedMg1Item = null;
+                    mg1PlacedCount++;
+                    updateGlobalScore(25);
+                    document.getElementById('mg1-progress').style.width = `${(mg1PlacedCount/4)*100}%`;
+
+                    if (mg1PlacedCount === 4) {
+                        showFeedback('mg1-feedback', true, 'Чудово! Ви правильно розпізнали всі види списків Python.');
+                        updateModuleProgress(0);
+                    }
+                }
+            } else {
+                playSound('error');
+                showFeedback('mg1-feedback', false, 'Неправильно! Зверніть увагу на типи даних у списку.');
             }
         }
 
@@ -703,99 +830,6 @@
         }
 
         /* ===================================================================
-           MINI-GAME 1 LOGIC (Створення Списків & Категорії)
-           =================================================================== */
-        const mg1RawData = [
-            { code: "empty_list = []", category: "empty" },
-            { code: "weekdays = ['Monday', 'Tuesday', 'Friday']", category: "strings" },
-            { code: "mix = ['Oksana', 15, 165.5]", category: "mixed" },
-            { code: "matrix = [[0, 0, 1], [0, 1, 0]]", category: "matrix" }
-        ];
-
-        let mg1PlacedCount = 0;
-
-        function initMG1() {
-            mg1PlacedCount = 0;
-            const container = document.getElementById('mg1-items-container');
-            container.innerHTML = '';
-            
-            // Clean up dropzones
-            document.querySelectorAll('.mg1-slots-container').forEach(c => c.innerHTML = '');
-
-            const shuffledData = shuffle(mg1RawData);
-
-            shuffledData.forEach((item, idx) => {
-                const el = document.createElement('div');
-                el.className = "interactive-card bg-slate-950 border border-slate-700/80 p-3 rounded-xl font-mono text-xs text-sky-300 cursor-grab active:cursor-grabbing flex items-center justify-between shadow-md";
-                el.draggable = true;
-                el.id = `mg1-item-${idx}`;
-                el.dataset.category = item.category;
-                el.innerHTML = `
-                    <span>${item.code}</span>
-                    <i class="fa-solid fa-grip-vertical text-slate-600 text-sm"></i>
-                `;
-
-                // Drag Events
-                el.addEventListener('dragstart', (e) => {
-                    e.dataTransfer.setData('text/plain', JSON.stringify(item));
-                    el.classList.add('dragging');
-                });
-
-                el.addEventListener('dragend', () => {
-                    el.classList.remove('dragging');
-                });
-
-                container.appendChild(el);
-            });
-
-            // Set up Dropzones
-            const dropzones = document.querySelectorAll('.mg1-dropzone');
-            dropzones.forEach(dz => {
-                dz.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    dz.classList.add('drop-target-active');
-                });
-
-                dz.addEventListener('dragleave', () => {
-                    dz.classList.remove('drop-target-active');
-                });
-
-                dz.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    dz.classList.remove('drop-target-active');
-                    const data = JSON.parse(e.dataTransfer.getData('text/plain'));
-                    const targetCategory = dz.dataset.category;
-
-                    if (data.category === targetCategory) {
-                        playSound('success');
-                        // Find element and place into slot
-                        const placedEl = document.querySelector(`[data-category="${data.category}"]`);
-                        if (placedEl && placedEl.parentElement === container) {
-                            container.removeChild(placedEl);
-                            
-                            const slot = document.createElement('div');
-                            slot.className = "bg-emerald-950/60 border border-emerald-500/40 px-2 py-1.5 rounded-lg text-[11px] font-mono text-emerald-300 w-full text-center";
-                            slot.textContent = data.code;
-                            dz.querySelector('.mg1-slots-container').appendChild(slot);
-
-                            mg1PlacedCount++;
-                            updateGlobalScore(25);
-                            document.getElementById('mg1-progress').style.width = `${(mg1PlacedCount/4)*100}%`;
-
-                            if (mg1PlacedCount === 4) {
-                                showFeedback('mg1-feedback', true, 'Чудово! Ви правильно розпізнали всі види списків Python.');
-                                updateModuleProgress(0);
-                            }
-                        }
-                    } else {
-                        playSound('error');
-                        showFeedback('mg1-feedback', false, 'Неправильно! Зверніть увагу на типи даних у списку.');
-                    }
-                });
-            });
-        }
-
-        /* ===================================================================
            MINI-GAME 2 LOGIC (Індексація: Додатня та Від’ємна)
            =================================================================== */
         const mg2Tasks = [
@@ -860,11 +894,11 @@
 
                 const card = document.createElement('button');
                 card.onclick = () => checkMG2Answer(idx);
-                card.className = "interactive-card flex flex-col items-center bg-slate-950 border-2 border-slate-800 hover:border-indigo-500 p-4 rounded-2xl min-w-[100px] transition group";
+                card.className = "interactive-card flex flex-col items-center bg-slate-950 border-2 border-slate-800 hover:border-indigo-500 p-3 sm:p-4 rounded-2xl min-w-[70px] sm:min-w-[100px] transition group active:scale-95";
                 
                 card.innerHTML = `
-                    <span class="text-[10px] font-mono ${mg2Mode === 'pos' ? 'text-indigo-400' : 'text-pink-400'} mb-2 font-bold">${shownIdx}</span>
-                    <span class="font-mono text-sm font-bold text-slate-200 group-hover:text-indigo-300">${JSON.stringify(item)}</span>
+                    <span class="text-[10px] sm:text-xs font-mono ${mg2Mode === 'pos' ? 'text-indigo-400' : 'text-pink-400'} mb-1 sm:mb-2 font-bold">${shownIdx}</span>
+                    <span class="font-mono text-xs sm:text-sm font-bold text-slate-200 group-hover:text-indigo-300 break-all">${JSON.stringify(item)}</span>
                 `;
                 display.appendChild(card);
             });
