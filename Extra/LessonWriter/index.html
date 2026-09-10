@@ -173,11 +173,8 @@
                         </p>
                     </div>
 
-                    <!-- Text-To-Speech Button -->
-                    <div class="mt-3 flex items-center justify-between text-xs text-slate-500">
-                        <button onclick="readTargetSentence()" class="hover:text-brand-600 dark:hover:text-brand-400 flex items-center gap-1.5 transition">
-                            <i class="fa-solid fa-volume-low text-brand-500"></i> Прослухати текст
-                        </button>
+                    <!-- Instruction Hint -->
+                    <div class="mt-3 flex items-center justify-end text-xs text-slate-500">
                         <span class="italic text-slate-400">Уважно перепишіть текст у поле нижче</span>
                     </div>
                 </div>
@@ -786,19 +783,6 @@
             const completeCard = document.getElementById('lesson-complete-card');
             completeCard.classList.remove('hidden');
             confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
-        }
-
-        function readTargetSentence() {
-            const text = document.getElementById('target-sentence-text').innerText;
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); // Stop any ongoing speech
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'uk-UA';
-                utterance.rate = 0.9;
-                window.speechSynthesis.speak(utterance);
-            } else {
-                alert('Синтез мовлення не підтримується у вашому браузері.');
-            }
         }
 
         function openPdfModal() {
