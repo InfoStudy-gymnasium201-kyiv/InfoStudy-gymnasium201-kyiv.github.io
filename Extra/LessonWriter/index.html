@@ -47,6 +47,15 @@
         .diff-extra { background-color: rgba(245, 158, 11, 0.25); color: #b45309; text-decoration: line-through; }
         .dark .diff-extra { background-color: rgba(245, 158, 11, 0.3); color: #fbbf24; }
 
+        .no-select {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
         .glass-panel {
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(12px);
@@ -151,7 +160,7 @@
             <div class="lg:col-span-8 space-y-6">
 
                 <!-- Sentence View Card (ЗВЕРХУ: КОНСПЕКТ ДЛЯ ЧИТАННЯ) -->
-                <div class="glass-panel rounded-2xl p-6 shadow-sm border-l-4 border-l-brand-600 relative overflow-hidden">
+                <div class="glass-panel rounded-2xl p-6 shadow-sm border-l-4 border-l-brand-600 relative overflow-hidden no-select" oncopy="return false" oncut="return false" ondragstart="return false">
                     <div class="flex items-center justify-between mb-3 text-xs font-medium text-slate-500 dark:text-slate-400">
                         <span class="flex items-center gap-1.5 text-brand-600 dark:text-brand-400 font-semibold">
                             <i class="fa-solid fa-book-open"></i>ЗРАЗОК КОНСПЕКТУ ДЛЯ ЗАПИСУ
@@ -168,7 +177,7 @@
 
                     <!-- Sentence to copy -->
                     <div class="bg-slate-100/80 dark:bg-slate-800/80 p-4 sm:p-5 rounded-xl border border-slate-200/80 dark:border-slate-700/80">
-                        <p id="target-sentence-text" class="text-base sm:text-lg lg:text-xl font-medium leading-relaxed text-slate-900 dark:text-slate-50 tracking-wide select-none">
+                        <p id="target-sentence-text" class="text-base sm:text-lg lg:text-xl font-medium leading-relaxed text-slate-900 dark:text-slate-50 tracking-wide no-select">
                             Завантаження тексту речення...
                         </p>
                     </div>
@@ -200,11 +209,13 @@
                             class="w-full p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-base sm:text-lg focus:outline-none focus:border-brand-500 dark:focus:border-brand-500 transition shadow-inner font-sans leading-relaxed resize-y"
                             oninput="handleLiveTyping()"
                             onkeydown="handleKeyDown(event)"
+                            onpaste="handlePaste(event)"
+                            ondrop="handleDrop(event)"
                         ></textarea>
                     </div>
 
                     <!-- Error Alert / Visual Diff Feedback Box -->
-                    <div id="feedback-box" class="hidden rounded-xl p-4 transition-all">
+                    <div id="feedback-box" class="hidden rounded-xl p-4 transition-all no-select" oncopy="return false" oncut="return false" ondragstart="return false">
                         <!-- Dynamic content injected via JS -->
                     </div>
 
@@ -611,6 +622,18 @@
             }
         }
 
+        function handlePaste(e) {
+            e.preventDefault();
+            showFeedback('warning', '<i class="fa-solid fa-ban text-lg mr-2"></i> Вставка тексту заборонена! Будь ласка, перепишіть конспект вручну з клавіатури.');
+            playSound('error');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            showFeedback('warning', '<i class="fa-solid fa-ban text-lg mr-2"></i> Перетягування тексту заборонено! Перепишіть конспект вручну.');
+            playSound('error');
+        }
+
         function clearTypingArea() {
             document.getElementById('student-input').value = '';
             handleLiveTyping();
@@ -665,7 +688,7 @@
                             Знайдено помилки або розбіжності в тексті!
                         </div>
                         <p class="text-xs text-slate-600 dark:text-slate-300">Порівняйте ваш варіант із правильним (червоним/жовтим підсвічено помилки та пропущені символи):</p>
-                        <div class="p-3 bg-white dark:bg-slate-900 rounded-lg border border-rose-200 dark:border-rose-900/50 font-sans text-sm sm:text-base leading-relaxed">
+                        <div class="p-3 bg-white dark:bg-slate-900 rounded-lg border border-rose-200 dark:border-rose-900/50 font-sans text-sm sm:text-base leading-relaxed no-select" oncopy="return false">
                             ${diffHtml}
                         </div>
                         <div class="text-xs text-slate-500 pt-1">
