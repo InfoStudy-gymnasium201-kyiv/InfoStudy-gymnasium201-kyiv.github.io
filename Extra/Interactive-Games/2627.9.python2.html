@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Майстер Списків Python | Інтерактивна Гра</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Vector Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    },
+                    colors: {
+                        pyblue: '#306998',
+                        pyyellow: '#FFE873',
+                        pydark: '#0e1726',
+                        pycard: '#1e293b',
+                        pyaccent: '#38bdf8'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0b1120;
+            color: #f8fafc;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        /* Neon Glows & Transitions */
+        .vector-glow-blue {
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
+        }
+        .vector-glow-green {
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.25);
+        }
+        .vector-glow-yellow {
+            box-shadow: 0 0 20px rgba(250, 204, 21, 0.25);
+        }
+
+        .animated-bg {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Tactile interactive elements */
+        .interactive-card {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .interactive-card:hover {
+            transform: translateY(-3px) scale(1.02);
+        }
+        .interactive-card:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        .dragging {
+            opacity: 0.5;
+            transform: scale(1.05);
+        }
+
+        .drop-target-active {
+            border-color: #38bdf8 !important;
+            background-color: rgba(56, 189, 248, 0.15) !important;
+        }
+
+        /* Laser Slicer Blade Animation */
+        @keyframes pulseBeam {
+            0%, 100% { opacity: 0.8; box-shadow: 0 0 10px #38bdf8, 0 0 20px #38bdf8; }
+            50% { opacity: 1; box-shadow: 0 0 20px #38bdf8, 0 0 35px #38bdf8; }
+        }
+        .laser-beam {
+            animation: pulseBeam 1.5s infinite;
+        }
+    </style>
+</head>
+<body class="animated-bg min-h-screen flex flex-col font-sans overflow-x-hidden">
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+            <!-- Brand -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-sky-500/20">
+                    <i class="fa-brands fa-python"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-white leading-tight flex items-center gap-2">
+                        Майстер Списків
+                        <span class="text-xs bg-sky-500/20 text-sky-400 border border-sky-500/30 px-2 py-0.5 rounded-full font-mono">Python 3</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Інтерактивний практикум з програмування</p>
+                </div>
+            </div>
+
+            <!-- Global Score & Progress Bar -->
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-2 bg-slate-800/80 border border-slate-700/60 px-3 py-1.5 rounded-lg">
+                    <i class="fa-solid fa-trophy text-amber-400"></i>
+                    <span class="text-xs text-slate-400">Очки:</span>
+                    <span id="global-score" class="font-mono font-bold text-amber-400 text-base">0</span>
+                </div>
+
+                <div class="flex items-center gap-2 bg-slate-800/80 border border-slate-700/60 px-3 py-1.5 rounded-lg">
+                    <i class="fa-solid fa-star text-purple-400"></i>
+                    <span class="text-xs text-slate-400">Прогрес:</span>
+                    <span id="level-progress-text" class="font-mono font-bold text-purple-400 text-base">0/5</span>
+                </div>
+
+                <!-- Sound Toggle -->
+                <button id="sound-btn" onclick="toggleSound()" class="w-9 h-9 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-700 transition">
+                    <i id="sound-icon" class="fa-solid fa-volume-high"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- NAVIGATION TABS FOR MINI-GAMES -->
+    <nav class="bg-slate-950/60 border-b border-slate-800/80 px-4 py-2 overflow-x-auto">
+        <div class="max-w-7xl mx-auto flex items-center gap-2 min-w-max">
+            <button onclick="switchTab(0)" class="tab-btn active px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition bg-sky-500/20 text-sky-300 border border-sky-500/40">
+                <span class="w-5 h-5 rounded-full bg-sky-500/30 text-sky-300 flex items-center justify-center text-[10px] font-mono">1</span>
+                <span>Створення Списків</span>
+            </button>
+            <button onclick="switchTab(1)" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition text-slate-400 hover:bg-slate-800 border border-transparent">
+                <span class="w-5 h-5 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center text-[10px] font-mono">2</span>
+                <span>Індексація [i]</span>
+            </button>
+            <button onclick="switchTab(2)" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition text-slate-400 hover:bg-slate-800 border border-transparent">
+                <span class="w-5 h-5 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center text-[10px] font-mono">3</span>
+                <span>Лазерні Зрізи [a:b]</span>
+            </button>
+            <button onclick="switchTab(3)" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition text-slate-400 hover:bg-slate-800 border border-transparent">
+                <span class="w-5 h-5 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center text-[10px] font-mono">4</span>
+                <span>Лабораторія Мутацій</span>
+            </button>
+            <button onclick="switchTab(4)" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition text-slate-400 hover:bg-slate-800 border border-transparent">
+                <span class="w-5 h-5 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center text-[10px] font-mono">5</span>
+                <span>Детектив Пам'яті</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col">
+
+        <!-- ======================================================== -->
+        <!-- MINI-GAME 1: CREATION & TYPES (Створення списків) -->
+        <!-- ======================================================== -->
+        <section id="game-section-0" class="game-section flex-1 flex flex-col gap-6">
+            <!-- Header & Task Description -->
+            <div class="bg-slate-900/90 border border-slate-800 p-5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xl">
+                <div>
+                    <div class="flex items-center gap-2 text-sky-400 text-xs font-semibold uppercase tracking-wider mb-1">
+                        <i class="fa-solid fa-shapes"></i> Модуль 1: Види та структура списків
+                    </div>
+                    <h2 class="text-xl font-bold text-white">Класифікація та Вкладені Матриці</h2>
+                    <p class="text-xs text-slate-400 mt-1">
+                        Розподіліть вирази Python за відповідними категоріями або складіть правильний вкладений список (matrix).
+                    </p>
+                </div>
+                <div class="flex items-center gap-3 bg-slate-950 px-4 py-2 rounded-xl border border-slate-800">
+                    <span class="text-xs text-slate-400">Рівень 1/5</span>
+                    <div class="w-24 h-2 bg-slate-800 rounded-full overflow-hidden">
+                        <div id="mg1-progress" class="h-full bg-sky-400 w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tactile Sorting Workbench -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1">
+                <!-- Source Code Items Palette -->
+                <div class="lg:col-span-5 bg-slate-900/60 border border-slate-800 p-5 rounded-2xl flex flex-col gap-4">
+                    <h3 class="text-sm font-semibold text-slate-300 flex items-center gap-2">
+                        <i class="fa-solid fa-hand-pointer text-sky-400"></i> Перетягніть блоки у потрібний кошик:
+                    </h3>
+                    <div id="mg1-items-container" class="flex flex-col gap-3 flex-1 justify-center min-h-[280px]">
+                        <!-- Dynamic code items spawned here -->
+                    </div>
+                </div>
+
+                <!-- Drop Target Categories -->
+                <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Drop Basket 1: Empty List -->
+                    <div data-category="empty" class="mg1-dropzone bg-slate-900/80 border-2 border-dashed border-slate-700/80 hover:border-sky-500/50 p-4 rounded-2xl flex flex-col items-center justify-start text-center transition min-h-[140px]">
+                        <div class="w-10 h-10 rounded-xl bg-slate-800 text-sky-400 flex items-center justify-center text-lg mb-2">
+                            <i class="fa-regular fa-square"></i>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-200">Порожній список</h4>
+                        <p class="text-[11px] text-slate-400 mt-0.5 font-mono">empty_list = []</p>
+                        <div class="mg1-slots-container w-full mt-3 flex flex-col gap-2"></div>
+                    </div>
+
+                    <!-- Drop Basket 2: Strings List -->
+                    <div data-category="strings" class="mg1-dropzone bg-slate-900/80 border-2 border-dashed border-slate-700/80 hover:border-sky-500/50 p-4 rounded-2xl flex flex-col items-center justify-start text-center transition min-h-[140px]">
+                        <div class="w-10 h-10 rounded-xl bg-slate-800 text-emerald-400 flex items-center justify-center text-lg mb-2">
+                            <i class="fa-solid fa-font"></i>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-200">Список рядків</h4>
+                        <p class="text-[11px] text-slate-400 mt-0.5 font-mono">['a', 'b', 'c']</p>
+                        <div class="mg1-slots-container w-full mt-3 flex flex-col gap-2"></div>
+                    </div>
+
+                    <!-- Drop Basket 3: Mixed List -->
+                    <div data-category="mixed" class="mg1-dropzone bg-slate-900/80 border-2 border-dashed border-slate-700/80 hover:border-sky-500/50 p-4 rounded-2xl flex flex-col items-center justify-start text-center transition min-h-[140px]">
+                        <div class="w-10 h-10 rounded-xl bg-slate-800 text-amber-400 flex items-center justify-center text-lg mb-2">
+                            <i class="fa-solid fa-cubes"></i>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-200">Мішаний список</h4>
+                        <p class="text-[11px] text-slate-400 mt-0.5 font-mono">['Oksana', 15, 165.5]</p>
+                        <div class="mg1-slots-container w-full mt-3 flex flex-col gap-2"></div>
+                    </div>
+
+                    <!-- Drop Basket 4: Nested Matrix -->
+                    <div data-category="matrix" class="mg1-dropzone bg-slate-900/80 border-2 border-dashed border-slate-700/80 hover:border-sky-500/50 p-4 rounded-2xl flex flex-col items-center justify-start text-center transition min-h-[140px]">
+                        <div class="w-10 h-10 rounded-xl bg-slate-800 text-purple-400 flex items-center justify-center text-lg mb-2">
+                            <i class="fa-solid fa-border-all"></i>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-200">Вкладений список</h4>
+                        <p class="text-[11px] text-slate-400 mt-0.5 font-mono">[[0, 1], [1, 0]]</p>
+                        <div class="mg1-slots-container w-full mt-3 flex flex-col gap-2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feedback Bar -->
+            <div id="mg1-feedback" class="hidden p-4 rounded-xl border font-mono text-sm flex items-center gap-3"></div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- MINI-GAME 2: INDEXING (Індексація: додатня та від’ємна) -->
+        <!-- ======================================================== -->
+        <section id="game-section-1" class="game-section hidden flex-1 flex flex-col gap-6">
+            <div class="bg-slate-900/90 border border-slate-800 p-5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xl">
+                <div>
+                    <div class="flex items-center gap-2 text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-1">
+                        <i class="fa-solid fa-hashtag"></i> Модуль 2: Порядкові індекси
+                    </div>
+                    <h2 class="text-xl font-bold text-white">Навігатор Індексів [0] та [-1]</h2>
+                    <p class="text-xs text-slate-400 mt-1">
+                        Памятайте: додатна нумерація починається з <span class="text-sky-400 font-mono font-bold">0</span>, а від'ємна з <span class="text-pink-400 font-mono font-bold">-1</span> з кінця!
+                    </p>
+                </div>
+                <div id="mg2-score-badge" class="bg-indigo-950/80 border border-indigo-500/30 px-4 py-2 rounded-xl text-xs text-indigo-300 font-mono">
+                    Завдання: <span id="mg2-task-count" class="font-bold text-white">1/4</span>
+                </div>
+            </div>
+
+            <!-- Array Inspection Machine -->
+            <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 flex flex-col items-center gap-8 shadow-2xl">
+                <!-- Code Snippet Display -->
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 w-full max-w-2xl text-center shadow-inner">
+                    <span class="text-xs text-slate-500 uppercase tracking-widest block mb-1">Виконай команду Python</span>
+                    <div id="mg2-code-prompt" class="font-mono text-lg md:text-xl text-sky-300 font-bold">
+                        colors = ['red', 'green', 'blue', 'yellow', 'purple']
+                    </div>
+                    <div id="mg2-question-text" class="text-sm text-slate-300 mt-2 font-semibold">
+                        Обери елемент, який поверне вираз: <span class="font-mono text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/30">colors[0]</span>
+                    </div>
+                </div>
+
+                <!-- Visual Interactive Array Slots -->
+                <div class="w-full max-w-4xl overflow-x-auto py-4">
+                    <div id="mg2-array-display" class="flex items-center justify-center gap-3 min-w-max mx-auto px-4">
+                        <!-- Items rendered by JS -->
+                    </div>
+                </div>
+
+                <!-- Interactive Dual Index Switcher (Visual Hint Toggle) -->
+                <div class="flex items-center gap-4 bg-slate-950/80 p-2 rounded-xl border border-slate-800">
+                    <span class="text-xs text-slate-400 pl-2">Показувати підказки індексів:</span>
+                    <button id="mg2-toggle-pos" onclick="toggleIndexMode('pos')" class="px-3 py-1 rounded-lg text-xs font-mono font-semibold transition bg-indigo-600 text-white">
+                        Додатні (0..N)
+                    </button>
+                    <button id="mg2-toggle-neg" onclick="toggleIndexMode('neg')" class="px-3 py-1 rounded-lg text-xs font-mono font-semibold transition bg-slate-800 text-slate-400 hover:text-white">
+                        Від'ємні (-1..-N)
+                    </button>
+                </div>
+            </div>
+
+            <div id="mg2-feedback" class="hidden p-4 rounded-xl border font-mono text-sm flex items-center justify-between"></div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- MINI-GAME 3: SLICING CUTTER (Лазерні Зрізи [start:end]) -->
+        <!-- ======================================================== -->
+        <section id="game-section-2" class="game-section hidden flex-1 flex flex-col gap-6">
+            <div class="bg-slate-900/90 border border-slate-800 p-5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xl">
+                <div>
+                    <div class="flex items-center gap-2 text-amber-400 text-xs font-semibold uppercase tracking-wider mb-1">
+                        <i class="fa-solid fa-scissors"></i> Модуль 3: Зрізи (Slicing)
+                    </div>
+                    <h2 class="text-xl font-bold text-white">Лазерний Різак Підсписків [start:end]</h2>
+                    <p class="text-xs text-slate-400 mt-1">
+                        Виберіть діапазон індексів на вимірювальній стрічці, щоб вирізати точний підсписок!
+                    </p>
+                </div>
+                <div class="bg-amber-950/60 border border-amber-500/30 px-4 py-2 rounded-xl text-xs text-amber-300 font-mono">
+                    Складності зрізу: <span id="mg3-level-indicator" class="font-bold text-white">1 / 3</span>
+                </div>
+            </div>
+
+            <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 flex flex-col gap-8 shadow-2xl">
+                <!-- Target Command Box -->
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4 bg-slate-950 p-4 rounded-xl border border-slate-800">
+                    <div>
+                        <span class="text-xs text-slate-400 uppercase tracking-wider block">Цільова команда зрізу:</span>
+                        <div id="mg3-target-code" class="font-mono text-xl text-amber-400 font-bold mt-1">
+                            numbers[1:4]
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs text-slate-400 block">Очікуваний результат:</span>
+                        <div id="mg3-expected-output" class="font-mono text-lg text-emerald-400 font-semibold mt-1">
+                            [20, 30, 40]
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tactile Slicer Ribbon Visualizer -->
+                <div class="flex flex-col gap-2">
+                    <div class="flex justify-between text-xs font-mono text-slate-400 px-2">
+                        <span>START INDEX</span>
+                        <span>END INDEX (НЕ включається!)</span>
+                    </div>
+
+                    <!-- Array Tape Container -->
+                    <div class="relative bg-slate-950 p-6 rounded-2xl border border-slate-800 overflow-x-auto">
+                        <div id="mg3-tape" class="flex items-center justify-center gap-2 min-w-max py-4">
+                            <!-- Array elements with slice blade highlights -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Range Control Sliders -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-950/60 p-5 rounded-xl border border-slate-800">
+                    <div class="flex flex-col gap-2">
+                        <div class="flex justify-between items-center">
+                            <label for="mg3-start-slider" class="text-xs font-bold text-slate-300 flex items-center gap-2">
+                                <i class="fa-solid fa-play text-sky-400"></i> Start Index (Початок):
+                            </label>
+                            <span id="mg3-start-val" class="font-mono font-bold text-sky-400 text-sm">0</span>
+                        </div>
+                        <input id="mg3-start-slider" type="range" min="0" max="6" value="0" oninput="updateSlicer()" class="w-full accent-sky-400 cursor-pointer">
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <div class="flex justify-between items-center">
+                            <label for="mg3-end-slider" class="text-xs font-bold text-slate-300 flex items-center gap-2">
+                                <i class="fa-solid fa-stop text-pink-400"></i> End Index (Кінець):
+                            </label>
+                            <span id="mg3-end-val" class="font-mono font-bold text-pink-400 text-sm">3</span>
+                        </div>
+                        <input id="mg3-end-slider" type="range" min="0" max="6" value="3" oninput="updateSlicer()" class="w-full accent-pink-400 cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- Execute Cut Button -->
+                <div class="flex justify-center">
+                    <button onclick="checkSlicerCut()" class="interactive-card px-8 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 font-bold rounded-xl shadow-lg shadow-amber-500/20 flex items-center gap-2">
+                        <i class="fa-solid fa-bolt"></i> Виконати Лазерний Зріз
+                    </button>
+                </div>
+            </div>
+
+            <div id="mg3-feedback" class="hidden p-4 rounded-xl border font-mono text-sm flex items-center justify-between"></div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- MINI-GAME 4: MUTATION PIPELINE (Зміна вмісту списку) -->
+        <!-- ======================================================== -->
+        <section id="game-section-3" class="game-section hidden flex-1 flex flex-col gap-6">
+            <div class="bg-slate-900/90 border border-slate-800 p-5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xl">
+                <div>
+                    <div class="flex items-center gap-2 text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-1">
+                        <i class="fa-solid fa-sliders"></i> Модуль 4: Редагування та Методи
+                    </div>
+                    <h2 class="text-xl font-bold text-white">Лабораторія Мутацій Списку</h2>
+                    <p class="text-xs text-slate-400 mt-1">
+                        Списки є <span class="text-emerald-400 font-bold">змінюваними (mutable)</span>. Перетягніть та застосуйте методи для трансформації!
+                    </p>
+                </div>
+                <button onclick="resetMutationWorkbench()" class="text-xs px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-rotate-left"></i> Скинути
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1">
+                <!-- Methods & Operations Toolbox -->
+                <div class="lg:col-span-4 bg-slate-900/70 border border-slate-800 p-5 rounded-2xl flex flex-col gap-4">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-wrench text-emerald-400"></i> Доступні Операції:
+                    </h3>
+                    <div id="mg4-toolbox" class="flex flex-col gap-2.5">
+                        <!-- Operation items dynamically rendered -->
+                    </div>
+                </div>
+
+                <!-- Simulation Workbench -->
+                <div class="lg:col-span-8 bg-slate-900/70 border border-slate-800 p-6 rounded-2xl flex flex-col justify-between gap-6">
+                    <!-- Current State vs Target State -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-500 uppercase tracking-wider block mb-2">Початковий стан list_a:</span>
+                            <div id="mg4-current-array" class="font-mono text-base text-sky-300 font-bold flex flex-wrap gap-1.5">
+                                <!-- Render current array badges -->
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950 p-4 rounded-xl border border-emerald-900/50">
+                            <span class="text-xs text-emerald-500 uppercase tracking-wider block mb-2">Цільовий стан:</span>
+                            <div id="mg4-target-array" class="font-mono text-base text-emerald-400 font-bold flex flex-wrap gap-1.5">
+                                <!-- Render target array badges -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Applied Operations Queue -->
+                    <div class="bg-slate-950/80 p-4 rounded-xl border border-slate-800 min-h-[120px] flex flex-col gap-2">
+                        <span class="text-xs text-slate-400 flex items-center justify-between">
+                            <span>Послідовність застосованих команд:</span>
+                            <span class="text-[10px] text-slate-500">Клацайте на методи зліва для додавання</span>
+                        </span>
+                        <div id="mg4-queue" class="flex flex-wrap gap-2 items-center py-2 min-h-[50px]">
+                            <span class="text-slate-600 text-xs italic">Команди ще не додані...</span>
+                        </div>
+                    </div>
+
+                    <!-- Action Button -->
+                    <div class="flex justify-end gap-3">
+                        <button onclick="mg4CheckSolution()" class="interactive-card px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-check-double"></i> Перевірити Результат
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="mg4-feedback" class="hidden p-4 rounded-xl border font-mono text-sm flex items-center justify-between"></div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- MINI-GAME 5: MEMORY & COPYING (Копіювання vs Посилання) -->
+        <!-- ======================================================== -->
+        <section id="game-section-4" class="game-section hidden flex-1 flex flex-col gap-6">
+            <div class="bg-slate-900/90 border border-slate-800 p-5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xl">
+                <div>
+                    <div class="flex items-center gap-2 text-purple-400 text-xs font-semibold uppercase tracking-wider mb-1">
+                        <i class="fa-solid fa-microchip"></i> Модуль 5: Пам'ять та Копіювання
+                    </div>
+                    <h2 class="text-xl font-bold text-white">Детектив Пам'яті (Reference vs Copy)</h2>
+                    <p class="text-xs text-slate-400 mt-1">
+                        Визначте: створює кожна операція <span class="text-purple-400 font-bold">Спільне посилання в ОЗП</span> чи <span class="text-sky-400 font-bold">Незалежну копію</span>?
+                    </p>
+                </div>
+            </div>
+
+            <!-- RAM Memory Visualizer Interactive Diagram -->
+            <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 flex flex-col gap-6 shadow-2xl">
+                <div id="mg5-scenario-card" class="bg-slate-950 border border-slate-800 p-5 rounded-xl flex flex-col gap-3">
+                    <!-- Dynamic Python Code snippet for scenario -->
+                </div>
+
+                <!-- Choice Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <button onclick="mg5SubmitAnswer('reference')" class="interactive-card bg-slate-950/80 hover:bg-purple-950/30 border-2 border-slate-800 hover:border-purple-500/60 p-6 rounded-2xl text-left flex flex-col gap-3 transition group">
+                        <div class="flex items-center justify-between">
+                            <span class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-lg font-bold">
+                                <i class="fa-solid fa-link"></i>
+                            </span>
+                            <span class="text-xs text-purple-400 font-mono">b = a</span>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-white group-hover:text-purple-300 transition">Спільне посилання (одна комірка ОЗП)</h3>
+                            <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                                Обидві змінні посилаються на один і той самий список. Зміна <span class="font-mono text-slate-200">a</span> автоматично змінює і <span class="font-mono text-slate-200">b</span>!
+                            </p>
+                        </div>
+                    </button>
+
+                    <button onclick="mg5SubmitAnswer('copy')" class="interactive-card bg-slate-950/80 hover:bg-sky-950/30 border-2 border-slate-800 hover:border-sky-500/60 p-6 rounded-2xl text-left flex flex-col gap-3 transition group">
+                        <div class="flex items-center justify-between">
+                            <span class="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-lg font-bold">
+                                <i class="fa-solid fa-clone"></i>
+                            </span>
+                            <span class="text-xs text-sky-400 font-mono">.copy() / list() / [:]</span>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-white group-hover:text-sky-300 transition">Незалежна копія (нова комірка ОЗП)</h3>
+                            <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                                Створюється новий повністю автономний список. Зміна <span class="font-mono text-slate-200">a</span> НЕ впливає на вміст <span class="font-mono text-slate-200">b</span>.
+                            </p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <div id="mg5-feedback" class="hidden p-4 rounded-xl border font-mono text-sm flex items-center justify-between"></div>
+        </section>
+
+        <!-- FINAL COMPLETION / CERTIFICATE MODAL -->
+        <div id="completion-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-50 hidden flex items-center justify-center p-4">
+            <div class="bg-slate-900 border border-slate-700 p-8 rounded-3xl max-w-lg w-full text-center flex flex-col items-center gap-6 shadow-2xl relative overflow-hidden">
+                <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-amber-400 to-amber-600 flex items-center justify-center text-slate-950 text-3xl font-bold shadow-xl shadow-amber-500/30">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+
+                <div>
+                    <span class="text-xs text-amber-400 font-bold uppercase tracking-widest">Практикум завершено!</span>
+                    <h2 class="text-2xl font-extrabold text-white mt-1">Сертифікат Майстра Списків</h2>
+                    <p class="text-xs text-slate-400 mt-2">
+                        Вітаємо! Ви успішно засвоїли всі ключові аспекти роботи зі списками в мові Python.
+                    </p>
+                </div>
+
+                <div class="bg-slate-950/80 border border-slate-800 p-4 rounded-2xl w-full grid grid-cols-2 gap-4 text-center">
+                    <div>
+                        <span class="text-xs text-slate-500 block">Загальний рахунок</span>
+                        <span id="modal-final-score" class="font-mono text-2xl font-bold text-amber-400">0</span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-500 block">Статус</span>
+                        <span class="font-mono text-sm font-bold text-emerald-400">Senior Pythonist</span>
+                    </div>
+                </div>
+
+                <button onclick="restartGame()" class="interactive-card w-full py-3 bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i> Пройти практикум знову
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        /* ===================================================================
+           SOUND SYNTHESIZER (Web Audio API - No external assets required)
+           =================================================================== */
+        let soundEnabled = true;
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+        }
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            initAudio();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'click') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            } else if (type === 'success') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+                osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'error') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.linearRampToValueAtTime(110, now + 0.2);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            } else if (type === 'laser') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(900, now);
+                osc.frequency.exponentialRampToValueAtTime(200, now + 0.15);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+                osc.start(now);
+                osc.stop(now + 0.15);
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            if (soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high';
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-slate-600';
+            }
+        }
+
+        /* ===================================================================
+           GLOBAL STATE & NAVIGATION
+           =================================================================== */
+        let globalScore = 0;
+        let completedModules = [false, false, false, false, false];
+        let currentTab = 0;
+
+        function updateGlobalScore(points) {
+            globalScore += points;
+            document.getElementById('global-score').textContent = globalScore;
+            document.getElementById('modal-final-score').textContent = globalScore;
+        }
+
+        function updateModuleProgress(modIndex) {
+            if (!completedModules[modIndex]) {
+                completedModules[modIndex] = true;
+                const count = completedModules.filter(Boolean).length;
+                document.getElementById('level-progress-text').textContent = `${count}/5`;
+
+                if (count === 5) {
+                    setTimeout(() => {
+                        document.getElementById('completion-modal').classList.remove('hidden');
+                        playSound('success');
+                    }, 800);
+                }
+            }
+        }
+
+        function switchTab(index) {
+            playSound('click');
+            currentTab = index;
+            const buttons = document.querySelectorAll('.tab-btn');
+            const sections = document.querySelectorAll('.game-section');
+
+            buttons.forEach((btn, i) => {
+                if (i === index) {
+                    btn.className = "tab-btn active px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition bg-sky-500/20 text-sky-300 border border-sky-500/40";
+                } else {
+                    btn.className = "tab-btn px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition text-slate-400 hover:bg-slate-800 border border-transparent";
+                }
+            });
+
+            sections.forEach((sec, i) => {
+                if (i === index) {
+                    sec.classList.remove('hidden');
+                } else {
+                    sec.classList.add('hidden');
+                }
+            });
+        }
+
+        /* Helper shuffle */
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            const arr = [...array];
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [arr[currentIndex], arr[randomIndex]] = [arr[randomIndex], arr[currentIndex]];
+            }
+            return arr;
+        }
+
+        /* ===================================================================
+           MINI-GAME 1 LOGIC (Створення Списків & Категорії)
+           =================================================================== */
+        const mg1RawData = [
+            { code: "empty_list = []", category: "empty" },
+            { code: "weekdays = ['Monday', 'Tuesday', 'Friday']", category: "strings" },
+            { code: "mix = ['Oksana', 15, 165.5]", category: "mixed" },
+            { code: "matrix = [[0, 0, 1], [0, 1, 0]]", category: "matrix" }
+        ];
+
+        let mg1PlacedCount = 0;
+
+        function initMG1() {
+            mg1PlacedCount = 0;
+            const container = document.getElementById('mg1-items-container');
+            container.innerHTML = '';
+            
+            // Clean up dropzones
+            document.querySelectorAll('.mg1-slots-container').forEach(c => c.innerHTML = '');
+
+            const shuffledData = shuffle(mg1RawData);
+
+            shuffledData.forEach((item, idx) => {
+                const el = document.createElement('div');
+                el.className = "interactive-card bg-slate-950 border border-slate-700/80 p-3 rounded-xl font-mono text-xs text-sky-300 cursor-grab active:cursor-grabbing flex items-center justify-between shadow-md";
+                el.draggable = true;
+                el.id = `mg1-item-${idx}`;
+                el.dataset.category = item.category;
+                el.innerHTML = `
+                    <span>${item.code}</span>
+                    <i class="fa-solid fa-grip-vertical text-slate-600 text-sm"></i>
+                `;
+
+                // Drag Events
+                el.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', JSON.stringify(item));
+                    el.classList.add('dragging');
+                });
+
+                el.addEventListener('dragend', () => {
+                    el.classList.remove('dragging');
+                });
+
+                container.appendChild(el);
+            });
+
+            // Set up Dropzones
+            const dropzones = document.querySelectorAll('.mg1-dropzone');
+            dropzones.forEach(dz => {
+                dz.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dz.classList.add('drop-target-active');
+                });
+
+                dz.addEventListener('dragleave', () => {
+                    dz.classList.remove('drop-target-active');
+                });
+
+                dz.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dz.classList.remove('drop-target-active');
+                    const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                    const targetCategory = dz.dataset.category;
+
+                    if (data.category === targetCategory) {
+                        playSound('success');
+                        // Find element and place into slot
+                        const placedEl = document.querySelector(`[data-category="${data.category}"]`);
+                        if (placedEl && placedEl.parentElement === container) {
+                            container.removeChild(placedEl);
+                            
+                            const slot = document.createElement('div');
+                            slot.className = "bg-emerald-950/60 border border-emerald-500/40 px-2 py-1.5 rounded-lg text-[11px] font-mono text-emerald-300 w-full text-center";
+                            slot.textContent = data.code;
+                            dz.querySelector('.mg1-slots-container').appendChild(slot);
+
+                            mg1PlacedCount++;
+                            updateGlobalScore(25);
+                            document.getElementById('mg1-progress').style.width = `${(mg1PlacedCount/4)*100}%`;
+
+                            if (mg1PlacedCount === 4) {
+                                showFeedback('mg1-feedback', true, 'Чудово! Ви правильно розпізнали всі види списків Python.');
+                                updateModuleProgress(0);
+                            }
+                        }
+                    } else {
+                        playSound('error');
+                        showFeedback('mg1-feedback', false, 'Неправильно! Зверніть увагу на типи даних у списку.');
+                    }
+                });
+            });
+        }
+
+        /* ===================================================================
+           MINI-GAME 2 LOGIC (Індексація: Додатня та Від’ємна)
+           =================================================================== */
+        const mg2Tasks = [
+            {
+                list: ['red', 'green', 'blue', 'yellow'],
+                varName: "colors",
+                targetIndexText: "colors[0]",
+                correctIndex: 0,
+                answerVal: 'red'
+            },
+            {
+                list: ['red', 'green', 'blue', 'yellow'],
+                varName: "colors",
+                targetIndexText: "colors[-1]",
+                correctIndex: 3,
+                answerVal: 'yellow'
+            },
+            {
+                list: ['Oksana', 'Petro', 'Ihor', 'Olga'],
+                varName: "names",
+                targetIndexText: "names[1]",
+                correctIndex: 1,
+                answerVal: 'Petro'
+            },
+            {
+                list: [10, 20, 30, 40, 50],
+                varName: "numbers",
+                targetIndexText: "numbers[-2]",
+                correctIndex: 3,
+                answerVal: 40
+            }
+        ];
+
+        let mg2CurrentIndex = 0;
+        let mg2Mode = 'pos'; // 'pos' or 'neg'
+
+        function initMG2() {
+            mg2CurrentIndex = 0;
+            renderMG2Question();
+        }
+
+        function toggleIndexMode(mode) {
+            playSound('click');
+            mg2Mode = mode;
+            document.getElementById('mg2-toggle-pos').className = mode === 'pos' ? "px-3 py-1 rounded-lg text-xs font-mono font-semibold transition bg-indigo-600 text-white" : "px-3 py-1 rounded-lg text-xs font-mono font-semibold transition bg-slate-800 text-slate-400 hover:text-white";
+            document.getElementById('mg2-toggle-neg').className = mode === 'neg' ? "px-3 py-1 rounded-lg text-xs font-mono font-semibold transition bg-pink-600 text-white" : "px-3 py-1 rounded-lg text-xs font-mono font-semibold transition bg-slate-800 text-slate-400 hover:text-white";
+            renderMG2Question();
+        }
+
+        function renderMG2Question() {
+            const task = mg2Tasks[mg2CurrentIndex];
+            document.getElementById('mg2-task-count').textContent = `${mg2CurrentIndex + 1} / ${mg2Tasks.length}`;
+            document.getElementById('mg2-code-prompt').textContent = `${task.varName} = ${JSON.stringify(task.list)}`;
+            document.getElementById('mg2-question-text').innerHTML = `Який елемент поверне команда: <span class="font-mono text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/30">${task.targetIndexText}</span>?`;
+
+            const display = document.getElementById('mg2-array-display');
+            display.innerHTML = '';
+
+            task.list.forEach((item, idx) => {
+                const negIdx = idx - task.list.length;
+                const shownIdx = mg2Mode === 'pos' ? `[${idx}]` : `[${negIdx}]`;
+
+                const card = document.createElement('button');
+                card.onclick = () => checkMG2Answer(idx);
+                card.className = "interactive-card flex flex-col items-center bg-slate-950 border-2 border-slate-800 hover:border-indigo-500 p-4 rounded-2xl min-w-[100px] transition group";
+                
+                card.innerHTML = `
+                    <span class="text-[10px] font-mono ${mg2Mode === 'pos' ? 'text-indigo-400' : 'text-pink-400'} mb-2 font-bold">${shownIdx}</span>
+                    <span class="font-mono text-sm font-bold text-slate-200 group-hover:text-indigo-300">${JSON.stringify(item)}</span>
+                `;
+                display.appendChild(card);
+            });
+        }
+
+        function checkMG2Answer(selectedIndex) {
+            const task = mg2Tasks[mg2CurrentIndex];
+            if (selectedIndex === task.correctIndex) {
+                playSound('success');
+                updateGlobalScore(25);
+                showFeedback('mg2-feedback', true, `Правильно! ${task.targetIndexText} дорівнює ${JSON.stringify(task.answerVal)}.`);
+
+                setTimeout(() => {
+                    document.getElementById('mg2-feedback').classList.add('hidden');
+                    mg2CurrentIndex++;
+                    if (mg2CurrentIndex < mg2Tasks.length) {
+                        renderMG2Question();
+                    } else {
+                        updateModuleProgress(1);
+                        showFeedback('mg2-feedback', true, 'Вітаємо! Модуль індексації успішно пройдено!');
+                    }
+                }, 1200);
+            } else {
+                playSound('error');
+                showFeedback('mg2-feedback', false, 'Помилка! Перевірте правильність розрахунку індексу.');
+            }
+        }
+
+        /* ===================================================================
+           MINI-GAME 3 LOGIC (Лазерний Зріз [start:end])
+           =================================================================== */
+        const mg3Levels = [
+            {
+                list: [10, 20, 30, 40, 50, 60],
+                targetCode: "numbers[1:4]",
+                reqStart: 1,
+                reqEnd: 4,
+                expected: "[20, 30, 40]"
+            },
+            {
+                list: [10, 20, 30, 40, 50, 60],
+                targetCode: "numbers[:3]",
+                reqStart: 0,
+                reqEnd: 3,
+                expected: "[10, 20, 30]"
+            },
+            {
+                list: [10, 20, 30, 40, 50, 60],
+                targetCode: "numbers[3:]",
+                reqStart: 3,
+                reqEnd: 6,
+                expected: "[40, 50, 60]"
+            }
+        ];
+
+        let mg3CurrentLevel = 0;
+
+        function initMG3() {
+            mg3CurrentLevel = 0;
+            renderMG3Level();
+        }
+
+        function renderMG3Level() {
+            const lvl = mg3Levels[mg3CurrentLevel];
+            document.getElementById('mg3-level-indicator').textContent = `${mg3CurrentLevel + 1} / ${mg3Levels.length}`;
+            document.getElementById('mg3-target-code').textContent = lvl.targetCode;
+            document.getElementById('mg3-expected-output').textContent = lvl.expected;
+
+            document.getElementById('mg3-start-slider').value = 0;
+            document.getElementById('mg3-end-slider').value = lvl.list.length;
+
+            updateSlicer();
+        }
+
+        function updateSlicer() {
+            const lvl = mg3Levels[mg3CurrentLevel];
+            let startVal = parseInt(document.getElementById('mg3-start-slider').value);
+            let endVal = parseInt(document.getElementById('mg3-end-slider').value);
+
+            // Constraint: start cannot exceed end
+            if (startVal > endVal) {
+                startVal = endVal;
+                document.getElementById('mg3-start-slider').value = startVal;
+            }
+
+            document.getElementById('mg3-start-val').textContent = startVal;
+            document.getElementById('mg3-end-val').textContent = endVal;
+
+            const tape = document.getElementById('mg3-tape');
+            tape.innerHTML = '';
+
+            lvl.list.forEach((val, idx) => {
+                const inSlice = idx >= startVal && idx < endVal;
+
+                const box = document.createElement('div');
+                box.className = `flex flex-col items-center justify-center w-14 h-16 rounded-xl border-2 font-mono font-bold transition-all ${
+                    inSlice 
+                    ? 'bg-amber-500/20 border-amber-400 text-amber-300 scale-105 laser-beam' 
+                    : 'bg-slate-900 border-slate-800 text-slate-600'
+                }`;
+
+                box.innerHTML = `
+                    <span class="text-[9px] text-slate-500 mb-1">${idx}</span>
+                    <span>${val}</span>
+                `;
+                tape.appendChild(box);
+            });
+        }
+
+        function checkSlicerCut() {
+            const lvl = mg3Levels[mg3CurrentLevel];
+            const startVal = parseInt(document.getElementById('mg3-start-slider').value);
+            const endVal = parseInt(document.getElementById('mg3-end-slider').value);
+
+            playSound('laser');
+
+            if (startVal === lvl.reqStart && endVal === lvl.reqEnd) {
+                playSound('success');
+                updateGlobalScore(30);
+                showFeedback('mg3-feedback', true, 'Ідеальний лазерний зріз! Підсписок вирізано вірно.');
+
+                setTimeout(() => {
+                    document.getElementById('mg3-feedback').classList.add('hidden');
+                    mg3CurrentLevel++;
+                    if (mg3CurrentLevel < mg3Levels.length) {
+                        renderMG3Level();
+                    } else {
+                        updateModuleProgress(2);
+                        showFeedback('mg3-feedback', true, 'Вітаємо! Ви майстерно володієте зрізами Python!');
+                    }
+                }, 1200);
+            } else {
+                playSound('error');
+                showFeedback('mg3-feedback', false, 'Неточний зріз! Пам’ятайте: верхня межа end не включається в підсписок.');
+            }
+        }
+
+        /* ===================================================================
+           MINI-GAME 4 LOGIC (Лабораторія Мутацій)
+           =================================================================== */
+        const mg4Task = {
+            initial: ['a', 'c'],
+            target: ['a', 'b', 'e'],
+            availableTools: [
+                { id: 'append_e', label: ".append('e')", action: (arr) => arr.push('e') },
+                { id: 'insert_b', label: ".insert(1, 'b')", action: (arr) => arr.splice(1, 0, 'b') },
+                { id: 'remove_c', label: ".remove('c')", action: (arr) => { const i = arr.indexOf('c'); if (i !== -1) arr.splice(i, 1); } },
+                { id: 'del_0', label: "del list[0]", action: (arr) => arr.shift() }
+            ]
+        };
+
+        let mg4CurrentArray = [];
+        let mg4Queue = [];
+
+        function initMG4() {
+            resetMutationWorkbench();
+        }
+
+        function resetMutationWorkbench() {
+            mg4CurrentArray = [...mg4Task.initial];
+            mg4Queue = [];
+            renderMG4();
+        }
+
+        function renderMG4() {
+            // Render toolbox buttons
+            const toolbox = document.getElementById('mg4-toolbox');
+            toolbox.innerHTML = '';
+
+            mg4Task.availableTools.forEach(tool => {
+                const btn = document.createElement('button');
+                btn.onclick = () => addMG4Tool(tool);
+                btn.className = "interactive-card bg-slate-950 border border-slate-800 hover:border-emerald-500/60 p-3 rounded-xl font-mono text-xs text-emerald-400 font-bold text-left flex items-center justify-between";
+                btn.innerHTML = `
+                    <span>${tool.label}</span>
+                    <i class="fa-solid fa-plus text-slate-600"></i>
+                `;
+                toolbox.appendChild(btn);
+            });
+
+            // Render current array state
+            const currentContainer = document.getElementById('mg4-current-array');
+            currentContainer.innerHTML = '';
+            mg4CurrentArray.forEach(item => {
+                const badge = document.createElement('span');
+                badge.className = "px-2.5 py-1 bg-sky-500/20 border border-sky-500/40 rounded-lg text-sky-300";
+                badge.textContent = `'${item}'`;
+                currentContainer.appendChild(badge);
+            });
+
+            // Render target array
+            const targetContainer = document.getElementById('mg4-target-array');
+            targetContainer.innerHTML = '';
+            mg4Task.target.forEach(item => {
+                const badge = document.createElement('span');
+                badge.className = "px-2.5 py-1 bg-emerald-500/20 border border-emerald-500/40 rounded-lg text-emerald-300";
+                badge.textContent = `'${item}'`;
+                targetContainer.appendChild(badge);
+            });
+
+            // Render applied queue
+            const queueContainer = document.getElementById('mg4-queue');
+            queueContainer.innerHTML = '';
+            if (mg4Queue.length === 0) {
+                queueContainer.innerHTML = '<span class="text-slate-600 text-xs italic">Команди ще не додані...</span>';
+            } else {
+                mg4Queue.forEach((tool, index) => {
+                    const tag = document.createElement('div');
+                    tag.className = "bg-slate-900 border border-slate-700 text-xs font-mono text-emerald-300 px-3 py-1 rounded-lg flex items-center gap-2";
+                    tag.innerHTML = `
+                        <span>${tool.label}</span>
+                        <button onclick="removeMG4Tool(${index})" class="text-slate-500 hover:text-red-400"><i class="fa-solid fa-xmark"></i></button>
+                    `;
+                    queueContainer.appendChild(tag);
+                });
+            }
+        }
+
+        function addMG4Tool(tool) {
+            playSound('click');
+            mg4Queue.push(tool);
+            // Simulate array
+            mg4CurrentArray = [...mg4Task.initial];
+            mg4Queue.forEach(t => t.action(mg4CurrentArray));
+            renderMG4();
+        }
+
+        function removeMG4Tool(index) {
+            playSound('click');
+            mg4Queue.splice(index, 1);
+            mg4CurrentArray = [...mg4Task.initial];
+            mg4Queue.forEach(t => t.action(mg4CurrentArray));
+            renderMG4();
+        }
+
+        function mg4CheckSolution() {
+            const isMatch = JSON.stringify(mg4CurrentArray) === JSON.stringify(mg4Task.target);
+
+            if (isMatch) {
+                playSound('success');
+                updateGlobalScore(30);
+                showFeedback('mg4-feedback', true, 'Успіх! Послідовність методів мутацій складено ідеально.');
+                updateModuleProgress(3);
+            } else {
+                playSound('error');
+                showFeedback('mg4-feedback', false, 'Результат не збігається з цільовим списком. Спробуйте змінити порядок методів.');
+            }
+        }
+
+        /* ===================================================================
+           MINI-GAME 5 LOGIC (Копіювання vs Посилання)
+           =================================================================== */
+        const mg5Scenarios = [
+            {
+                code: "a = [1, 2, 3]\nb = a\na.append(4)\nprint(b)",
+                correct: "reference",
+                explanation: "Вираз b = a НЕ створює новий список! Змінна b посилається на той самий список у пам’яті, тому print(b) виведе [1, 2, 3, 4]."
+            },
+            {
+                code: "a = [1, 2, 3]\nb = a.copy()\na.append(4)\nprint(b)",
+                correct: "copy",
+                explanation: "Метод .copy() створює дублікат у новій комірці пам’яті. Зміна 'a' не впливає на 'b', тому print(b) виведе [1, 2, 3]."
+            },
+            {
+                code: "a = [10, 20]\nb = a[:]\na[0] = 99\nprint(b)",
+                correct: "copy",
+                explanation: "Зріз [:] створює повну поверхневу копію списку. Список 'b' залишається [10, 20]."
+            }
+        ];
+
+        let mg5Index = 0;
+
+        function initMG5() {
+            mg5Index = 0;
+            renderMG5Scenario();
+        }
+
+        function renderMG5Scenario() {
+            const sc = mg5Scenarios[mg5Index];
+            const card = document.getElementById('mg5-scenario-card');
+            card.innerHTML = `
+                <div class="flex items-center justify-between text-xs text-slate-400">
+                    <span>Сценарій ${mg5Index + 1} з ${mg5Scenarios.length}</span>
+                    <span class="font-mono text-purple-400">ОЗП Аналіз</span>
+                </div>
+                <pre class="font-mono text-base text-sky-300 font-bold bg-slate-900 p-4 rounded-xl border border-slate-800 leading-relaxed">${sc.code}</pre>
+                <p class="text-xs text-slate-300">
+                    Який зв'язок виникає між змінними <span class="font-mono text-amber-400 font-bold">a</span> та <span class="font-mono text-amber-400 font-bold">b</span>?
+                </p>
+            `;
+        }
+
+        function mg5SubmitAnswer(type) {
+            const sc = mg5Scenarios[mg5Index];
+            if (type === sc.correct) {
+                playSound('success');
+                updateGlobalScore(30);
+                showFeedback('mg5-feedback', true, `Вірно! ${sc.explanation}`);
+
+                setTimeout(() => {
+                    document.getElementById('mg5-feedback').classList.add('hidden');
+                    mg5Index++;
+                    if (mg5Index < mg5Scenarios.length) {
+                        renderMG5Scenario();
+                    } else {
+                        updateModuleProgress(4);
+                        showFeedback('mg5-feedback', true, 'Вітаємо! Ви повністю розібралися з механікамою ОЗП Python!');
+                    }
+                }, 2000);
+            } else {
+                playSound('error');
+                showFeedback('mg5-feedback', false, `Невірно. ${sc.explanation}`);
+            }
+        }
+
+        /* Helper for showing visual feedback banners */
+        function showFeedback(elementId, isSuccess, message) {
+            const el = document.getElementById(elementId);
+            el.classList.remove('hidden');
+            if (isSuccess) {
+                el.className = "p-4 rounded-xl border font-mono text-sm flex items-center justify-between bg-emerald-950/80 border-emerald-500/50 text-emerald-300";
+                el.innerHTML = `<span><i class="fa-solid fa-circle-check mr-2"></i> ${message}</span>`;
+            } else {
+                el.className = "p-4 rounded-xl border font-mono text-sm flex items-center justify-between bg-rose-950/80 border-rose-500/50 text-rose-300";
+                el.innerHTML = `<span><i class="fa-solid fa-circle-xmark mr-2"></i> ${message}</span>`;
+            }
+        }
+
+        function restartGame() {
+            playSound('click');
+            document.getElementById('completion-modal').classList.add('hidden');
+            globalScore = 0;
+            completedModules = [false, false, false, false, false];
+            updateGlobalScore(0);
+            document.getElementById('level-progress-text').textContent = "0/5";
+
+            initMG1();
+            initMG2();
+            initMG3();
+            initMG4();
+            initMG5();
+            switchTab(0);
+        }
+
+        /* Boot up game on DOM load */
+        window.onload = function() {
+            initMG1();
+            initMG2();
+            initMG3();
+            initMG4();
+            initMG5();
+        };
+    </script>
+</body>
+</html>
