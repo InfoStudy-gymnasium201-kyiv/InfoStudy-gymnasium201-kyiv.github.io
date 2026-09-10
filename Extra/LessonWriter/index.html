@@ -146,7 +146,7 @@
             <div class="lg:col-span-4 glass-panel p-4 rounded-2xl shadow-sm space-y-3">
                 <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
                     <h3 class="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
-                        <i class="fa-solid fa-list-check text-brand-500"></i> Темы конспекту
+                        <i class="fa-solid fa-list-check text-brand-500"></i> Теми конспекту
                     </h3>
                     <span id="completed-badge-count" class="text-xs bg-slate-100 dark:bg-slate-700 font-mono px-2 py-0.5 rounded-md text-slate-600 dark:text-slate-300">0/0</span>
                 </div>
@@ -231,7 +231,7 @@
                                 <i class="fa-solid fa-chevron-left"></i>
                             </button>
 
-                            <!-- Check Button (Основна кнопка Перевірити) -->
+                            <!-- Check Button -->
                             <button id="check-btn" onclick="checkAnswer()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white font-bold text-sm shadow-md shadow-brand-500/20 active:scale-95 transition flex items-center gap-2">
                                 <i class="fa-solid fa-circle-check text-lg"></i>
                                 <span>Перевірити</span>
@@ -244,7 +244,7 @@
                     </div>
                 </div>
 
-                <!-- Lesson Completion Banner (Appears when all sentences are done) -->
+                <!-- Lesson Completion Banner -->
                 <div id="lesson-complete-card" class="hidden glass-panel rounded-2xl p-6 shadow-md border-2 border-emerald-500/50 text-center space-y-4 bg-gradient-to-br from-emerald-500/10 via-transparent to-brand-500/10">
                     <div class="w-16 h-16 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto text-3xl shadow-lg shadow-emerald-500/30">
                         <i class="fa-solid fa-trophy"></i>
@@ -303,28 +303,28 @@
         </div>
     </div>
 
-    <!-- Hidden Template Container specifically styled for clean PDF rendering -->
-    <div class="hidden">
-        <div id="pdf-export-template" class="p-8 bg-white text-slate-900 font-sans" style="width: 790px;">
+    <!-- Hidden container for PDF rendering positioned at top:0 left:0 to prevent canvas coordinate offset clipping -->
+    <div id="pdf-wrapper" style="position: fixed; top: 0; left: 0; z-index: -9999; opacity: 0; pointer-events: none; width: 190mm;">
+        <div id="pdf-export-template" style="width: 190mm; box-sizing: border-box; background: #ffffff; color: #0f172a; font-family: 'Inter', system-ui, -apple-system, sans-serif; padding: 0; margin: 0; word-break: break-word; overflow-wrap: break-word;">
             <!-- PDF Header -->
-            <div style="border-bottom: 2px solid #4f46e5; padding-bottom: 12px; margin-bottom: 20px;" class="flex justify-between items-end">
+            <div style="border-bottom: 2px solid #4f46e5; padding-bottom: 10px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: flex-end; box-sizing: border-box; width: 100%;">
                 <div>
-                    <h1 style="font-size: 22px; font-weight: bold; color: #312e81; margin: 0;">Конспект з Інформатики</h1>
-                    <p id="pdf-school-header" style="font-size: 12px; color: #64748b; margin-top: 4px;">Гімназія №201 м. Києва</p>
+                    <h1 style="font-size: 18px; font-weight: 800; color: #312e81; margin: 0; line-height: 1.2;">Конспект з Інформатики</h1>
+                    <p id="pdf-school-header" style="font-size: 11px; color: #64748b; margin: 3px 0 0 0;">Гімназія №201 м. Києва</p>
                 </div>
                 <div style="text-align: right;">
-                    <p id="pdf-student-header" style="font-size: 14px; font-weight: bold; color: #1e293b; margin: 0;">Учень: -</p>
-                    <p id="pdf-date-header" style="font-size: 11px; color: #64748b; margin-top: 2px;">Дата: -</p>
+                    <p id="pdf-student-header" style="font-size: 12px; font-weight: 700; color: #1e293b; margin: 0;">Учень: -</p>
+                    <p id="pdf-date-header" style="font-size: 10px; color: #64748b; margin: 2px 0 0 0;">Дата: -</p>
                 </div>
             </div>
 
             <!-- PDF Content topics -->
-            <div id="pdf-topics-body" style="font-size: 13px; line-height: 1.6;" class="space-y-6">
+            <div id="pdf-topics-body" style="font-size: 11px; line-height: 1.45; box-sizing: border-box; width: 100%;">
                 <!-- Injected via JS -->
             </div>
 
             <!-- PDF Footer -->
-            <div style="margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 10px; text-align: center; font-size: 10px; color: #94a3b8;">
+            <div style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 8px; text-align: center; font-size: 9px; color: #94a3b8; page-break-inside: avoid; break-inside: avoid;">
                 Згенеровано в Інтерактивному тренажері InfoStudy &bull; Самостійна робота з конспектування
             </div>
         </div>
@@ -437,7 +437,6 @@
             let fileParam = '';
             const search = window.location.search;
 
-            // Direct check for /?=НАЗВА or ?=НАЗВА parameter
             if (search.startsWith('?=') || search.startsWith('?%3D')) {
                 fileParam = decodeURIComponent(search.replace(/^\?\=?/, ''));
             }
@@ -448,14 +447,12 @@
             }
 
             if (!fileParam) {
-                // Fallback for ?НАЗВА without equal sign
                 if (search.length > 1 && !search.includes('=')) {
                     fileParam = decodeURIComponent(search.substring(1));
                 }
             }
 
             if (!fileParam) {
-                // Fallback for #НАЗВА in hash
                 const hash = window.location.hash.replace('#', '').trim();
                 if (hash) fileParam = hash;
             }
@@ -467,11 +464,9 @@
             loadLessonFile(fileParam);
         }
 
-        // Load JSON file from GitHub repo or custom URL
         async function loadLessonFile(fileNameOrUrl) {
             let fetchUrl = fileNameOrUrl;
 
-            // If user passed a short name like "test1" or "test2"
             if (!fileNameOrUrl.startsWith('http://') && !fileNameOrUrl.startsWith('https://')) {
                 let cleanName = fileNameOrUrl;
                 if (!cleanName.endsWith('.json')) cleanName += '.json';
@@ -490,11 +485,10 @@
                 if (data && data.topics && Array.isArray(data.topics)) {
                     initAppWithData(data);
                 } else {
-                    throw new Error('Невірний формат JSON (очікувався масив "topics")');
+                    throw new Error('Невірний формат JSON');
                 }
             } catch (err) {
                 console.warn('Неможливо завантажити файл з GitHub, використовуємо локальний конспект:', err);
-                // Fallback to default sample data if fetch fails (e.g. offline or CORS/invalid filename)
                 initAppWithData(DEFAULT_LESSON_DATA);
             }
         }
@@ -521,7 +515,6 @@
                 const numSentences = topic.sentences_to_remember ? topic.sentences_to_remember.length : 0;
                 totalSentencesCount += numSentences;
 
-                // Count completed in this topic
                 let topicDone = 0;
                 for (let sIdx = 0; sIdx < numSentences; sIdx++) {
                     if (appState.completedSentences[`${tIdx}-${sIdx}`]) topicDone++;
@@ -574,17 +567,14 @@
             document.getElementById('active-sentence-counter').innerText = `Речення ${appState.currentSentenceIdx + 1} з ${sentences.length}`;
             document.getElementById('target-sentence-text').innerText = sentenceText;
 
-            // Load saved user input for this sentence if completed or previously written
             const key = `${appState.currentTopicIdx}-${appState.currentSentenceIdx}`;
             const existingInput = appState.completedSentences[key] || '';
             const textarea = document.getElementById('student-input');
             textarea.value = existingInput;
 
-            // Clear feedback alert
             hideFeedback();
             handleLiveTyping();
 
-            // Update nav buttons disabled state
             document.getElementById('prev-btn').disabled = (appState.currentTopicIdx === 0 && appState.currentSentenceIdx === 0);
             
             const isLastTopic = appState.currentTopicIdx === appState.topics.length - 1;
@@ -600,7 +590,6 @@
 
             document.getElementById('char-counter').innerText = `Символи: ${input.length} / ${target.length}`;
 
-            // Quick live accuracy indicator
             let matchCount = 0;
             const minLen = Math.min(input.length, target.length);
             for (let i = 0; i < minLen; i++) {
@@ -614,7 +603,6 @@
 
         function handleKeyDown(e) {
             playSound('key');
-            // Ctrl+Enter or Cmd+Enter triggers Check
             if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
                 e.preventDefault();
                 checkAnswer();
@@ -640,7 +628,7 @@
             document.getElementById('student-input').focus();
         }
 
-        /* MAIN CHECK FUNCTION */
+        /* CHECK ANSWER FUNCTION */
         function checkAnswer() {
             const inputVal = document.getElementById('student-input').value.trim();
             const targetVal = document.getElementById('target-sentence-text').innerText.trim();
@@ -651,32 +639,26 @@
                 return;
             }
 
-            // Clean spacing differences (normalize quotes or multiple spaces if needed, but stick to exact matching)
             const cleanInput = inputVal.replace(/\s+/g, ' ');
             const cleanTarget = targetVal.replace(/\s+/g, ' ');
 
             if (cleanInput === cleanTarget) {
-                // PERFECT MATCH
                 playSound('success');
                 showFeedback('success', '<i class="fa-solid fa-circle-check text-xl mr-2"></i> Чудово! Переписано без жодної помилки!');
                 
-                // Save completed
                 const key = `${appState.currentTopicIdx}-${appState.currentSentenceIdx}`;
                 appState.completedSentences[key] = inputVal;
 
                 renderTopicsSidebar();
                 updateOverallProgress();
 
-                // Trigger mini confetti
                 confetti({ particleCount: 35, spread: 60, origin: { y: 0.8 } });
 
-                // Auto advance after 1.2s if not last
                 setTimeout(() => {
                     autoAdvanceNext();
                 }, 1300);
 
             } else {
-                // HAS ERRORS - Show Detailed Visual Diff
                 playSound('error');
                 const diffHtml = computeDiffHighlight(cleanInput, cleanTarget);
                 
@@ -699,7 +681,6 @@
             }
         }
 
-        // Generate visual diff highlighting for typos
         function computeDiffHighlight(userText, targetText) {
             let resultHtml = '';
             let uIdx = 0;
@@ -707,12 +688,10 @@
 
             while (tIdx < targetText.length || uIdx < userText.length) {
                 if (tIdx < targetText.length && uIdx < userText.length && targetText[tIdx] === userText[uIdx]) {
-                    // Match
                     resultHtml += `<span class="diff-correct">${escapeHtml(targetText[tIdx])}</span>`;
                     tIdx++;
                     uIdx++;
                 } else {
-                    // Mis-match
                     if (tIdx < targetText.length && (uIdx >= userText.length || targetText[tIdx] !== userText[uIdx])) {
                         resultHtml += `<span class="diff-missing">${escapeHtml(targetText[tIdx])}</span>`;
                         tIdx++;
@@ -759,7 +738,6 @@
                 renderTopicsSidebar();
                 loadActiveSentence();
             } else {
-                // Completed ALL topics!
                 showLessonCompleteCard();
             }
         }
@@ -815,7 +793,7 @@
             document.getElementById('pdf-modal').classList.add('hidden');
         }
 
-        function generatePDF() {
+        async function generatePDF() {
             const studentName = document.getElementById('student-name-input').value.trim() || 'Учень / Учениця';
             const schoolName = document.getElementById('school-name-input').value.trim() || 'Гімназія №201 м. Києва';
             const dateStr = new Date().toLocaleDateString('uk-UA', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -824,13 +802,13 @@
             document.getElementById('pdf-school-header').innerText = schoolName;
             document.getElementById('pdf-date-header').innerText = `Дата: ${dateStr}`;
 
-            // Build PDF HTML Body
+            // Build PDF HTML Body with explicit 190mm width formatting and word wrapping
             const pdfBody = document.getElementById('pdf-topics-body');
             pdfBody.innerHTML = '';
 
             appState.topics.forEach((topic, tIdx) => {
                 const topicBlock = document.createElement('div');
-                topicBlock.style.marginBottom = '20px';
+                topicBlock.style.cssText = 'margin-bottom: 14px; page-break-inside: avoid; break-inside: avoid; box-sizing: border-box; width: 100%;';
 
                 let sentencesHtml = '';
                 (topic.sentences_to_remember || []).forEach((sentence, sIdx) => {
@@ -838,15 +816,15 @@
                     const isDone = !!savedText;
 
                     sentencesHtml += `
-                        <div style="margin-top: 8px; padding: 8px 12px; background: ${isDone ? '#f0fdf4' : '#f8fafc'}; border-left: 3px solid ${isDone ? '#22c55e' : '#cbd5e1'}; border-radius: 4px;">
-                            <p style="margin: 0; font-weight: 600; color: #1e293b;">${sIdx + 1}. ${escapeHtml(sentence)}</p>
-                            ${isDone ? `<p style="margin-top: 4px; font-size: 11px; color: #166534; font-style: italic;"><i class="fa-solid fa-pen"></i> Записано: "${escapeHtml(savedText)}"</p>` : ''}
+                        <div style="margin-top: 6px; padding: 6px 10px; background: ${isDone ? '#f0fdf4' : '#f8fafc'}; border-left: 3px solid ${isDone ? '#16a34a' : '#cbd5e1'}; border-radius: 4px; page-break-inside: avoid; break-inside: avoid; box-sizing: border-box; width: 100%; word-break: break-word; overflow-wrap: break-word;">
+                            <p style="margin: 0; font-size: 11px; line-height: 1.4; font-weight: 600; color: #0f172a; word-break: break-word; overflow-wrap: break-word;">${sIdx + 1}. ${escapeHtml(sentence)}</p>
+                            ${isDone ? `<p style="margin: 3px 0 0 0; font-size: 10px; line-height: 1.35; color: #15803d; font-style: italic; word-break: break-word; overflow-wrap: break-word;"><i class="fa-solid fa-pen" style="margin-right: 4px;"></i><strong>Записано:</strong> "${escapeHtml(savedText)}"</p>` : ''}
                         </div>
                     `;
                 });
 
                 topicBlock.innerHTML = `
-                    <h3 style="font-size: 15px; font-weight: bold; color: #4338ca; margin-bottom: 6px; border-bottom: 1px solid #e0e7ff; padding-bottom: 4px;">
+                    <h3 style="font-size: 13px; font-weight: 700; color: #3730a3; margin: 0 0 4px 0; border-bottom: 1.5px solid #e0e7ff; padding-bottom: 3px; page-break-after: avoid; break-after: avoid; word-break: break-word;">
                         Тема ${topic.topic_id || tIdx + 1}: ${escapeHtml(topic.title)}
                     </h3>
                     ${sentencesHtml}
@@ -857,17 +835,32 @@
 
             closePdfModal();
 
-            // Options for html2pdf
+            // Temporarily enable opacity for html2canvas to render starting at (0,0)
+            const wrapper = document.getElementById('pdf-wrapper');
+            wrapper.style.opacity = '1';
+
             const element = document.getElementById('pdf-export-template');
+            
             const opt = {
-                margin:       10,
+                margin:       [10, 10, 10, 10], // top, left, bottom, right in mm
                 filename:     `Конспект_Інформатика_${studentName.replace(/\s+/g, '_')}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                html2canvas:  { 
+                    scale: 2, 
+                    useCORS: true, 
+                    logging: false,
+                    scrollX: 0,
+                    scrollY: 0
+                },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
             };
 
-            html2pdf().set(opt).from(element).save();
+            try {
+                await html2pdf().set(opt).from(element).save();
+            } finally {
+                wrapper.style.opacity = '0';
+            }
         }
 
         function initTheme() {
