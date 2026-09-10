@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python & Алгоритми: Інтерактивний тренажер 9 клас</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        .font-mono {
+            font-family: 'Fira Code', monospace;
+        }
+        /* Custom flowchart node shapes */
+        .shape-oval {
+            border-radius: 9999px;
+            border: 2px solid #3b82f6;
+            background: rgba(59, 130, 246, 0.15);
+        }
+        .shape-parallelogram {
+            transform: skewX(-12deg);
+            border: 2px solid #10b981;
+            background: rgba(16, 185, 129, 0.15);
+        }
+        .shape-parallelogram > div {
+            transform: skewX(12deg);
+        }
+        .shape-process {
+            border-radius: 0.5rem;
+            border: 2px solid #8b5cf6;
+            background: rgba(139, 92, 246, 0.15);
+        }
+        .shape-rhombus {
+            border: 2px solid #f59e0b;
+            background: rgba(245, 158, 11, 0.15);
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            min-height: 90px;
+        }
+        /* Transition & Hover effects */
+        .reveal-box {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .hidden-mask {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border: 2px dashed #475569;
+            color: transparent;
+            text-shadow: none;
+            user-select: none;
+            cursor: pointer;
+        }
+        .hidden-mask:hover {
+            border-color: #38bdf8;
+            background: linear-gradient(135deg, #334155 0%, #475569 100%);
+        }
+        /* Code syntax styling */
+        .code-kw { color: #f472b6; font-weight: 600; }
+        .code-fn { color: #38bdf8; }
+        .code-str { color: #4ade80; }
+        .code-num { color: #fbbf24; }
+        .code-op { color: #f43f5e; }
+        .code-com { color: #94a3b8; font-style: italic; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- Header / Top Bar -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-cyan-400 flex items-center justify-center text-slate-900 font-bold text-xl shadow-lg shadow-indigo-500/30">
+                    <i class="fa-brands fa-python"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-white leading-tight">Python & Алгоритми</h1>
+                    <p class="text-xs text-indigo-400 font-medium">Інтерактивний тренажер • Інформатика 9 клас</p>
+                </div>
+            </div>
+
+            <!-- Task Selector Dropdown -->
+            <div class="flex items-center space-x-3">
+                <label for="taskSelect" class="text-xs sm:text-sm font-medium text-slate-400 hidden sm:block">Обрати завдання:</label>
+                <select id="taskSelect" onchange="loadTask(this.value)" class="bg-slate-800 text-slate-100 text-sm rounded-lg border border-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 p-2.5 max-w-xs outline-none">
+                    <!-- Tasks will be populated dynamically -->
+                </select>
+
+                <button onclick="toggleTeacherGuide()" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition" title="Інструкція вчителя">
+                    <i class="fa-solid fa-circle-question"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left Column: Navigation & Control Panel -->
+        <div class="lg:col-span-4 flex flex-col gap-6">
+
+            <!-- Task Description Card -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl"></div>
+                <div class="flex justify-between items-center mb-3">
+                    <span id="taskCategory" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                        Розгалуження
+                    </span>
+                    <span id="taskDifficulty" class="text-xs text-slate-400">Рівень: 9 клас</span>
+                </div>
+                
+                <h2 id="taskTitle" class="text-xl font-bold text-white mb-2">Назва завдання</h2>
+                <div id="taskDescription" class="text-slate-300 text-sm leading-relaxed mb-4 bg-slate-800/50 p-3.5 rounded-xl border border-slate-800">
+                    Умова завдання з'явиться тут...
+                </div>
+
+                <!-- Input/Output Examples -->
+                <div class="space-y-2">
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Приклад роботи:</div>
+                    <div class="bg-slate-950 rounded-lg p-3 text-xs font-mono space-y-1 border border-slate-800">
+                        <div class="text-slate-400">Вхідні дані: <span id="taskInputEx" class="text-emerald-400"></span></div>
+                        <div class="text-slate-400">Вихідні дані: <span id="taskOutputEx" class="text-cyan-400"></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Master Control Panel for Teacher -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+                <h3 class="text-sm font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-indigo-400"></i> Керування демонстрацією
+                </h3>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="revealAllFlowchart()" class="p-2.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-medium rounded-xl transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-sitemap"></i> Всі блоки
+                    </button>
+                    <button onclick="revealAllCode()" class="p-2.5 bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 border border-cyan-500/30 text-xs font-medium rounded-xl transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-code"></i> Весь код
+                    </button>
+                </div>
+
+                <button onclick="resetCurrentTask()" class="w-full p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium rounded-xl transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rotate-left"></i> Приховати все назад
+                </button>
+
+                <!-- Navigation buttons -->
+                <div class="pt-2 border-t border-slate-800 flex justify-between items-center">
+                    <button onclick="prevTask()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-lg transition flex items-center gap-1">
+                        <i class="fa-solid fa-arrow-left"></i> Назад
+                    </button>
+                    <span id="taskProgress" class="text-xs text-slate-500 font-mono">1 / 5</span>
+                    <button onclick="nextTask()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs rounded-lg transition flex items-center gap-1">
+                        Вперед <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Flowchart & Code Display -->
+        <div class="lg:col-span-8 space-y-6">
+
+            <!-- Section 1: Flowchart (Блок-схема) -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+                <!-- Header with Toggle -->
+                <div class="bg-slate-800/80 px-5 py-3.5 flex justify-between items-center border-b border-slate-700/50">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                            <i class="fa-solid fa-diagram-project"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-semibold text-white">1. Етап: Блок-схема алгоритму</h3>
+                            <p class="text-xs text-slate-400">Клацайте по блоках для поступового відкриття</p>
+                        </div>
+                    </div>
+                    
+                    <button id="toggleFlowchartBtn" onclick="toggleFlowchartSection()" class="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-xs font-medium rounded-lg border border-emerald-500/30 transition">
+                        <i class="fa-solid fa-eye mr-1"></i> Відкрити секцію
+                    </button>
+                </div>
+
+                <!-- Interactive Flowchart Canvas Container -->
+                <div id="flowchartSection" class="p-6 min-h-[220px] flex flex-col items-center justify-center bg-slate-950/40 relative hidden">
+                    <div id="flowchartContainer" class="w-full max-w-lg flex flex-col items-center space-y-4 py-2">
+                        <!-- Flowchart blocks rendered here via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Code (Python Скрипт) -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+                <!-- Header with Toggle -->
+                <div class="bg-slate-800/80 px-5 py-3.5 flex justify-between items-center border-b border-slate-700/50">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center">
+                            <i class="fa-solid fa-code"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-semibold text-white">2. Етап: Python Скрипт</h3>
+                            <p class="text-xs text-slate-400">Клацайте по рядках коду для їх розшифровки</p>
+                        </div>
+                    </div>
+
+                    <button id="toggleCodeBtn" onclick="toggleCodeSection()" class="px-3 py-1.5 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 text-xs font-medium rounded-lg border border-cyan-500/30 transition">
+                        <i class="fa-solid fa-eye mr-1"></i> Відкрити секцію
+                    </button>
+                </div>
+
+                <!-- Code Container -->
+                <div id="codeSection" class="p-6 bg-slate-950 font-mono text-sm hidden">
+                    <div id="codeLinesContainer" class="space-y-2 border border-slate-800 rounded-xl p-4 bg-slate-900/60 shadow-inner">
+                        <!-- Code lines rendered here via JS -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Teacher Guide Modal -->
+    <div id="teacherGuideModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full p-6 shadow-2xl relative">
+            <button onclick="toggleTeacherGuide()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-chalkboard-user text-indigo-400"></i> Методика проведення уроку
+            </h3>
+            <div class="space-y-3 text-sm text-slate-300 leading-relaxed">
+                <p><strong class="text-indigo-400">1. Оголошення завдання:</strong> Учні бачать лише картку з умовою та прикладом даних. Дайте їм 1-2 хвилини на усне обговорення алгоритму.</p>
+                <p><strong class="text-emerald-400">2. Аналіз алгоритму (Блок-схема):</strong> Натисніть "Відкрити секцію" у блоці схеми. Відкривайте блоки по черзі, запитуючи у класу: <em>"Що має бути наступним кроком?"</em>.</p>
+                <p><strong class="text-cyan-400">3. Написання коду (Python):</strong> Після блок-схеми переходоьте до коду. Відкривайте рядки по одному. Пропонуйте учням назвати синтаксис Python для кожного блоку перед тим, як відкрити рядок.</p>
+                <p class="bg-slate-800 p-3 rounded-lg border border-slate-700 text-xs text-slate-400">
+                    💡 <strong>Порада:</strong> Використовуйте кнопки швидкого керування на лівій панелі для керування всією групою прихованих елементів.
+                </p>
+            </div>
+            <div class="mt-6 text-right">
+                <button onclick="toggleTeacherGuide()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl text-sm transition">
+                    Зрозуміло
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 9th Grade Computer Science Python Curriculum Tasks
+        const tasksData = [
+            {
+                id: 1,
+                title: "Обчислення площі прямокутника",
+                category: "Лінійні алгоритми",
+                difficulty: "Легкий",
+                description: "Складіть програму, яка запитує у користувача довжину (a) та ширину (b) прямокутника, обчислює його площу (S) та виводить результат на екран.",
+                inputEx: "a = 5, b = 4",
+                outputEx: "Площа = 20.0",
+                flowchart: [
+                    { type: "oval", text: "Початок", revealed: false },
+                    { type: "parallelogram", text: "Введення довжини (a) та ширини (b)", revealed: false },
+                    { type: "process", text: "Обчислення: S = a * b", revealed: false },
+                    { type: "parallelogram", text: "Виведення значення S", revealed: false },
+                    { type: "oval", text: "Кінець", revealed: false }
+                ],
+                codeLines: [
+                    { raw: "a = float(input('Введіть довжину a: '))", tokens: "<span class='code-fn'>a</span> = <span class='code-fn'>float</span>(<span class='code-fn'>input</span>(<span class='code-str'>'Введіть довжину a: '</span>))", revealed: false, hint: "Введення першого числа" },
+                    { raw: "b = float(input('Введіть ширину b: '))", tokens: "<span class='code-fn'>b</span> = <span class='code-fn'>float</span>(<span class='code-fn'>input</span>(<span class='code-str'>'Введіть ширину b: '</span>))", revealed: false, hint: "Введення другого числа" },
+                    { raw: "S = a * b", tokens: "S = a <span class='code-op'>*</span> b", revealed: false, hint: "Обчислення площі" },
+                    { raw: "print(f'Площа = {S}')", tokens: "<span class='code-fn'>print</span>(<span class='code-str'>f'Площа = {S}'</span>)", revealed: false, hint: "Виведення результату" }
+                ]
+            },
+            {
+                id: 2,
+                title: "Перевірка парності числа",
+                category: "Розгалуження (if/else)",
+                difficulty: "Базовий",
+                description: "Напишіть програму, яка приймає ціле число та визначає, чи є воно парним. Якщо парне — вивести 'Парне', інакше — 'Непарне'.",
+                inputEx: "8",
+                outputEx: "Число парне",
+                flowchart: [
+                    { type: "oval", text: "Початок", revealed: false },
+                    { type: "parallelogram", text: "Введення цілого числа (n)", revealed: false },
+                    { type: "rhombus", text: "Перевірка: n % 2 == 0 ?", revealed: false },
+                    { type: "process", text: "ТАК: Результат = 'Парне' | НІ: Результат = 'Непарне'", revealed: false },
+                    { type: "parallelogram", text: "Виведення результату", revealed: false },
+                    { type: "oval", text: "Кінець", revealed: false }
+                ],
+                codeLines: [
+                    { raw: "n = int(input('Введіть ціле число: '))", tokens: "n = <span class='code-fn'>int</span>(<span class='code-fn'>input</span>(<span class='code-str'>'Введіть ціле число: '</span>))", revealed: false, hint: "Зчитування цілого числа" },
+                    { raw: "if n % 2 == 0:", tokens: "<span class='code-kw'>if</span> n <span class='code-op'>%</span> <span class='code-num'>2</span> <span class='code-op'>==</span> <span class='code-num'>0</span>:", revealed: false, hint: "Умова перевірки залишку від ділення на 2" },
+                    { raw: "    print('Число парне')", tokens: "    <span class='code-fn'>print</span>(<span class='code-str'>'Число парне'</span>)", revealed: false, hint: "Дія, якщо умова виконується" },
+                    { raw: "else:", tokens: "<span class='code-kw'>else</span>:", revealed: false, hint: "Інакше" },
+                    { raw: "    print('Число непарне')", tokens: "    <span class='code-fn'>print</span>(<span class='code-str'>'Число непарне'</span>)", revealed: false, hint: "Дія, якщо умова не виконується" }
+                ]
+            },
+            {
+                id: 3,
+                title: "Сума чисел від 1 до N",
+                category: "Цикли (for / range)",
+                difficulty: "Середній",
+                description: "Користувач вводить натуральне число N. Програма повинна порахувати суму всіх цілих чисел від 1 до N включно.",
+                inputEx: "N = 5",
+                outputEx: "Сума = 15 (1+2+3+4+5)",
+                flowchart: [
+                    { type: "oval", text: "Початок", revealed: false },
+                    { type: "parallelogram", text: "Введення числа N", revealed: false },
+                    { type: "process", text: "Створення змінної суми: total = 0", revealed: false },
+                    { type: "rhombus", text: "Цикл i від 1 до N включно", revealed: false },
+                    { type: "process", text: "Додавання: total = total + i", revealed: false },
+                    { type: "parallelogram", text: "Виведення значення total", revealed: false },
+                    { type: "oval", text: "Кінець", revealed: false }
+                ],
+                codeLines: [
+                    { raw: "n = int(input('Введіть N: '))", tokens: "n = <span class='code-fn'>int</span>(<span class='code-fn'>input</span>(<span class='code-str'>'Введіть N: '</span>))", revealed: false, hint: "Введення границі N" },
+                    { raw: "total = 0", tokens: "total = <span class='code-num'>0</span>", revealed: false, hint: "Ініціалізація суми" },
+                    { raw: "for i in range(1, n + 1):", tokens: "<span class='code-kw'>for</span> i <span class='code-kw'>in</span> <span class='code-fn'>range</span>(<span class='code-num'>1</span>, n <span class='code-op'>+</span> <span class='code-num'>1</span>):", revealed: false, hint: "Запуск циклу від 1 до N" },
+                    { raw: "    total += i", tokens: "    total <span class='code-op'>+=</span> i", revealed: false, hint: "Накопичення суми" },
+                    { raw: "print(f'Сума = {total}')", tokens: "<span class='code-fn'>print</span>(<span class='code-str'>f'Сума = {total}'</span>)", revealed: false, hint: "Вивід підсумку" }
+                ]
+            },
+            {
+                id: 4,
+                title: "Визначення рівня оцінки",
+                category: "Каскадні умови (if-elif-else)",
+                difficulty: "Середній",
+                description: "Програма отримує оцінку учня (1-12) та виводить рівень знань: 1-3 -> 'Початковий', 4-6 -> 'Середній', 7-9 -> 'Достатній', 10-12 -> 'Високий'.",
+                inputEx: "9",
+                outputEx: "Достатній рівень",
+                flowchart: [
+                    { type: "oval", text: "Початок", revealed: false },
+                    { type: "parallelogram", text: "Введення балу (score)", revealed: false },
+                    { type: "rhombus", text: "score <= 3 ?", revealed: false },
+                    { type: "rhombus", text: "score <= 6 ?", revealed: false },
+                    { type: "rhombus", text: "score <= 9 ?", revealed: false },
+                    { type: "process", text: "Визначення відповідної назви рівня", revealed: false },
+                    { type: "oval", text: "Кінець", revealed: false }
+                ],
+                codeLines: [
+                    { raw: "score = int(input('Введіть бал (1-12): '))", tokens: "score = <span class='code-fn'>int</span>(<span class='code-fn'>input</span>(<span class='code-str'>'Введіть бал: '</span>))", revealed: false, hint: "Введення оцінки" },
+                    { raw: "if score <= 3:", tokens: "<span class='code-kw'>if</span> score <span class='code-op'>&lt;=</span> <span class='code-num'>3</span>:", revealed: false, hint: "Перевірка початкового рівня" },
+                    { raw: "    print('Початковий рівень')", tokens: "    <span class='code-fn'>print</span>(<span class='code-str'>'Початковий рівень'</span>)", revealed: false, hint: "Вивід Початкового" },
+                    { raw: "elif score <= 6:", tokens: "<span class='code-kw'>elif</span> score <span class='code-op'>&lt;=</span> <span class='code-num'>6</span>:", revealed: false, hint: "Перевірка середнього рівня" },
+                    { raw: "    print('Середній рівень')", tokens: "    <span class='code-fn'>print</span>(<span class='code-str'>'Середній рівень'</span>)", revealed: false, hint: "Вивід Середнього" },
+                    { raw: "elif score <= 9:", tokens: "<span class='code-kw'>elif</span> score <span class='code-op'>&lt;=</span> <span class='code-num'>9</span>:", revealed: false, hint: "Перевірка достатнього рівня" },
+                    { raw: "    print('Достатній рівень')", tokens: "    <span class='code-fn'>print</span>(<span class='code-str'>'Достатній рівень'</span>)", revealed: false, hint: "Вивід Достатнього" },
+                    { raw: "else:", tokens: "<span class='code-kw'>else</span>:", revealed: false, hint: "Якщо бал 10-12" },
+                    { raw: "    print('Високий рівень')", tokens: "    <span class='code-fn'>print</span>(<span class='code-str'>'Високий рівень'</span>)", revealed: false, hint: "Вивід Високого" }
+                ]
+            },
+            {
+                id: 5,
+                title: "Пошук найбільшого з трьох чисел",
+                category: "Складні умови",
+                difficulty: "Складний",
+                description: "Ввести три числа a, b, c. Знайти та вивести найбільше серед них значення.",
+                inputEx: "a=3, b=12, c=7",
+                outputEx: "Максимум = 12",
+                flowchart: [
+                    { type: "oval", text: "Початок", revealed: false },
+                    { type: "parallelogram", text: "Введення a, b, c", revealed: false },
+                    { type: "process", text: "Припустити mx = a", revealed: false },
+                    { type: "rhombus", text: "Якщо b > mx ?", revealed: false },
+                    { type: "process", text: "Оновити mx = b", revealed: false },
+                    { type: "rhombus", text: "Якщо c > mx ?", revealed: false },
+                    { type: "process", text: "Оновити mx = c", revealed: false },
+                    { type: "parallelogram", text: "Виведення mx", revealed: false },
+                    { type: "oval", text: "Кінець", revealed: false }
+                ],
+                codeLines: [
+                    { raw: "a = float(input('a = '))", tokens: "a = <span class='code-fn'>float</span>(<span class='code-fn'>input</span>(<span class='code-str'>'a = '</span>))", revealed: false, hint: "Введення a" },
+                    { raw: "b = float(input('b = '))", tokens: "b = <span class='code-fn'>float</span>(<span class='code-fn'>input</span>(<span class='code-str'>'b = '</span>))", revealed: false, hint: "Введення b" },
+                    { raw: "c = float(input('c = '))", tokens: "c = <span class='code-fn'>float</span>(<span class='code-fn'>input</span>(<span class='code-str'>'c = '</span>))", revealed: false, hint: "Введення c" },
+                    { raw: "mx = a", tokens: "mx = a", revealed: false, hint: "Початковий максимум" },
+                    { raw: "if b > mx:", tokens: "<span class='code-kw'>if</span> b <span class='code-op'>&gt;</span> mx:", revealed: false, hint: "Перевірка b" },
+                    { raw: "    mx = b", tokens: "    mx = b", revealed: false, hint: "Перепризначення" },
+                    { raw: "if c > mx:", tokens: "<span class='code-kw'>if</span> c <span class='code-op'>&gt;</span> mx:", revealed: false, hint: "Перевірка c" },
+                    { raw: "    mx = c", tokens: "    mx = c", revealed: false, hint: "Перепризначення" },
+                    { raw: "print(f'Максимум = {mx}')", tokens: "<span class='code-fn'>print</span>(<span class='code-str'>f'Максимум = {mx}'</span>)", revealed: false, hint: "Вивід результату" }
+                ]
+            }
+        ];
+
+        // App State
+        let currentTaskIndex = 0;
+        let isFlowchartSectionVisible = false;
+        let isCodeSectionVisible = false;
+
+        window.onload = function() {
+            initTaskSelect();
+            loadTask(0);
+        };
+
+        function initTaskSelect() {
+            const select = document.getElementById('taskSelect');
+            select.innerHTML = '';
+            tasksData.forEach((task, index) => {
+                const opt = document.createElement('option');
+                opt.value = index;
+                opt.textContent = `${index + 1}. ${task.title}`;
+                select.appendChild(opt);
+            });
+        }
+
+        function loadTask(index) {
+            currentTaskIndex = parseInt(index);
+            const task = tasksData[currentTaskIndex];
+
+            // Reset visibilities for sections & state
+            isFlowchartSectionVisible = false;
+            isCodeSectionVisible = false;
+            task.flowchart.forEach(b => b.revealed = false);
+            task.codeLines.forEach(l => l.revealed = false);
+
+            // Update UI task info
+            document.getElementById('taskCategory').textContent = task.category;
+            document.getElementById('taskDifficulty').textContent = `Рівень: ${task.difficulty}`;
+            document.getElementById('taskTitle').textContent = task.title;
+            document.getElementById('taskDescription').textContent = task.description;
+            document.getElementById('taskInputEx').textContent = task.inputEx;
+            document.getElementById('taskOutputEx').textContent = task.outputEx;
+            document.getElementById('taskProgress').textContent = `${currentTaskIndex + 1} / ${tasksData.length}`;
+            document.getElementById('taskSelect').value = currentTaskIndex;
+
+            // Render components
+            renderFlowchartSection();
+            renderCodeSection();
+        }
+
+        function nextTask() {
+            if (currentTaskIndex < tasksData.length - 1) {
+                loadTask(currentTaskIndex + 1);
+            }
+        }
+
+        function prevTask() {
+            if (currentTaskIndex > 0) {
+                loadTask(currentTaskIndex - 1);
+            }
+        }
+
+        // Section Toggles
+        function toggleFlowchartSection() {
+            isFlowchartSectionVisible = !isFlowchartSectionVisible;
+            renderFlowchartSection();
+        }
+
+        function toggleCodeSection() {
+            isCodeSectionVisible = !isCodeSectionVisible;
+            renderCodeSection();
+        }
+
+        function renderFlowchartSection() {
+            const section = document.getElementById('flowchartSection');
+            const btn = document.getElementById('toggleFlowchartBtn');
+            const container = document.getElementById('flowchartContainer');
+
+            if (!isFlowchartSectionVisible) {
+                section.classList.add('hidden');
+                btn.innerHTML = `<i class="fa-solid fa-eye mr-1"></i> Відкрити секцію`;
+                return;
+            }
+
+            section.classList.remove('hidden');
+            btn.innerHTML = `<i class="fa-solid fa-eye-slash mr-1"></i> Сховати секцію`;
+
+            const task = tasksData[currentTaskIndex];
+            container.innerHTML = '';
+
+            task.flowchart.forEach((block, idx) => {
+                // Wrapper div with arrow connection
+                const blockWrapper = document.createElement('div');
+                blockWrapper.className = "w-full flex flex-col items-center relative";
+
+                // Node Element
+                const nodeDiv = document.createElement('div');
+                
+                let shapeClass = "";
+                let iconClass = "";
+                if (block.type === 'oval') {
+                    shapeClass = "shape-oval px-8 py-3 w-64 text-center font-bold text-blue-300";
+                    iconClass = "fa-regular fa-circle-play";
+                } else if (block.type === 'parallelogram') {
+                    shapeClass = "shape-parallelogram px-8 py-3 w-72 text-center font-medium text-emerald-300";
+                    iconClass = "fa-solid fa-right-to-bracket";
+                } else if (block.type === 'process') {
+                    shapeClass = "shape-process px-6 py-3 w-72 text-center font-medium text-purple-300";
+                    iconClass = "fa-solid fa-gear";
+                } else if (block.type === 'rhombus') {
+                    shapeClass = "shape-rhombus px-8 py-4 w-72 flex items-center justify-center text-center font-semibold text-amber-300";
+                    iconClass = "fa-solid fa-code-branch";
+                }
+
+                nodeDiv.className = `reveal-box shadow-md flex items-center justify-center gap-2 ${shapeClass} ${
+                    block.revealed ? '' : 'hidden-mask'
+                }`;
+
+                nodeDiv.onclick = () => {
+                    block.revealed = !block.revealed;
+                    renderFlowchartSection();
+                };
+
+                if (block.revealed) {
+                    nodeDiv.innerHTML = `<div><i class="${iconClass} opacity-70 mr-1.5"></i> ${block.text}</div>`;
+                } else {
+                    nodeDiv.innerHTML = `<div><i class="fa-solid fa-lock mr-2 text-xs opacity-60"></i> Блок #${idx + 1} (Натисніть)</div>`;
+                }
+
+                blockWrapper.appendChild(nodeDiv);
+
+                // Add connecting arrow if not last item
+                if (idx < task.flowchart.length - 1) {
+                    const arrow = document.createElement('div');
+                    arrow.className = "my-1 text-slate-600 flex flex-col items-center text-xs";
+                    arrow.innerHTML = `<i class="fa-solid fa-arrow-down text-slate-500 animate-pulse"></i>`;
+                    blockWrapper.appendChild(arrow);
+                }
+
+                container.appendChild(blockWrapper);
+            });
+        }
+
+        function renderCodeSection() {
+            const section = document.getElementById('codeSection');
+            const btn = document.getElementById('toggleCodeBtn');
+            const container = document.getElementById('codeLinesContainer');
+
+            if (!isCodeSectionVisible) {
+                section.classList.add('hidden');
+                btn.innerHTML = `<i class="fa-solid fa-eye mr-1"></i> Відкрити секцію`;
+                return;
+            }
+
+            section.classList.remove('hidden');
+            btn.innerHTML = `<i class="fa-solid fa-eye-slash mr-1"></i> Сховати секцію`;
+
+            const task = tasksData[currentTaskIndex];
+            container.innerHTML = '';
+
+            task.codeLines.forEach((line, idx) => {
+                const lineRow = document.createElement('div');
+                lineRow.className = "flex items-center space-x-3 group cursor-pointer";
+
+                // Line Number
+                const lineNum = document.createElement('span');
+                lineNum.className = "w-8 text-right text-xs text-slate-600 font-mono select-none";
+                lineNum.textContent = idx + 1;
+
+                // Code Mask/Content Box
+                const codeBox = document.createElement('div');
+                codeBox.className = `flex-1 px-4 py-2.5 rounded-lg border text-sm font-mono transition-all duration-200 flex justify-between items-center ${
+                    line.revealed 
+                        ? 'bg-slate-950 border-slate-800 text-slate-100 shadow-sm' 
+                        : 'hidden-mask text-transparent'
+                }`;
+
+                codeBox.onclick = () => {
+                    line.revealed = !line.revealed;
+                    renderCodeSection();
+                };
+
+                if (line.revealed) {
+                    codeBox.innerHTML = `
+                        <span>${line.tokens}</span>
+                        <span class="text-xs text-slate-500 font-sans italic opacity-75">${line.hint || ''}</span>
+                    `;
+                } else {
+                    codeBox.innerHTML = `
+                        <span class="flex items-center text-xs text-slate-400 font-sans">
+                            <i class="fa-solid fa-lock mr-2 text-indigo-400"></i> Натисніть, щоб показати рядок #${idx + 1}
+                        </span>
+                        <span class="text-xs text-slate-600 font-sans">Python</span>
+                    `;
+                }
+
+                lineRow.appendChild(lineNum);
+                lineRow.appendChild(codeBox);
+                container.appendChild(lineRow);
+            });
+        }
+
+        function revealAllFlowchart() {
+            isFlowchartSectionVisible = true;
+            tasksData[currentTaskIndex].flowchart.forEach(b => b.revealed = true);
+            renderFlowchartSection();
+        }
+
+        function revealAllCode() {
+            isCodeSectionVisible = true;
+            tasksData[currentTaskIndex].codeLines.forEach(l => l.revealed = true);
+            renderCodeSection();
+        }
+
+        function resetCurrentTask() {
+            tasksData[currentTaskIndex].flowchart.forEach(b => b.revealed = false);
+            tasksData[currentTaskIndex].codeLines.forEach(l => l.revealed = false);
+            renderFlowchartSection();
+            renderCodeSection();
+        }
+
+        function toggleTeacherGuide() {
+            const modal = document.getElementById('teacherGuideModal');
+            modal.classList.toggle('hidden');
+        }
+    </script>
+</body>
+</html>
