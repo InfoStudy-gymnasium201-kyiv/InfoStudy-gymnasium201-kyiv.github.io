@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="uk" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Chrome Extensions — Інтерактивний посібник</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        chrome: {
+                            blue: '#1a73e8',
+                            red: '#ea4335',
+                            yellow: '#fbbc04',
+                            green: '#34a853',
+                            darkBg: '#121212',
+                            cardDark: '#1e1e1e'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .dark .glass-panel {
+            background: rgba(30, 30, 30, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .chrome-gradient {
+            background: linear-gradient(135deg, #4285F4 0%, #34A853 33%, #FBBC05 66%, #EA4335 100%);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #1a73e8, #34a853);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.5);
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-[#0f172a] dark:text-slate-100 font-sans transition-colors duration-300">
+
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-200 dark:border-slate-800 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center bg-white shadow-sm dark:bg-slate-800">
+                    <i class="fa-brands fa-chrome text-2xl text-chrome-blue"></i>
+                </div>
+                <span class="font-bold text-lg sm:text-xl tracking-tight">Chrome<span class="text-chrome-blue">Pro</span> Hub</span>
+            </div>
+
+            <nav class="hidden md:flex items-center space-x-6 text-sm font-medium">
+                <a href="#about" class="hover:text-chrome-blue transition-colors">Що це?</a>
+                <a href="#simulator" class="hover:text-chrome-blue transition-colors">Симулятор</a>
+                <a href="#categories" class="hover:text-chrome-blue transition-colors">Топ-розширення</a>
+                <a href="#guide" class="hover:text-chrome-blue transition-colors">Інструкція</a>
+                <a href="#security" class="hover:text-chrome-blue transition-colors">RAM & Безпека</a>
+                <a href="#quiz" class="hover:text-chrome-blue transition-colors">Тест</a>
+            </nav>
+
+            <div class="flex items-center space-x-3">
+                <button id="themeToggleBtn" onclick="toggleDarkMode()" class="p-2 rounded-xl bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-amber-400 hover:scale-105 transition-transform" title="Змінити тему">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:block"></i>
+                </button>
+                <a href="#simulator" class="bg-chrome-blue hover:bg-blue-600 text-white px-4 py-2 rounded-xl font-medium text-sm shadow-md hover:shadow-lg transition-all">
+                    <i class="fa-solid fa-flask mr-1.5"></i> Спробувати
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <section class="relative overflow-hidden py-16 lg:py-24">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-tr from-blue-500/10 via-emerald-500/10 to-amber-500/10 blur-3xl -z-10 rounded-full"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800/50 text-blue-600 dark:text-blue-300 text-xs font-semibold uppercase tracking-wider mb-6">
+                <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                <span>Інтерактивний навчальний модуль</span>
+            </div>
+
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight max-w-4xl mx-auto leading-tight">
+                Перетворіть Chrome на потужний <span class="text-gradient">робочий інструмент</span>
+            </h1>
+
+            <p class="mt-6 text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto font-normal">
+                Google Chrome за замовчуванням — це лише основа. Дізнайтеся, як за допомогою розширень підлаштувати браузер під свої завдання, підвищити продуктивність та захистити дані.
+            </p>
+
+            <div class="mt-8 flex flex-wrap justify-center gap-4">
+                <a href="#simulator" class="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3.5 rounded-2xl font-semibold shadow-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-all flex items-center space-x-2">
+                    <span>Тестувати симулятор</span>
+                    <i class="fa-solid fa-arrow-right text-sm"></i>
+                </a>
+                <a href="#categories" class="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-6 py-3.5 rounded-2xl font-semibold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all">
+                    Огляд кращих розширень
+                </a>
+            </div>
+
+            <!-- Quick stats bar -->
+            <div class="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                <div class="p-4 rounded-2xl bg-white/60 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800 backdrop-blur-sm">
+                    <div class="text-2xl font-bold text-chrome-blue">1-Клік</div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">Встановлення програм</div>
+                </div>
+                <div class="p-4 rounded-2xl bg-white/60 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800 backdrop-blur-sm">
+                    <div class="text-2xl font-bold text-emerald-500">3x</div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">Швидкість роботи з текстом</div>
+                </div>
+                <div class="p-4 rounded-2xl bg-white/60 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800 backdrop-blur-sm">
+                    <div class="text-2xl font-bold text-amber-500">95%</div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">Блокування баннерів та спаму</div>
+                </div>
+                <div class="p-4 rounded-2xl bg-white/60 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800 backdrop-blur-sm">
+                    <div class="text-2xl font-bold text-rose-500">100%</div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">Контроль безпеки даних</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="py-16 bg-white dark:bg-slate-900/50 border-y border-slate-200/60 dark:border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <h2 class="text-3xl font-bold tracking-tight">Що таке розширення та як вони працюють?</h2>
+                <p class="mt-3 text-slate-600 dark:text-slate-400">
+                    Розширення (Extensions) — це міні-програми, які вбудовуються безпосередньо у ваш браузер Chrome, змінюючи його вигляд та розширюючи можливості завантажених вебсторінок.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/50 transition-all hover:shadow-md">
+                    <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-chrome-blue flex items-center justify-center text-xl mb-4">
+                        <i class="fa-solid fa-puzzle-piece"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Інтеграція в інтерфейс</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                        Після встановлення розширення з'являються на панелі інструментів біля адресного рядка. Вони діють непомітно, додаючи кнопки, контекстні меню або випливаючі вікна.
+                    </p>
+                </div>
+
+                <div class="p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/50 transition-all hover:shadow-md">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-500 flex items-center justify-center text-xl mb-4">
+                        <i class="fa-solid fa-[#34a853] fa-store"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Вебмагазин Chrome</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                        Усі офіційні розширення безпечно завантажуються з Chrome Web Store. Установка відбувається в один клік без необхідності перезавантаження ПК.
+                    </p>
+                </div>
+
+                <div class="p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/50 transition-all hover:shadow-md">
+                    <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-500 flex items-center justify-center text-xl mb-4">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Автоматизація рутини</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                        Вони автоматично перекладають незнайомі слова, блокують набридливі реклами, перевіряють помилки в мовленні та автозаповнюють паролі.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="simulator" class="py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-8">
+                <span class="text-chrome-blue font-semibold text-sm tracking-wide uppercase">Практична пісочниця</span>
+                <h2 class="text-3xl font-bold tracking-tight mt-1">Симулятор дій розширень у Chrome</h2>
+                <p class="mt-2 text-slate-600 dark:text-slate-400">
+                    Увімкніть розширення на панелі інструментів "віртуального браузера" та подивіться, як змінюється вміст вебсторінки!
+                </p>
+            </div>
+
+            <!-- Virtual Browser Container -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-300 dark:border-slate-800 overflow-hidden max-w-5xl mx-auto">
+                
+                <!-- Mock Browser Top Header Bar -->
+                <div class="bg-slate-200 dark:bg-slate-800 px-4 py-2.5 flex items-center justify-between border-b border-slate-300 dark:border-slate-700/60">
+                    <!-- Window control buttons -->
+                    <div class="flex items-center space-x-2">
+                        <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                        <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+                        <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+                    </div>
+
+                    <!-- Mock Tabs -->
+                    <div id="mockTabContainer" class="flex items-center space-x-2 overflow-x-auto text-xs px-2 py-1 max-w-xl">
+                        <div id="tab1" class="active-tab bg-white dark:bg-slate-900 px-3 py-1.5 rounded-t-lg font-medium flex items-center space-x-2 text-slate-800 dark:text-slate-200 shadow-sm border-t border-x border-slate-300 dark:border-slate-700">
+                            <i class="fa-solid fa-globe text-chrome-blue text-xs"></i>
+                            <span class="truncate max-w-[120px]">Моя робоча сторінка</span>
+                        </div>
+                        <div id="tab2" class="sim-extra-tab bg-slate-300/70 dark:bg-slate-700/50 px-3 py-1.5 rounded-t-lg text-slate-600 dark:text-slate-400 flex items-center space-x-2">
+                            <span class="truncate max-w-[100px]">Новини Tech</span>
+                        </div>
+                        <div id="tab3" class="sim-extra-tab bg-slate-300/70 dark:bg-slate-700/50 px-3 py-1.5 rounded-t-lg text-slate-600 dark:text-slate-400 flex items-center space-x-2">
+                            <span class="truncate max-w-[100px]">Документи Google</span>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="text-xs text-slate-500 font-mono hidden sm:block">
+                        Virtual Chrome v128.0
+                    </div>
+                </div>
+
+                <!-- Mock Toolbar & Address bar -->
+                <div class="bg-slate-100 dark:bg-slate-800/80 px-4 py-2 border-b border-slate-300 dark:border-slate-700 flex items-center justify-between gap-3">
+                    <div class="flex items-center space-x-2 text-slate-500">
+                        <i class="fa-solid fa-arrow-left cursor-pointer hover:text-slate-800"></i>
+                        <i class="fa-solid fa-arrow-right cursor-pointer hover:text-slate-800"></i>
+                        <i class="fa-solid fa-rotate-right cursor-pointer hover:text-slate-800"></i>
+                    </div>
+
+                    <!-- Address Bar -->
+                    <div class="flex-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-full px-4 py-1.5 text-xs text-slate-600 dark:text-slate-300 flex items-center space-x-2">
+                        <i class="fa-solid fa-lock text-emerald-500 text-[10px]"></i>
+                        <span class="font-mono">https://my-workstation.internal/demo-page</span>
+                    </div>
+
+                    <!-- Extensions Bar Icons (Interactive!) -->
+                    <div class="flex items-center space-x-1 sm:space-x-2 bg-slate-200/60 dark:bg-slate-700/50 p-1 rounded-xl">
+                        
+                        <!-- Dark Reader Toggle -->
+                        <button onclick="toggleSimExtension('darkReader')" id="ext-darkReader" class="p-1.5 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-all relative group" title="Dark Reader (Темна тема)">
+                            <i class="fa-solid fa-moon text-slate-600 dark:text-slate-300"></i>
+                            <span class="active-badge hidden absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white"></span>
+                        </button>
+
+                        <!-- uBlock Toggle -->
+                        <button onclick="toggleSimExtension('uBlock')" id="ext-uBlock" class="p-1.5 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-all relative group" title="uBlock Origin (Блокувальник реклами)">
+                            <i class="fa-solid fa-shield-halved text-slate-600 dark:text-slate-300"></i>
+                            <span class="active-badge hidden absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white"></span>
+                        </button>
+
+                        <!-- OneTab Toggle -->
+                        <button onclick="toggleSimExtension('oneTab')" id="ext-oneTab" class="p-1.5 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-all relative group" title="OneTab (Оптимізація вкладок)">
+                            <i class="fa-solid fa-layer-group text-slate-600 dark:text-slate-300"></i>
+                            <span class="active-badge hidden absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white"></span>
+                        </button>
+
+                        <!-- Grammarly Toggle -->
+                        <button onclick="toggleSimExtension('grammarly')" id="ext-grammarly" class="p-1.5 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-all relative group" title="LanguageTool/Grammarly (Перевірка граматики)">
+                            <i class="fa-solid fa-spell-check text-slate-600 dark:text-slate-300"></i>
+                            <span class="active-badge hidden absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white"></span>
+                        </button>
+
+                        <!-- Bitwarden Toggle -->
+                        <button onclick="toggleSimExtension('bitwarden')" id="ext-bitwarden" class="p-1.5 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-all relative group" title="Bitwarden (Менеджер паролів)">
+                            <i class="fa-solid fa-key text-slate-600 dark:text-slate-300"></i>
+                            <span class="active-badge hidden absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white"></span>
+                        </button>
+
+                        <!-- Puzzle Icon -->
+                        <div class="h-4 w-px bg-slate-300 dark:bg-slate-600 mx-1"></div>
+                        <button class="p-1.5 text-slate-500" title="Розширення Chrome">
+                            <i class="fa-solid fa-puzzle-piece"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mock Page Content Area -->
+                <div id="simViewport" class="p-6 transition-colors duration-300 min-h-[420px] bg-slate-50 text-slate-800">
+                    
+                    <div class="flex items-center justify-between mb-4 border-b pb-3 border-slate-200 dark:border-slate-700">
+                        <div>
+                            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">Веб-сторінка зразка</span>
+                            <h3 class="text-xl font-bold mt-1">Робочий кабінет користувача</h3>
+                        </div>
+                        <div class="text-xs text-slate-500 font-mono" id="simStatus">
+                            Активні модулі: <span id="activeExtCount" class="font-bold text-chrome-blue">0</span>
+                        </div>
+                    </div>
+
+                    <!-- OneTab Banner Alert -->
+                    <div id="oneTabAlert" class="hidden mb-4 p-3 bg-indigo-50 border border-indigo-200 text-indigo-900 rounded-xl text-xs flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-layer-group text-indigo-600"></i>
+                            <span><b>OneTab згорнув 2 додаткові вкладки!</b> Економія RAM: <b>~350 MB</b>.</span>
+                        </div>
+                        <button onclick="toggleSimExtension('oneTab')" class="text-xs text-indigo-700 underline font-medium">Відновити</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        
+                        <!-- Main Content Column -->
+                        <div class="lg:col-span-2 space-y-4">
+                            
+                            <!-- Grammarly Interactive Text Sandbox -->
+                            <div class="p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm">
+                                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
+                                    <i class="fa-solid fa-pen-nib mr-1"></i> Редактор тексту (Спробуйте розширення перевірки правопису)
+                                </label>
+                                <div class="relative">
+                                    <textarea id="simTextInput" rows="3" class="w-full p-2.5 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-chrome-blue transition-all" placeholder="Введіть текст тут...">Доброго дня, я вивчаю розширення для хром та бажаю підвищити продуктивнісь!</textarea>
+                                    
+                                    <!-- Grammarly Indicator Widget inside textarea -->
+                                    <div id="grammarlyBadge" class="hidden absolute right-3 bottom-3 flex items-center space-x-1.5 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-xs px-2 py-1 rounded-full border border-emerald-300">
+                                        <i class="fa-solid fa-circle-check text-emerald-500"></i>
+                                        <span>Виправлено: "продуктивнісь" ➔ "продуктивність"</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bitwarden Login Form Simulation -->
+                            <div class="p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="text-sm font-semibold">Форма входу у систему</h4>
+                                    <button id="bitwardenAutoFillBtn" onclick="triggerBitwardenFill()" class="hidden text-xs bg-blue-600 text-white px-2.5 py-1 rounded-md hover:bg-blue-700 transition-colors">
+                                        <i class="fa-solid fa-key mr-1"></i> Bitwarden Auto-fill
+                                    </button>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <input type="text" id="simEmail" placeholder="Електронна пошта" class="p-2 text-xs rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900" readonly>
+                                    <input type="password" id="simPassword" placeholder="Пароль" class="p-2 text-xs rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900" readonly>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Sidebar / Ads Block Column -->
+                        <div class="space-y-4">
+                            
+                            <!-- Ad Box (Target for uBlock) -->
+                            <div id="simAdBox" class="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-center relative overflow-hidden transition-all duration-300">
+                                <span class="text-[10px] uppercase tracking-wider text-amber-600 dark:text-amber-400 font-bold block mb-1">Рекламний банер</span>
+                                <p class="text-xs font-semibold text-amber-900 dark:text-amber-200"> КУПУЙТЕ СУПЕР КРАН! ЗНИЖКИ 90% СЬОГОДНІ!</p>
+                                <p class="text-[11px] text-amber-700 dark:text-amber-400 mt-1">Клацніть тут, щоб виграти $1,000,000</p>
+                            </div>
+
+                            <!-- uBlock Blocked Success Alert -->
+                            <div id="simAdBlocked" class="hidden p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-center text-emerald-800 dark:text-emerald-300 text-xs">
+                                <i class="fa-solid fa-shield-check text-2xl text-emerald-500 mb-1"></i>
+                                <p class="font-bold">uBlock Origin Заблокував рекламу</p>
+                                <p class="text-[11px] opacity-80">Захищено від шпигунських трекерів</p>
+                            </div>
+
+                            <!-- Quick Tip -->
+                            <div class="p-4 rounded-xl bg-blue-50 dark:bg-slate-800/80 border border-blue-100 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300">
+                                <i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i>
+                                <b>Підказка:</b> Натискайте на іконки у верхній панелі інструментів симулятора, щоб активувати відповідні розширення!
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section id="categories" class="py-16 bg-white dark:bg-slate-900/50 border-t border-slate-200/60 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-10">
+                <div>
+                    <span class="text-chrome-blue font-semibold text-sm tracking-wide uppercase">Каталог рекомендованих розширень</span>
+                    <h2 class="text-3xl font-bold tracking-tight mt-1">Топ-категорії для щоденної роботи</h2>
+                </div>
+
+                <!-- Category Filters -->
+                <div class="mt-4 md:mt-0 flex flex-wrap gap-2">
+                    <button onclick="filterExtensions('all')" class="cat-filter-btn active bg-chrome-blue text-white px-4 py-1.5 rounded-xl text-sm font-medium transition-all">Усі</button>
+                    <button onclick="filterExtensions('productivity')" class="cat-filter-btn bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-1.5 rounded-xl text-sm font-medium hover:bg-slate-300 transition-all">Продуктивність</button>
+                    <button onclick="filterExtensions('security')" class="cat-filter-btn bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-1.5 rounded-xl text-sm font-medium hover:bg-slate-300 transition-all">Безпека</button>
+                    <button onclick="filterExtensions('customization')" class="cat-filter-btn bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-1.5 rounded-xl text-sm font-medium hover:bg-slate-300 transition-all">Кастомізація</button>
+                </div>
+            </div>
+
+            <!-- Cards Grid -->
+            <div id="extCardsGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- Grammarly & LanguageTool -->
+                <div class="ext-card productivity p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/60 hover:shadow-lg transition-all flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center text-2xl">
+                                <i class="fa-solid fa-spell-check"></i>
+                            </div>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">Продуктивність</span>
+                        </div>
+                        <h3 class="text-xl font-bold">Grammarly & LanguageTool</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 mt-2">
+                            Інструменти автоматичної перевірки орфографії, граматики та стилістики тексту безпосередньо у полях введення.
+                        </p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700/60 flex items-center justify-between text-xs text-slate-500">
+                        <span><i class="fa-solid fa-star text-amber-400 mr-1"></i>4.8 / 5.0</span>
+                        <span class="font-semibold text-slate-700 dark:text-slate-300">Перевірка правопису</span>
+                    </div>
+                </div>
+
+                <!-- Notion Web Clipper & Pocket -->
+                <div class="ext-card productivity p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/60 hover:shadow-lg transition-all flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-2xl">
+                                <i class="fa-solid fa-bookmark"></i>
+                            </div>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300">Продуктивність</span>
+                        </div>
+                        <h3 class="text-xl font-bold">Notion Web Clipper & Pocket</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 mt-2">
+                            Зберігайте важливі статті, рецепти та матеріали в один клік для подальшого читання або збереження у базі знань.
+                        </p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700/60 flex items-center justify-between text-xs text-slate-500">
+                        <span><i class="fa-solid fa-star text-amber-400 mr-1"></i>4.7 / 5.0</span>
+                        <span class="font-semibold text-slate-700 dark:text-slate-300">Закладки & Кліпер</span>
+                    </div>
+                </div>
+
+                <!-- Bitwarden & 1Password -->
+                <div class="ext-card security p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/60 hover:shadow-lg transition-all flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center text-2xl">
+                                <i class="fa-solid fa-vault"></i>
+                            </div>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">Безпека</span>
+                        </div>
+                        <h3 class="text-xl font-bold">Bitwarden / 1Password</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 mt-2">
+                            Надійні менеджери паролів. Автоматично підставляють складні паролі, підтримують 2FA та зашифроване сховище.
+                        </p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700/60 flex items-center justify-between text-xs text-slate-500">
+                        <span><i class="fa-solid fa-star text-amber-400 mr-1"></i>4.9 / 5.0</span>
+                        <span class="font-semibold text-slate-700 dark:text-slate-300">Менеджер паролів</span>
+                    </div>
+                </div>
+
+                <!-- uBlock Origin -->
+                <div class="ext-card security p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/60 hover:shadow-lg transition-all flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center text-2xl">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </div>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300">Безпека</span>
+                        </div>
+                        <h3 class="text-xl font-bold">uBlock Origin</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 mt-2">
+                            Найефективніший блокувальник реклами, баннерів, спливаючих вікон та трекерів стеження без зайвого споживання ресурсів.
+                        </p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700/60 flex items-center justify-between text-xs text-slate-500">
+                        <span><i class="fa-solid fa-star text-amber-400 mr-1"></i>4.9 / 5.0</span>
+                        <span class="font-semibold text-slate-700 dark:text-slate-300">Блокування баннерів</span>
+                    </div>
+                </div>
+
+                <!-- Dark Reader -->
+                <div class="ext-card customization p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/60 hover:shadow-lg transition-all flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center text-2xl">
+                                <i class="fa-solid fa-moon"></i>
+                            </div>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300">Кастомізація</span>
+                        </div>
+                        <h3 class="text-xl font-bold">Dark Reader</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 mt-2">
+                            Створює інверсовану темну тему для будь-якого вебсайту, знижуючи навантаження на очі під час роботи ввечері.
+                        </p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700/60 flex items-center justify-between text-xs text-slate-500">
+                        <span><i class="fa-solid fa-star text-amber-400 mr-1"></i>4.8 / 5.0</span>
+                        <span class="font-semibold text-slate-700 dark:text-slate-300">Темний режим</span>
+                    </div>
+                </div>
+
+                <!-- OneTab -->
+                <div class="ext-card customization p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/60 hover:shadow-lg transition-all flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-teal-500/10 text-teal-500 flex items-center justify-center text-2xl">
+                                <i class="fa-solid fa-layer-group"></i>
+                            </div>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-teal-100 dark:bg-teal-950 text-teal-700 dark:text-teal-300">Кастомізація</span>
+                        </div>
+                        <h3 class="text-xl font-bold">OneTab</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 mt-2">
+                            Згортає десятки відкритих вкладок у зручний список в один клік, заощаджуючи до 95% оперативної пам'яті (RAM).
+                        </p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700/60 flex items-center justify-between text-xs text-slate-500">
+                        <span><i class="fa-solid fa-star text-amber-400 mr-1"></i>4.6 / 5.0</span>
+                        <span class="font-semibold text-slate-700 dark:text-slate-300">Оптимізація вкладок</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section id="guide" class="py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <span class="text-chrome-blue font-semibold text-sm tracking-wide uppercase">Практичний посібник</span>
+                <h2 class="text-3xl font-bold tracking-tight mt-1">Як встановити та налаштувати розширення</h2>
+                <p class="mt-2 text-slate-600 dark:text-slate-400">
+                    Три прості кроки для комфортної роботи з модулями у браузері Google Chrome.
+                </p>
+            </div>
+
+            <!-- Steps Grid -->
+            <div class="grid md:grid-cols-3 gap-8 relative">
+                
+                <!-- Step 1 -->
+                <div class="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm relative">
+                    <div class="w-10 h-10 rounded-full bg-chrome-blue text-white flex items-center justify-center font-bold text-lg mb-4">
+                        1
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Встановлення</h3>
+                    <ol class="text-sm text-slate-600 dark:text-slate-400 space-y-2 list-disc list-inside">
+                        <li>Відкрийте <b>Chrome Web Store</b>.</li>
+                        <li>Введіть назву розширення в пошук.</li>
+                        <li>Натисніть кнопку <b>«Додати в Chrome»</b>.</li>
+                    </ol>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm relative">
+                    <div class="w-10 h-10 rounded-full bg-chrome-blue text-white flex items-center justify-center font-bold text-lg mb-4">
+                        2
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Управління</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-400 mb-2">
+                        Керуйте додатками через іконку <b>«Пазл»</b> у правому верхньому кутку або за адресою:
+                    </p>
+                    <div class="bg-slate-100 dark:bg-slate-900 p-2 rounded-lg font-mono text-xs text-chrome-blue flex justify-between items-center">
+                        <span>chrome://extensions/</span>
+                        <i class="fa-regular fa-copy cursor-pointer" onclick="copyToClipboard('chrome://extensions/')" title="Скопіювати"></i>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm relative">
+                    <div class="w-10 h-10 rounded-full bg-chrome-blue text-white flex items-center justify-center font-bold text-lg mb-4">
+                        3
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Закріплення (Pin)</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">
+                        Щоб тримати найважливіші інструменти завжди під рукою, натисніть значок <b>«шпильки»</b> <i class="fa-solid fa-thumbtack text-slate-400 mx-1"></i> поруч із розширенням у меню.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section id="security" class="py-16 bg-white dark:bg-slate-900/50 border-y border-slate-200/60 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                
+                <div>
+                    <span class="text-amber-500 font-semibold text-sm tracking-wide uppercase">Оптимізація та захист</span>
+                    <h2 class="text-3xl font-bold tracking-tight mt-1 mb-4">Поради щодо безпеки та продуктивності</h2>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60">
+                            <div class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-500 flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-microchip"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-base">Не перевантажуйте браузер</h4>
+                                <p class="text-sm text-slate-600 dark:text-slate-400 mt-0.5">
+                                    Кожне розширення споживає оперативну пам'ять (RAM). Залишайте активними лише ті модулі, якими ви користуєтеся щодня.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60">
+                            <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-500 flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-user-shield"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-base">Перевіряйте дозволи</h4>
+                                <p class="text-sm text-slate-600 dark:text-slate-400 mt-0.5">
+                                    Звертайте увагу на права доступу при встановленні (наприклад, «читання та зміна даних на всіх сайтах»).
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60">
+                            <div class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-500 flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-circle-check"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-base">Звертайте увагу на бейдж «Перевірено»</h4>
+                                <p class="text-sm text-slate-600 dark:text-slate-400 mt-0.5">
+                                    Обирайте додатки з високими оцінками, великою кількістю користувачів та позначкою перевірки від розробників Google.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive RAM Usage Calculator -->
+                <div class="bg-slate-50 dark:bg-slate-800 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-xl">
+                    <h3 class="text-xl font-bold mb-2 flex items-center space-x-2">
+                        <i class="fa-solid fa-calculator text-chrome-blue"></i>
+                        <span>Калькулятор навантаження RAM</span>
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-6">
+                        Порухайте повзунок, щоб дізнатися, як кількість активних розширень впливає на пам'ять вашого комп'ютера.
+                    </p>
+
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex justify-between text-sm font-semibold mb-2">
+                                <span>Кількість активних розширень:</span>
+                                <span id="extCountValue" class="text-chrome-blue font-bold text-lg">5</span>
+                            </div>
+                            <input type="range" id="ramRange" min="1" max="25" value="5" oninput="updateRamCalc()" class="w-full accent-chrome-blue cursor-pointer">
+                        </div>
+
+                        <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 space-y-3">
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-slate-600 dark:text-slate-400">Використання RAM розширеннями:</span>
+                                <span id="ramUsageMb" class="font-bold text-slate-800 dark:text-slate-200">~350 MB</span>
+                            </div>
+
+                            <!-- RAM Bar -->
+                            <div class="w-full h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                <div id="ramProgressBar" class="h-full bg-emerald-500 transition-all duration-300" style="width: 20%;"></div>
+                            </div>
+
+                            <div class="flex justify-between items-center text-xs">
+                                <span>Стан оптимальності:</span>
+                                <span id="ramStatusBadge" class="px-2 py-0.5 rounded font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">Чудово</span>
+                            </div>
+                        </div>
+
+                        <div id="ramRecommendation" class="text-xs text-slate-500 dark:text-slate-400 italic">
+                            💡 Рекомендація: Ваша кількість розширень є оптимальною для стабільної роботи браузера.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section id="quiz" class="py-16">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-slate-700 shadow-2xl">
+                
+                <div class="text-center mb-8">
+                    <span class="text-chrome-blue font-semibold text-xs uppercase tracking-wider">Перевірка знань</span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold mt-1">Тест: Чи готові ви прокачати Chrome?</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">
+                        Дайте відповіді на 4 питання для закріплення матеріалу уроку.
+                    </p>
+                </div>
+
+                <div id="quizContainer" class="space-y-6">
+                    <!-- Questions will be injected dynamically -->
+                </div>
+
+                <div id="quizResult" class="hidden mt-8 text-center p-6 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700">
+                    <h3 class="text-2xl font-bold mb-2">Ваш результат: <span id="quizScoreText" class="text-chrome-blue">0/4</span></h3>
+                    <p id="quizFeedback" class="text-sm text-slate-600 dark:text-slate-400 mb-4"></p>
+                    <button onclick="resetQuiz()" class="bg-chrome-blue text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-600 transition-colors">
+                        Спробувати знову
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-8 border-t border-slate-800 text-xs">
+        <div class="max-w-7xl mx-auto px-4 text-center space-y-2">
+            <p>© 2026 ChromePro Hub — Навчальний матеріал про розширення Google Chrome.</p>
+            <p>Створено для підвищення вашої щоденної продуктивності та безпеки у мережі.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Dark Mode State Control ---
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+        }
+
+        // --- Virtual Browser Playground Logic ---
+        const activeSimExts = new Set();
+
+        function toggleSimExtension(extName) {
+            const btn = document.getElementById(`ext-${extName}`);
+            const badge = btn.querySelector('.active-badge');
+            
+            if (activeSimExts.has(extName)) {
+                activeSimExts.delete(extName);
+                btn.classList.remove('bg-white', 'dark:bg-slate-800', 'shadow-sm', 'text-chrome-blue');
+                if (badge) badge.classList.add('hidden');
+            } else {
+                activeSimExts.add(extName);
+                btn.classList.add('bg-white', 'dark:bg-slate-800', 'shadow-sm', 'text-chrome-blue');
+                if (badge) badge.classList.remove('hidden');
+            }
+
+            updateSimViewport();
+        }
+
+        function updateSimViewport() {
+            const viewport = document.getElementById('simViewport');
+            const countElem = document.getElementById('activeExtCount');
+            const adBox = document.getElementById('simAdBox');
+            const adBlocked = document.getElementById('simAdBlocked');
+            const grammarlyBadge = document.getElementById('grammarlyBadge');
+            const bitwardenBtn = document.getElementById('bitwardenAutoFillBtn');
+            const oneTabAlert = document.getElementById('oneTabAlert');
+            const extraTabs = document.querySelectorAll('.sim-extra-tab');
+
+            countElem.textContent = activeSimExts.size;
+
+            // 1. Dark Reader Effect
+            if (activeSimExts.has('darkReader')) {
+                viewport.classList.remove('bg-slate-50', 'text-slate-800');
+                viewport.classList.add('bg-slate-950', 'text-slate-100');
+            } else {
+                viewport.classList.remove('bg-slate-950', 'text-slate-100');
+                viewport.classList.add('bg-slate-50', 'text-slate-800');
+            }
+
+            // 2. uBlock Origin Effect
+            if (activeSimExts.has('uBlock')) {
+                adBox.classList.add('hidden');
+                adBlocked.classList.remove('hidden');
+            } else {
+                adBox.classList.remove('hidden');
+                adBlocked.classList.add('hidden');
+            }
+
+            // 3. OneTab Effect
+            if (activeSimExts.has('oneTab')) {
+                extraTabs.forEach(tab => tab.classList.add('hidden'));
+                oneTabAlert.classList.remove('hidden');
+            } else {
+                extraTabs.forEach(tab => tab.classList.remove('hidden'));
+                oneTabAlert.classList.add('hidden');
+            }
+
+            // 4. Grammarly Effect
+            if (activeSimExts.has('grammarly')) {
+                grammarlyBadge.classList.remove('hidden');
+            } else {
+                grammarlyBadge.classList.add('hidden');
+            }
+
+            // 5. Bitwarden Effect
+            if (activeSimExts.has('bitwarden')) {
+                bitwardenBtn.classList.remove('hidden');
+            } else {
+                bitwardenBtn.classList.add('hidden');
+                document.getElementById('simEmail').value = '';
+                document.getElementById('simPassword').value = '';
+            }
+        }
+
+        function triggerBitwardenFill() {
+            document.getElementById('simEmail').value = 'alex.developer@chrome.com';
+            document.getElementById('simPassword').value = '••••••••••••••••';
+        }
+
+        // --- Extension Filter Grid ---
+        function filterExtensions(category) {
+            const cards = document.querySelectorAll('.ext-card');
+            const btns = document.querySelectorAll('.cat-filter-btn');
+
+            btns.forEach(btn => {
+                btn.classList.remove('bg-chrome-blue', 'text-white');
+                btn.classList.add('bg-slate-200', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-300');
+            });
+
+            event.target.classList.remove('bg-slate-200', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-300');
+            event.target.classList.add('bg-chrome-blue', 'text-white');
+
+            cards.forEach(card => {
+                if (category === 'all' || card.classList.contains(category)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // --- RAM Calculator Logic ---
+        function updateRamCalc() {
+            const count = parseInt(document.getElementById('ramRange').value);
+            document.getElementById('extCountValue').textContent = count;
+
+            const mb = count * 70; // rough simulation 70MB per ext
+            document.getElementById('ramUsageMb').textContent = `~${mb} MB`;
+
+            const bar = document.getElementById('ramProgressBar');
+            const badge = document.getElementById('ramStatusBadge');
+            const rec = document.getElementById('ramRecommendation');
+
+            let percentage = (count / 25) * 100;
+            bar.style.width = `${percentage}%`;
+
+            if (count <= 7) {
+                bar.className = 'h-full bg-emerald-500 transition-all duration-300';
+                badge.className = 'px-2 py-0.5 rounded font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300';
+                badge.textContent = 'Чудово';
+                rec.textContent = '💡 Рекомендація: Ваша кількість розширень є оптимальною для швидкої роботи Chrome.';
+            } else if (count <= 15) {
+                bar.className = 'h-full bg-amber-500 transition-all duration-300';
+                badge.className = 'px-2 py-0.5 rounded font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300';
+                badge.textContent = 'Помірне навантаження';
+                rec.textContent = '⚠️ Порада: Вимкніть розширення, якими рідко користуєтеся, через chrome://extensions/.';
+            } else {
+                bar.className = 'h-full bg-rose-500 transition-all duration-300';
+                badge.className = 'px-2 py-0.5 rounded font-bold bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300';
+                badge.textContent = 'Високе навантаження';
+                rec.textContent = '🚨 Увага: Браузер може споживати забагато RAM. Скористайтеся OneTab або видаліть зайві розширення.';
+            }
+        }
+
+        function copyToClipboard(text) {
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            alert('Скопійовано в буфер обміну: ' + text);
+        }
+
+        // --- Quiz Questions Data ---
+        const quizData = [
+            {
+                question: "Де офіційно завантажуються розширення для Google Chrome?",
+                options: [
+                    "Google Play Store",
+                    "Chrome Web Store",
+                    "Windows Store",
+                    "Torrent трекери"
+                ],
+                correct: 1
+            },
+            {
+                question: "Яке з розширень призначене для зменшення споживання оперативної пам'яті (RAM)?",
+                options: [
+                    "Dark Reader",
+                    "OneTab",
+                    "Grammarly",
+                    "Bitwarden"
+                ],
+                correct: 1
+            },
+            {
+                question: "Як швидко відкрити меню управління всіма розширеннями?",
+                options: [
+                    "Ввівши chrome://extensions/ в адресний рядок",
+                    "Натиснувши Alt + F4",
+                    "Відкривши кошик Windows",
+                    "Перезавантаживши комп'ютер"
+                ],
+                correct: 0
+            },
+            {
+                question: "Чому не варто встановлювати десятки розширень одночасно?",
+                options: [
+                    "Chrome автоматично видалить їх",
+                    "Кожне розширення споживає RAM і може сповільнити браузер",
+                    "Це заборонено правилами Google",
+                    "Зникне доступ до інтернету"
+                ],
+                correct: 1
+            }
+        ];
+
+        let userAnswers = {};
+
+        function renderQuiz() {
+            const container = document.getElementById('quizContainer');
+            container.innerHTML = '';
+
+            quizData.forEach((q, qIndex) => {
+                const card = document.createElement('div');
+                card.className = 'p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/60';
+                
+                let optionsHtml = q.options.map((opt, oIndex) => `
+                    <label class="flex items-center space-x-3 p-3 rounded-xl hover:bg-white dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 cursor-pointer transition-all">
+                        <input type="radio" name="q_${qIndex}" value="${oIndex}" onchange="selectQuizOption(${qIndex}, ${oIndex})" class="accent-chrome-blue w-4 h-4">
+                        <span class="text-sm font-medium text-slate-700 dark:text-slate-300">${opt}</span>
+                    </label>
+                `).join('');
+
+                card.innerHTML = `
+                    <h4 class="font-bold text-base mb-3"><span class="text-chrome-blue mr-1.5">#${qIndex + 1}</span> ${q.question}</h4>
+                    <div class="space-y-1">${optionsHtml}</div>
+                `;
+                container.appendChild(card);
+            });
+
+            const submitBtn = document.createElement('button');
+            submitBtn.className = "w-full py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold rounded-2xl shadow-lg hover:opacity-90 transition-all mt-4";
+            submitBtn.textContent = "Перевірити результати";
+            submitBtn.onclick = checkQuizResults;
+            container.appendChild(submitBtn);
+        }
+
+        function selectQuizOption(qIdx, oIdx) {
+            userAnswers[qIdx] = oIdx;
+        }
+
+        function checkQuizResults() {
+            let score = 0;
+            quizData.forEach((q, idx) => {
+                if (userAnswers[idx] === q.correct) {
+                    score++;
+                }
+            });
+
+            const resDiv = document.getElementById('quizResult');
+            const scoreText = document.getElementById('quizScoreText');
+            const feedback = document.getElementById('quizFeedback');
+
+            scoreText.textContent = `${score} / ${quizData.length}`;
+            resDiv.classList.remove('hidden');
+
+            if (score === quizData.length) {
+                feedback.textContent = "Вітаємо! Ви чудово засвоїли матеріал та знаєте, як зробити Chrome супер-інструментом!";
+                if (typeof confetti === 'function') {
+                    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                }
+            } else if (score >= 2) {
+                feedback.textContent = "Добре! Ви знаєте основи, але продивіться поради щодо безпеки ще раз.";
+            } else {
+                feedback.textContent = "Рекомендуємо прочитати уроки ще раз та випробувати розширення у симуляторі.";
+            }
+        }
+
+        function resetQuiz() {
+            userAnswers = {};
+            document.getElementById('quizResult').classList.add('hidden');
+            renderQuiz();
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            renderQuiz();
+            updateRamCalc();
+        };
+    </script>
+</body>
+</html>
