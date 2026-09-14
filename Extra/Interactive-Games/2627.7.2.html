@@ -2,861 +2,1080 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Інфо-Лабораторія: Пошук та ШІ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberInfo 405: Пошук & ШІ</title>
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        cyber: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            400: '#38bdf8',
-                            500: '#0284c7',
-                            600: '#0369a1',
-                            900: '#0c4a6e',
-                        },
-                        violettech: '#6366f1',
-                        emeraldtech: '#10b981',
-                        ambertech: '#f59e0b',
-                        darkbg: '#0f172a'
+                        spaceBg: '#0f172a',
+                        cardBg: 'rgba(30, 41, 59, 0.7)',
+                        cyanGlow: '#38bdf8',
+                        purpleGlow: '#8b5cf6',
+                        emeraldGlow: '#10b981',
+                        roseGlow: '#f43f5e',
+                        amberGlow: '#f59e0b',
                     },
                     fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        comfortaa: ['Comfortaa', 'cursive'],
+                        nunito: ['Nunito', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'neon-cyan': '0 0 20px rgba(56, 189, 248, 0.4)',
+                        'neon-purple': '0 0 20px rgba(139, 92, 246, 0.4)',
+                        'neon-emerald': '0 0 20px rgba(16, 185, 129, 0.4)',
+                        'neon-rose': '0 0 20px rgba(244, 63, 94, 0.4)',
                     }
                 }
             }
         }
     </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
     <style>
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            touch-action: manipulation;
-            user-select: none;
-            -webkit-user-select: none;
-            background: #0f172a;
+            font-family: 'Nunito', sans-serif;
+            background: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #0f172a 70%);
+            min-height: 100vh;
             color: #f8fafc;
+            overflow-x: hidden;
+            touch-action: manipulation;
         }
 
-        /* Glassmorphism vector card style */
-        .vector-card {
-            background: rgba(30, 41, 59, 0.85);
+        h1, h2, h3, .font-title {
+            font-family: 'Comfortaa', cursive;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
             backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border: 2px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .vector-btn {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 0 0 rgba(0,0,0,0.25);
+        .glass-card:hover {
+            border-color: rgba(56, 189, 248, 0.5);
+            box-shadow: 0 10px 30px -10px rgba(56, 189, 248, 0.3);
         }
 
-        .vector-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 0 rgba(0,0,0,0.25);
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(1deg); }
         }
 
-        /* Custom scrollbars */
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.03); }
+        }
+
+        .animate-pulse-slow {
+            animation: pulseGlow 3s ease-in-out infinite;
+        }
+
+        /* Custom Scrollbar */
         ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+            width: 8px;
+            height: 8px;
         }
         ::-webkit-scrollbar-track {
             background: rgba(15, 23, 42, 0.6);
         }
         ::-webkit-scrollbar-thumb {
-            background: #38bdf8;
-            border-radius: 9999px;
+            background: rgba(139, 92, 246, 0.5);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(56, 189, 248, 0.8);
         }
 
-        .drag-item {
-            touch-action: none;
-            cursor: grab;
-        }
-        .drag-item:active {
-            cursor: grabbing;
-        }
-
-        .drop-target-active {
-            border-color: #38bdf8 !important;
-            background-color: rgba(56, 189, 248, 0.15) !important;
-            transform: scale(1.02);
-        }
-
-        @keyframes pulse-subtle {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.85; transform: scale(0.98); }
-        }
-        .animate-pulse-subtle {
-            animation: pulse-subtle 3s infinite ease-in-out;
-        }
-
-        @keyframes float-vector {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-6px); }
-        }
-        .animate-float {
-            animation: float-vector 4s ease-in-out infinite;
+        .touch-target {
+            min-height: 48px;
+            min-width: 48px;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between overflow-x-hidden antialiased bg-slate-900 text-slate-100">
+<body class="flex flex-col min-h-screen text-slate-100 selection:bg-cyan-500 selection:text-slate-900">
 
-    <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3">
-        <div class="max-w-5xl mx-auto flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 font-black text-xl text-white">
-                    7
+    <!-- Top Navigation Header -->
+    <header class="w-full py-4 px-4 md:px-8 glass-card border-b border-white/10 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchGame('hub')">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center shadow-neon-cyan animate-float">
+                    <i class="fa-solid font-bold fa-user-astronaut text-2xl text-white"></i>
                 </div>
                 <div>
-                    <h1 class="text-base sm:text-lg font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent leading-tight">
-                        Інфо-Лабораторія
+                    <h1 class="text-xl md:text-2xl font-bold bg-gradient-to-r from-cyan-400 via-purple-300 to-emerald-400 bg-clip-text text-transparent">
+                        CyberInfo 405
                     </h1>
-                    <p class="text-xs text-slate-400 hidden sm:block">Пошук, Критичне мислення та ШІ</p>
+                    <p class="text-xs text-slate-400">Пошук & Ш штучний Інтелект</p>
                 </div>
             </div>
 
-            <!-- Stats Bar -->
-            <div class="flex items-center space-x-2 sm:space-x-4">
-                <div class="bg-slate-800/80 border border-slate-700/60 rounded-xl px-3 py-1.5 flex items-center space-x-2">
-                    <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                    </svg>
-                    <span id="score-display" class="font-bold text-amber-300 text-sm sm:text-base">0</span>
+            <!-- Stats & Controls -->
+            <div class="flex items-center space-x-3 md:space-x-6">
+                <div class="flex items-center space-x-2 bg-slate-900/60 px-4 py-2 rounded-xl border border-white/10">
+                    <i class="fa-solid fa-star text-amber-400 animate-pulse text-lg"></i>
+                    <span class="text-xs text-slate-400 uppercase font-semibold">Бали:</span>
+                    <span id="total-score" class="font-bold text-amber-300 text-lg">0</span>
                 </div>
                 
-                <div class="bg-slate-800/80 border border-slate-700/60 rounded-xl px-3 py-1.5 flex items-center space-x-2">
-                    <span class="text-xs text-slate-400 uppercase tracking-wider">Модуль:</span>
-                    <span id="level-display" class="font-bold text-cyan-400 text-sm">1/4</span>
-                </div>
+                <button id="sound-btn" onclick="toggleSound()" class="touch-target px-3 py-2 bg-slate-800 hover:bg-slate-700 text-cyan-400 rounded-xl border border-cyan-500/30 transition hover:scale-105 active:scale-95" title="Вмикнути/Вимкнути звук">
+                    <i id="sound-icon" class="fa-solid fa-volume-high"></i>
+                </button>
 
-                <button id="sound-toggle" onclick="toggleAudio()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 p-2 rounded-xl transition">
-                    <svg id="sound-icon-on" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
-                    <svg id="sound-icon-off" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/></svg>
+                <button onclick="switchGame('hub')" class="touch-target px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-xl font-bold text-sm shadow-neon-purple transition hover:-translate-y-0.5 active:scale-95 flex items-center gap-2">
+                    <i class="fa-solid fa-house"></i>
+                    <span class="hidden sm:inline">Меню</span>
                 </button>
             </div>
         </div>
     </header>
 
-    <main class="flex-grow max-w-5xl w-full mx-auto p-4 flex flex-col justify-center">
+    <!-- Main Interactive Container -->
+    <main class="flex-grow max-w-6xl w-full mx-auto p-4 md:p-8 flex flex-col justify-center">
 
-        <!-- Welcome Screen -->
-        <section id="screen-welcome" class="vector-card rounded-3xl p-6 sm:p-10 text-center max-w-2xl mx-auto my-auto shadow-2xl relative overflow-hidden">
-            <div class="absolute -right-16 -bottom-16 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
-            <div class="absolute -left-16 -top-16 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-            <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-tr from-cyan-500 via-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center p-0.5 shadow-xl shadow-cyan-500/20 animate-float">
-                <div class="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center">
-                    <svg class="w-10 h-10 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                    </svg>
-                </div>
+        <!-- GAME HUB / LEVEL SELECTOR -->
+        <section id="screen-hub" class="space-y-8 animate-fade-in">
+            <div class="text-center space-y-3">
+                <span class="px-4 py-1.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 text-xs md:text-sm font-semibold tracking-wide uppercase">
+                    7 клас • Інформатика 405
+                </span>
+                <h2 class="text-2xl md:text-4xl font-bold text-white tracking-wide">
+                    Обери ігрову місію
+                </h2>
+                <p class="text-slate-400 max-w-2xl mx-auto text-sm md:text-base">
+                    Пройди всі місії, опануй ефективний пошук, відсіювання інформаційного шуму та роботу з ChatGPT!
+                </p>
             </div>
 
-            <h2 class="text-2xl sm:text-4xl font-extrabold text-white mb-3">
-                Інформатика: Пошук & ШІ
-            </h2>
-            <p class="text-slate-300 text-sm sm:text-base mb-6 leading-relaxed">
-                Ласкаво просимо до віртуальної інтерактивної лабораторії! Перевірте свої навички роботи з пошуковими операторами, критичного аналізу джерел, технологіями штучного інтелекту та створіть ефективні промпти для ChatGPT.
-            </p>
+            <!-- Mini-Game Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-            <div class="grid grid-cols-2 gap-3 mb-8 text-xs sm:text-sm text-left">
-                <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700/60 flex items-center space-x-2">
-                    <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
-                    <span>1. Конструктор Пошуку</span>
+                <!-- Mission 1 Card -->
+                <div onclick="startMiniGame('game1')" class="glass-card rounded-3xl p-6 cursor-pointer group hover:-translate-y-1 relative overflow-hidden flex flex-col justify-between">
+                    <div class="absolute -right-8 -bottom-8 w-36 h-36 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/20 transition"></div>
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-14 h-14 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-2xl border border-cyan-500/30 group-hover:scale-110 transition">
+                                <i class="fa-solid fa-magnifying-glass-chart"></i>
+                            </div>
+                            <span id="badge-g1" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">
+                                0 / 100 XP
+                            </span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-cyan-300 transition">
+                            1. Лабораторія Пошукових Операторів
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                            Збирай правильні запити з спец-символів (`" "`, `-`, `*`, `site:`, `filetype:`), щоб знищити інформаційний шум.
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-between pt-4 border-t border-white/10 text-xs font-bold text-cyan-400">
+                        <span>Тактильний конструктор</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
+                    </div>
                 </div>
-                <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700/60 flex items-center space-x-2">
-                    <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-                    <span>2. Детектор Достовірності</span>
+
+                <!-- Mission 2 Card -->
+                <div onclick="startMiniGame('game2')" class="glass-card rounded-3xl p-6 cursor-pointer group hover:-translate-y-1 relative overflow-hidden flex flex-col justify-between">
+                    <div class="absolute -right-8 -bottom-8 w-36 h-36 bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-500/20 transition"></div>
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-14 h-14 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-2xl border border-purple-500/30 group-hover:scale-110 transition">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </div>
+                            <span id="badge-g2" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">
+                                0 / 100 XP
+                            </span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-purple-300 transition">
+                            2. Радар Достовірності & Критичне Мислення
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                            Аналізуй джерела інформації: Хто автор? Чим відрізняється реклама від науки? Відсортуй факти від шуму!
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-between pt-4 border-t border-white/10 text-xs font-bold text-purple-400">
+                        <span>Сортування карт & Свайпи</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
+                    </div>
                 </div>
-                <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700/60 flex items-center space-x-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                    <span>3. Ядро Генеративного ШІ</span>
+
+                <!-- Mission 3 Card -->
+                <div onclick="startMiniGame('game3')" class="glass-card rounded-3xl p-6 cursor-pointer group hover:-translate-y-1 relative overflow-hidden flex flex-col justify-between">
+                    <div class="absolute -right-8 -bottom-8 w-36 h-36 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition"></div>
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl border border-emerald-500/30 group-hover:scale-110 transition">
+                                <i class="fa-solid fa-robot"></i>
+                            </div>
+                            <span id="badge-g3" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">
+                                0 / 100 XP
+                            </span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-emerald-300 transition">
+                            3. Сортувальник ШІ: Традиційний vs Генеративний
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                            Розподіли модулі технологій: Хто лише шукає і розпізнає, а хто генерує новий унікальний вміст?
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-between pt-4 border-t border-white/10 text-xs font-bold text-emerald-400">
+                        <span>Перетягування в енерго-контейнери</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
+                    </div>
                 </div>
-                <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700/60 flex items-center space-x-2">
-                    <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-                    <span>4. Майстерня Промптів</span>
+
+                <!-- Mission 4 Card -->
+                <div onclick="startMiniGame('game4')" class="glass-card rounded-3xl p-6 cursor-pointer group hover:-translate-y-1 relative overflow-hidden flex flex-col justify-between">
+                    <div class="absolute -right-8 -bottom-8 w-36 h-36 bg-rose-500/10 rounded-full blur-2xl group-hover:bg-rose-500/20 transition"></div>
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-14 h-14 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-2xl border border-rose-500/30 group-hover:scale-110 transition">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            </div>
+                            <span id="badge-g4" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">
+                                0 / 100 XP
+                            </span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-rose-300 transition">
+                            4. Майстер Промптів ChatGPT
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                            Трансформуй розпливчасті промпти у чіткі інструкції з контекстом та виявляй галюцинації бота.
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-between pt-4 border-t border-white/10 text-xs font-bold text-rose-400">
+                        <span>Інтерактивна збірка промпту</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
+                    </div>
                 </div>
+
             </div>
 
-            <button onclick="startGame()" class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-lg rounded-2xl vector-btn shadow-lg shadow-cyan-500/25 flex items-center justify-center space-x-2 mx-auto">
-                <span>Розпочати Дослідження</span>
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-            </button>
+            <!-- Total Completion Banner -->
+            <div id="final-banner" class="hidden glass-card rounded-3xl p-6 bg-gradient-to-r from-cyan-900/40 via-purple-900/40 to-emerald-900/40 border-amber-400/40 text-center space-y-4">
+                <div class="inline-block p-4 rounded-full bg-amber-500/20 border border-amber-400 text-amber-300 text-3xl">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-amber-300">Вітаємо, Кібер-Експерте!</h3>
+                <p class="text-slate-300 max-w-xl mx-auto text-sm">
+                    Ти успішно пройшов усі 4 місії та довів знання пошукових операторів, інформаційної культури та генеративного ШІ!
+                </p>
+                <button onclick="resetAllProgress()" class="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-sm font-bold border border-white/20 transition">
+                    Спробувати знову
+                </button>
+            </div>
         </section>
 
-        <section id="screen-game-1" class="hidden flex-col space-y-4 my-auto">
-            <div class="vector-card rounded-2xl p-4 sm:p-6">
-                <div class="flex items-center justify-between mb-3 border-b border-slate-700/80 pb-3">
-                    <div class="flex items-center space-x-3">
-                        <div class="p-2 bg-cyan-500/20 text-cyan-400 rounded-xl">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        </div>
-                        <div>
-                            <h3 class="text-base sm:text-lg font-bold text-white">Міні-Гра 1: Лабораторія Пошукових Операторів</h3>
-                            <p class="text-xs text-slate-400">Зберіть правильну термінальну команду пошуку для відсіювання "інформаційного шуму".</p>
-                        </div>
-                    </div>
-                    <span class="text-xs font-mono bg-cyan-950 text-cyan-400 border border-cyan-800 px-2.5 py-1 rounded-lg" id="g1-step-badge">Завдання 1/3</span>
-                </div>
-
-                <!-- Mission Description Box -->
-                <div class="bg-slate-900/90 rounded-xl p-4 border border-cyan-500/30 mb-4">
-                    <div class="text-xs text-cyan-400 font-semibold mb-1 uppercase tracking-wider">Ціль Пошуку:</div>
-                    <p id="g1-task-text" class="text-sm sm:text-base font-medium text-slate-100">Завантаження...</p>
-                </div>
-
-                <!-- Target Drop Slot Area -->
-                <div class="mb-5">
-                    <label class="block text-xs font-semibold text-slate-400 mb-2">Зона складання команди (натискайте або перетягуйте блоки):</label>
-                    <div id="g1-drop-zone" class="min-h-[64px] bg-slate-950/80 border-2 border-dashed border-slate-700 rounded-2xl p-2 flex flex-wrap items-center gap-2 transition-all">
-                        <span id="g1-placeholder" class="text-xs text-slate-500 p-2">Обирайте блоки нижче для формування запиту...</span>
-                    </div>
-                </div>
-
-                <!-- Available Shuffled Option Blocks -->
+        <!-- MINI-GAME 1: OPERATOR LAB -->
+        <section id="screen-game1" class="hidden space-y-6 animate-fade-in">
+            <div class="flex items-center justify-between flex-wrap gap-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-400 mb-2">Доступні блоки операторів (переплутано):</label>
-                    <div id="g1-blocks-pool" class="flex flex-wrap gap-2 p-3 bg-slate-800/50 rounded-2xl border border-slate-700/50 min-h-[70px]">
-                        <!-- Blocks injected dynamically -->
-                    </div>
+                    <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider">Місія 1</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white">Лабораторія Пошукових Операторів</h2>
                 </div>
-
-                <div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-700/60">
-                    <button onclick="resetG1Query()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs sm:text-sm font-semibold rounded-xl border border-slate-700 transition">
-                        Очистити
-                    </button>
-                    <button onclick="checkG1Query()" class="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-sm rounded-xl vector-btn shadow-lg shadow-cyan-500/20">
-                        Запустити Пошук
-                    </button>
+                <div class="text-sm font-semibold bg-slate-900/80 px-4 py-2 rounded-xl border border-cyan-500/30">
+                    Раунд <span id="g1-round" class="text-cyan-400 font-bold">1</span> / 5
                 </div>
             </div>
-        </section>
 
-        <section id="screen-game-2" class="hidden flex-col space-y-4 my-auto">
-            <div class="vector-card rounded-2xl p-4 sm:p-6">
-                <div class="flex items-center justify-between mb-3 border-b border-slate-700/80 pb-3">
-                    <div class="flex items-center space-x-3">
-                        <div class="p-2 bg-amber-500/20 text-amber-400 rounded-xl">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                        </div>
-                        <div>
-                            <h3 class="text-base sm:text-lg font-bold text-white">Міні-Гра 2: Сканер Достовірності Джерел</h3>
-                            <p class="text-xs text-slate-400">Оцініть кадри новин за критеріями інформаційної культури (Автор, Актуальність, Мета).</p>
-                        </div>
+            <!-- Task Container -->
+            <div class="glass-card rounded-3xl p-6 md:p-8 space-y-6">
+                <!-- Task Goal -->
+                <div class="bg-cyan-950/40 border border-cyan-500/30 rounded-2xl p-4 flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-bullseye text-lg"></i>
                     </div>
-                    <span class="text-xs font-mono bg-amber-950 text-amber-400 border border-amber-800 px-2.5 py-1 rounded-lg" id="g2-step-badge">1/4</span>
-                </div>
-
-                <!-- Interactive News Card Viewer -->
-                <div class="max-w-md mx-auto w-full my-4">
-                    <div id="g2-card-display" class="bg-slate-900 border-2 border-amber-500/40 rounded-2xl p-5 shadow-xl relative overflow-hidden transition-all duration-300">
-                        <div class="flex items-center justify-between text-xs text-amber-400 font-bold uppercase tracking-wider mb-2">
-                            <span id="g2-card-category">Джерело Новин</span>
-                            <span id="g2-card-date" class="text-slate-400 font-mono">11.09.2026</span>
-                        </div>
-                        <h4 id="g2-card-headline" class="text-base sm:text-lg font-bold text-white mb-2 leading-snug">Завантаження картки...</h4>
-                        <div class="bg-slate-800/90 rounded-xl p-3 border border-slate-700/60 mb-4 text-xs space-y-1.5 text-slate-300">
-                            <div><strong class="text-slate-400">Автор:</strong> <span id="g2-card-author" class="text-white">...</span></div>
-                            <div><strong class="text-slate-400">Контекст/Джерело:</strong> <span id="g2-card-context" class="text-white">...</span></div>
-                        </div>
-
-                        <!-- Tactical Choice Buttons -->
-                        <div class="grid grid-cols-2 gap-3 pt-2">
-                            <button onclick="sortG2Card(false)" class="p-3 bg-red-500/15 hover:bg-red-500/25 border border-red-500/40 text-red-300 font-bold rounded-xl vector-btn flex flex-col items-center justify-center space-y-1">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                <span class="text-xs">ФЕЙК / РЕКЛАМА</span>
-                            </button>
-                            <button onclick="sortG2Card(true)" class="p-3 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 font-bold rounded-xl vector-btn flex flex-col items-center justify-center space-y-1">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                <span class="text-xs">ДОСТОВІРНО</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="screen-game-3" class="hidden flex-col space-y-4 my-auto">
-            <div class="vector-card rounded-2xl p-4 sm:p-6">
-                <div class="flex items-center justify-between mb-3 border-b border-slate-700/80 pb-3">
-                    <div class="flex items-center space-x-3">
-                        <div class="p-2 bg-emerald-500/20 text-emerald-400 rounded-xl">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 01-2 2h-0a2 2 0 01-2-2v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-                        </div>
-                        <div>
-                            <h3 class="text-base sm:text-lg font-bold text-white">Міні-Гра 3: Класифікатор Завдань ШІ</h3>
-                            <p class="text-xs text-slate-400">Розподіліть завдання між Традиційним Пошуковиком, Генеративним ШІ (ChatGPT) та Людською Суперсилою.</p>
-                        </div>
-                    </div>
-                    <span class="text-xs font-mono bg-emerald-950 text-emerald-400 border border-emerald-800 px-2.5 py-1 rounded-lg" id="g3-step-badge">1/5</span>
-                </div>
-
-                <!-- Current Task Tile -->
-                <div class="my-4">
-                    <div class="bg-slate-900 border-2 border-emerald-500/30 rounded-2xl p-4 text-center">
-                        <span class="text-xs uppercase text-slate-400 font-bold block mb-1">Вхідне Завдання:</span>
-                        <div id="g3-task-box" class="text-base sm:text-lg font-extrabold text-emerald-300">
-                            Завантаження...
-                        </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-cyan-300 uppercase">Пошукова Задача:</h4>
+                        <p id="g1-task-desc" class="text-base font-semibold text-slate-100 mt-1"></p>
                     </div>
                 </div>
 
-                <!-- 3 Target Cores -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <button onclick="sortG3Task('search')" class="p-4 bg-slate-800/90 hover:bg-slate-800 border-2 border-cyan-500/40 rounded-2xl vector-btn text-left flex flex-col justify-between space-y-2">
-                        <div class="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold">1</div>
-                        <div>
-                            <h4 class="font-bold text-white text-sm">Традиційний Пошук</h4>
-                            <p class="text-[11px] text-slate-400">Шукає і показує готову наявну інформацію</p>
-                        </div>
+                <!-- Query Slots Building Area -->
+                <div class="space-y-3">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Зібраний пошуковий рядок:</label>
+                    <div id="g1-slots-container" class="min-h-[64px] p-3 rounded-2xl bg-slate-950/80 border-2 border-dashed border-cyan-500/40 flex flex-wrap items-center gap-2">
+                        <!-- Slots will be rendered here dynamically -->
+                    </div>
+                </div>
+
+                <!-- Available Token Chips -->
+                <div class="space-y-3">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Доступні фрагменти операторів:</label>
+                    <div id="g1-tokens-container" class="flex flex-wrap gap-3">
+                        <!-- Chips rendered dynamically -->
+                    </div>
+                </div>
+
+                <!-- Action buttons -->
+                <div class="flex items-center justify-between pt-4 border-t border-white/10">
+                    <button onclick="resetG1Query()" class="touch-target px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-bold transition">
+                        <i class="fa-solid fa-rotate-left mr-1.5"></i> Скинути
                     </button>
-
-                    <button onclick="sortG3Task('genai')" class="p-4 bg-slate-800/90 hover:bg-slate-800 border-2 border-emerald-500/40 rounded-2xl vector-btn text-left flex flex-col justify-between space-y-2">
-                        <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">2</div>
-                        <div>
-                            <h4 class="font-bold text-white text-sm">Генеративний ШІ</h4>
-                            <p class="text-[11px] text-slate-400">Генерує новий текст, коди, ідеї чи переклади</p>
-                        </div>
-                    </button>
-
-                    <button onclick="sortG3Task('human')" class="p-4 bg-slate-800/90 hover:bg-slate-800 border-2 border-purple-500/40 rounded-2xl vector-btn text-left flex flex-col justify-between space-y-2">
-                        <div class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold">3</div>
-                        <div>
-                            <h4 class="font-bold text-white text-sm">Людина (Суперсила)</h4>
-                            <p class="text-[11px] text-slate-400">Критична перевірка, креативне оцінювання та етика</p>
-                        </div>
+                    <button onclick="checkG1Query()" class="touch-target px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-sm shadow-neon-cyan transition hover:scale-105 active:scale-95">
+                        <i class="fa-solid fa-paper-plane mr-1.5"></i> Запустити пошук
                     </button>
                 </div>
             </div>
         </section>
 
-        <section id="screen-game-4" class="hidden flex-col space-y-4 my-auto">
-            <div class="vector-card rounded-2xl p-4 sm:p-6">
-                <div class="flex items-center justify-between mb-3 border-b border-slate-700/80 pb-3">
-                    <div class="flex items-center space-x-3">
-                        <div class="p-2 bg-purple-500/20 text-purple-400 rounded-xl">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        <!-- MINI-GAME 2: CRITICAL EVALUATION RADAR -->
+        <section id="screen-game2" class="hidden space-y-6 animate-fade-in">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                    <span class="text-xs font-bold text-purple-400 uppercase tracking-wider">Місія 2</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white">Радар Достовірності</h2>
+                </div>
+                <div class="text-sm font-semibold bg-slate-900/80 px-4 py-2 rounded-xl border border-purple-500/30">
+                    Картка <span id="g2-card-index" class="text-purple-400 font-bold">1</span> / 5
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Active Source Card -->
+                <div class="lg:col-span-2 glass-card rounded-3xl p-6 md:p-8 flex flex-col justify-between relative overflow-hidden">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span id="g2-card-tag" class="px-3 py-1 rounded-lg bg-purple-500/20 text-purple-300 text-xs font-bold border border-purple-500/30">
+                                Знайдена сторінка
+                            </span>
+                            <i class="fa-solid fa-satellite-dish text-purple-400 text-xl animate-pulse"></i>
                         </div>
-                        <div>
-                            <h3 class="text-base sm:text-lg font-bold text-white">Міні-Гра 4: Інженерія Промптів для ChatGPT</h3>
-                            <p class="text-xs text-slate-400">Виправте слабкий промпт, додавши необхідні модулі: Конкретність, Контекст та Уточнення.</p>
+
+                        <h3 id="g2-card-title" class="text-xl font-bold text-white leading-snug"></h3>
+                        <p id="g2-card-snippet" class="text-slate-300 text-sm leading-relaxed bg-slate-900/60 p-4 rounded-xl border border-white/5"></p>
+
+                        <!-- Source Details Checklist -->
+                        <div class="space-y-2 pt-2">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase">Ознаки джерела:</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                                <div class="bg-slate-900/50 p-3 rounded-xl border border-white/5">
+                                    <span class="text-slate-400 block">Автор:</span>
+                                    <span id="g2-meta-author" class="font-bold text-purple-300"></span>
+                                </div>
+                                <div class="bg-slate-900/50 p-3 rounded-xl border border-white/5">
+                                    <span class="text-slate-400 block">Дата публікації:</span>
+                                    <span id="g2-meta-date" class="font-bold text-purple-300"></span>
+                                </div>
+                                <div class="bg-slate-900/50 p-3 rounded-xl border border-white/5">
+                                    <span class="text-slate-400 block">Мета сайту:</span>
+                                    <span id="g2-meta-purpose" class="font-bold text-purple-300"></span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <span class="text-xs font-mono bg-purple-950 text-purple-400 border border-purple-800 px-2.5 py-1 rounded-lg" id="g4-step-badge">1/3</span>
+
+                    <!-- Tactical Action Selection -->
+                    <div class="mt-8 pt-6 border-t border-white/10 flex flex-col sm:flex-row gap-4">
+                        <button onclick="evaluateG2Card(false)" class="touch-target flex-1 py-3 px-4 rounded-2xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 font-bold text-sm transition hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-ban text-lg"></i>
+                            <span>Шум / Ненадійне джерело</span>
+                        </button>
+                        <button onclick="evaluateG2Card(true)" class="touch-target flex-1 py-3 px-4 rounded-2xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-bold text-sm transition hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-circle-check text-lg"></i>
+                            <span>Достовірна інформація</span>
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Weak Prompt Base Box -->
-                <div class="bg-slate-900 border border-red-500/40 rounded-xl p-4 mb-4">
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-xs uppercase text-red-400 font-bold">Слабкий (нерозпланований) запит:</span>
-                        <span class="text-[10px] bg-red-500/20 text-red-300 px-2 py-0.5 rounded">Потребує покращення</span>
+                <!-- Info Help / Criteria Checklist -->
+                <div class="glass-card rounded-3xl p-6 space-y-4 flex flex-col justify-center">
+                    <div class="flex items-center gap-3 text-purple-300">
+                        <i class="fa-solid fa-circle-info text-xl"></i>
+                        <h4 class="font-bold text-sm uppercase tracking-wider">Правила Оцінки:</h4>
                     </div>
-                    <p id="g4-weak-prompt" class="text-sm font-semibold text-slate-200">"Напиши про історію"</p>
-                </div>
-
-                <!-- Modular Workbench Selector -->
-                <div class="space-y-3 mb-5">
-                    <label class="block text-xs font-semibold text-slate-400">Оберіть НАЙКРАЩИЙ покращений промпт із заданим контекстом та конкретикою:</label>
-                    <div id="g4-options-container" class="space-y-2">
-                        <!-- Options injected dynamically -->
-                    </div>
+                    <ul class="text-xs text-slate-300 space-y-3 leading-relaxed">
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-user-check text-purple-400 mt-0.5"></i>
+                            <span><b>Хто автор?</b> Перевіряй, чи є автор експертом у даній галузі.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-calendar-days text-purple-400 mt-0.5"></i>
+                            <span><b>Коли написано?</b> Стара інформація може бути застарілою.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-bullseye text-purple-400 mt-0.5"></i>
+                            <span><b>Для кого створено?</b> Відрізняй наукову статтю/підручник від рекламної маніпуляції.</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </section>
 
-        <section id="screen-results" class="hidden vector-card rounded-3xl p-6 sm:p-10 text-center max-w-2xl mx-auto my-auto shadow-2xl relative overflow-hidden">
-            <div class="w-24 h-24 mx-auto mb-4 bg-gradient-to-tr from-amber-400 via-orange-500 to-yellow-300 rounded-full flex items-center justify-center p-1 shadow-2xl shadow-amber-500/30">
-                <div class="w-full h-full bg-slate-900 rounded-full flex items-center justify-center">
-                    <svg class="w-12 h-12 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1.323l1.954-1.24a1 1 0 011.092.032l1.954 1.241V3a1 1 0 112 0v5a1 1 0 01-.39.782l-3.5 2.5a1 1 0 01-1.22 0l-3.5-2.5A1 1 0 019 8V3a1 1 0 011-1zm0 10a1 1 0 011 1v.01a1 1 0 11-2 0V13a1 1 0 011-1z" clip-rule="evenodd"/>
-                        <path d="M6.293 9.293a1 1 0 011.414 0L10 11.586l2.293-2.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"/>
-                    </svg>
+        <!-- MINI-GAME 3: AI SORTER (TRADITIONAL VS GENERATIVE) -->
+        <section id="screen-game3" class="hidden space-y-6 animate-fade-in">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                    <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Місія 3</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white">Сортувальник Технологій ШІ</h2>
+                </div>
+                <div class="text-sm font-semibold bg-slate-900/80 px-4 py-2 rounded-xl border border-emerald-500/30">
+                    Зашилось елементів: <span id="g3-remaining" class="text-emerald-400 font-bold">6</span>
                 </div>
             </div>
 
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-white mb-2">Лабораторію Пройдено!</h2>
-            <p class="text-slate-300 text-sm mb-6">Ви успішно засвоїли практичні навички роботи з Інтернетом та ШІ.</p>
+            <!-- Active Card to Route -->
+            <div id="g3-active-card-box" class="glass-card rounded-3xl p-6 text-center space-y-3 bg-gradient-to-b from-slate-800/80 to-slate-900/90 border-emerald-500/30 relative">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Поточне завдання / функція:</span>
+                <h3 id="g3-card-title" class="text-xl md:text-2xl font-bold text-emerald-300"></h3>
+                <p id="g3-card-desc" class="text-slate-300 text-sm max-w-xl mx-auto"></p>
+            </div>
 
-            <div class="bg-slate-900/90 rounded-2xl p-4 border border-slate-700/80 mb-6 text-left space-y-2">
-                <div class="flex justify-between items-center text-sm">
-                    <span class="text-slate-400">Загальний результат:</span>
-                    <span id="res-score" class="font-extrabold text-amber-400 text-lg">0 / 100</span>
+            <!-- Destined Containers -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- Traditional AI Drop Target -->
+                <button onclick="sortG3Card('traditional')" class="glass-card rounded-3xl p-6 text-left hover:border-cyan-400/60 transition group hover:scale-[1.01] active:scale-95 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xl border border-cyan-500/30 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-microchip"></i>
+                        </div>
+                        <span class="text-xs font-bold text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20">
+                            Традиційний ШІ
+                        </span>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-bold text-white group-hover:text-cyan-300">Традиційний ШІ</h4>
+                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                            Виконує аналіз, розпізнає мову та зображення, шукає та показує готову інформацію за правилами.
+                        </p>
+                    </div>
+                    <div class="pt-2 text-xs font-bold text-cyan-400 flex items-center gap-1">
+                        <span>Сюди</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </button>
+
+                <!-- Generative AI Drop Target -->
+                <button onclick="sortG3Card('generative')" class="glass-card rounded-3xl p-6 text-left hover:border-emerald-400/60 transition group hover:scale-[1.01] active:scale-95 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl border border-emerald-500/30 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-sparkles"></i>
+                        </div>
+                        <span class="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                            Генеративний ШІ
+                        </span>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-bold text-white group-hover:text-emerald-300">Генеративний ШІ</h4>
+                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                            Створює принципово новий оригінальний вміст: текст, музику, відео або унікальні малюнки.
+                        </p>
+                    </div>
+                    <div class="pt-2 text-xs font-bold text-emerald-400 flex items-center gap-1">
+                        <span>Сюди</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </button>
+
+            </div>
+        </section>
+
+        <!-- MINI-GAME 4: CHATGPT PROMPT ENGINEER & HALLUCINATION CHECK -->
+        <section id="screen-game4" class="hidden space-y-6 animate-fade-in">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                    <span class="text-xs font-bold text-rose-400 uppercase tracking-wider">Місія 4</span>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white">Майстер Промптів ChatGPT</h2>
                 </div>
-                <div class="flex justify-between items-center text-sm">
-                    <span class="text-slate-400">Оцінка знань:</span>
-                    <span id="res-grade" class="font-bold text-cyan-400">Відмінно</span>
-                </div>
-                <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
-                    <div id="res-progress-bar" class="bg-gradient-to-r from-cyan-400 to-emerald-400 h-2.5 rounded-full" style="width: 0%"></div>
+                <div class="text-sm font-semibold bg-slate-900/80 px-4 py-2 rounded-xl border border-rose-500/30">
+                    Етап <span id="g4-stage" class="text-rose-400 font-bold">1</span> / 4
                 </div>
             </div>
 
-            <button onclick="startGame()" class="px-8 py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-2xl vector-btn shadow-lg shadow-cyan-500/25">
-                Пройти Знову (Змішати Завдання)
-            </button>
+            <!-- ChatGPT Interface Mockup -->
+            <div class="glass-card rounded-3xl p-6 md:p-8 space-y-6 border-rose-500/30">
+                <div class="flex items-center gap-3 border-b border-white/10 pb-4">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-white text-base">ChatGPT Помічник</h3>
+                        <p class="text-xs text-slate-400">Введіть якісний промпт або перевірте відповідь</p>
+                    </div>
+                </div>
+
+                <!-- Scenario Instructions -->
+                <div class="bg-slate-950/60 p-4 rounded-2xl border border-white/5 space-y-1">
+                    <span class="text-xs font-bold text-rose-400 uppercase">Завдання від учителя:</span>
+                    <p id="g4-scenario-desc" class="text-sm text-slate-200 font-semibold"></p>
+                </div>
+
+                <!-- Interactive Prompt Assembler / Answer Check Area -->
+                <div id="g4-interactive-area" class="space-y-4">
+                    <!-- Dynamic choices rendered by JS -->
+                </div>
+            </div>
         </section>
 
     </main>
 
-    <!-- Custom Modal Message Box (No browser alert) -->
-    <div id="game-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="vector-card rounded-2xl max-w-sm w-full p-6 text-center space-y-4 border-2 border-slate-700">
-            <div id="modal-icon" class="w-12 h-12 mx-auto rounded-full flex items-center justify-center text-2xl">
-                💡
+    <!-- Custom Modal for Feedback/Results -->
+    <div id="feedback-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="glass-card max-w-md w-full rounded-3xl p-6 text-center space-y-4 border-2 shadow-2xl animate-fade-in" id="modal-box">
+            <div id="modal-icon-wrap" class="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-3xl">
+                <!-- Icon via JS -->
             </div>
-            <h3 id="modal-title" class="text-lg font-bold text-white">Повідомлення</h3>
-            <p id="modal-body" class="text-sm text-slate-300 leading-relaxed">Деталі...</p>
-            <button onclick="closeModal()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl border border-slate-600 transition">
-                Зрозуміло
+            <h3 id="modal-title" class="text-2xl font-bold text-white"></h3>
+            <p id="modal-message" class="text-sm text-slate-300 leading-relaxed"></p>
+            <button onclick="closeModal()" class="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl text-sm transition hover:scale-[1.02] active:scale-95">
+                Продовжити
             </button>
         </div>
     </div>
 
     <script>
-        /* Web Audio API Sound Synthesizer */
-        let audioCtx = null;
-        let soundEnabled = true;
+        let state = {
+            totalScore: 0,
+            soundEnabled: true,
+            scores: { g1: 0, g2: 0, g3: 0, g4: 0 },
+            g1: { round: 0, selectedTokens: [] },
+            g2: { index: 0 },
+            g3: { index: 0, remaining: [] },
+            g4: { stage: 0 }
+        };
 
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-        }
-
-        function playSound(type) {
-            if (!soundEnabled) return;
+        // Web Audio Synthesizer for SFX
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSFX(type) {
+            if (!state.soundEnabled) return;
             try {
-                initAudio();
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
 
-                const now = audioCtx.currentTime;
-
-                if (type === 'click') {
-                    osc.frequency.setValueAtTime(400, now);
-                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
-                    gain.gain.setValueAtTime(0.15, now);
-                    gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
-                    osc.start(now);
-                    osc.stop(now + 0.05);
-                } else if (type === 'correct') {
-                    osc.frequency.setValueAtTime(523.25, now); // C5
-                    osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
-                    osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
-                    gain.gain.setValueAtTime(0.2, now);
-                    gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
-                    osc.start(now);
-                    osc.stop(now + 0.3);
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.2); // A5
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
                 } else if (type === 'wrong') {
                     osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(220, now);
-                    osc.frequency.setValueAtTime(160, now + 0.1);
-                    gain.gain.setValueAtTime(0.2, now);
-                    gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
-                    osc.start(now);
-                    osc.stop(now + 0.25);
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+                    osc.frequency.setValueAtTime(146.83, audioCtx.currentTime + 0.15); // D3
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'click') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.05);
                 }
-            } catch (e) {}
+            } catch(e) {}
         }
 
-        function toggleAudio() {
-            soundEnabled = !soundEnabled;
-            document.getElementById('sound-icon-on').classList.toggle('hidden', !soundEnabled);
-            document.getElementById('sound-icon-off').classList.toggle('hidden', soundEnabled);
+        function toggleSound() {
+            state.soundEnabled = !state.soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            if (state.soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high';
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-slate-500';
+            }
         }
 
-        /* Shuffle Utility */
-        function shuffleArray(arr) {
-            const array = [...arr];
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
+        function switchGame(screenId) {
+            playSFX('click');
+            const screens = ['hub', 'game1', 'game2', 'game3', 'game4'];
+            screens.forEach(s => {
+                const el = document.getElementById(`screen-${s}`);
+                if (s === screenId) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        /* Global Game State */
-        let gameState = {
-            score: 0,
-            currentModule: 1,
-            g1Step: 0,
-            g2Step: 0,
-            g3Step: 0,
-            g4Step: 0
-        };
+        function showModal(title, msg, isSuccess, onContinue) {
+            const modal = document.getElementById('feedback-modal');
+            const box = document.getElementById('modal-box');
+            const iconWrap = document.getElementById('modal-icon-wrap');
+            const titleEl = document.getElementById('modal-title');
+            const msgEl = document.getElementById('modal-message');
 
-        /* Data - Game 1: Search Operators */
-        const g1Tasks = [
-            {
-                task: "Знайдіть точну фразу про український борщ без змін слів.",
-                correct: ["\"рецепт", "українського", "борщу\""],
-                distractors: ["site:wiki.org", "-м'ясо", "filetype:pdf"]
-            },
-            {
-                task: "Знайдіть іграшкову машину, але БЕЗ згадки словосполучень про реальні машини (виключити слово).",
-                correct: ["машина", "-іграшка"],
-                distractors: ["* борщ", "site:gov.ua", "\"купити\""]
-            },
-            {
-                task: "Шукайте підручники з інформатики виключно у форматі PDF на сайті підручників.",
-                correct: ["інформатика", "site:infostudy.org", "filetype:pdf"],
-                distractors: ["-підручник", "\"як борщ\"", "*"]
+            titleEl.textContent = title;
+            msgEl.textContent = msg;
+
+            if (isSuccess) {
+                playSFX('correct');
+                box.className = "glass-card max-w-md w-full rounded-3xl p-6 text-center space-y-4 border-2 border-emerald-500/50 shadow-neon-emerald";
+                iconWrap.className = "w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-3xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40";
+                iconWrap.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+            } else {
+                playSFX('wrong');
+                box.className = "glass-card max-w-md w-full rounded-3xl p-6 text-center space-y-4 border-2 border-rose-500/50 shadow-neon-rose";
+                iconWrap.className = "w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-3xl bg-rose-500/20 text-rose-400 border border-rose-500/40";
+                iconWrap.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
             }
-        ];
 
-        /* Data - Game 2: Information Culture / Source Verification */
-        const g2CardsData = [
-            {
-                headline: "СЕНСАЦІЯ! Усі школи переходять на 100% віртуальне навчання вже завтра!",
-                author: "Анонімний користувач у соцмережі",
-                context: "Рекламний банер на сумнівному сайті без посилань на МОН",
-                isReliable: false,
-                reason: "Відсутній офіційний автор-експерт та присутня ознака фейкового/рекламного заголовку."
-            },
-            {
-                headline: "Офіційні матеріали з інформатики: Пошукові оператори та ШІ для 7 класу",
-                author: "Вчитель інформатики / Освітній портал",
-                context: "Навчальний сайт з актуальною датою та зрозумілою освітньою метою",
-                isReliable: true,
-                reason: "Експертний автор, актуальна дата та чітка навчальна мета без прихованої реклами."
-            },
-            {
-                headline: "Штучний інтелект замінить усіх людей за 2 дні: Купуйте наші курси зі знижкою 99%!",
-                author: "Маркетингова компанія",
-                context: "Рекламна стаття із закликом терміново витратити гроші",
-                isReliable: false,
-                reason: "Маніпуляція, рекламна мета, відсутність наукової достовірності."
-            },
-            {
-                headline: "Аналітичний звіт: Принципи роботи генеративного ШІ та ChatGPT",
-                author: "Дослідники технологій ШІ",
-                context: "Опубліковано у науково-популярному виданні 2026 року",
-                isReliable: true,
-                reason: "Компетентні автори, актуальні дані 2026 року та наукова мета."
-            }
-        ];
-
-        /* Data - Game 3: Generative AI & Task Sorter */
-        const g3TasksData = [
-            { text: "Знайти точну адресу та графік роботи міської бібліотеки", type: "search" },
-            { text: "Написати творчу казку про пригоди робота-дослідника", type: "genai" },
-            { text: "Критично оцінити морально-етичний аспект використання ШІ в школі", type: "human" },
-            { text: "Згенерувати варіанти кольорової гами та опису для нового логотипу", type: "genai" },
-            { text: "Знайти залізничні квитки на конкретну дату через офіційний сайт", type: "search" }
-        ];
-
-        /* Data - Game 4: Prompt Engineering Workshop */
-        const g4PromptsData = [
-            {
-                weak: "«Напиши про історію»",
-                options: [
-                    { text: "«Розкажи про історію Київської Русі у 9-10 століттях.»", correct: true, reason: "Задано конкретні часові та географічні рамки." },
-                    { text: "«Що таке історія?»", correct: false },
-                    { text: "«Напиши будь-що про давні часи.»", correct: false }
-                ]
-            },
-            {
-                weak: "«Напиши твір про осінь»",
-                options: [
-                    { text: "«Напиши короткий твір-опис на тему \"Осінній ліс\", використовуючи чітко 5 речень.»", correct: true, reason: "Чітко визначено тему, жанр та обсяг." },
-                    { text: "«Розкажи розлого все про осінь та погоду.»", correct: false },
-                    { text: "«Осінь це добре чи погано?»", correct: false }
-                ]
-            },
-            {
-                weak: "«Поясни як працює ШІ»",
-                options: [
-                    { text: "«Це занадто складно, спробуй пояснити принципи ШІ простіше, як для учня 7 класу.»", correct: true, reason: "Задано уточнення та рівень аудиторії." },
-                    { text: "«Надай мені повну наукову монографію з формулами.»", correct: false },
-                    { text: "«ШІ це штучний інтелект.»", correct: false }
-                ]
-            }
-        ];
-
-        /* Modal Logic */
-        function showModal(title, text, icon = '💡') {
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-body').innerText = text;
-            document.getElementById('modal-icon').innerText = icon;
-            document.getElementById('game-modal').classList.remove('hidden');
+            modal.classList.remove('hidden');
+            state.pendingModalAction = onContinue;
         }
 
         function closeModal() {
-            playSound('click');
-            document.getElementById('game-modal').classList.add('hidden');
+            playSFX('click');
+            document.getElementById('feedback-modal').classList.add('hidden');
+            if (state.pendingModalAction) {
+                const act = state.pendingModalAction;
+                state.pendingModalAction = null;
+                act();
+            }
         }
 
-        /* Screen Switcher */
-        function showScreen(screenId) {
-            ['screen-welcome', 'screen-game-1', 'screen-game-2', 'screen-game-3', 'screen-game-4', 'screen-results'].forEach(id => {
-                const el = document.getElementById(id);
-                if (id === screenId) {
-                    el.classList.remove('hidden');
-                    el.classList.add('flex');
-                } else {
-                    el.classList.add('hidden');
-                    el.classList.remove('flex');
-                }
-            });
+        function updateScore(gameKey, addPoints) {
+            state.scores[gameKey] = Math.min(100, state.scores[gameKey] + addPoints);
+            state.totalScore = state.scores.g1 + state.scores.g2 + state.scores.g3 + state.scores.g4;
+            document.getElementById('total-score').textContent = state.totalScore;
+            document.getElementById(`badge-${gameKey}`).textContent = `${state.scores[gameKey]} / 100 XP`;
+
+            if (state.totalScore >= 350) {
+                document.getElementById('final-banner').classList.remove('hidden');
+            }
         }
 
-        /* Start / Restart Game */
-        function startGame() {
-            playSound('click');
-            gameState.score = 0;
-            gameState.currentModule = 1;
-            gameState.g1Step = 0;
-            gameState.g2Step = 0;
-            gameState.g3Step = 0;
-            gameState.g4Step = 0;
+        // GAME 1 DATA: Operator scenarios
+        const g1Data = [
+            {
+                task: "Знайди рецепт борщу ТОЧНО з цією назвою, щоб результати не змінювалися.",
+                targetQuery: ['"як приготувати борщ"'],
+                pool: ['"як приготувати борщ"', 'як приготувати борщ', 'site:borsch.ua', '-борщ', 'filetype:pdf']
+            },
+            {
+                task: "Знайди інформацію про автомобіль, але повністю виключи з результатів іграшки (інформаційний шум).",
+                targetQuery: ['машина', '-іграшка'],
+                pool: ['машина', '-іграшка', '"машина іграшка"', 'site:toy.com', '*іграшка']
+            },
+            {
+                task: "Шукаєш підручник з інформатики у форматі PDF файлу.",
+                targetQuery: ['інформатика', 'filetype:pdf'],
+                pool: ['інформатика', 'filetype:pdf', 'site:pdf.org', '"filetype pdf"', '-інформатика']
+            },
+            {
+                task: "Потрібно знайти статті про штучний інтелект ЛИШЕ на сайті wikipedia.org.",
+                targetQuery: ['штучний інтелект', 'site:wikipedia.org'],
+                pool: ['штучний інтелект', 'site:wikipedia.org', '"site wikipedia"', '-wikipedia', 'filetype:doc']
+            },
+            {
+                task: "Не пам'ятаєш одне слово у фразі: 'як * борщ'. Знайди вирази з пропущеним словом.",
+                targetQuery: ['"як * борщ"'],
+                pool: ['"як * борщ"', 'як борщ', '-борщ', 'site:google.com', 'filetype:txt']
+            }
+        ];
+
+        function startMiniGame(gameKey) {
+            if (gameKey === 'game1') {
+                state.g1.round = 0;
+                loadG1Round();
+                switchGame('game1');
+            } else if (gameKey === 'game2') {
+                state.g2.index = 0;
+                g2Data.sort(() => Math.random() - 0.5);
+                loadG2Card();
+                switchGame('game2');
+            } else if (gameKey === 'game3') {
+                state.g3.remaining = [...g3Data].sort(() => Math.random() - 0.5);
+                state.g3.index = 0;
+                loadG3Card();
+                switchGame('game3');
+            } else if (gameKey === 'game4') {
+                state.g4.stage = 0;
+                g4Data.sort(() => Math.random() - 0.5);
+                loadG4Stage();
+                switchGame('game4');
+            }
+        }
+
+        function loadG1Round() {
+            const data = g1Data[state.g1.round];
+            document.getElementById('g1-round').textContent = state.g1.round + 1;
+            document.getElementById('g1-task-desc').textContent = data.task;
             
-            updateHeaderStats();
-            showScreen('screen-game-1');
-            initG1Step();
-        }
+            state.g1.selectedTokens = [];
+            renderG1Slots();
 
-        function updateHeaderStats() {
-            document.getElementById('score-display').innerText = gameState.score;
-            document.getElementById('level-display').innerText = `${gameState.currentModule}/4`;
-        }
+            // Shuffle pool
+            const shuffledPool = [...data.pool].sort(() => Math.random() - 0.5);
+            const tokensContainer = document.getElementById('g1-tokens-container');
+            tokensContainer.innerHTML = '';
 
-        let g1SelectedBlocks = [];
-
-        function initG1Step() {
-            if (gameState.g1Step >= g1Tasks.length) {
-                gameState.currentModule = 2;
-                updateHeaderStats();
-                showScreen('screen-game-2');
-                initG2Step();
-                return;
-            }
-
-            document.getElementById('g1-step-badge').innerText = `Завдання ${gameState.g1Step + 1}/${g1Tasks.length}`;
-            const currentData = g1Tasks[gameState.g1Step];
-            document.getElementById('g1-task-text').innerText = currentData.task;
-
-            g1SelectedBlocks = [];
-            renderG1Selected();
-
-            // Shuffle option blocks (correct + distractors)
-            const allBlocks = shuffleArray([...currentData.correct, ...currentData.distractors]);
-            const poolContainer = document.getElementById('g1-blocks-pool');
-            poolContainer.innerHTML = '';
-
-            allBlocks.forEach(text => {
+            shuffledPool.forEach((tokenText, idx) => {
                 const btn = document.createElement('button');
-                btn.className = "px-3 py-2 bg-slate-700 hover:bg-slate-600 text-cyan-300 font-mono text-xs sm:text-sm rounded-xl border border-slate-600 vector-btn transition drag-item";
-                btn.innerText = text;
-                btn.onclick = () => selectG1Block(text, btn);
-                poolContainer.appendChild(btn);
+                btn.className = "px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 font-mono text-sm border border-cyan-500/30 transition hover:scale-105 active:scale-95 shadow-sm";
+                btn.textContent = tokenText;
+                btn.onclick = () => selectG1Token(tokenText, btn);
+                tokensContainer.appendChild(btn);
             });
         }
 
-        function selectG1Block(text, btnEl) {
-            playSound('click');
-            g1SelectedBlocks.push(text);
+        function selectG1Token(tokenText, btnEl) {
+            playSFX('click');
+            state.g1.selectedTokens.push(tokenText);
             btnEl.disabled = true;
-            btnEl.classList.add('opacity-30', 'pointer-events-none');
-            renderG1Selected();
+            btnEl.classList.add('opacity-40', 'pointer-events-none');
+            renderG1Slots();
         }
 
-        function renderG1Selected() {
-            const dropZone = document.getElementById('g1-drop-zone');
-            dropZone.innerHTML = '';
-
-            if (g1SelectedBlocks.length === 0) {
-                dropZone.innerHTML = '<span id="g1-placeholder" class="text-xs text-slate-500 p-2">Обирайте блоки нижче для формування запиту...</span>';
+        function renderG1Slots() {
+            const container = document.getElementById('g1-slots-container');
+            container.innerHTML = '';
+            if (state.g1.selectedTokens.length === 0) {
+                container.innerHTML = '<span class="text-xs text-slate-500 italic p-2">Натисни на оператори нижче, щоб сформувати запит...</span>';
                 return;
             }
+            state.g1.selectedTokens.forEach((token, i) => {
+                const chip = document.createElement('div');
+                chip.className = "px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 font-mono text-sm border border-cyan-400/40 flex items-center gap-2";
+                chip.innerHTML = `<span>${token}</span><i class="fa-solid fa-xmark text-xs cursor-pointer hover:text-rose-400" onclick="removeG1Token(${i})"></i>`;
+                container.appendChild(chip);
+            });
+        }
 
-            g1SelectedBlocks.forEach((text, idx) => {
-                const tag = document.createElement('span');
-                tag.className = "px-3 py-1.5 bg-cyan-900/90 text-cyan-200 border border-cyan-500/50 font-mono text-xs sm:text-sm rounded-lg flex items-center space-x-1";
-                tag.innerText = text;
-                dropZone.appendChild(tag);
+        function removeG1Token(index) {
+            playSFX('click');
+            const removed = state.g1.selectedTokens.splice(index, 1)[0];
+            renderG1Slots();
+            
+            // Re-enable in pool
+            const buttons = document.querySelectorAll('#g1-tokens-container button');
+            buttons.forEach(btn => {
+                if (btn.textContent === removed && btn.disabled) {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-40', 'pointer-events-none');
+                }
             });
         }
 
         function resetG1Query() {
-            playSound('click');
-            g1SelectedBlocks = [];
-            initG1Step();
+            loadG1Round();
         }
 
         function checkG1Query() {
-            const currentData = g1Tasks[gameState.g1Step];
-            const isCorrect = JSON.stringify(g1SelectedBlocks) === JSON.stringify(currentData.correct);
+            const currentData = g1Data[state.g1.round];
+            const isCorrect = JSON.stringify(state.g1.selectedTokens.sort()) === JSON.stringify([...currentData.targetQuery].sort());
 
             if (isCorrect) {
-                playSound('correct');
-                gameState.score += 25;
-                updateHeaderStats();
-                showModal("Чудово!", "Правильна комбінація операторів! Інформаційний шум відсіяно.", "🎯");
-                gameState.g1Step++;
-                setTimeout(initG1Step, 500);
+                updateScore('g1', 20);
+                showModal(
+                    "Відмінний результат!",
+                    "Точний пошуковий оператор відсіяв весь інформаційний шум!",
+                    true,
+                    () => {
+                        state.g1.round++;
+                        if (state.g1.round < g1Data.length) {
+                            loadG1Round();
+                        } else {
+                            switchGame('hub');
+                        }
+                    }
+                );
             } else {
-                playSound('wrong');
-                showModal("Помилка Пошуку", "Спробуйте ще раз! Зверніть увагу на точність лапок, знаків мінус чи розширень файлів.", "❌");
+                showModal(
+                    "Запит містить помилки",
+                    "Перевірте використання операторів: ' site: ', ' filetype: ', ' - ' або дужок. Варіанти було перемішано без підказок!",
+                    false,
+                    () => {}
+                );
             }
         }
 
-        let shuffledG2Data = [];
-
-        function initG2Step() {
-            if (gameState.g2Step === 0) {
-                shuffledG2Data = shuffleArray(g2CardsData);
+        // GAME 2 DATA: Critical thinking cards
+        const g2Data = [
+            {
+                title: "100% Спосіб скласти ДПА з інформатики без навчання!",
+                snippet: "Купуйте наш магічний кристал усього за 200 грн і отримуйте 12 балів автоматично! Переходьте за посиланням зараз!",
+                author: "Анонімний акаунт Telegram",
+                date: "Сьогодні",
+                purpose: "Реклама / Продаж товарів",
+                isReliable: false,
+                explanation: "Це класичний інформаційний шум та рекламний фейк. Анонімні джерела без наукових фактів не є достовірними."
+            },
+            {
+                title: "Оператори пошуку та генеративний штучний інтелект",
+                snippet: "Підручник з інформатики для 7 класу відповідає державній програмі навчання. Подаються точні визначення операторів site:, filetype: та основи ChatGPT.",
+                author: "Вчителі інформатики / МОН України",
+                date: "2026 рік",
+                purpose: "Освітня стаття / Навчальний матеріал",
+                isReliable: true,
+                explanation: "Правильно! Джерело має офіційних авторів, освітню мету та актуальну дату."
+            },
+            {
+                title: "Шокуюча правда! Штучний інтелект захопить світ завтра!",
+                snippet: "Подивіться це відео до кінця, щоб дізнатися таємницю, яку приховують вчені. Тільки у нашому блозі!",
+                author: "Незрозумілий блогер без ліцензії",
+                date: "3 роки тому",
+                purpose: "Клікбейтерська реклама",
+                isReliable: false,
+                explanation: "Це залякування та інформаційний шум задля кліків."
+            },
+            {
+                title: "Аналіз етичних норм використання ChatGPT у школах",
+                snippet: "Наукове дослідження про використання ШІ як помічника для підсумків та перекладу, підкреслюючи критичне мислення учня.",
+                author: "Доктор комп'ютерних наук Іваненко О.В.",
+                date: "2025 рік",
+                purpose: "Науково-дослідна публікація",
+                isReliable: true,
+                explanation: "Чудово! Автор є визнаним експертом, а стаття має дослідницький характер."
+            },
+            {
+                title: "Безкоштовні відповіді на всі домашні завдання!",
+                snippet: "Скачайте файл zip без перевірки. Потрібно лише ввести свій номер телефону та пароль.",
+                author: "Невідомий сайт HW-Free",
+                date: "Не вказана",
+                purpose: "Фішинг / Шкідливий вміст",
+                isReliable: false,
+                explanation: "Небезпечне джерело! Збір особистих даних під виглядом завантажень."
             }
+        ];
 
-            if (gameState.g2Step >= shuffledG2Data.length) {
-                gameState.currentModule = 3;
-                updateHeaderStats();
-                showScreen('screen-game-3');
-                initG3Step();
+        function loadG2Card() {
+            const card = g2Data[state.g2.index];
+            document.getElementById('g2-card-index').textContent = state.g2.index + 1;
+            document.getElementById('g2-card-title').textContent = card.title;
+            document.getElementById('g2-card-snippet').textContent = card.snippet;
+            document.getElementById('g2-meta-author').textContent = card.author;
+            document.getElementById('g2-meta-date').textContent = card.date;
+            document.getElementById('g2-meta-purpose').textContent = card.purpose;
+        }
+
+        function evaluateG2Card(userChoiceIsReliable) {
+            const card = g2Data[state.g2.index];
+            if (userChoiceIsReliable === card.isReliable) {
+                updateScore('g2', 20);
+                showModal(
+                    "Правильна оцінка!",
+                    card.explanation,
+                    true,
+                    nextG2Card
+                );
+            } else {
+                showModal(
+                    "Помилкова оцінка джерела",
+                    card.explanation,
+                    false,
+                    nextG2Card
+                );
+            }
+        }
+
+        function nextG2Card() {
+            state.g2.index++;
+            if (state.g2.index < g2Data.length) {
+                loadG2Card();
+            } else {
+                switchGame('hub');
+            }
+        }
+
+        // GAME 3 DATA: Traditional vs Generative AI
+        const g3Data = [
+            {
+                title: "Створення нової пісні у стилі джаз",
+                desc: "Генерація унікальної мелодії та тексту, яких раніше не існувало в мережі.",
+                type: "generative"
+            },
+            {
+                title: "Розпізнавання обличчя для розблокування смартфона",
+                desc: "Аналіз геометрії обличчя та порівняння з уже збереженим шаблоном.",
+                type: "traditional"
+            },
+            {
+                title: "Написання твору-опису 'Осінній ліс'",
+                desc: "Генерація оригінального художнього тексту на основі наданого промпту.",
+                type: "generative"
+            },
+            {
+                title: "Пошук та виведення списку статей за запросом ' site:gov.ua '",
+                desc: "Сканування баз даних та показ готових посилань без створення нового контенту.",
+                type: "traditional"
+            },
+            {
+                title: "Генерація футуристичного малюнка кота у космосі",
+                desc: "Створення нового зображення піксель за пікселем за допомогою нейромережі.",
+                type: "generative"
+            },
+            {
+                title: "Розпізнавання голосової команди 'Увімкнути світло'",
+                desc: "Перетворення звукових хвиль у команду за наперед визначеним алгоритмом.",
+                type: "traditional"
+            }
+        ];
+
+        function loadG3Card() {
+            const current = state.g3.remaining[state.g3.index];
+            document.getElementById('g3-remaining').textContent = state.g3.remaining.length - state.g3.index;
+
+            if (!current) {
+                switchGame('hub');
                 return;
             }
 
-            document.getElementById('g2-step-badge').innerText = `${gameState.g2Step + 1}/${shuffledG2Data.length}`;
-            const card = shuffledG2Data[gameState.g2Step];
-
-            document.getElementById('g2-card-headline').innerText = card.headline;
-            document.getElementById('g2-card-author').innerText = card.author;
-            document.getElementById('g2-card-context').innerText = card.context;
+            document.getElementById('g3-card-title').textContent = current.title;
+            document.getElementById('g3-card-desc').textContent = current.desc;
         }
 
-        function sortG2Card(userChoice) {
-            const card = shuffledG2Data[gameState.g2Step];
-            if (userChoice === card.isReliable) {
-                playSound('correct');
-                gameState.score += 20;
-                updateHeaderStats();
-                showModal("Правильний Аналіз!", card.reason, "✅");
+        function sortG3Card(userChoiceType) {
+            const current = state.g3.remaining[state.g3.index];
+            if (userChoiceType === current.type) {
+                updateScore('g3', 17);
+                showModal(
+                    "Правильно розподілено!",
+                    current.type === 'generative' 
+                        ? "Генеративний ШІ створює принципово новий контент (текст, малюнок, музику)." 
+                        : "Традиційний ШІ аналізує, шукає та розпізнає готові дані.",
+                    true,
+                    nextG3Card
+                );
             } else {
-                playSound('wrong');
-                showModal("Помилка Оцінки!", `Невірно. ${card.reason}`, "⚠️");
+                showModal(
+                    "Помилка класифікації",
+                    `Пам'ятайте: Генеративний ШІ створює щось нове, а Традиційний ШІ лише розпізнає або шукає готові елементи.`,
+                    false,
+                    nextG3Card
+                );
             }
-
-            gameState.g2Step++;
-            setTimeout(initG2Step, 300);
         }
 
-        let shuffledG3Data = [];
-
-        function initG3Step() {
-            if (gameState.g3Step === 0) {
-                shuffledG3Data = shuffleArray(g3TasksData);
-            }
-
-            if (gameState.g3Step >= shuffledG3Data.length) {
-                gameState.currentModule = 4;
-                updateHeaderStats();
-                showScreen('screen-game-4');
-                initG4Step();
-                return;
-            }
-
-            document.getElementById('g3-step-badge').innerText = `${gameState.g3Step + 1}/${shuffledG3Data.length}`;
-            const task = shuffledG3Data[gameState.g3Step];
-            document.getElementById('g3-task-box').innerText = task.text;
-        }
-
-        function sortG3Task(chosenType) {
-            const task = shuffledG3Data[gameState.g3Step];
-            if (chosenType === task.type) {
-                playSound('correct');
-                gameState.score += 15;
-                updateHeaderStats();
-                showModal("Вірно!", "Ви правильно визначили призначення та тип технології для цього завдання.", "⚡");
+        function nextG3Card() {
+            state.g3.index++;
+            if (state.g3.index < state.g3.remaining.length) {
+                loadG3Card();
             } else {
-                playSound('wrong');
-                showModal("Не зовсім так", "Пам'ятайте: Традиційний пошук знаходить наявне, Генеративний ШІ створює нове, а Людина відповідає за критичне мислення та етику.", "🤔");
+                switchGame('hub');
             }
-
-            gameState.g3Step++;
-            setTimeout(initG3Step, 300);
         }
 
-        let shuffledG4Data = [];
-
-        function initG4Step() {
-            if (gameState.g4Step === 0) {
-                shuffledG4Data = shuffleArray(g4PromptsData);
+        // GAME 4 DATA: ChatGPT prompt construction & hallucination checks
+        const g4Data = [
+            {
+                scenario: "Потрібно написати твір з історії про Київську Русь. Який промпт для ChatGPT буде НАЙБІЛЬШ ефективним?",
+                options: [
+                    { text: "Напиши щось про історію.", isCorrect: false, feedback: "Занадто загальний запит! ШІ надасть розпливчату відповідь." },
+                    { text: "Розкажи про історію Київської Русі у 9-10 століттях, виділивши 3 головні події.", isCorrect: true, feedback: "Супер! Вказано конкретну тему, часові рамки та обсяг." },
+                    { text: "Історія це цікаво?", isCorrect: false, feedback: "Це просто риторичне питання, а не інструкція." }
+                ]
+            },
+            {
+                scenario: "Тобі потрібно зробити підсумок великої статті. Як правильно попросити ChatGPT?",
+                options: [
+                    { text: "Зроби скорочений підсумок цього тексту у 3 тези, пояснивши головні думки простіше.", isCorrect: true, feedback: "Чудово! Задано контекст, формат тез та прохання спростити." },
+                    { text: "Перепиши все повністю без змін.", isCorrect: false, feedback: "Це не допоможе прискорити розуміння головного." },
+                    { text: "Текст підручника.", isCorrect: false, feedback: "Відсутнє дієслово та завдання." }
+                ]
+            },
+            {
+                scenario: "Перевірка відповіді ChatGPT (Галюцинація ШІ): Бот стверджує, що оператор ' site: ' використовується для видалення слів із пошуку. Чи це правда?",
+                options: [
+                    { text: "Так, це абсолютно правильно.", isCorrect: false, feedback: "Ні! ШІ помилився. Для виключення слів використовують мінус (-слово)." },
+                    { text: "Ні, ШІ помилився! ' site: ' шукає лише на конкретному сайті, а виключає слова мінус (-).", isCorrect: true, feedback: "Критичне мислення на висоті! ШІ іноді галюцинує і його треба перевіряти." }
+                ]
+            },
+            {
+                scenario: "Бот видав занадто складне пояснення штучного інтелекту. Яке уточнення варто відправити далі?",
+                options: [
+                    { text: "Це занадто складно, спробуй пояснити простіше, наче мені 12 років.", isCorrect: true, feedback: "Правильно! Уточнення та спрощення — чудова техніка спілкування з чат-ботом." },
+                    { text: "Видали все і мовчи.", isCorrect: false, feedback: "Це не конструктивне уточнення." },
+                    { text: "Дякую.", isCorrect: false, feedback: "Дякувати ввічливо, але це не виправить складність відповіді." }
+                ]
             }
+        ];
 
-            if (gameState.g4Step >= shuffledG4Data.length) {
-                showResultsScreen();
-                return;
-            }
+        function loadG4Stage() {
+            const stageData = g4Data[state.g4.stage];
+            document.getElementById('g4-stage').textContent = state.g4.stage + 1;
+            document.getElementById('g4-scenario-desc').textContent = stageData.scenario;
 
-            document.getElementById('g4-step-badge').innerText = `${gameState.g4Step + 1}/${shuffledG4Data.length}`;
-            const item = shuffledG4Data[gameState.g4Step];
-            document.getElementById('g4-weak-prompt').innerText = item.weak;
-
-            const container = document.getElementById('g4-options-container');
-            container.innerHTML = '';
+            const area = document.getElementById('g4-interactive-area');
+            area.innerHTML = '';
 
             // Shuffle options
-            const shuffledOptions = shuffleArray(item.options);
+            const shuffled = [...stageData.options].sort(() => Math.random() - 0.5);
 
-            shuffledOptions.forEach(opt => {
+            shuffled.forEach((opt) => {
                 const btn = document.createElement('button');
-                btn.className = "w-full p-3.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 hover:border-purple-500/50 rounded-xl text-left font-medium text-xs sm:text-sm text-slate-100 vector-btn flex items-center justify-between";
-                btn.innerHTML = `<span>${opt.text}</span>`;
+                btn.className = "w-full text-left p-4 rounded-2xl bg-slate-900/80 hover:bg-slate-800 border border-white/10 hover:border-rose-400/50 transition group flex items-start gap-3";
+                btn.innerHTML = `
+                    <div class="w-7 h-7 rounded-lg bg-rose-500/20 text-rose-300 flex items-center justify-center shrink-0 mt-0.5 border border-rose-500/30 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </div>
+                    <span class="text-sm font-semibold text-slate-200 group-hover:text-white leading-relaxed">${opt.text}</span>
+                `;
                 btn.onclick = () => selectG4Option(opt);
-                container.appendChild(btn);
+                area.appendChild(btn);
             });
         }
 
         function selectG4Option(option) {
-            if (option.correct) {
-                playSound('correct');
-                gameState.score += 25;
-                updateHeaderStats();
-                showModal("Відмінний Промпт!", option.reason, "🚀");
+            if (option.isCorrect) {
+                updateScore('g4', 25);
+                showModal(
+                    "Чудовий вибір!",
+                    option.feedback,
+                    true,
+                    nextG4Stage
+                );
             } else {
-                playSound('wrong');
-                showModal("Слабкий Запит", "Цей варіант залишається занадто загальним або не дає потрібного контексту.", "❌");
+                showModal(
+                    "Не зовсім вдало",
+                    option.feedback,
+                    false,
+                    nextG4Stage
+                );
             }
-
-            gameState.g4Step++;
-            setTimeout(initG4Step, 300);
         }
 
-        function showResultsScreen() {
-            showScreen('screen-results');
-            playSound('correct');
-
-            const scoreDisplay = document.getElementById('res-score');
-            const gradeDisplay = document.getElementById('res-grade');
-            const bar = document.getElementById('res-progress-bar');
-
-            scoreDisplay.innerText = `${gameState.score} Балів`;
-
-            let grade = "Початковий рівень";
-            let color = "text-amber-400";
-
-            if (gameState.score >= 180) {
-                grade = "Експерт з Пошуку та ШІ (12 балів)";
-                color = "text-emerald-400";
-            } else if (gameState.score >= 130) {
-                grade = "Дослідник Інфо-простору (9-11 балів)";
-                color = "text-cyan-400";
+        function nextG4Stage() {
+            state.g4.stage++;
+            if (state.g4.stage < g4Data.length) {
+                loadG4Stage();
             } else {
-                grade = "Учень-початківець (Рекомендовано повторити)";
-                color = "text-amber-400";
+                switchGame('hub');
             }
-
-            gradeDisplay.innerText = grade;
-            gradeDisplay.className = `font-bold ${color}`;
-
-            const percent = Math.min(100, Math.round((gameState.score / 230) * 100));
-            bar.style.width = `${percent}%`;
         }
+
+        function resetAllProgress() {
+            playSFX('click');
+            state.totalScore = 0;
+            state.scores = { g1: 0, g2: 0, g3: 0, g4: 0 };
+            document.getElementById('total-score').textContent = '0';
+            ['g1', 'g2', 'g3', 'g4'].forEach(k => {
+                document.getElementById(`badge-${k}`).textContent = '0 / 100 XP';
+            });
+            document.getElementById('final-banner').classList.add('hidden');
+            switchGame('hub');
+        }
+
+        // Window Onload initialization
+        window.onload = function() {
+            switchGame('hub');
+        };
     </script>
 </body>
 </html>
