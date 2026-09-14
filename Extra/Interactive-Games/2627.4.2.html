@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="uk" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Пригоди в Мережі Інтернет — Інтерактивна Гра</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.6.0/confetti.browser.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#0f172a',
+                            card: '#1e293b',
+                            accent: '#38bdf8',
+                            purple: '#8b5cf6',
+                            emerald: '#10b981',
+                            rose: '#f43f5e',
+                            amber: '#f59e0b'
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 4s ease-in-out infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        glow: {
+                            '0%': { boxShadow: '0 0 15px rgba(56, 189, 248, 0.4)' },
+                            '100%': { boxShadow: '0 0 30px rgba(139, 92, 246, 0.8)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;700&family=Nunito:wght@400;600;800;900&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+            overflow-x: hidden;
+            background: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #0f172a 70%);
+        }
+
+        .heading-font {
+            font-family: 'Comfortaa', cursive;
+        }
+
+        .vector-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .vector-card:hover {
+            border-color: rgba(56, 189, 248, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+
+        /* Drag and Drop visual feedback */
+        .dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+
+        .drop-target-active {
+            border-color: #38bdf8 !important;
+            background: rgba(56, 189, 248, 0.15) !important;
+            transform: scale(1.02);
+        }
+
+        .swipe-card {
+            will-change: transform;
+            transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+        }
+
+        /* Touch target improvements */
+        .touch-btn {
+            min-height: 48px;
+            min-width: 48px;
+        }
+    </style>
+</head>
+<body class="h-full text-slate-100 flex flex-col justify-between min-h-screen select-none">
+
+    <!-- Header / Status Bar -->
+    <header class="w-full max-w-5xl mx-auto px-4 pt-4 pb-2 flex justify-between items-center z-20">
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="game.showHome()">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                <i class="fa-solid fa-globe text-white text-xl"></i>
+            </div>
+            <div>
+                <h1 class="heading-font text-lg md:text-xl font-bold bg-gradient-to-r from-cyan-400 to-indigo-300 bg-clip-text text-transparent">
+                    ІНФОРМАТИКА 4
+                </h1>
+                <p class="text-xs text-slate-400 font-semibold">Світ Інтернету</p>
+            </div>
+        </div>
+
+        <!-- Score & Progress Display -->
+        <div class="flex items-center space-x-3 bg-slate-800/80 px-4 py-2 rounded-2xl border border-slate-700/60 shadow-inner">
+            <div class="flex items-center space-x-1.5 text-amber-400">
+                <i class="fa-solid fa-star text-lg animate-pulse"></i>
+                <span id="score-display" class="font-extrabold text-lg">0</span>
+            </div>
+            <div class="h-4 w-px bg-slate-700"></div>
+            <div class="flex items-center space-x-1 text-cyan-400 text-xs font-bold">
+                <span id="progress-text">0/4</span>
+                <span>Місій</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center p-3 md:p-6 relative z-10 max-w-5xl mx-auto w-full">
+        
+        <!-- HOME SCREEN -->
+        <section id="screen-home" class="w-full text-center py-4 space-y-6">
+            <div class="relative inline-block">
+                <div class="absolute -inset-4 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-full blur-xl opacity-40 animate-pulse-slow"></div>
+                <div class="relative w-28 h-28 md:w-36 md:h-36 mx-auto rounded-3xl bg-slate-800 border-2 border-cyan-400/50 flex items-center justify-center shadow-2xl animate-float">
+                    <i class="fa-solid fa-network-wired text-5xl md:text-6xl text-cyan-400"></i>
+                </div>
+            </div>
+
+            <div class="max-w-xl mx-auto space-y-3">
+                <h2 class="heading-font text-2xl md:text-4xl font-extrabold text-white">
+                    Досліджуй Мережу Інтернет!
+                </h2>
+                <p class="text-slate-300 text-sm md:text-base leading-relaxed px-4">
+                    Виконуй інтерактивні інтерактивні місії, розгадуй правила безпеки, розпізнавай браузери та стань справжнім Кібер-Експертом.
+                </p>
+            </div>
+
+            <!-- Mini Games Selection Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto text-left pt-2">
+                <!-- Mission 1 Card -->
+                <button onclick="game.startMiniGame(1)" class="vector-card p-4 rounded-2xl flex items-center space-x-4 hover:border-cyan-400 transition-all group">
+                    <div class="w-14 h-14 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-user-shield text-2xl text-cyan-400"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-cyan-400">Місія 1</span>
+                            <span id="badge-mg1" class="hidden px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-300 rounded-full font-bold">Пройдено</span>
+                        </div>
+                        <h3 class="font-bold text-lg text-white group-hover:text-cyan-300">Щит Кібербезпеки</h3>
+                        <p class="text-xs text-slate-400">Сортуй правила: що безпечно, а що ні?</p>
+                    </div>
+                </button>
+
+                <!-- Mission 2 Card -->
+                <button onclick="game.startMiniGame(2)" class="vector-card p-4 rounded-2xl flex items-center space-x-4 hover:border-purple-400 transition-all group">
+                    <div class="w-14 h-14 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-window-restore text-2xl text-purple-400"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-purple-400">Місія 2</span>
+                            <span id="badge-mg2" class="hidden px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-300 rounded-full font-bold">Пройдено</span>
+                        </div>
+                        <h3 class="font-bold text-lg text-white group-hover:text-purple-300">Браузери та Мережа</h3>
+                        <p class="text-xs text-slate-400">З'єднуй програму з її назвою та ціллю</p>
+                    </div>
+                </button>
+
+                <!-- Mission 3 Card -->
+                <button onclick="game.startMiniGame(3)" class="vector-card p-4 rounded-2xl flex items-center space-x-4 hover:border-amber-400 transition-all group">
+                    <div class="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-magnifying-glass text-2xl text-amber-400"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Місія 3</span>
+                            <span id="badge-mg3" class="hidden px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-300 rounded-full font-bold">Пройдено</span>
+                        </div>
+                        <h3 class="font-bold text-lg text-white group-hover:text-amber-300">Пошуковий Конструктор</h3>
+                        <p class="text-xs text-slate-400">Збери тільки правильні ключові слова</p>
+                    </div>
+                </button>
+
+                <!-- Mission 4 Card -->
+                <button onclick="game.startMiniGame(4)" class="vector-card p-4 rounded-2xl flex items-center space-x-4 hover:border-emerald-400 transition-all group">
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-lock text-2xl text-emerald-400"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Місія 4</span>
+                            <span id="badge-mg4" class="hidden px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-300 rounded-full font-bold">Пройдено</span>
+                        </div>
+                        <h3 class="font-bold text-lg text-white group-hover:text-emerald-300">Охоронець HTTPS</h3>
+                        <p class="text-xs text-slate-400">Фільтруй безпечні трафік-пакети сайту</p>
+                    </div>
+                </button>
+            </div>
+        </section>
+
+        <!-- MINI GAME 1: CYBER SAFETY SHIELD (Swipe / Click sorting) -->
+        <section id="screen-mg1" class="hidden w-full max-w-xl mx-auto text-center space-y-4">
+            <div class="flex justify-between items-center bg-slate-800/60 p-3 rounded-xl border border-slate-700">
+                <button onclick="game.showHome()" class="text-slate-400 hover:text-white text-sm flex items-center space-x-1">
+                    <i class="fa-solid fa-arrow-left"></i> <span>Меню</span>
+                </button>
+                <h3 class="heading-font font-bold text-cyan-300 text-base">Місія 1: Щит Кібербезпеки</h3>
+                <span id="mg1-counter" class="text-xs font-extrabold bg-cyan-950 text-cyan-300 border border-cyan-800 px-2 py-1 rounded-lg">1/6</span>
+            </div>
+
+            <p class="text-xs md:text-sm text-slate-300">
+                Клацай або свайпай картку: <b>БЕЗПЕЧНО</b> (праворуч/зелена) чи <b>НЕБЕЗПЕЧНО</b> (ліворуч/червона)!
+            </p>
+
+            <!-- Card Stack Container -->
+            <div class="relative w-full h-64 md:h-72 flex items-center justify-center my-4">
+                <div id="mg1-card" class="swipe-card w-full max-w-sm h-full vector-card rounded-3xl p-6 flex flex-col justify-between items-center border-2 shadow-2xl relative cursor-grab active:cursor-grabbing">
+                    <div class="w-16 h-16 rounded-2xl bg-cyan-500/20 flex items-center justify-center text-3xl text-cyan-400 mb-2">
+                        <i id="mg1-card-icon" class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <p id="mg1-card-text" class="text-base md:text-lg font-bold text-slate-100 px-2 text-center my-auto">
+                        Завантаження завдання...
+                    </p>
+                    <div class="w-full text-xs text-slate-400 uppercase tracking-widest font-semibold pt-2 border-t border-slate-700/50">
+                        Визнач безпечність
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Action Buttons -->
+            <div class="grid grid-cols-2 gap-4 max-w-sm mx-auto">
+                <button onclick="game.mg1Answer(false)" class="touch-btn bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 active:scale-95 text-white font-extrabold rounded-2xl py-3 px-4 shadow-lg shadow-rose-900/40 flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                    <span>НЕБЕЗПЕЧНО</span>
+                </button>
+                <button onclick="game.mg1Answer(true)" class="touch-btn bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:scale-95 text-white font-extrabold rounded-2xl py-3 px-4 shadow-lg shadow-emerald-900/40 flex items-center justify-center space-x-2">
+                    <span>БЕЗПЕЧНО</span>
+                    <i class="fa-solid fa-check text-xl"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- MINI GAME 2: BROWSER & NETWORK MATCHING -->
+        <section id="screen-mg2" class="hidden w-full max-w-3xl mx-auto space-y-4">
+            <div class="flex justify-between items-center bg-slate-800/60 p-3 rounded-xl border border-slate-700">
+                <button onclick="game.showHome()" class="text-slate-400 hover:text-white text-sm flex items-center space-x-1">
+                    <i class="fa-solid fa-arrow-left"></i> <span>Меню</span>
+                </button>
+                <h3 class="heading-font font-bold text-purple-300 text-base">Місія 2: З'єднай Елементи</h3>
+                <span id="mg2-counter" class="text-xs font-extrabold bg-purple-950 text-purple-300 border border-purple-800 px-2 py-1 rounded-lg">З'єднай пари</span>
+            </div>
+
+            <p class="text-xs md:text-sm text-center text-slate-300">
+                Натисни на картку ліворуч, а потім на її відповідну пару праворуч!
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2" id="mg2-matching-container">
+                <!-- Left Items Column -->
+                <div id="mg2-left-col" class="space-y-3"></div>
+                <!-- Right Items Column -->
+                <div id="mg2-right-col" class="space-y-3"></div>
+            </div>
+        </section>
+
+        <!-- MINI GAME 3: KEYWORD SEARCH BUILDER -->
+        <section id="screen-mg3" class="hidden w-full max-w-2xl mx-auto space-y-4">
+            <div class="flex justify-between items-center bg-slate-800/60 p-3 rounded-xl border border-slate-700">
+                <button onclick="game.showHome()" class="text-slate-400 hover:text-white text-sm flex items-center space-x-1">
+                    <i class="fa-solid fa-arrow-left"></i> <span>Меню</span>
+                </button>
+                <h3 class="heading-font font-bold text-amber-300 text-base">Місія 3: Пошуковий Конструктор</h3>
+                <span id="mg3-round-counter" class="text-xs font-extrabold bg-amber-950 text-amber-300 border border-amber-800 px-2 py-1 rounded-lg">1/3</span>
+            </div>
+
+            <div class="vector-card p-4 rounded-2xl border-amber-500/30">
+                <div class="text-xs text-amber-400 font-bold uppercase mb-1">Завдання пошуку:</div>
+                <p id="mg3-task-desc" class="text-base md:text-lg font-extrabold text-white">
+                    Завантаження завдання...
+                </p>
+            </div>
+
+            <!-- Target Slots area -->
+            <div class="space-y-2">
+                <div class="text-xs text-slate-400 font-bold uppercase">Сформований пошуковий запит (обери потрібні слова):</div>
+                <div id="mg3-query-box" class="min-h-[60px] p-3 rounded-2xl bg-slate-900/80 border-2 border-dashed border-amber-500/40 flex flex-wrap gap-2 items-center">
+                    <span class="text-slate-500 text-sm italic" id="mg3-placeholder">Натискай на блоки слів нижче...</span>
+                </div>
+            </div>
+
+            <!-- Available Words pool -->
+            <div class="space-y-2 pt-2">
+                <div class="text-xs text-slate-400 font-bold uppercase">Всі переплутані слова:</div>
+                <div id="mg3-words-pool" class="flex flex-wrap gap-2 p-2 justify-center"></div>
+            </div>
+
+            <div class="flex justify-end pt-2">
+                <button onclick="game.mg3CheckAnswer()" class="touch-btn bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black rounded-xl py-3 px-6 shadow-lg shadow-amber-500/20 active:scale-95 transition-all">
+                    Перевірити запит <i class="fa-solid fa-magnifying-glass ml-1"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- MINI GAME 4: HTTPS GUARDIAN (Fast Catch/Filter Game) -->
+        <section id="screen-mg4" class="hidden w-full max-w-2xl mx-auto space-y-4">
+            <div class="flex justify-between items-center bg-slate-800/60 p-3 rounded-xl border border-slate-700">
+                <button onclick="game.showHome()" class="text-slate-400 hover:text-white text-sm flex items-center space-x-1">
+                    <i class="fa-solid fa-arrow-left"></i> <span>Меню</span>
+                </button>
+                <h3 class="heading-font font-bold text-emerald-300 text-base">Місія 4: Охоронець HTTPS</h3>
+                <div class="flex items-center space-x-3">
+                    <span id="mg4-score" class="text-xs font-bold text-emerald-400">Спіймано: 0/5</span>
+                </div>
+            </div>
+
+            <p class="text-xs md:text-sm text-center text-slate-300">
+                Натискай <b>ТІЛЬКИ на безпечні HTTPS сайти (з замком)</b>! Пропускай підозрілі сайти та завантаження!
+            </p>
+
+            <!-- Interactive Inspector Field -->
+            <div id="mg4-game-field" class="relative w-full h-80 bg-slate-950/90 rounded-3xl border-2 border-emerald-500/40 overflow-hidden flex flex-col items-center justify-start p-4">
+                <div class="w-full flex justify-between items-center border-b border-slate-800 pb-2 z-10">
+                    <span class="text-xs text-emerald-400 font-mono font-bold"><i class="fa-solid fa-shield-cat mr-1"></i> HTTPS_FIREWALL_ACTIVE</span>
+                    <span class="text-xs text-slate-400" id="mg4-timer">Час: 30с</span>
+                </div>
+
+                <!-- Floating items will render dynamically inside this space -->
+                <div id="mg4-stream-container" class="relative w-full h-full"></div>
+
+                <div id="mg4-start-overlay" class="absolute inset-0 bg-slate-900/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center space-y-4 z-20">
+                    <i class="fa-solid fa-lock text-5xl text-emerald-400 animate-bounce"></i>
+                    <h4 class="font-bold text-xl text-white">Правило безпеки HTTPS:</h4>
+                    <p class="text-xs text-slate-300 max-w-md">
+                        Буква <b>'s'</b> у <b>https://</b> означає <i>secure</i> (безпечний). Натискай тільки на сайти з прописаним <b>https://</b>!
+                    </p>
+                    <button onclick="game.mg4Start()" class="touch-btn px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-2xl shadow-lg shadow-emerald-500/30 active:scale-95 transition-all">
+                        Розпочати Перевірку <i class="fa-solid fa-play ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- VICTORY MODAL -->
+        <section id="screen-victory" class="hidden w-full max-w-md mx-auto text-center space-y-6 vector-card p-8 rounded-3xl border-2 border-emerald-400/50 shadow-2xl">
+            <div class="relative inline-block">
+                <div class="w-24 h-24 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center mx-auto text-4xl text-emerald-400 animate-glow">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <h2 class="heading-font text-2xl font-black text-white">Вітаємо, Кібер-Експерте!</h2>
+                <p class="text-sm text-slate-300">
+                    Ти успішно пройшов усі завдання з теми <b>"Мережа Інтернет"</b>!
+                </p>
+            </div>
+
+            <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-700/80 space-y-2 text-left">
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-400">Загальний рахунок:</span>
+                    <span id="final-score" class="font-extrabold text-amber-400">100 б.</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-400">Статус:</span>
+                    <span class="font-bold text-emerald-400">Захисник Мережі <i class="fa-solid fa-check-double"></i></span>
+                </div>
+            </div>
+
+            <button onclick="game.resetAll()" class="touch-btn w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-black rounded-2xl shadow-xl shadow-cyan-500/25 active:scale-95 transition-all">
+                Зіграти Знову <i class="fa-solid fa-rotate-right ml-1"></i>
+            </button>
+        </section>
+
+    </main>
+
+    <!-- Custom Feedback Toast Notification (Replaces alert) -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transform transition-all duration-300 opacity-0 translate-y-4 pointer-events-none max-w-md w-[90%] px-4 py-3 rounded-2xl text-center text-sm font-bold shadow-2xl flex items-center justify-center space-x-2 border">
+        <i id="toast-icon" class="text-lg"></i>
+        <span id="toast-msg">Повідомлення</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="w-full text-center py-3 text-xs text-slate-500 border-t border-slate-800/80">
+        Урок Інформатики 4 Клас &bull; Тема: Мережа Інтернет &bull; Векторний Інтерактив
+    </footer>
+
+    <script>
+        /**
+         * Web Audio Synthesizer for tactile UI sound effects (No external audio file needed)
+         */
+        const SoundFX = {
+            ctx: null,
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            },
+            play(type) {
+                try {
+                    this.init();
+                    if (this.ctx.state === 'suspended') {
+                        this.ctx.resume();
+                    }
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    const now = this.ctx.currentTime;
+
+                    if (type === 'correct') {
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(523.25, now); // C5
+                        osc.frequency.exponentialRampToValueAtTime(880, now + 0.15); // A5
+                        gain.gain.setValueAtTime(0.2, now);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                        osc.start(now);
+                        osc.stop(now + 0.2);
+                    } else if (type === 'wrong') {
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(220, now); // A3
+                        osc.frequency.exponentialRampToValueAtTime(110, now + 0.2); // A2
+                        gain.gain.setValueAtTime(0.3, now);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                        osc.start(now);
+                        osc.stop(now + 0.25);
+                    } else if (type === 'click') {
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(400, now);
+                        gain.gain.setValueAtTime(0.1, now);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                        osc.start(now);
+                        osc.stop(now + 0.05);
+                    } else if (type === 'win') {
+                        // Fanfare chime
+                        const notes = [523.25, 659.25, 783.99, 1046.50];
+                        notes.forEach((freq, idx) => {
+                            const o = this.ctx.createOscillator();
+                            const g = this.ctx.createGain();
+                            o.connect(g);
+                            g.connect(this.ctx.destination);
+                            o.frequency.setValueAtTime(freq, now + idx * 0.1);
+                            g.gain.setValueAtTime(0.2, now + idx * 0.1);
+                            g.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.1 + 0.3);
+                            o.start(now + idx * 0.1);
+                            o.stop(now + idx * 0.1 + 0.3);
+                        });
+                    }
+                } catch(e) {
+                    // Audio context fallback safely handled
+                }
+            }
+        };
+
+        // Utility: Fisher-Yates array shuffle function
+        function shuffle(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        const game = {
+            score: 0,
+            completedMissions: new Set(),
+            toastTimer: null,
+
+            // Mission 1 State
+            mg1Data: [],
+            mg1Index: 0,
+
+            // Mission 2 State
+            mg2SelectedLeft: null,
+            mg2MatchedPairs: 0,
+
+            // Mission 3 State
+            mg3Rounds: [],
+            mg3CurrentRound: 0,
+            mg3SelectedWords: [],
+
+            // Mission 4 State
+            mg4Score: 0,
+            mg4Timer: 30,
+            mg4Interval: null,
+            mg4SpawnInterval: null,
+
+            init() {
+                this.updateUI();
+                this.setupSwipeEvents();
+            },
+
+            showToast(message, isSuccess = true) {
+                const toast = document.getElementById('toast');
+                const toastMsg = document.getElementById('toast-msg');
+                const toastIcon = document.getElementById('toast-icon');
+
+                clearTimeout(this.toastTimer);
+                toastMsg.innerText = message;
+
+                if (isSuccess) {
+                    toast.className = "fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transform transition-all duration-300 pointer-events-none max-w-md w-[90%] px-4 py-3 rounded-2xl text-center text-sm font-bold shadow-2xl flex items-center justify-center space-x-2 bg-emerald-900/90 border-emerald-500 text-emerald-200 backdrop-blur-md opacity-100 translate-y-0";
+                    toastIcon.className = "fa-solid fa-circle-check text-emerald-400";
+                    SoundFX.play('correct');
+                } else {
+                    toast.className = "fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transform transition-all duration-300 pointer-events-none max-w-md w-[90%] px-4 py-3 rounded-2xl text-center text-sm font-bold shadow-2xl flex items-center justify-center space-x-2 bg-rose-900/90 border-rose-500 text-rose-200 backdrop-blur-md opacity-100 translate-y-0";
+                    toastIcon.className = "fa-solid fa-triangle-exclamation text-rose-400";
+                    SoundFX.play('wrong');
+                }
+
+                this.toastTimer = setTimeout(() => {
+                    toast.classList.add('opacity-0', 'translate-y-4');
+                }, 2200);
+            },
+
+            showHome() {
+                SoundFX.play('click');
+                this.clearIntervals();
+                document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+                document.getElementById('screen-home').classList.remove('hidden');
+                this.updateUI();
+
+                if (this.completedMissions.size === 4) {
+                    this.showVictoryScreen();
+                }
+            },
+
+            updateUI() {
+                document.getElementById('score-display').innerText = this.score;
+                document.getElementById('progress-text').innerText = `${this.completedMissions.size}/4`;
+
+                // Update badges
+                for (let i = 1; i <= 4; i++) {
+                    const badge = document.getElementById(`badge-mg${i}`);
+                    if (this.completedMissions.has(i)) {
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+                }
+            },
+
+            startMiniGame(id) {
+                SoundFX.play('click');
+                document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+                document.getElementById(`screen-mg${id}`).classList.remove('hidden');
+
+                if (id === 1) this.mg1Init();
+                if (id === 2) this.mg2Init();
+                if (id === 3) this.mg3Init();
+                if (id === 4) this.mg4Reset();
+            },
+
+            // --- MINI GAME 1: SAFETY SHIELD ---
+            mg1Init() {
+                // Statements strictly extracted from the PDF rules
+                const rawItems = [
+                    { text: "Повідомити незнайомцю свою домашню адресу та школу", safe: false, icon: "fa-house-user" },
+                    { text: "Використовувати вигаданий нікнейм замість справжнього імені", safe: true, icon: "fa-user-ninja" },
+                    { text: "Ставити аватарку замість власної фотографії у профілі", safe: true, icon: "fa-user-astronaut" },
+                    { text: "Відвідувати сайти, чия адреса починається з https://", safe: true, icon: "fa-lock" },
+                    { text: "Погодитися на особисту зустріч з незнайомцем з Інтернету", safe: false, icon: "fa-user-slash" },
+                    { text: "Натискати кнопку 'Завантажити' на підозрілих сайтах", safe: false, icon: "fa-file-circle-exclamation" },
+                    { text: "Вмикати вебкамеру під час спілкування без присутності дорослих", safe: false, icon: "fa-video-slash" },
+                    { text: "Додавати у друзі в соцмережах тільки тих, кого знаєш особисто", safe: true, icon: "fa-user-check" }
+                ];
+                this.mg1Data = shuffle(rawItems);
+                this.mg1Index = 0;
+                this.mg1RenderCard();
+            },
+
+            mg1RenderCard() {
+                if (this.mg1Index >= this.mg1Data.length) {
+                    this.completedMissions.add(1);
+                    this.score += 25;
+                    this.showToast("Місію 1 виконано! Щит безпеки активовано! (+25 б.)", true);
+                    this.showHome();
+                    return;
+                }
+
+                const current = this.mg1Data[this.mg1Index];
+                document.getElementById('mg1-counter').innerText = `${this.mg1Index + 1}/${this.mg1Data.length}`;
+                document.getElementById('mg1-card-text').innerText = current.text;
+                document.getElementById('mg1-card-icon').className = `fa-solid ${current.icon}`;
+                
+                const card = document.getElementById('mg1-card');
+                card.style.transform = 'none';
+                card.style.opacity = '1';
+                card.className = "swipe-card w-full max-w-sm h-full vector-card rounded-3xl p-6 flex flex-col justify-between items-center border-2 shadow-2xl relative cursor-grab active:cursor-grabbing border-cyan-500/30";
+            },
+
+            mg1Answer(userChoice) {
+                const current = this.mg1Data[this.mg1Index];
+                const card = document.getElementById('mg1-card');
+
+                if (userChoice === current.safe) {
+                    this.showToast("Правильно! Безпечне рішення.", true);
+                    card.style.transform = userChoice ? 'translateX(200px) rotate(15deg)' : 'translateX(-200px) rotate(-15deg)';
+                    card.style.opacity = '0';
+                    setTimeout(() => {
+                        this.mg1Index++;
+                        this.mg1RenderCard();
+                    }, 200);
+                } else {
+                    this.showToast(current.safe ? "Це безпечно! Потрібно було довіряти." : "Небезпека! Це порушує правила інтернет-безпеки!", false);
+                    card.classList.add('border-rose-500', 'animate-shake');
+                    setTimeout(() => card.classList.remove('border-rose-500', 'animate-shake'), 500);
+                }
+            },
+
+            setupSwipeEvents() {
+                const card = document.getElementById('mg1-card');
+                let startX = 0;
+                let currentX = 0;
+                let isDragging = false;
+
+                const start = (e) => {
+                    isDragging = true;
+                    startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                };
+
+                const move = (e) => {
+                    if (!isDragging) return;
+                    currentX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                    const diffX = currentX - startX;
+                    card.style.transform = `translateX(${diffX}px) rotate(${diffX * 0.05}deg)`;
+
+                    if (diffX > 40) {
+                        card.classList.add('border-emerald-500');
+                        card.classList.remove('border-rose-500');
+                    } else if (diffX < -40) {
+                        card.classList.add('border-rose-500');
+                        card.classList.remove('border-emerald-500');
+                    }
+                };
+
+                const end = () => {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    const diffX = currentX - startX;
+                    if (diffX > 100) {
+                        this.mg1Answer(true);
+                    } else if (diffX < -100) {
+                        this.mg1Answer(false);
+                    } else {
+                        card.style.transform = 'none';
+                    }
+                };
+
+                card.addEventListener('mousedown', start);
+                window.addEventListener('mousemove', move);
+                window.addEventListener('mouseup', end);
+
+                card.addEventListener('touchstart', start, { passive: true });
+                window.addEventListener('touchmove', move, { passive: true });
+                window.addEventListener('touchend', end);
+            },
+
+            // --- MINI GAME 2: BROWSER & NETWORK MATCHING ---
+            mg2Init() {
+                this.mg2SelectedLeft = null;
+                this.mg2MatchedPairs = 0;
+
+                const pairs = [
+                    { id: 1, left: "Google Chrome", right: "Популярний веб-браузер", icon: "fa-chrome text-red-400" },
+                    { id: 2, left: "Mozilla Firefox", right: "Браузер із вогняним лисом", icon: "fa-firefox text-orange-400" },
+                    { id: 3, left: "Microsoft Edge", right: "Стандартний браузер Windows", icon: "fa-edge text-blue-400" },
+                    { id: 4, left: "Opera", right: "Швидкий браузер з червоною O", icon: "fa-opera text-rose-400" },
+                    { id: 5, left: "Brave", right: "Браузер зі левом для конфіденційності", icon: "fa-shield-cat text-amber-400" },
+                    { id: 6, left: "Навчання в мережі", right: "Онлайн-бібліотеки та тести", icon: "fa-graduation-cap text-emerald-400" },
+                    { id: 7, left: "Спілкування", right: "Листування у соціальних мережах", icon: "fa-comments text-cyan-400" }
+                ];
+
+                const shuffledLeft = shuffle(pairs);
+                const shuffledRight = shuffle(pairs);
+
+                const leftCol = document.getElementById('mg2-left-col');
+                const rightCol = document.getElementById('mg2-right-col');
+                leftCol.innerHTML = '';
+                rightCol.innerHTML = '';
+
+                shuffledLeft.forEach(p => {
+                    const btn = document.createElement('button');
+                    btn.className = "w-full vector-card p-3 rounded-2xl flex items-center space-x-3 text-left border-2 border-slate-700 hover:border-purple-400 active:scale-95 transition-all cursor-pointer";
+                    btn.dataset.id = p.id;
+                    btn.innerHTML = `
+                        <div class="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center text-lg"><i class="fa-brands ${p.icon}"></i></div>
+                        <span class="font-bold text-sm text-white">${p.left}</span>
+                    `;
+                    btn.onclick = () => this.mg2SelectLeft(btn, p.id);
+                    leftCol.appendChild(btn);
+                });
+
+                shuffledRight.forEach(p => {
+                    const btn = document.createElement('button');
+                    btn.className = "w-full vector-card p-3 rounded-2xl flex items-center space-x-3 text-left border-2 border-slate-700 hover:border-purple-400 active:scale-95 transition-all cursor-pointer";
+                    btn.dataset.id = p.id;
+                    btn.innerHTML = `
+                        <div class="w-3 h-3 rounded-full bg-purple-500/40 border border-purple-400"></div>
+                        <span class="font-semibold text-xs md:text-sm text-slate-200">${p.right}</span>
+                    `;
+                    btn.onclick = () => this.mg2SelectRight(btn, p.id);
+                    rightCol.appendChild(btn);
+                });
+            },
+
+            mg2SelectLeft(element, id) {
+                SoundFX.play('click');
+                document.querySelectorAll('#mg2-left-col button').forEach(b => b.classList.remove('border-purple-500', 'bg-purple-900/30'));
+                element.classList.add('border-purple-500', 'bg-purple-900/30');
+                this.mg2SelectedLeft = { element, id };
+            },
+
+            mg2SelectRight(element, id) {
+                if (!this.mg2SelectedLeft) {
+                    this.showToast("Спочатку оберіть елемент з лівої колонки!", false);
+                    return;
+                }
+
+                if (this.mg2SelectedLeft.id === id) {
+                    // Correct Match
+                    SoundFX.play('correct');
+                    this.showToast("Чудова пара!", true);
+
+                    this.mg2SelectedLeft.element.classList.add('opacity-40', 'pointer-events-none', 'border-emerald-500');
+                    element.classList.add('opacity-40', 'pointer-events-none', 'border-emerald-500');
+
+                    this.mg2SelectedLeft = null;
+                    this.mg2MatchedPairs++;
+
+                    if (this.mg2MatchedPairs === 7) {
+                        this.completedMissions.add(2);
+                        this.score += 25;
+                        this.showToast("Місію 2 успішно пройдено! Все з'єднано! (+25 б.)", true);
+                        setTimeout(() => this.showHome(), 1000);
+                    }
+                } else {
+                    SoundFX.play('wrong');
+                    this.showToast("Не збігається. Спробуй ще!", false);
+                    element.classList.add('border-rose-500');
+                    setTimeout(() => element.classList.remove('border-rose-500'), 500);
+                }
+            },
+
+            // --- MINI GAME 3: KEYWORD SEARCH BUILDER ---
+            mg3Init() {
+                this.mg3Rounds = [
+                    {
+                        task: "Знайти електронну книгу з математики для 4 класу",
+                        correctWords: ["математика", "4 клас", "електронна книга"],
+                        noiseWords: ["купити", "відео", "ігри", "терміново", "скачати вірус"]
+                    },
+                    {
+                        task: "Шукаємо правила безпеки в мережі Інтернет для дітей",
+                        correctWords: ["безпека в Інтернеті", "діти", "правила"],
+                        noiseWords: ["секрет", "комп'ютер зламати", "купити телефон"]
+                    },
+                    {
+                        task: "Знайти дитячу навчальну платформу з інформатики",
+                        correctWords: ["інформатика", "навчальна платформа", "для дітей"],
+                        noiseWords: ["фільми 2026", "безкоштовні цукерки", "соцмережі"]
+                    }
+                ];
+
+                this.mg3CurrentRound = 0;
+                this.mg3LoadRound();
+            },
+
+            mg3LoadRound() {
+                if (this.mg3CurrentRound >= this.mg3Rounds.length) {
+                    this.completedMissions.add(3);
+                    this.score += 25;
+                    this.showToast("Місію 3 виконано! Пошуковий майстер! (+25 б.)", true);
+                    this.showHome();
+                    return;
+                }
+
+                const round = this.mg3Rounds[this.mg3CurrentRound];
+                document.getElementById('mg3-round-counter').innerText = `${this.mg3CurrentRound + 1}/${this.mg3Rounds.length}`;
+                document.getElementById('mg3-task-desc').innerText = round.task;
+
+                this.mg3SelectedWords = [];
+                this.mg3RenderQueryBox();
+
+                const allWords = shuffle([...round.correctWords, ...round.noiseWords]);
+                const pool = document.getElementById('mg3-words-pool');
+                pool.innerHTML = '';
+
+                allWords.forEach(word => {
+                    const chip = document.createElement('button');
+                    chip.className = "px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 hover:border-amber-400 text-sm font-bold text-slate-200 active:scale-95 transition-all shadow cursor-pointer";
+                    chip.innerText = word;
+                    chip.onclick = () => this.mg3ToggleWord(chip, word);
+                    pool.appendChild(chip);
+                });
+            },
+
+            mg3ToggleWord(element, word) {
+                SoundFX.play('click');
+                const idx = this.mg3SelectedWords.indexOf(word);
+                if (idx > -1) {
+                    this.mg3SelectedWords.splice(idx, 1);
+                    element.classList.remove('bg-amber-500/20', 'border-amber-400', 'text-amber-300');
+                } else {
+                    this.mg3SelectedWords.push(word);
+                    element.classList.add('bg-amber-500/20', 'border-amber-400', 'text-amber-300');
+                }
+                this.mg3RenderQueryBox();
+            },
+
+            mg3RenderQueryBox() {
+                const box = document.getElementById('mg3-query-box');
+                box.innerHTML = '';
+                if (this.mg3SelectedWords.length === 0) {
+                    box.innerHTML = '<span class="text-slate-500 text-sm italic" id="mg3-placeholder">Обирай найважливіші ключові слова...</span>';
+                    return;
+                }
+
+                this.mg3SelectedWords.forEach(w => {
+                    const tag = document.createElement('span');
+                    tag.className = "px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-black text-xs flex items-center space-x-1 shadow";
+                    tag.innerHTML = `<span>${w}</span> <i class="fa-solid fa-xmark text-[10px] ml-1 opacity-60"></i>`;
+                    tag.onclick = () => {
+                        // Find element in pool and toggle off
+                        document.querySelectorAll('#mg3-words-pool button').forEach(btn => {
+                            if (btn.innerText === w) this.mg3ToggleWord(btn, w);
+                        });
+                    };
+                    box.appendChild(tag);
+                });
+            },
+
+            mg3CheckAnswer() {
+                const round = this.mg3Rounds[this.mg3CurrentRound];
+                const isCorrect = this.mg3SelectedWords.length === round.correctWords.length &&
+                    round.correctWords.every(w => this.mg3SelectedWords.includes(w));
+
+                if (isCorrect) {
+                    this.showToast("Точний пошуковий запит!", true);
+                    this.mg3CurrentRound++;
+                    setTimeout(() => this.mg3LoadRound(), 800);
+                } else {
+                    this.showToast("Запит містить зайві або некоректні слова. Обирай лише найважливіше!", false);
+                }
+            },
+
+            // --- MINI GAME 4: HTTPS GUARDIAN ---
+            mg4Reset() {
+                this.clearIntervals();
+                this.mg4Score = 0;
+                this.mg4Timer = 30;
+                document.getElementById('mg4-score').innerText = `Спіймано: 0/5`;
+                document.getElementById('mg4-timer').innerText = `Час: 30с`;
+                document.getElementById('mg4-stream-container').innerHTML = '';
+                document.getElementById('mg4-start-overlay').classList.remove('hidden');
+            },
+
+            mg4Start() {
+                document.getElementById('mg4-start-overlay').classList.add('hidden');
+                SoundFX.play('click');
+
+                this.mg4Interval = setInterval(() => {
+                    this.mg4Timer--;
+                    document.getElementById('mg4-timer').innerText = `Час: ${this.mg4Timer}с`;
+                    if (this.mg4Timer <= 0) {
+                        this.mg4End(false);
+                    }
+                }, 1000);
+
+                this.mg4SpawnInterval = setInterval(() => this.mg4SpawnPacket(), 1100);
+            },
+
+            mg4SpawnPacket() {
+                const container = document.getElementById('mg4-stream-container');
+                if (!container) return;
+
+                const isHttps = Math.random() > 0.45;
+                const domains = ["school-learning.ua", "kids-books.org", "safe-info.com", "games-edu.net"];
+                const domain = domains[Math.floor(Math.random() * domains.length)];
+                const text = isHttps ? `https://${domain}` : `http://${domain}`;
+
+                const packet = document.createElement('div');
+                const left = Math.floor(Math.random() * 65) + 5;
+                packet.className = `absolute px-3 py-2 rounded-xl border text-xs font-mono font-bold flex items-center space-x-2 cursor-pointer shadow-xl transition-transform active:scale-95 ${
+                    isHttps ? 'bg-emerald-950/80 border-emerald-400 text-emerald-300' : 'bg-rose-950/80 border-rose-500 text-rose-300'
+                }`;
+                packet.style.left = `${left}%`;
+                packet.style.top = '-40px';
+                packet.innerHTML = `
+                    <i class="fa-solid ${isHttps ? 'fa-lock text-emerald-400' : 'fa-unlock text-rose-400'}"></i>
+                    <span>${text}</span>
+                `;
+
+                container.appendChild(packet);
+
+                // Animate downward movement
+                let pos = -40;
+                const anim = setInterval(() => {
+                    pos += 2.5;
+                    packet.style.top = `${pos}px`;
+                    if (pos > 260) {
+                        clearInterval(anim);
+                        if (packet.parentNode) packet.remove();
+                    }
+                }, 30);
+
+                packet.onclick = () => {
+                    clearInterval(anim);
+                    if (isHttps) {
+                        SoundFX.play('correct');
+                        this.mg4Score++;
+                        document.getElementById('mg4-score').innerText = `Спіймано: ${this.mg4Score}/5`;
+                        packet.remove();
+
+                        if (this.mg4Score >= 5) {
+                            this.mg4End(true);
+                        }
+                    } else {
+                        SoundFX.play('wrong');
+                        this.showToast("Увага! Помилка! Уникни протоколу http:// без букви 's'!", false);
+                        packet.classList.add('animate-shake');
+                        setTimeout(() => packet.remove(), 300);
+                    }
+                };
+            },
+
+            mg4End(success) {
+                this.clearIntervals();
+                if (success) {
+                    this.completedMissions.add(4);
+                    this.score += 25;
+                    this.showToast("Місію 4 успішно виконано! Трафік під захистом! (+25 б.)", true);
+                    this.showHome();
+                } else {
+                    this.showToast("Час вичерпано. Спробуй ще раз!", false);
+                    this.mg4Reset();
+                }
+            },
+
+            clearIntervals() {
+                if (this.mg4Interval) clearInterval(this.mg4Interval);
+                if (this.mg4SpawnInterval) clearInterval(this.mg4SpawnInterval);
+            },
+
+            showVictoryScreen() {
+                SoundFX.play('win');
+                document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+                document.getElementById('screen-victory').classList.remove('hidden');
+                document.getElementById('final-score').innerText = `${this.score} б.`;
+
+                try {
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                } catch(e) {}
+            },
+
+            resetAll() {
+                this.score = 0;
+                this.completedMissions.clear();
+                this.showHome();
+            }
+        };
+
+        window.onload = () => {
+            game.init();
+        };
+    </script>
+</body>
+</html>
