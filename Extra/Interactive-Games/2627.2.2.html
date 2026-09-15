@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Види Інформації — Інтерактивна Гра</title>
+
+    <!-- Google Fonts: Fredoka & Nunito -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --bg-grid: #EBF3FA;
+            --border-color: #2D3436;
+            --shadow-color: #2D3436;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-grid);
+            background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+            color: #2D3436;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        h1, h2, h3, h4, button, .font-heading {
+            font-family: 'Fredoka', cursive;
+        }
+
+        /* Neo-Brutalism standard utilities */
+        .neo-box {
+            border: 3.5px solid var(--border-color);
+            box-shadow: 5px 5px 0px var(--shadow-color);
+            transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
+        }
+
+        .neo-box-sm {
+            border: 3px solid var(--border-color);
+            box-shadow: 3.5px 3.5px 0px var(--shadow-color);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .neo-btn {
+            border: 3.5px solid var(--border-color);
+            box-shadow: 4px 4px 0px var(--shadow-color);
+            transition: all 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+        }
+
+        .neo-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 7px 7px 0px var(--shadow-color);
+        }
+
+        .neo-btn:active {
+            transform: translateY(2px);
+            box-shadow: 2px 2px 0px var(--shadow-color);
+        }
+
+        .neo-btn-selected {
+            transform: translateY(2px) !important;
+            box-shadow: 2px 2px 0px var(--shadow-color) !important;
+            filter: brightness(0.95);
+        }
+
+        /* Custom Animations */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px) rotate(-2deg); }
+            40%, 80% { transform: translateX(8px) rotate(2deg); }
+        }
+
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            70% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animate-pop {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+        .animate-pulse-glow {
+            animation: pulseGlow 1.5s infinite ease-in-out;
+        }
+
+        /* Drag over target feedback */
+        .drag-over {
+            transform: scale(1.05) !important;
+            background-color: #ffeaa7 !important;
+            border-style: dashed !important;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #EBF3FA;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #6C5CE7;
+            border: 2px solid #2D3436;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-3 sm:p-6 overflow-x-hidden">
+
+    <header class="max-w-6xl w-full mx-auto mb-4">
+        <div class="neo-box bg-[#FFE17D] rounded-3xl p-4 sm:p-5 flex flex-wrap justify-between items-center gap-4">
+            <!-- Game Brand / Logo -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="showScreen('screen-menu')">
+                <div class="w-12 h-12 bg-[#FD79A8] rounded-2xl neo-box-sm flex items-center justify-center text-2xl">
+                    💡
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-black tracking-wide text-[#2D3436] leading-none">
+                        ІНФО-СВІТ
+                    </h1>
+                    <p class="text-xs sm:text-sm font-bold text-[#636e72] mt-0.5">
+                        Види інформації за способом подання
+                    </p>
+                </div>
+            </div>
+
+            <!-- Stats & Sound Toggle Controls -->
+            <div class="flex items-center gap-3">
+                <div class="neo-box-sm bg-[#00B894] text-white px-3 py-1.5 rounded-2xl flex items-center gap-2 text-sm sm:text-base font-black">
+                    <span>⭐ Зірки:</span>
+                    <span id="total-score-badge" class="bg-white text-[#2D3436] px-2 py-0.5 rounded-xl border-2 border-[#2D3436]">0</span>
+                </div>
+
+                <button id="sound-btn" onclick="toggleSound()" class="neo-btn bg-[#6C5CE7] text-white w-11 h-11 rounded-2xl flex items-center justify-center text-xl">
+                    🔊
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl w-full mx-auto flex-1 flex flex-col justify-center my-2">
+
+        <!-- SCREEN 1: MAIN MENU / THEORY DASHBOARD -->
+        <section id="screen-menu" class="animate-pop">
+            <div class="text-center mb-6">
+                <span class="inline-block bg-[#FD79A8] text-white font-black px-4 py-1.5 rounded-full neo-box-sm text-sm uppercase mb-2">
+                    🎓 Урок Інформатики (2-4 клас)
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-black text-[#2D3436] leading-tight">
+                    Які бувають види інформації?
+                </h2>
+                <p class="text-base sm:text-lg text-[#636e72] font-semibold max-w-2xl mx-auto mt-1">
+                    Обирай міні-гру та досліджуй, як ми сприймаємо світ навколо нас!
+                </p>
+            </div>
+
+            <!-- Theory Preview Cards Carousel Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-8">
+                <!-- Text -->
+                <div class="neo-box bg-[#E17055] text-white p-3 sm:p-4 rounded-2xl text-center flex flex-col justify-between">
+                    <div class="text-3xl sm:text-4xl mb-2">📖</div>
+                    <h3 class="font-black text-lg">Текстова</h3>
+                    <p class="text-xs font-semibold mt-1 opacity-90">Букви, слова, речення, книжки</p>
+                </div>
+                <!-- Number -->
+                <div class="neo-box bg-[#00B894] text-white p-3 sm:p-4 rounded-2xl text-center flex flex-col justify-between">
+                    <div class="text-3xl sm:text-4xl mb-2">🔢</div>
+                    <h3 class="font-black text-lg">Числова</h3>
+                    <p class="text-xs font-semibold mt-1 opacity-90">Цифри, числа, вік, ціна, приклади</p>
+                </div>
+                <!-- Graphic -->
+                <div class="neo-box bg-[#0984E3] text-white p-3 sm:p-4 rounded-2xl text-center flex flex-col justify-between">
+                    <div class="text-3xl sm:text-4xl mb-2">🖼️</div>
+                    <h3 class="font-black text-lg">Графічна</h3>
+                    <p class="text-xs font-semibold mt-1 opacity-90">Малюнки, фото, схеми, знаки</p>
+                </div>
+                <!-- Sound -->
+                <div class="neo-box bg-[#FD79A8] text-white p-3 sm:p-4 rounded-2xl text-center flex flex-col justify-between">
+                    <div class="text-3xl sm:text-4xl mb-2">🔊</div>
+                    <h3 class="font-black text-lg">Звукова</h3>
+                    <p class="text-xs font-semibold mt-1 opacity-90">Музика, спів пташок, шум, голос</p>
+                </div>
+                <!-- Combined -->
+                <div class="neo-box bg-[#6C5CE7] text-white p-3 sm:p-4 rounded-2xl text-center flex flex-col justify-between col-span-2 sm:col-span-1">
+                    <div class="text-3xl sm:text-4xl mb-2">🎬</div>
+                    <h3 class="font-black text-lg">Комбінована</h3>
+                    <p class="text-xs font-semibold mt-1 opacity-90">Поєднання декількох видів (відео, мультфільми)</p>
+                </div>
+            </div>
+
+            <!-- Mini Games Selector Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                <!-- Game 1 Card -->
+                <div class="neo-box bg-[#FFE17D] p-5 sm:p-6 rounded-3xl flex flex-col justify-between relative overflow-hidden">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="bg-[#2D3436] text-white text-xs font-black px-2.5 py-1 rounded-lg">Рівень 1</span>
+                            <h3 class="text-2xl font-black mt-2">📦 Сортувальний Конвеєр</h3>
+                            <p class="text-sm font-bold text-[#4b5563] mt-1">
+                                Перетягуй або натискай на картки, щоб розподілити дані по 5 контейнерах!
+                            </p>
+                        </div>
+                        <div class="text-4xl sm:text-5xl">🤖</div>
+                    </div>
+                    <button onclick="startMiniGame(1)" class="neo-btn bg-[#00B894] text-white font-black text-lg py-3 px-6 rounded-2xl mt-5 w-full">
+                        Грати зараз! ▶️
+                    </button>
+                </div>
+
+                <!-- Game 2 Card -->
+                <div class="neo-box bg-[#a29bfe] p-5 sm:p-6 rounded-3xl flex flex-col justify-between relative overflow-hidden">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="bg-[#2D3436] text-white text-xs font-black px-2.5 py-1 rounded-lg">Рівень 2</span>
+                            <h3 class="text-2xl font-black mt-2 text-white">🧪 Лабораторія Синтезу</h3>
+                            <p class="text-sm font-bold text-white/90 mt-1">
+                                Змішуй базові види інформації, щоб створити складні повідомлення!
+                            </p>
+                        </div>
+                        <div class="text-4xl sm:text-5xl">🔬</div>
+                    </div>
+                    <button onclick="startMiniGame(2)" class="neo-btn bg-[#FD79A8] text-white font-black text-lg py-3 px-6 rounded-2xl mt-5 w-full">
+                        Змішувати елементи! ▶️
+                    </button>
+                </div>
+
+                <!-- Game 3 Card -->
+                <div class="neo-box bg-[#ff7675] p-5 sm:p-6 rounded-3xl flex flex-col justify-between relative overflow-hidden text-white">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="bg-[#2D3436] text-white text-xs font-black px-2.5 py-1 rounded-lg">Рівень 3</span>
+                            <h3 class="text-2xl font-black mt-2">⚡ Швидкісний Детектив</h3>
+                            <p class="text-sm font-bold text-white/90 mt-1">
+                                Реагуй на час! Знайди та спіймай тільки потрібний вид інформації.
+                            </p>
+                        </div>
+                        <div class="text-4xl sm:text-5xl">🕵️‍♂️</div>
+                    </div>
+                    <button onclick="startMiniGame(3)" class="neo-btn bg-[#FFE17D] text-[#2D3436] font-black text-lg py-3 px-6 rounded-2xl mt-5 w-full">
+                        Упіймати цілі! ▶️
+                    </button>
+                </div>
+
+                <!-- Game 4 Card -->
+                <div class="neo-box bg-[#74b9ff] p-5 sm:p-6 rounded-3xl flex flex-col justify-between relative overflow-hidden text-white">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="bg-[#2D3436] text-white text-xs font-black px-2.5 py-1 rounded-lg">Рівень 4</span>
+                            <h3 class="text-2xl font-black mt-2">📱 Інфо-Майстерня Гаджетів</h3>
+                            <p class="text-sm font-bold text-white/90 mt-1">
+                                Досліджуй дисплеї смарт-годинника та гаджетів, розпізнаючи елементи.
+                            </p>
+                        </div>
+                        <div class="text-4xl sm:text-5xl">⌚</div>
+                    </div>
+                    <button onclick="startMiniGame(4)" class="neo-btn bg-[#0984E3] text-white font-black text-lg py-3 px-6 rounded-2xl mt-5 w-full">
+                        Сканувати пристрої! ▶️
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="game-1" class="hidden animate-pop">
+            <!-- Game Top Bar -->
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <button onclick="showScreen('screen-menu')" class="neo-btn bg-[#dfe6e9] text-[#2D3436] font-black px-4 py-2 rounded-2xl text-sm flex items-center gap-2">
+                    ⬅️ Меню
+                </button>
+                <div class="bg-white neo-box-sm px-4 py-1.5 rounded-2xl font-black text-sm flex items-center gap-3">
+                    <span>📦 Прогрес: <span id="g1-progress">0/10</span></span>
+                </div>
+                <button onclick="initGame1()" class="neo-btn bg-[#FFE17D] text-[#2D3436] font-black px-4 py-2 rounded-2xl text-sm">
+                    🔄 Перезапустити
+                </button>
+            </div>
+
+            <div class="neo-box bg-white rounded-3xl p-4 sm:p-6">
+                <div class="text-center mb-4">
+                    <h2 class="text-2xl sm:text-3xl font-black text-[#2D3436]">Розподіли картки по контейнерах</h2>
+                    <p class="text-xs sm:text-sm font-bold text-[#636e72]">
+                        💡 Натисни на картку, а потім на потрібний кошик (або перетягни її)!
+                    </p>
+                </div>
+
+                <!-- Conveyor Current Active Cards Container -->
+                <div class="min-h-[140px] bg-[#EBF3FA] neo-box-sm rounded-2xl p-4 mb-6 flex items-center justify-center relative overflow-hidden">
+                    <div id="g1-cards-container" class="flex flex-wrap gap-3 justify-center items-center w-full">
+                        <!-- Cards will be dynamically injected here -->
+                    </div>
+                </div>
+
+                <!-- 5 Target Bins -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3" id="g1-bins-container">
+                    <!-- Bin 1 -->
+                    <div data-type="text" onclick="handleBinClick('text')" class="g1-bin neo-box bg-[#E17055] text-white p-3 rounded-2xl text-center cursor-pointer transition-all hover:scale-105 min-h-[120px] flex flex-col justify-between items-center">
+                        <div class="text-3xl">📖</div>
+                        <h4 class="font-black text-base">Текстова</h4>
+                        <div class="bin-counter text-xs bg-black/20 px-2.5 py-0.5 rounded-full font-bold">0 шт</div>
+                    </div>
+                    <!-- Bin 2 -->
+                    <div data-type="number" onclick="handleBinClick('number')" class="g1-bin neo-box bg-[#00B894] text-white p-3 rounded-2xl text-center cursor-pointer transition-all hover:scale-105 min-h-[120px] flex flex-col justify-between items-center">
+                        <div class="text-3xl">🔢</div>
+                        <h4 class="font-black text-base">Числова</h4>
+                        <div class="bin-counter text-xs bg-black/20 px-2.5 py-0.5 rounded-full font-bold">0 шт</div>
+                    </div>
+                    <!-- Bin 3 -->
+                    <div data-type="graphic" onclick="handleBinClick('graphic')" class="g1-bin neo-box bg-[#0984E3] text-white p-3 rounded-2xl text-center cursor-pointer transition-all hover:scale-105 min-h-[120px] flex flex-col justify-between items-center">
+                        <div class="text-3xl">🖼️</div>
+                        <h4 class="font-black text-base">Графічна</h4>
+                        <div class="bin-counter text-xs bg-black/20 px-2.5 py-0.5 rounded-full font-bold">0 шт</div>
+                    </div>
+                    <!-- Bin 4 -->
+                    <div data-type="sound" onclick="handleBinClick('sound')" class="g1-bin neo-box bg-[#FD79A8] text-white p-3 rounded-2xl text-center cursor-pointer transition-all hover:scale-105 min-h-[120px] flex flex-col justify-between items-center">
+                        <div class="text-3xl">🔊</div>
+                        <h4 class="font-black text-base">Звукова</h4>
+                        <div class="bin-counter text-xs bg-black/20 px-2.5 py-0.5 rounded-full font-bold">0 шт</div>
+                    </div>
+                    <!-- Bin 5 -->
+                    <div data-type="combined" onclick="handleBinClick('combined')" class="g1-bin neo-box bg-[#6C5CE7] text-white p-3 rounded-2xl text-center cursor-pointer transition-all hover:scale-105 min-h-[120px] flex flex-col justify-between items-center col-span-2 sm:col-span-1">
+                        <div class="text-3xl">🎬</div>
+                        <h4 class="font-black text-base">Комбінована</h4>
+                        <div class="bin-counter text-xs bg-black/20 px-2.5 py-0.5 rounded-full font-bold">0 шт</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="game-2" class="hidden animate-pop">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <button onclick="showScreen('screen-menu')" class="neo-btn bg-[#dfe6e9] text-[#2D3436] font-black px-4 py-2 rounded-2xl text-sm flex items-center gap-2">
+                    ⬅️ Меню
+                </button>
+                <div class="bg-white neo-box-sm px-4 py-1.5 rounded-2xl font-black text-sm flex items-center gap-3">
+                    <span>🧪 Синтезовано: <span id="g2-progress">0/5</span></span>
+                </div>
+                <button onclick="initGame2()" class="neo-btn bg-[#FFE17D] text-[#2D3436] font-black px-4 py-2 rounded-2xl text-sm">
+                    🔄 Скинути
+                </button>
+            </div>
+
+            <div class="neo-box bg-white rounded-3xl p-4 sm:p-6">
+                <div class="text-center mb-4">
+                    <h2 class="text-2xl sm:text-3xl font-black text-[#2D3436]">Синтезуй інформаційні об'єкти</h2>
+                    <p class="text-xs sm:text-sm font-bold text-[#636e72]">
+                        Обери базові види інформації, які разом утворюють задане ціле!
+                    </p>
+                </div>
+
+                <!-- Target Object Panel -->
+                <div class="neo-box bg-[#a29bfe] text-white rounded-2xl p-4 sm:p-6 text-center max-w-xl mx-auto mb-6">
+                    <span class="text-xs font-black uppercase tracking-wider bg-black/20 px-3 py-1 rounded-full">Завдання для реакції:</span>
+                    <div id="g2-target-icon" class="text-5xl sm:text-6xl my-3">📺</div>
+                    <h3 id="g2-target-title" class="text-2xl sm:text-3xl font-black">Мультфільм «Мавка»</h3>
+                    <p id="g2-target-desc" class="text-sm font-semibold mt-1 opacity-90">З чого складається цей об'єкт?</p>
+                </div>
+
+                <!-- Ingredients Selector Buttons -->
+                <div class="mb-6">
+                    <h4 class="text-center font-black text-sm text-[#2D3436] mb-3">Обери необхідні компоненти:</h4>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto" id="g2-ingredients">
+                        <button onclick="toggleG2Ingredient('text')" data-ing="text" class="g2-ing-btn neo-btn bg-white p-3 rounded-2xl flex items-center justify-center gap-2 font-black text-sm text-[#2D3436]">
+                            <span>📖</span> Текстова
+                        </button>
+                        <button onclick="toggleG2Ingredient('number')" data-ing="number" class="g2-ing-btn neo-btn bg-white p-3 rounded-2xl flex items-center justify-center gap-2 font-black text-sm text-[#2D3436]">
+                            <span>🔢</span> Числова
+                        </button>
+                        <button onclick="toggleG2Ingredient('graphic')" data-ing="graphic" class="g2-ing-btn neo-btn bg-white p-3 rounded-2xl flex items-center justify-center gap-2 font-black text-sm text-[#2D3436]">
+                            <span>🖼️</span> Графічна
+                        </button>
+                        <button onclick="toggleG2Ingredient('sound')" data-ing="sound" class="g2-ing-btn neo-btn bg-white p-3 rounded-2xl flex items-center justify-center gap-2 font-black text-sm text-[#2D3436]">
+                            <span>🔊</span> Звукова
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mix Button -->
+                <div class="text-center">
+                    <button onclick="checkG2Synthesis()" class="neo-btn bg-[#00B894] text-white text-xl font-black px-8 py-3.5 rounded-2xl">
+                        ⚡ Синтезувати! ⚗️
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="game-3" class="hidden animate-pop">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <button onclick="showScreen('screen-menu')" class="neo-btn bg-[#dfe6e9] text-[#2D3436] font-black px-4 py-2 rounded-2xl text-sm flex items-center gap-2">
+                    ⬅️ Меню
+                </button>
+                <div class="bg-white neo-box-sm px-4 py-1.5 rounded-2xl font-black text-sm flex items-center gap-4">
+                    <span>⏱️ Час: <span id="g3-timer" class="text-red-500 font-extrabold text-base">15</span> с</span>
+                    <span>🎯 Очки: <span id="g3-score" class="text-indigo-600 font-extrabold text-base">0</span></span>
+                </div>
+            </div>
+
+            <div class="neo-box bg-white rounded-3xl p-4 sm:p-6">
+                <!-- Target Prompt Banner -->
+                <div class="neo-box bg-[#ff7675] text-white rounded-2xl p-4 text-center mb-6">
+                    <span class="text-xs font-black uppercase tracking-wider bg-black/20 px-3 py-1 rounded-full">Увага, Детективе!</span>
+                    <h2 id="g3-prompt" class="text-2xl sm:text-3xl font-black mt-1">Знайди всі ЧИСЛОВІ дані! 🔢</h2>
+                </div>
+
+                <!-- Cards Grid -->
+                <div id="g3-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                    <!-- Dynamic interactive cards -->
+                </div>
+            </div>
+        </section>
+
+        <section id="game-4" class="hidden animate-pop">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <button onclick="showScreen('screen-menu')" class="neo-btn bg-[#dfe6e9] text-[#2D3436] font-black px-4 py-2 rounded-2xl text-sm flex items-center gap-2">
+                    ⬅️ Меню
+                </button>
+                <div class="bg-white neo-box-sm px-4 py-1.5 rounded-2xl font-black text-sm flex items-center gap-3">
+                    <span>⌚ Гаджет: <span id="g4-step">1/4</span></span>
+                </div>
+            </div>
+
+            <div class="neo-box bg-white rounded-3xl p-4 sm:p-6">
+                <div class="text-center mb-4">
+                    <h2 class="text-2xl sm:text-3xl font-black text-[#2D3436]">Сканер цифрових пристроїв</h2>
+                    <p class="text-xs sm:text-sm font-bold text-[#636e72]">
+                        Розпізнай вид інформації, вказаний на виділеній зоні пристрою!
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center max-w-4xl mx-auto">
+                    <!-- Device Mockup Screen -->
+                    <div class="neo-box bg-[#2D3436] p-6 rounded-[40px] text-white flex flex-col items-center justify-center min-h-[300px] relative">
+                        <div class="absolute top-3 w-16 h-2 bg-gray-700 rounded-full"></div>
+                        <div id="g4-device-container" class="w-full bg-[#0984E3] rounded-3xl p-5 border-4 border-gray-700 text-center flex flex-col items-center justify-center min-h-[220px]">
+                            <div id="g4-hotspot-icon" class="text-5xl mb-2">⏱️</div>
+                            <div id="g4-hotspot-content" class="bg-white text-[#2D3436] font-black px-4 py-2 rounded-xl text-xl neo-box-sm">
+                                14:30
+                            </div>
+                            <span id="g4-hotspot-label" class="text-xs font-bold text-white/90 mt-2">Екран смарт-годинника</span>
+                        </div>
+                    </div>
+
+                    <!-- Choices Buttons -->
+                    <div class="flex flex-col gap-3" id="g4-choices">
+                        <button onclick="checkG4Choice('text')" class="neo-btn bg-[#E17055] text-white p-4 rounded-2xl font-black text-left text-base flex items-center gap-3">
+                            <span class="text-2xl">📖</span> Текстова інформація
+                        </button>
+                        <button onclick="checkG4Choice('number')" class="neo-btn bg-[#00B894] text-white p-4 rounded-2xl font-black text-left text-base flex items-center gap-3">
+                            <span class="text-2xl">🔢</span> Числова інформація
+                        </button>
+                        <button onclick="checkG4Choice('graphic')" class="neo-btn bg-[#0984E3] text-white p-4 rounded-2xl font-black text-left text-base flex items-center gap-3">
+                            <span class="text-2xl">🖼️</span> Графічна інформація
+                        </button>
+                        <button onclick="checkG4Choice('sound')" class="neo-btn bg-[#FD79A8] text-white p-4 rounded-2xl font-black text-left text-base flex items-center gap-3">
+                            <span class="text-2xl">🔊</span> Звукова інформація
+                        </button>
+                        <button onclick="checkG4Choice('combined')" class="neo-btn bg-[#6C5CE7] text-white p-4 rounded-2xl font-black text-left text-base flex items-center gap-3">
+                            <span class="text-2xl">🎬</span> Комбінована інформація
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="screen-victory" class="hidden animate-pop">
+            <div class="neo-box bg-[#FFE17D] rounded-3xl p-6 sm:p-10 text-center max-w-2xl mx-auto">
+                <div class="text-6xl sm:text-7xl mb-3 animate-bounce">🏆</div>
+                <h2 class="text-3xl sm:text-4xl font-black text-[#2D3436]">Чудова робота!</h2>
+                <p class="text-lg font-bold text-[#636e72] mt-1">
+                    Ти справжній експерт з видів інформації!
+                </p>
+
+                <div class="neo-box bg-white rounded-2xl p-4 my-6 flex justify-around items-center">
+                    <div>
+                        <p class="text-xs font-bold text-[#b2bec3] uppercase">Зароблені зірки</p>
+                        <p id="vic-stars" class="text-3xl font-black text-[#00B894]">⭐ +50</p>
+                    </div>
+                    <div class="h-10 w-0.5 bg-gray-200"></div>
+                    <div>
+                        <p class="text-xs font-bold text-[#b2bec3] uppercase">Точність</p>
+                        <p id="vic-accuracy" class="text-3xl font-black text-[#6C5CE7]">100%</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap justify-center gap-4">
+                    <button onclick="showScreen('screen-menu')" class="neo-btn bg-[#00B894] text-white font-black text-lg px-6 py-3 rounded-2xl">
+                        🏠 Головне Меню
+                    </button>
+                    <button onclick="replayCurrentMiniGame()" class="neo-btn bg-[#FD79A8] text-white font-black text-lg px-6 py-3 rounded-2xl">
+                        🔄 Зіграти знову
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="max-w-6xl w-full mx-auto mt-4 text-center">
+        <p class="text-xs font-bold text-[#636e72]">
+            🎨 Навчальний інтерактивний тренажер для уроку Інформатики • Створено у стилі Playful Vector UI
+        </p>
+    </footer>
+
+    <script>
+        let audioCtx = null;
+        let isMuted = false;
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playSound(type) {
+            if (isMuted) return;
+            try {
+                initAudio();
+                const now = audioCtx.currentTime;
+
+                if (type === 'click') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(500, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'correct') {
+                    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                    notes.forEach((freq, i) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, now + i * 0.07);
+                        gain.gain.setValueAtTime(0.2, now + i * 0.07);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.2);
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start(now + i * 0.07);
+                        osc.stop(now + i * 0.07 + 0.2);
+                    });
+                } else if (type === 'wrong') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, now);
+                    osc.frequency.linearRampToValueAtTime(110, now + 0.25);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'fanfare') {
+                    const fanfareNotes = [440, 554.37, 659.25, 880];
+                    fanfareNotes.forEach((freq, i) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, now + i * 0.12);
+                        gain.gain.setValueAtTime(0.25, now + i * 0.12);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.12 + 0.3);
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start(now + i * 0.12);
+                        osc.stop(now + i * 0.12 + 0.3);
+                    });
+                }
+            } catch (e) {
+                console.log("Audio not allowed yet");
+            }
+        }
+
+        function toggleSound() {
+            isMuted = !isMuted;
+            const btn = document.getElementById('sound-btn');
+            btn.innerHTML = isMuted ? '🔇' : '🔊';
+            playSound('click');
+        }
+
+        let totalScore = 0;
+        let activeMiniGame = 0;
+
+        function updateScore(pts) {
+            totalScore += pts;
+            document.getElementById('total-score-badge').innerText = totalScore;
+        }
+
+        function showScreen(screenId) {
+            playSound('click');
+            ['screen-menu', 'game-1', 'game-2', 'game-3', 'game-4', 'screen-victory'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function triggerConfetti() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 80,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
+        }
+
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function startMiniGame(gameNum) {
+            activeMiniGame = gameNum;
+            if (gameNum === 1) initGame1();
+            else if (gameNum === 2) initGame2();
+            else if (gameNum === 3) initGame3();
+            else if (gameNum === 4) initGame4();
+            showScreen(`game-${gameNum}`);
+        }
+
+        function replayCurrentMiniGame() {
+            if (activeMiniGame > 0) startMiniGame(activeMiniGame);
+            else showScreen('screen-menu');
+        }
+
+        const g1DataPool = [
+            { text: "Книжка з казками 📖", type: "text" },
+            { text: "Лист від друга ✉️", type: "text" },
+            { text: "Правила гри у футбол 📜", type: "text" },
+            { text: "Повідомлення в чаті 💬", type: "text" },
+            
+            { text: "Приклад: 5 + 3 = 8 🔢", type: "number" },
+            { text: "Ціна іграшки: 250 грн 🏷️", type: "number" },
+            { text: "Ваш вік: 9 років 🎂", type: "number" },
+            { text: "Температура повітря: +22°C 🌡️", type: "number" },
+
+            { text: "Фотографія котика 🐱", type: "graphic" },
+            { text: "Схема маршруту автобуса 🗺️", type: "graphic" },
+            { text: "Малюнок сонечка 🎨", type: "graphic" },
+            { text: "Дорожній знак «Пішохід» 🚸", type: "graphic" },
+
+            { text: "Спів пташок у гаю 🐦", type: "sound" },
+            { text: "Музика з колонки 🎵", type: "sound" },
+            { text: "Дзвінок на урок 🔔", type: "sound" },
+            { text: "Гуркіт грому 🌩️", type: "sound" },
+
+            { text: "Мультфільм по телевізору 🎬", type: "combined" },
+            { text: "Відеоурок з диктором та слайдами 📹", type: "combined" },
+            { text: "Комп'ютерна відеогра 🎮", type: "combined" },
+            { text: "Театральна вистава зі звуком 🎭", type: "combined" }
+        ];
+
+        let g1Items = [];
+        let g1CurrentSelectedCard = null;
+        let g1SortedCount = 0;
+
+        function initGame1() {
+            g1Items = shuffleArray(g1DataPool).slice(0, 10);
+            g1SortedCount = 0;
+            g1CurrentSelectedCard = null;
+            document.getElementById('g1-progress').innerText = `0/${g1Items.length}`;
+            
+            // Reset Bins count UI
+            document.querySelectorAll('#g1-bins-container .bin-counter').forEach(el => el.innerText = '0 шт');
+            renderG1Cards();
+        }
+
+        function renderG1Cards() {
+            const container = document.getElementById('g1-cards-container');
+            container.innerHTML = '';
+
+            if (g1Items.length === 0) {
+                container.innerHTML = `<div class="text-center font-black text-emerald-600 text-xl">🎉 Усі картки розсортовано!</div>`;
+                setTimeout(() => {
+                    playSound('fanfare');
+                    triggerConfetti();
+                    updateScore(20);
+                    showScreen('screen-victory');
+                }, 600);
+                return;
+            }
+
+            g1Items.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = `neo-btn bg-white font-black text-sm px-4 py-3 rounded-2xl cursor-pointer select-none text-[#2D3436] ${g1CurrentSelectedCard === index ? 'neo-btn-selected bg-[#FFE17D]' : ''}`;
+                card.innerText = item.text;
+                card.draggable = true;
+
+                // Tap selection
+                card.onclick = () => {
+                    playSound('click');
+                    g1CurrentSelectedCard = index;
+                    renderG1Cards();
+                };
+
+                // Desktop Drag & Drop API
+                card.ondragstart = (e) => {
+                    g1CurrentSelectedCard = index;
+                    e.dataTransfer.setData('text/plain', index);
+                };
+
+                container.appendChild(card);
+            });
+
+            // Bind Drag events to Bins
+            document.querySelectorAll('.g1-bin').forEach(bin => {
+                bin.ondragover = (e) => {
+                    e.preventDefault();
+                    bin.classList.add('drag-over');
+                };
+                bin.ondragleave = () => {
+                    bin.classList.remove('drag-over');
+                };
+                bin.ondrop = (e) => {
+                    e.preventDefault();
+                    bin.classList.remove('drag-over');
+                    const binType = bin.getAttribute('data-type');
+                    handleBinClick(binType);
+                };
+            });
+        }
+
+        function handleBinClick(targetType) {
+            if (g1CurrentSelectedCard === null || !g1Items[g1CurrentSelectedCard]) return;
+
+            const currentItem = g1Items[g1CurrentSelectedCard];
+
+            if (currentItem.type === targetType) {
+                // Correct match!
+                playSound('correct');
+                g1SortedCount++;
+                
+                // Update specific bin counter
+                const binEl = document.querySelector(`.g1-bin[data-type="${targetType}"] .bin-counter`);
+                let count = parseInt(binEl.innerText) || 0;
+                binEl.innerText = `${count + 1} шт`;
+
+                // Remove item from active pool
+                g1Items.splice(g1CurrentSelectedCard, 1);
+                g1CurrentSelectedCard = null;
+                document.getElementById('g1-progress').innerText = `${g1SortedCount}/10`;
+                renderG1Cards();
+            } else {
+                // Wrong bin
+                playSound('wrong');
+                const binEl = document.querySelector(`.g1-bin[data-type="${targetType}"]`);
+                binEl.classList.add('animate-shake');
+                setTimeout(() => binEl.classList.remove('animate-shake'), 400);
+            }
+        }
+
+        const g2RecipePool = [
+            {
+                title: "Мультфільм «Мавка» 🎬",
+                icon: "📺",
+                desc: "Які види інформації об'єднані в мультфільмі?",
+                required: ["graphic", "sound"]
+            },
+            {
+                title: "Книжка з малюнками 📖",
+                icon: "📚",
+                desc: "Що входить до складу ілюстрованої казки?",
+                required: ["text", "graphic"]
+            },
+            {
+                title: "Шкільний щоденник 📝",
+                icon: "🗓️",
+                desc: "Які види інформації містить щоденник з розкладом та оцінками?",
+                required: ["text", "number"]
+            },
+            {
+                title: "Музичний відеокліп 🎵",
+                icon: "🎤",
+                desc: "З чого складається сучасне музичне відео?",
+                required: ["graphic", "sound"]
+            },
+            {
+                title: "Навчальний слайд із диктором 📹",
+                icon: "💻",
+                desc: "Які елементи має повний комбінований відеоурок?",
+                required: ["text", "graphic", "sound"]
+            }
+        ];
+
+        let g2Index = 0;
+        let g2SelectedIngredients = new Set();
+
+        function initGame2() {
+            g2Index = 0;
+            g2SelectedIngredients.clear();
+            loadG2Recipe();
+        }
+
+        function loadG2Recipe() {
+            g2SelectedIngredients.clear();
+            document.querySelectorAll('.g2-ing-btn').forEach(btn => btn.classList.remove('neo-btn-selected', 'bg-[#FFE17D]'));
+            document.getElementById('g2-progress').innerText = `${g2Index}/${g2RecipePool.length}`;
+
+            if (g2Index >= g2RecipePool.length) {
+                setTimeout(() => {
+                    playSound('fanfare');
+                    triggerConfetti();
+                    updateScore(25);
+                    showScreen('screen-victory');
+                }, 500);
+                return;
+            }
+
+            const recipe = g2RecipePool[g2Index];
+            document.getElementById('g2-target-icon').innerText = recipe.icon;
+            document.getElementById('g2-target-title').innerText = recipe.title;
+            document.getElementById('g2-target-desc').innerText = recipe.desc;
+        }
+
+        function toggleG2Ingredient(ingType) {
+            playSound('click');
+            const btn = document.querySelector(`.g2-ing-btn[data-ing="${ingType}"]`);
+            if (g2SelectedIngredients.has(ingType)) {
+                g2SelectedIngredients.delete(ingType);
+                btn.classList.remove('neo-btn-selected', 'bg-[#FFE17D]');
+            } else {
+                g2SelectedIngredients.add(ingType);
+                btn.classList.add('neo-btn-selected', 'bg-[#FFE17D]');
+            }
+        }
+
+        function checkG2Synthesis() {
+            const currentRecipe = g2RecipePool[g2Index];
+            const requiredSet = new Set(currentRecipe.required);
+
+            let isCorrect = (g2SelectedIngredients.size === requiredSet.size) && 
+                            [...g2SelectedIngredients].every(val => requiredSet.has(val));
+
+            if (isCorrect) {
+                playSound('correct');
+                g2Index++;
+                loadG2Recipe();
+            } else {
+                playSound('wrong');
+                const targetCard = document.getElementById('g2-target-title').parentElement;
+                targetCard.classList.add('animate-shake');
+                setTimeout(() => targetCard.classList.remove('animate-shake'), 400);
+            }
+        }
+
+        const g3Prompts = [
+            { type: "number", title: "Знайди всі ЧИСЛОВІ дані! 🔢" },
+            { type: "sound", title: "Знайди всі ЗВУКОВІ елементи! 🔊" },
+            { type: "text", title: "Знайди всі ТЕКСТОВІ повідомлення! 📖" },
+            { type: "graphic", title: "Знайди всі ГРАФІЧНІ образи! 🖼️" }
+        ];
+
+        const g3CardItems = [
+            { text: "777", type: "number", icon: "🔢" },
+            { text: "15:00", type: "number", icon: "⏰" },
+            { text: "+30°C", type: "number", icon: "🌡️" },
+            { text: "100 грн", type: "number", icon: "💵" },
+
+            { text: "Пісня", type: "sound", icon: "🎵" },
+            { text: "Сирена", type: "sound", icon: "🚨" },
+            { text: "Дзвін", type: "sound", icon: "🔔" },
+            { text: "Шум дощу", type: "sound", icon: "🌧️" },
+
+            { text: "Слово", type: "text", icon: "🔤" },
+            { text: "Поема", type: "text", icon: "📜" },
+            { text: "Правило", type: "text", icon: "📖" },
+            { text: "СМС", type: "text", icon: "💬" },
+
+            { text: "Малюнок", type: "graphic", icon: "🎨" },
+            { text: "Схема", type: "graphic", icon: "📊" },
+            { text: "Фото", type: "graphic", icon: "📷" },
+            { text: "Карта", type: "graphic", icon: "🗺️" }
+        ];
+
+        let g3Timer = 15;
+        let g3TimerInterval = null;
+        let g3TargetType = "number";
+        let g3Score = 0;
+        let g3CardsList = [];
+
+        function initGame3() {
+            clearInterval(g3TimerInterval);
+            g3Score = 0;
+            g3Timer = 15;
+            document.getElementById('g3-score').innerText = g3Score;
+            document.getElementById('g3-timer').innerText = g3Timer;
+
+            // Pick random target type
+            const prompt = g3Prompts[Math.floor(Math.random() * g3Prompts.length)];
+            g3TargetType = prompt.type;
+            document.getElementById('g3-prompt').innerText = prompt.title;
+
+            // Shuffle 8 cards from pool
+            g3CardsList = shuffleArray(g3CardItems).slice(0, 8);
+            renderG3Grid();
+
+            // Start countdown timer
+            g3TimerInterval = setInterval(() => {
+                g3Timer--;
+                document.getElementById('g3-timer').innerText = g3Timer;
+                if (g3Timer <= 0) {
+                    clearInterval(g3TimerInterval);
+                    finishG3();
+                }
+            }, 1000);
+        }
+
+        function renderG3Grid() {
+            const grid = document.getElementById('g3-grid');
+            grid.innerHTML = '';
+
+            g3CardsList.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = "neo-btn bg-white p-4 rounded-2xl text-center flex flex-col justify-center items-center cursor-pointer min-h-[100px]";
+                card.innerHTML = `
+                    <div class="text-3xl mb-1">${item.icon}</div>
+                    <div class="font-black text-[#2D3436] text-sm">${item.text}</div>
+                `;
+
+                card.onclick = () => {
+                    if (item.type === g3TargetType) {
+                        playSound('correct');
+                        g3Score += 10;
+                        document.getElementById('g3-score').innerText = g3Score;
+                        card.style.visibility = 'hidden';
+                        
+                        // Check if all correct items cleared
+                        const remainingTargets = g3CardsList.filter((c, i) => c.type === g3TargetType && grid.children[i].style.visibility !== 'hidden');
+                        if (remainingTargets.length === 0) {
+                            clearInterval(g3TimerInterval);
+                            finishG3();
+                        }
+                    } else {
+                        playSound('wrong');
+                        card.classList.add('animate-shake');
+                        setTimeout(() => card.classList.remove('animate-shake'), 400);
+                    }
+                };
+
+                grid.appendChild(card);
+            });
+        }
+
+        function finishG3() {
+            playSound('fanfare');
+            triggerConfetti();
+            updateScore(g3Score);
+            showScreen('screen-victory');
+        }
+
+        const g4Questions = [
+            {
+                deviceLabel: "Дисплей смарт-годинника",
+                icon: "⏱️",
+                content: "14:30",
+                correctType: "number",
+                bg: "bg-[#0984E3]"
+            },
+            {
+                deviceLabel: "Екран електронної книги",
+                icon: "📖",
+                content: "Жили-були дід та баба...",
+                correctType: "text",
+                bg: "bg-[#E17055]"
+            },
+            {
+                deviceLabel: "Галерея фотографій у смартфоні",
+                icon: "🖼️",
+                content: "📷 Фото з карпатської поїздки",
+                correctType: "graphic",
+                bg: "bg-[#00B894]"
+            },
+            {
+                deviceLabel: "Аудіоповідомлення у месенджері",
+                icon: "🔊",
+                content: "🎙️ Голосова нота (0:15)",
+                correctType: "sound",
+                bg: "bg-[#FD79A8]"
+            }
+        ];
+
+        let g4Index = 0;
+
+        function initGame4() {
+            g4Index = 0;
+            loadG4Step();
+        }
+
+        function loadG4Step() {
+            document.getElementById('g4-step').innerText = `${g4Index + 1}/${g4Questions.length}`;
+            if (g4Index >= g4Questions.length) {
+                setTimeout(() => {
+                    playSound('fanfare');
+                    triggerConfetti();
+                    updateScore(20);
+                    showScreen('screen-victory');
+                }, 500);
+                return;
+            }
+
+            const step = g4Questions[g4Index];
+            const container = document.getElementById('g4-device-container');
+            container.className = `w-full ${step.bg} rounded-3xl p-5 border-4 border-gray-700 text-center flex flex-col items-center justify-center min-h-[220px]`;
+            
+            document.getElementById('g4-hotspot-icon').innerText = step.icon;
+            document.getElementById('g4-hotspot-content').innerText = step.content;
+            document.getElementById('g4-hotspot-label').innerText = step.deviceLabel;
+        }
+
+        function checkG4Choice(chosenType) {
+            const step = g4Questions[g4Index];
+            if (chosenType === step.correctType) {
+                playSound('correct');
+                g4Index++;
+                loadG4Step();
+            } else {
+                playSound('wrong');
+                const choices = document.getElementById('g4-choices');
+                choices.classList.add('animate-shake');
+                setTimeout(() => choices.classList.remove('animate-shake'), 400);
+            }
+        }
+
+        window.onload = function() {
+            // First user touch/click unlocks AudioContext seamlessly
+            document.body.addEventListener('click', initAudio, { once: true });
+            document.body.addEventListener('touchstart', initAudio, { once: true });
+        };
+    </script>
+</body>
+</html>
