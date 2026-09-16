@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Сервіси Інтернету для Творчості | Інтерактивна Гра</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Canvas Confetti for victory celebration -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --bg-radial: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #0f172a 70%);
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg-radial);
+            background-attachment: fixed;
+            color: #f8fafc;
+            min-height: 100vh;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+
+        .font-heading {
+            font-family: 'Comfortaa', cursive;
+        }
+
+        /* Glassmorphism Styles */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(56, 189, 248, 0.4);
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.25);
+        }
+
+        .glass-btn {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(8px);
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.2s ease;
+        }
+
+        .glass-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(1deg); }
+        }
+
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6)); }
+            50% { filter: drop-shadow(0 0 18px rgba(139, 92, 246, 0.8)); }
+        }
+
+        .glow-pulse {
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+
+        /* Drag & Touch Selected state */
+        .touch-selected {
+            border-color: #38bdf8 !important;
+            background: rgba(56, 189, 248, 0.25) !important;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.6) !important;
+            transform: scale(1.03);
+        }
+
+        .drop-target-active {
+            border-color: #10b981 !important;
+            background: rgba(16, 185, 129, 0.15) !important;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #38bdf8;
+        }
+
+        /* Puzzle grid styles */
+        .puzzle-piece {
+            transition: all 0.5s ease-in-out;
+            background-size: 300px 300px;
+        }
+
+        .puzzle-piece.locked {
+            filter: grayscale(100%) brightness(0.3);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-slate-100 selection:bg-cyan-500 selection:text-white">
+
+    <!-- Header / Navbar -->
+    <header class="sticky top-0 z-40 w-full glass-card border-b border-slate-700/50 bg-slate-900/80 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            
+            <!-- Logo & Title -->
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-white text-2xl shadow-lg shadow-cyan-500/30 animate-float">
+                    <i class="fa-solid fa-laptop-code"></i>
+                </div>
+                <div>
+                    <span class="text-xs font-bold tracking-widest uppercase text-cyan-400 font-heading">Дія.Освіта // ІТ-Студія</span>
+                    <h1 class="text-lg sm:text-xl font-extrabold font-heading bg-gradient-to-r from-white via-cyan-200 to-indigo-300 bg-clip-text text-transparent">
+                        Сервіси Інтернету для Творчості
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Progress & Controls -->
+            <div class="flex items-center space-x-4">
+                <!-- Game Progress Badge -->
+                <div class="hidden md:flex items-center space-x-2 bg-slate-800/80 px-4 py-2 rounded-2xl border border-slate-700">
+                    <i class="fa-solid fa-puzzle-piece text-amber-400"></i>
+                    <span class="text-sm font-semibold">Пазл казки: <span id="puzzle-count" class="text-cyan-400 font-bold">0/5</span></span>
+                </div>
+
+                <!-- Reset / Sound Buttons -->
+                <button id="sound-btn" onclick="toggleSound()" class="p-3 rounded-2xl glass-btn text-cyan-400 hover:text-cyan-300 focus:outline-none" title="Звукові ефекти">
+                    <i class="fa-solid fa-volume-high text-lg" id="sound-icon"></i>
+                </button>
+                
+                <button onclick="confirmRestartGame()" class="p-3 rounded-2xl glass-btn text-rose-400 hover:text-rose-300 focus:outline-none" title="Перезапустити випробування">
+                    <i class="fa-solid fa-rotate-right text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Sidebar Navigation & Status (Desktop & Mobile selector) -->
+        <aside class="lg:col-span-4 flex flex-col space-y-6">
+            
+            <!-- Mini-Games Navigation Card -->
+            <div class="glass-card rounded-3xl p-5 border border-slate-700/60">
+                <h2 class="text-lg font-bold font-heading mb-4 text-cyan-300 flex items-center space-x-2">
+                    <span class="w-7 h-7 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-sm">
+                        <i class="fa-solid fa-gamepad"></i>
+                    </span>
+                    <span>Модулі та Практика</span>
+                </h2>
+
+                <nav class="space-y-2.5" id="game-nav-list">
+                    <!-- Nav item 1 -->
+                    <button onclick="switchGame(1)" id="nav-btn-1" class="w-full p-3.5 rounded-2xl flex items-center justify-between text-left transition-all bg-gradient-to-r from-cyan-600/30 to-indigo-600/30 border border-cyan-500/50 shadow-md">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-xl bg-cyan-500/20 text-cyan-300 flex items-center justify-center font-bold">1</div>
+                            <div>
+                                <div class="text-sm font-bold text-white font-heading">Види Творчості</div>
+                                <div class="text-xs text-slate-400">Сортування видів діяльностей</div>
+                            </div>
+                        </div>
+                        <i id="status-icon-1" class="fa-solid fa-circle-play text-cyan-400 text-lg"></i>
+                    </button>
+
+                    <!-- Nav item 2 -->
+                    <button onclick="switchGame(2)" id="nav-btn-2" class="w-full p-3.5 rounded-2xl flex items-center justify-between text-left transition-all glass-btn opacity-80 hover:opacity-100">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center font-bold">2</div>
+                            <div>
+                                <div class="text-sm font-bold text-white font-heading">Цифрова чи Традиційна?</div>
+                                <div class="text-xs text-slate-400">Матриця класифікації</div>
+                            </div>
+                        </div>
+                        <i id="status-icon-2" class="fa-solid fa-lock text-slate-500 text-sm"></i>
+                    </button>
+
+                    <!-- Nav item 3 -->
+                    <button onclick="switchGame(3)" id="nav-btn-3" class="w-full p-3.5 rounded-2xl flex items-center justify-between text-left transition-all glass-btn opacity-80 hover:opacity-100">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-bold">3</div>
+                            <div>
+                                <div class="text-sm font-bold text-white font-heading">Аватарка та Безпека</div>
+                                <div class="text-xs text-slate-400">Конструктор та перевірка профілю</div>
+                            </div>
+                        </div>
+                        <i id="status-icon-3" class="fa-solid fa-lock text-slate-500 text-sm"></i>
+                    </button>
+
+                    <!-- Nav item 4 -->
+                    <button onclick="switchGame(4)" id="nav-btn-4" class="w-full p-3.5 rounded-2xl flex items-center justify-between text-left transition-all glass-btn opacity-80 hover:opacity-100">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center font-bold">4</div>
+                            <div>
+                                <div class="text-sm font-bold text-white font-heading">Алгоритм Збереження</div>
+                                <div class="text-xs text-slate-400">Послідовність дій у системі</div>
+                            </div>
+                        </div>
+                        <i id="status-icon-4" class="fa-solid fa-lock text-slate-500 text-sm"></i>
+                    </button>
+
+                    <!-- Nav item 5 -->
+                    <button onclick="switchGame(5)" id="nav-btn-5" class="w-full p-3.5 rounded-2xl flex items-center justify-between text-left transition-all glass-btn opacity-80 hover:opacity-100">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-xl bg-rose-500/20 text-rose-300 flex items-center justify-center font-bold">5</div>
+                            <div>
+                                <div class="text-sm font-bold text-white font-heading">Сервіси та Поняття</div>
+                                <div class="text-xs text-slate-400">Інтерактивні зв'язки</div>
+                            </div>
+                        </div>
+                        <i id="status-icon-5" class="fa-solid fa-lock text-slate-500 text-sm"></i>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Reward Puzzle Preview Box -->
+            <div class="glass-card rounded-3xl p-5 border border-slate-700/60 flex flex-col items-center text-center">
+                <div class="w-full flex items-center justify-between mb-3">
+                    <span class="text-sm font-bold font-heading text-amber-300 flex items-center space-x-2">
+                        <i class="fa-solid fa-crown text-amber-400"></i>
+                        <span>Колекційна Казка</span>
+                    </span>
+                    <span class="text-xs px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30">
+                        Нагорода
+                    </span>
+                </div>
+                
+                <p class="text-xs text-slate-300 mb-4">
+                    Збери всі 5 фрагментів ілюстрації, щоб розгадати заховану дитячу казку!
+                </p>
+
+                <!-- 5-Piece Puzzle Frame Grid -->
+                <div id="puzzle-frame" class="w-64 h-64 grid grid-cols-3 grid-rows-2 gap-1.5 p-2 bg-slate-950/80 rounded-2xl border-2 border-slate-700/80 relative shadow-inner overflow-hidden">
+                    <!-- Fragment 1 -->
+                    <div id="puzzle-tile-1" class="puzzle-piece locked rounded-lg flex items-center justify-center bg-slate-800 text-slate-600 relative overflow-hidden">
+                        <i class="fa-solid fa-puzzle-piece text-xl"></i>
+                    </div>
+                    <!-- Fragment 2 -->
+                    <div id="puzzle-tile-2" class="puzzle-piece locked rounded-lg flex items-center justify-center bg-slate-800 text-slate-600 relative overflow-hidden">
+                        <i class="fa-solid fa-puzzle-piece text-xl"></i>
+                    </div>
+                    <!-- Fragment 3 -->
+                    <div id="puzzle-tile-3" class="puzzle-piece locked rounded-lg flex items-center justify-center bg-slate-800 text-slate-600 relative overflow-hidden">
+                        <i class="fa-solid fa-puzzle-piece text-xl"></i>
+                    </div>
+                    <!-- Fragment 4 -->
+                    <div id="puzzle-tile-4" class="puzzle-piece locked rounded-lg flex items-center justify-center bg-slate-800 text-slate-600 relative overflow-hidden">
+                        <i class="fa-solid fa-puzzle-piece text-xl"></i>
+                    </div>
+                    <!-- Fragment 5 -->
+                    <div id="puzzle-tile-5" class="puzzle-piece locked col-span-2 rounded-lg flex items-center justify-center bg-slate-800 text-slate-600 relative overflow-hidden">
+                        <i class="fa-solid fa-puzzle-piece text-xl"></i>
+                    </div>
+                </div>
+
+                <div id="fairy-tale-title" class="mt-3 text-xs font-semibold text-slate-400 italic">
+                    Заблоковано • Пройдіть завдання
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- Active Game Workspace -->
+        <section class="lg:col-span-8 flex flex-col">
+            <div class="glass-card rounded-3xl p-5 sm:p-7 border border-slate-700/60 flex-grow flex flex-col justify-between relative overflow-hidden">
+                
+                <!-- Dynamic Header of current mini-game -->
+                <div class="flex items-center justify-between pb-4 border-b border-slate-700/50 mb-6">
+                    <div class="flex items-center space-x-3">
+                        <div id="game-icon-badge" class="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 flex items-center justify-center text-xl shadow-md">
+                            <i class="fa-solid fa-layer-group"></i>
+                        </div>
+                        <div>
+                            <span id="game-subtitle" class="text-xs uppercase tracking-wider text-cyan-400 font-bold">Міні-гра #1</span>
+                            <h2 id="game-title" class="text-xl sm:text-2xl font-bold font-heading bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent">
+                                Види Творчості
+                            </h2>
+                        </div>
+                    </div>
+
+                    <!-- Touch Mobile Dynamic Helper Note -->
+                    <div class="text-xs text-slate-400 bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700 hidden sm:flex items-center space-x-1.5">
+                        <i class="fa-solid fa-hand-pointer text-cyan-400"></i>
+                        <span>Перетягуйте або натискайте</span>
+                    </div>
+                </div>
+
+                <!-- Game Container Area (Swapped dynamically) -->
+                <div id="game-stage" class="flex-grow flex flex-col justify-start">
+                    <!-- Dynamic Game HTML inserted via JavaScript -->
+                </div>
+
+                <!-- Bottom Status / Action Bar -->
+                <div class="pt-6 mt-6 border-t border-slate-700/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div id="feedback-msg" class="text-sm font-semibold text-slate-300 min-h-[24px] flex items-center space-x-2">
+                        <i class="fa-solid fa-circle-info text-cyan-400"></i>
+                        <span>Оберіть або перетягніть картки у відповідні блоки!</span>
+                    </div>
+
+                    <div class="flex items-center space-x-3 w-full sm:w-auto">
+                        <button id="reset-stage-btn" onclick="resetCurrentGame()" class="w-1/2 sm:w-auto px-4 py-2.5 rounded-2xl glass-btn text-slate-300 hover:text-white text-sm font-semibold flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-arrows-rotate"></i>
+                            <span>Скинути</span>
+                        </button>
+
+                        <button id="check-stage-btn" onclick="checkCurrentGame()" class="w-1/2 sm:w-auto px-6 py-2.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-cyan-500/25 active:scale-95 transition-all flex items-center justify-center space-x-2">
+                            <span>Перевірити</span>
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal for Completion / Custom Dialogs -->
+    <div id="modal-overlay" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass-card max-w-lg w-full rounded-3xl p-6 sm:p-8 border border-slate-600 text-center relative transform scale-90 transition-transform duration-300" id="modal-card">
+            
+            <div id="modal-icon-wrapper" class="w-20 h-20 rounded-3xl bg-cyan-500/20 border-2 border-cyan-400 text-cyan-300 flex items-center justify-center text-3xl mx-auto mb-4 animate-float">
+                <i id="modal-icon" class="fa-solid fa-trophy"></i>
+            </div>
+
+            <h3 id="modal-title" class="text-2xl font-bold font-heading text-white mb-2">Чудова робота!</h3>
+            <p id="modal-body" class="text-slate-300 text-sm mb-6 leading-relaxed">
+                Ти успішно пройшов цей модуль та отримав фрагмент казки!
+            </p>
+
+            <div class="flex items-center justify-center space-x-4">
+                <button id="modal-primary-btn" onclick="closeModal()" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-cyan-500/30 transition-all active:scale-95">
+                    Продовжити
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* SOUND SYNTHESIZER (Web Audio API - No External Audio Files needed) */
+        let soundEnabled = true;
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                if (!audioCtx) audioCtx = new AudioCtx();
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                } else if (type === 'success') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.setValueAtTime(180, now + 0.1);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                }
+            } catch (e) {
+                console.log("Audio not allowed yet");
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            if (soundEnabled) {
+                icon.className = "fa-solid fa-volume-high text-lg";
+                playSound('click');
+            } else {
+                icon.className = "fa-solid fa-volume-xmark text-lg text-slate-500";
+            }
+        }
+
+        /* GAME STATE MANAGEMENT */
+        let currentGameIndex = 1;
+        const completedGames = [false, false, false, false, false];
+        let touchSelectedItem = null; // Dual interaction for touch screen compatibility
+
+        // Fisher-Yates Shuffle Utility
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        /* GAME 1 DATA & ENGINE (Види творчості) */
+        const game1Categories = [
+            { id: 'tech', label: 'Технічна', icon: 'fa-robot', color: 'border-cyan-500/40 text-cyan-400 bg-cyan-500/10' },
+            { id: 'art', label: 'Художня', icon: 'fa-palette', color: 'border-rose-500/40 text-rose-400 bg-rose-500/10' },
+            { id: 'lit', label: 'Літературна', icon: 'fa-book-open', color: 'border-amber-500/40 text-amber-400 bg-amber-500/10' },
+            { id: 'sci', label: 'Наукова', icon: 'fa-flask', color: 'border-purple-500/40 text-purple-400 bg-purple-500/10' },
+            { id: 'mus', label: 'Музична', icon: 'fa-music', color: 'border-emerald-500/40 text-emerald-400 bg-emerald-500/10' }
+        ];
+
+        const game1RawItems = [
+            { id: 'i1', text: 'Конструювання робота з лего', cat: 'tech' },
+            { id: 'i2', text: 'Малювання пейзажу фарбами', cat: 'art' },
+            { id: 'i3', text: 'Написання вірша або казки', cat: 'lit' },
+            { id: 'i4', text: 'Проведення хімічного досліду', cat: 'sci' },
+            { id: 'i5', text: 'Складання мелодії на піаніно', cat: 'mus' },
+            { id: 'i6', text: '3D-моделювання деталі', cat: 'tech' },
+            { id: 'i7', text: 'Ліплення скульптури з глини', cat: 'art' },
+            { id: 'i8', text: 'Спостереження за зірками', cat: 'sci' }
+        ];
+
+        function renderGame1() {
+            const shuffledItems = shuffleArray(game1RawItems);
+            let html = `
+                <div class="space-y-6">
+                    <p class="text-sm text-slate-300">
+                        Розподіліть приклади діяльності за відповідними видами творчості. Торкніться картки, а потім торкніться потрібної категорії або перетягніть її:
+                    </p>
+
+                    <!-- Items Source Pool -->
+                    <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-700/80">
+                        <div class="text-xs uppercase font-bold tracking-wider text-slate-400 mb-3 flex items-center space-x-2">
+                            <i class="fa-solid fa-boxes-stacked text-cyan-400"></i>
+                            <span>Доступні картки:</span>
+                        </div>
+                        <div id="g1-items-pool" class="flex flex-wrap gap-2.5 min-h-[60px] p-2 rounded-xl bg-slate-950/50">
+                            ${shuffledItems.map(item => `
+                                <div id="g1-item-${item.id}" 
+                                     data-id="${item.id}" 
+                                     data-cat="${item.cat}"
+                                     draggable="true" 
+                                     ondragstart="handleDragStart(event)"
+                                     onclick="handleItemSelect('${item.id}', 'g1')"
+                                     class="g1-card cursor-pointer p-3 rounded-xl glass-btn border border-slate-600/80 text-xs font-semibold text-slate-100 shadow-md hover:border-cyan-400 active:scale-95 transition-all flex items-center space-x-2 select-none">
+                                    <i class="fa-solid fa-grip-vertical text-slate-500"></i>
+                                    <span>${item.text}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Target Categories Containers -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        ${game1Categories.map(cat => `
+                            <div id="g1-target-${cat.id}" 
+                                 data-cat="${cat.id}"
+                                 ondragover="handleDragOver(event)"
+                                 ondragleave="handleDragLeave(event)"
+                                 ondrop="handleDrop(event, '${cat.id}', 'g1')"
+                                 onclick="handleTargetClick('${cat.id}', 'g1')"
+                                 class="p-3.5 rounded-2xl bg-slate-900/50 border ${cat.color} min-h-[120px] flex flex-col transition-all cursor-pointer hover:bg-slate-800/40">
+                                
+                                <div class="flex items-center space-x-2 pb-2 mb-2 border-b border-slate-700/50 font-heading font-bold text-sm">
+                                    <i class="fa-solid ${cat.icon}"></i>
+                                    <span>${cat.label}</span>
+                                </div>
+
+                                <div id="g1-bucket-${cat.id}" class="g1-bucket flex-grow flex flex-col gap-2 p-1 rounded-xl">
+                                    <!-- Dropped cards land here -->
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            document.getElementById('game-stage').innerHTML = html;
+        }
+
+        /* GAME 2 DATA & ENGINE (Цифрова чи Традиційна) */
+        const game2Items = [
+            { id: 'g2_1', title: 'Малювання в графічному редакторі', type: 'digital', icon: 'fa-laptop-code' },
+            { id: 'g2_2', title: 'Вишивання нитками на канві', type: 'trad', icon: 'fa-scissors' },
+            { id: 'g2_3', title: 'Створення 3D-моделі будинку', type: 'digital', icon: 'fa-cube' },
+            { id: 'g2_4', title: 'Виготовлення аплікації з паперу', type: 'trad', icon: 'fa-file-lines' },
+            { id: 'g2_5', title: 'Запис електронної музики в додатку', type: 'digital', icon: 'fa-sliders' },
+            { id: 'g2_6', title: 'Гра на акустичній гітарі', type: 'trad', icon: 'fa-guitar' }
+        ];
+
+        function renderGame2() {
+            const shuffled = shuffleArray(game2Items);
+            let html = `
+                <div class="space-y-6">
+                    <p class="text-sm text-slate-300">
+                        Розподіліть картки творчих робіт у відповідний стовпчик: <b class="text-purple-300">Цифрова творчість</b> (використання цифрових пристроїв) або <b class="text-amber-300">Традиційна творчість</b>.
+                    </p>
+
+                    <!-- Source items -->
+                    <div id="g2-source-pool" class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-2xl bg-slate-900/80 border border-slate-700">
+                        ${shuffled.map(item => `
+                            <div id="g2-item-${item.id}" 
+                                 data-id="${item.id}" 
+                                 data-type="${item.type}"
+                                 onclick="handleGame2Select('${item.id}')"
+                                 class="g2-card cursor-pointer p-3.5 rounded-xl glass-btn border border-slate-600 text-xs font-bold text-slate-100 flex items-center justify-between transition-all hover:border-purple-400 select-none">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fa-solid ${item.icon} text-purple-400 text-base"></i>
+                                    <span>${item.title}</span>
+                                </div>
+                                <i class="fa-solid fa-arrows-left-right text-slate-500"></i>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <!-- 2 Target Columns -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Digital Bucket -->
+                        <div id="g2-bucket-digital" 
+                             onclick="assignGame2ToBucket('digital')"
+                             class="p-4 rounded-2xl bg-purple-950/20 border-2 border-purple-500/40 min-h-[160px] flex flex-col transition-all cursor-pointer hover:bg-purple-900/30">
+                            <div class="flex items-center space-x-2 pb-2 mb-3 border-b border-purple-500/30 text-purple-300 font-heading font-bold text-base">
+                                <i class="fa-solid fa-display"></i>
+                                <span>Цифрова творчість</span>
+                            </div>
+                            <div id="g2-list-digital" class="flex flex-col gap-2 flex-grow">
+                                <!-- Target items -->
+                            </div>
+                        </div>
+
+                        <!-- Traditional Bucket -->
+                        <div id="g2-bucket-trad" 
+                             onclick="assignGame2ToBucket('trad')"
+                             class="p-4 rounded-2xl bg-amber-950/20 border-2 border-amber-500/40 min-h-[160px] flex flex-col transition-all cursor-pointer hover:bg-amber-900/30">
+                            <div class="flex items-center space-x-2 pb-2 mb-3 border-b border-amber-500/30 text-amber-300 font-heading font-bold text-base">
+                                <i class="fa-solid fa-hands-holding"></i>
+                                <span>Традиційна творчість</span>
+                            </div>
+                            <div id="g2-list-trad" class="flex flex-col gap-2 flex-grow">
+                                <!-- Target items -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('game-stage').innerHTML = html;
+        }
+
+        let game2SelectedId = null;
+        function handleGame2Select(id) {
+            playSound('click');
+            if (game2SelectedId) {
+                const prev = document.getElementById(`g2-item-${game2SelectedId}`);
+                if (prev) prev.classList.remove('touch-selected');
+            }
+            game2SelectedId = id;
+            const curr = document.getElementById(`g2-item-${id}`);
+            if (curr) curr.classList.add('touch-selected');
+            
+            document.getElementById('feedback-msg').innerHTML = `<i class="fa-solid fa-arrow-pointer text-cyan-400"></i> Тепер оберіть відповідну колонку знизу!`;
+        }
+
+        function assignGame2ToBucket(bucketType) {
+            if (!game2SelectedId) return;
+            playSound('click');
+            const itemEl = document.getElementById(`g2-item-${game2SelectedId}`);
+            if (!itemEl) return;
+
+            itemEl.classList.remove('touch-selected');
+            const targetList = document.getElementById(`g2-list-${bucketType}`);
+            targetList.appendChild(itemEl);
+
+            game2SelectedId = null;
+            document.getElementById('feedback-msg').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> Картку розміщено! Продовжуйте.`;
+        }
+
+        /* GAME 3 DATA & ENGINE (Конструктор аватарки та безпека) */
+        let avatarConfig = {
+            bgColor: '#1e293b',
+            skinColor: '#f87171',
+            eyes: 'normal',
+            accessory: 'glasses',
+            hasRealPhoto: false
+        };
+
+        function renderGame3() {
+            let html = `
+                <div class="space-y-6">
+                    <p class="text-sm text-slate-300">
+                        <b>Аватарка</b> — це цифровий образ для захисту та вираження власних інтересів. Налаштуйте безпечну аватарку для навчального профілю та дайте відповідь на запитання щодо приватності.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                        <!-- Vector Interactive Avatar Preview -->
+                        <div class="md:col-span-5 flex flex-col items-center justify-center p-5 rounded-2xl bg-slate-900/90 border border-slate-700">
+                            <div id="avatar-svg-box" class="w-40 h-40 rounded-full border-4 border-cyan-400/50 shadow-xl flex items-center justify-center relative overflow-hidden transition-all" style="background-color: ${avatarConfig.bgColor};">
+                                <!-- Dynamic SVG Vector Avatar -->
+                                <svg class="w-32 h-32" viewBox="0 0 100 100">
+                                    <!-- Body -->
+                                    <path d="M20,90 Q50,60 80,90" fill="#38bdf8" />
+                                    <!-- Head -->
+                                    <circle cx="50" cy="45" r="26" fill="${avatarConfig.skinColor}" />
+                                    <!-- Eyes -->
+                                    <g id="svg-eyes">
+                                        <circle cx="40" cy="42" r="3" fill="#0f172a" />
+                                        <circle cx="60" cy="42" r="3" fill="#0f172a" />
+                                    </g>
+                                    <!-- Smile -->
+                                    <path d="M42,55 Q50,62 58,55" stroke="#0f172a" stroke-width="2.5" fill="none" stroke-linecap="round" />
+                                    <!-- Accessories Layer -->
+                                    <g id="svg-acc">
+                                        <!-- Glasses -->
+                                        <rect x="33" y="38" width="14" height="10" rx="2" fill="none" stroke="#38bdf8" stroke-width="2"/>
+                                        <rect x="53" y="38" width="14" height="10" rx="2" fill="none" stroke="#38bdf8" stroke-width="2"/>
+                                        <line x1="47" y1="43" x2="53" y2="43" stroke="#38bdf8" stroke-width="2"/>
+                                    </g>
+                                </svg>
+                            </div>
+                            <span class="mt-3 text-xs font-bold font-heading text-cyan-300">Ваш Інтерактивний Аватар</span>
+                        </div>
+
+                        <!-- Controls Panel -->
+                        <div class="md:col-span-7 space-y-3">
+                            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Налаштування Вигляду:</div>
+                            
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="updateAvatar('bg', '#1e293b')" class="p-2 rounded-xl glass-btn text-xs font-semibold flex items-center justify-center space-x-1.5">
+                                    <span class="w-3 h-3 rounded-full bg-slate-800 border border-white/40"></span>
+                                    <span>Темний фон</span>
+                                </button>
+                                <button onclick="updateAvatar('bg', '#4c1d95')" class="p-2 rounded-xl glass-btn text-xs font-semibold flex items-center justify-center space-x-1.5">
+                                    <span class="w-3 h-3 rounded-full bg-purple-900 border border-white/40"></span>
+                                    <span>Фіолетовий</span>
+                                </button>
+                                <button onclick="updateAvatar('bg', '#065f46')" class="p-2 rounded-xl glass-btn text-xs font-semibold flex items-center justify-center space-x-1.5">
+                                    <span class="w-3 h-3 rounded-full bg-emerald-800 border border-white/40"></span>
+                                    <span>Смарагдовий</span>
+                                </button>
+                                <button onclick="updateAvatar('bg', '#991b1b')" class="p-2 rounded-xl glass-btn text-xs font-semibold flex items-center justify-center space-x-1.5">
+                                    <span class="w-3 h-3 rounded-full bg-rose-900 border border-white/40"></span>
+                                    <span>Бордовий</span>
+                                </button>
+                            </div>
+
+                            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider pt-2">Аксесуари:</div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="updateAvatar('acc', 'glasses')" class="p-2 rounded-xl glass-btn text-xs font-semibold">
+                                    <i class="fa-solid fa-glasses mr-1 text-cyan-400"></i> Окуляри
+                                </button>
+                                <button onclick="updateAvatar('acc', 'headphones')" class="p-2 rounded-xl glass-btn text-xs font-semibold">
+                                    <i class="fa-solid fa-headphones mr-1 text-purple-400"></i> Навушники
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Safety Quiz Component -->
+                    <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-700/80 space-y-3">
+                        <div class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center space-x-2">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <span>Питання з безпеки профілю:</span>
+                        </div>
+                        <p class="text-sm font-semibold text-slate-200">
+                            Яку інформацію БЕЗПЕЧНО розміщувати на аватарці або в описі публічного профілю?
+                        </p>
+
+                        <div class="space-y-2" id="g3-quiz-options">
+                            <label class="p-3 rounded-xl glass-btn flex items-center space-x-3 cursor-pointer hover:bg-slate-800">
+                                <input type="radio" name="g3_question" value="wrong1" class="w-4 h-4 text-cyan-500">
+                                <span class="text-xs text-slate-200">Домашню адресу, номер школи та повне ім'я з прізвищем</span>
+                            </label>
+                            <label class="p-3 rounded-xl glass-btn flex items-center space-x-3 cursor-pointer hover:bg-slate-800">
+                                <input type="radio" name="g3_question" value="correct" class="w-4 h-4 text-cyan-500">
+                                <span class="text-xs text-slate-200">Мальований аватар та інформацію про свої захоплення (наприклад, хобі, улюблені книги)</span>
+                            </label>
+                            <label class="p-3 rounded-xl glass-btn flex items-center space-x-3 cursor-pointer hover:bg-slate-800">
+                                <input type="radio" name="g3_question" value="wrong2" class="w-4 h-4 text-cyan-500">
+                                <span class="text-xs text-slate-200">Номери телефонів та паролі від своїх акаунтів</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('game-stage').innerHTML = html;
+        }
+
+        function updateAvatar(type, val) {
+            playSound('click');
+            if (type === 'bg') {
+                avatarConfig.bgColor = val;
+                document.getElementById('avatar-svg-box').style.backgroundColor = val;
+            } else if (type === 'acc') {
+                const accGroup = document.getElementById('svg-acc');
+                if (val === 'glasses') {
+                    accGroup.innerHTML = `
+                        <rect x="33" y="38" width="14" height="10" rx="2" fill="none" stroke="#38bdf8" stroke-width="2"/>
+                        <rect x="53" y="38" width="14" height="10" rx="2" fill="none" stroke="#38bdf8" stroke-width="2"/>
+                        <line x1="47" y1="43" x2="53" y2="43" stroke="#38bdf8" stroke-width="2"/>
+                    `;
+                } else if (val === 'headphones') {
+                    accGroup.innerHTML = `
+                        <path d="M22,45 A28,28 0 0,1 78,45" fill="none" stroke="#c084fc" stroke-width="4" />
+                        <rect x="18" y="40" width="8" height="16" rx="3" fill="#a855f7"/>
+                        <rect x="74" y="40" width="8" height="16" rx="3" fill="#a855f7"/>
+                    `;
+                }
+            }
+        }
+
+        /* GAME 4 DATA & ENGINE (Алгоритм збереження аватарки) */
+        const game4Steps = [
+            { stepId: 1, text: 'Натиснути правою кнопкою миші на зображення аватарки або кнопку "Завантажити"', order: 1 },
+            { stepId: 2, text: 'У контекстному меню обрати пункт "Зберегти зображення як..."', order: 2 },
+            { stepId: 3, text: 'У вікні огляду обрати потрібну папку на комп’ютері (наприклад, "Зображення")', order: 3 },
+            { stepId: 4, text: 'Натиснути кнопку "Зберегти" внизу вікна', order: 4 }
+        ];
+
+        let game4CurrentOrder = [];
+
+        function renderGame4() {
+            game4CurrentOrder = shuffleArray(game4Steps);
+            let html = `
+                <div class="space-y-6">
+                    <p class="text-sm text-slate-300">
+                        Розташуйте кроки <b>алгоритму завантаження та збереження аватарки</b> у правильній послідовності (від першої дії до останньої):
+                    </p>
+
+                    <div id="g4-sequence-list" class="space-y-3">
+                        ${game4CurrentOrder.map((item, idx) => `
+                            <div id="g4-step-${item.stepId}" 
+                                 onclick="moveGame4Step(${idx})"
+                                 class="p-4 rounded-2xl glass-card border border-slate-600/80 flex items-center justify-between cursor-pointer hover:border-amber-400 active:scale-98 transition-all select-none">
+                                <div class="flex items-center space-x-3.5">
+                                    <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/40 font-extrabold flex items-center justify-center text-sm">
+                                        ${idx + 1}
+                                    </div>
+                                    <span class="text-xs sm:text-sm font-bold text-slate-100">${item.text}</span>
+                                </div>
+                                <div class="flex items-center space-x-1 text-slate-400 text-xs">
+                                    <i class="fa-solid fa-arrows-up-down"></i>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-700/60 text-xs text-slate-400 flex items-center space-x-2">
+                        <i class="fa-solid fa-lightbulb text-amber-400"></i>
+                        <span>Натисніть на крок, щоб перемістити його вниз у списку та впорядкувати алгоритм!</span>
+                    </div>
+                </div>
+            `;
+            document.getElementById('game-stage').innerHTML = html;
+        }
+
+        function moveGame4Step(idx) {
+            playSound('click');
+            // Move selected element down cyclicly
+            const item = game4CurrentOrder.splice(idx, 1)[0];
+            game4CurrentOrder.push(item);
+            
+            // Re-render sequence
+            renderGame4StepList();
+        }
+
+        function renderGame4StepList() {
+            const container = document.getElementById('g4-sequence-list');
+            if (!container) return;
+
+            container.innerHTML = game4CurrentOrder.map((item, idx) => `
+                <div id="g4-step-${item.stepId}" 
+                     onclick="moveGame4Step(${idx})"
+                     class="p-4 rounded-2xl glass-card border border-slate-600/80 flex items-center justify-between cursor-pointer hover:border-amber-400 active:scale-98 transition-all select-none">
+                    <div class="flex items-center space-x-3.5">
+                        <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/40 font-extrabold flex items-center justify-center text-sm">
+                            ${idx + 1}
+                        </div>
+                        <span class="text-xs sm:text-sm font-bold text-slate-100">${item.text}</span>
+                    </div>
+                    <div class="flex items-center space-x-1 text-slate-400 text-xs">
+                        <i class="fa-solid fa-arrows-up-down"></i>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        /* GAME 5 DATA & ENGINE (Зв'язки сервісів та понять) */
+        const game5Pairs = [
+            { id: 'p1', left: 'Canva / Малювання онлайн', right: 'Створення цифрових ілюстрацій та листівок', key: 1 },
+            { id: 'p2', left: 'Конструктор Аватарок', right: 'Створення безпечного образу для власного профілю', key: 2 },
+            { id: 'p3', left: 'Папка "Завантаження"', right: 'Місце збереження файлів із мережі Інтернет', key: 3 },
+            { id: 'p4', left: 'Нікнейм замість прізвища', right: 'Захист конфіденційності особистих даних у мережі', key: 4 }
+        ];
+
+        let game5SelectedLeft = null;
+        let game5SelectedRight = null;
+        let game5Matches = {};
+
+        function renderGame5() {
+            const leftList = shuffleArray(game5Pairs.map(p => ({ id: p.id, text: p.left, key: p.key })));
+            const rightList = shuffleArray(game5Pairs.map(p => ({ id: p.id, text: p.right, key: p.key })));
+            game5Matches = {};
+            game5SelectedLeft = null;
+            game5SelectedRight = null;
+
+            let html = `
+                <div class="space-y-6">
+                    <p class="text-sm text-slate-300">
+                        Встановіть відповідність між <b>Інтернет-сервісом / Поняттям</b> та його <b>призначенням</b>. Натисніть поняття ліворуч, а потім його пару праворуч:
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Left items -->
+                        <div class="space-y-3">
+                            <div class="text-xs font-bold uppercase tracking-wider text-rose-400 mb-2">Сервіси та Інструменти:</div>
+                            ${leftList.map(item => `
+                                <div id="g5-left-${item.key}" 
+                                     onclick="selectGame5Node('left', ${item.key})"
+                                     class="p-4 rounded-2xl glass-btn border border-slate-600/80 text-xs font-bold text-slate-100 cursor-pointer hover:border-rose-400 flex items-center justify-between select-none transition-all">
+                                    <span>${item.text}</span>
+                                    <i class="fa-solid fa-circle-dot text-rose-400"></i>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <!-- Right items -->
+                        <div class="space-y-3">
+                            <div class="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2">Призначення / Функція:</div>
+                            ${rightList.map(item => `
+                                <div id="g5-right-${item.key}" 
+                                     onclick="selectGame5Node('right', ${item.key})"
+                                     class="p-4 rounded-2xl glass-btn border border-slate-600/80 text-xs font-bold text-slate-100 cursor-pointer hover:border-cyan-400 flex items-center justify-between select-none transition-all">
+                                    <i class="fa-solid fa-circle-dot text-cyan-400"></i>
+                                    <span class="text-right">${item.text}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('game-stage').innerHTML = html;
+        }
+
+        function selectGame5Node(side, key) {
+            playSound('click');
+            if (side === 'left') {
+                if (game5SelectedLeft) {
+                    const prev = document.getElementById(`g5-left-${game5SelectedLeft}`);
+                    if (prev) prev.classList.remove('touch-selected');
+                }
+                game5SelectedLeft = key;
+                const curr = document.getElementById(`g5-left-${key}`);
+                if (curr) curr.classList.add('touch-selected');
+            } else {
+                if (game5SelectedRight) {
+                    const prev = document.getElementById(`g5-right-${game5SelectedRight}`);
+                    if (prev) prev.classList.remove('touch-selected');
+                }
+                game5SelectedRight = key;
+                const curr = document.getElementById(`g5-right-${key}`);
+                if (curr) curr.classList.add('touch-selected');
+            }
+
+            // If both sides selected, attempt pairing
+            if (game5SelectedLeft && game5SelectedRight) {
+                game5Matches[game5SelectedLeft] = game5SelectedRight;
+
+                const leftEl = document.getElementById(`g5-left-${game5SelectedLeft}`);
+                const rightEl = document.getElementById(`g5-right-${game5SelectedRight}`);
+
+                if (leftEl) {
+                    leftEl.classList.remove('touch-selected');
+                    leftEl.classList.add('border-emerald-500', 'bg-emerald-500/10');
+                }
+                if (rightEl) {
+                    rightEl.classList.remove('touch-selected');
+                    rightEl.classList.add('border-emerald-500', 'bg-emerald-500/10');
+                }
+
+                game5SelectedLeft = null;
+                game5SelectedRight = null;
+
+                document.getElementById('feedback-msg').innerHTML = `<i class="fa-solid fa-link text-emerald-400"></i> Побудовано з'єднання!`;
+            }
+        }
+
+        /* GENERAL DRAG AND DROP / TOUCH SELECTION ENGINE (Works on both PC & Mobile Touch) */
+        let draggedItemId = null;
+
+        function handleDragStart(e) {
+            draggedItemId = e.target.getAttribute('data-id');
+            e.dataTransfer.setData('text/plain', draggedItemId);
+            playSound('click');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drop-target-active');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drop-target-active');
+        }
+
+        function handleDrop(e, targetCatId, gameType) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drop-target-active');
+            const itemId = e.dataTransfer.getData('text/plain') || draggedItemId;
+            
+            if (itemId && gameType === 'g1') {
+                moveG1ItemToBucket(itemId, targetCatId);
+            }
+        }
+
+        function handleItemSelect(itemId, gameType) {
+            playSound('click');
+            if (touchSelectedItem) {
+                const prev = document.getElementById(`g1-item-${touchSelectedItem}`);
+                if (prev) prev.classList.remove('touch-selected');
+            }
+
+            touchSelectedItem = itemId;
+            const curr = document.getElementById(`g1-item-${itemId}`);
+            if (curr) curr.classList.add('touch-selected');
+
+            document.getElementById('feedback-msg').innerHTML = `<i class="fa-solid fa-hand-pointer text-cyan-400"></i> Картку обрано! Тепер торкніться блоку відповідної категорії!`;
+        }
+
+        function handleTargetClick(targetCatId, gameType) {
+            if (!touchSelectedItem) return;
+            moveG1ItemToBucket(touchSelectedItem, targetCatId);
+            touchSelectedItem = null;
+        }
+
+        function moveG1ItemToBucket(itemId, targetCatId) {
+            playSound('click');
+            const itemEl = document.getElementById(`g1-item-${itemId}`);
+            const bucketEl = document.getElementById(`g1-bucket-${targetCatId}`);
+
+            if (itemEl && bucketEl) {
+                itemEl.classList.remove('touch-selected');
+                bucketEl.appendChild(itemEl);
+                document.getElementById('feedback-msg').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> Переміщено в категорію!`;
+            }
+        }
+
+        /* GAME SWITCHING & NAVIGATION */
+        function switchGame(index) {
+            playSound('click');
+            currentGameIndex = index;
+            updateNavUI();
+
+            const titleMap = {
+                1: { title: "Види Творчості", sub: "Міні-гра #1 • Класифікація", icon: "fa-cubes-stacked", badgeColor: "bg-cyan-500/20 text-cyan-400 border-cyan-500/40" },
+                2: { title: "Цифрова чи Традиційна?", sub: "Міні-гра #2 • Порівняння", icon: "fa-code-compare", badgeColor: "bg-purple-500/20 text-purple-400 border-purple-500/40" },
+                3: { title: "Аватарка та Безпека", sub: "Міні-гра #3 • Конструктор", icon: "fa-user-gear", badgeColor: "bg-emerald-500/20 text-emerald-400 border-emerald-500/40" },
+                4: { title: "Алгоритм Збереження", sub: "Міні-гра #4 • Послідовність", icon: "fa-list-check", badgeColor: "bg-amber-500/20 text-amber-400 border-amber-500/40" },
+                5: { title: "Сервіси та Поняття", sub: "Міні-гра #5 • Відповідності", icon: "fa-network-wired", badgeColor: "bg-rose-500/20 text-rose-400 border-rose-500/40" }
+            };
+
+            const info = titleMap[index];
+            document.getElementById('game-title').innerText = info.title;
+            document.getElementById('game-subtitle').innerText = info.sub;
+            const badge = document.getElementById('game-icon-badge');
+            badge.className = `w-12 h-12 rounded-2xl border flex items-center justify-center text-xl shadow-md ${info.badgeColor}`;
+            badge.innerHTML = `<i class="fa-solid ${info.icon}"></i>`;
+
+            // Reset Feedback
+            document.getElementById('feedback-msg').innerHTML = `<i class="fa-solid fa-circle-info text-cyan-400"></i> Виконай практичне завдання та натисни "Перевірити"!`;
+
+            // Render active game
+            if (index === 1) renderGame1();
+            else if (index === 2) renderGame2();
+            else if (index === 3) renderGame3();
+            else if (index === 4) renderGame4();
+            else if (index === 5) renderGame5();
+        }
+
+        function updateNavUI() {
+            for (let i = 1; i <= 5; i++) {
+                const btn = document.getElementById(`nav-btn-${i}`);
+                const icon = document.getElementById(`status-icon-${i}`);
+
+                if (i === currentGameIndex) {
+                    btn.className = "w-full p-3.5 rounded-2xl flex items-center justify-between text-left transition-all bg-gradient-to-r from-cyan-600/30 to-indigo-600/30 border border-cyan-500/50 shadow-md";
+                } else {
+                    btn.className = "w-full p-3.5 rounded-2xl flex items-center justify-between text-left transition-all glass-btn opacity-80 hover:opacity-100";
+                }
+
+                if (completedGames[i - 1]) {
+                    icon.className = "fa-solid fa-circle-check text-emerald-400 text-lg";
+                } else if (i === currentGameIndex) {
+                    icon.className = "fa-solid fa-circle-play text-cyan-400 text-lg animate-pulse";
+                } else {
+                    icon.className = "fa-solid fa-circle text-slate-600 text-sm";
+                }
+            }
+
+            // Update Puzzle Counter
+            const count = completedGames.filter(Boolean).length;
+            document.getElementById('puzzle-count').innerText = `${count}/5`;
+        }
+
+        function resetCurrentGame() {
+            playSound('click');
+            switchGame(currentGameIndex);
+        }
+
+        /* CHECKING ANSWERS & PUZZLE UNLOCKING */
+        function checkCurrentGame() {
+            let isCorrect = false;
+
+            if (currentGameIndex === 1) {
+                // Check if all items are inside correct category bucket
+                let totalCorrect = 0;
+                game1RawItems.forEach(item => {
+                    const el = document.getElementById(`g1-item-${item.id}`);
+                    if (el && el.parentElement) {
+                        const parentBucket = el.parentElement.closest('[data-cat]');
+                        if (parentBucket && parentBucket.getAttribute('data-cat') === item.cat) {
+                            totalCorrect++;
+                        }
+                    }
+                });
+
+                if (totalCorrect === game1RawItems.length) {
+                    isCorrect = true;
+                } else {
+                    showFeedbackError(`Розподілено правильно: ${totalCorrect} з ${game1RawItems.length}. Перевірте ще раз!`);
+                }
+            } else if (currentGameIndex === 2) {
+                let totalCorrect = 0;
+                game2Items.forEach(item => {
+                    const el = document.getElementById(`g2-item-${item.id}`);
+                    if (el && el.parentElement) {
+                        const isDigital = el.parentElement.id === 'g2-list-digital' && item.type === 'digital';
+                        const isTrad = el.parentElement.id === 'g2-list-trad' && item.type === 'trad';
+                        if (isDigital || isTrad) totalCorrect++;
+                    }
+                });
+
+                if (totalCorrect === game2Items.length) {
+                    isCorrect = true;
+                } else {
+                    showFeedbackError(`Вірно класифіковано: ${totalCorrect} з ${game2Items.length}. Спробуйте ще!`);
+                }
+            } else if (currentGameIndex === 3) {
+                const selectedQuiz = document.querySelector('input[name="g3_question"]:checked');
+                if (selectedQuiz && selectedQuiz.value === 'correct') {
+                    isCorrect = true;
+                } else {
+                    showFeedbackError("Зверніть увагу на правила збереження особистих даних!");
+                }
+            } else if (currentGameIndex === 4) {
+                // Check exact sequential algorithm order
+                let isOrdered = true;
+                for (let i = 0; i < game4CurrentOrder.length; i++) {
+                    if (game4CurrentOrder[i].order !== i + 1) {
+                        isOrdered = false;
+                        break;
+                    }
+                }
+
+                if (isOrdered) {
+                    isCorrect = true;
+                } else {
+                    showFeedbackError("Послідовність алгоритму містить помилки. Перевірте порядок кроків!");
+                }
+            } else if (currentGameIndex === 5) {
+                let totalCorrectPairs = 0;
+                Object.keys(game5Matches).forEach(key => {
+                    if (parseInt(key) === parseInt(game5Matches[key])) {
+                        totalCorrectPairs++;
+                    }
+                });
+
+                if (totalCorrectPairs === game5Pairs.length) {
+                    isCorrect = true;
+                } else {
+                    showFeedbackError(`Вірно з'єднано: ${totalCorrectPairs} з ${game5Pairs.length}. Відкоригуйте зв'язки!`);
+                }
+            }
+
+            if (isCorrect) {
+                playSound('success');
+                completedGames[currentGameIndex - 1] = true;
+                unlockPuzzlePiece(currentGameIndex);
+                updateNavUI();
+
+                if (completedGames.every(Boolean)) {
+                    // Entire game completed!
+                    triggerVictoryModal();
+                } else {
+                    showModal(
+                        "Чудово виконано!",
+                        `Ви правильно пройшли модуль #${currentGameIndex} та здобули новий фрагмент ілюстрації казки!`,
+                        "fa-puzzle-piece"
+                    );
+                }
+            } else {
+                playSound('error');
+            }
+        }
+
+        function showFeedbackError(msg) {
+            const feedback = document.getElementById('feedback-msg');
+            feedback.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-400"></i> <span class="text-rose-300">${msg}</span>`;
+        }
+
+        /* FAIRY TALE PUZZLE UNLOCK ENGINE */
+        const puzzleSVGData = [
+            // Fragment 1 (Top Left)
+            `<svg viewBox="0 0 100 100" class="w-full h-full"><rect width="100" height="100" fill="#1e1b4b"/><circle cx="50" cy="50" r="30" fill="#f59e0b"/><path d="M10 80 Q 50 20 90 80" stroke="#38bdf8" stroke-width="6" fill="none"/></svg>`,
+            // Fragment 2 (Top Center)
+            `<svg viewBox="0 0 100 100" class="w-full h-full"><rect width="100" height="100" fill="#0f172a"/><polygon points="50,15 90,85 10,85" fill="#8b5cf6"/><circle cx="50" cy="55" r="12" fill="#10b981"/></svg>`,
+            // Fragment 3 (Top Right)
+            `<svg viewBox="0 0 100 100" class="w-full h-full"><rect width="100" height="100" fill="#312e81"/><path d="M20,30 C50,10 50,90 80,30" stroke="#f43f5e" stroke-width="8" fill="none"/></svg>`,
+            // Fragment 4 (Bottom Left)
+            `<svg viewBox="0 0 100 100" class="w-full h-full"><rect width="100" height="100" fill="#0284c7"/><circle cx="30" cy="40" r="20" fill="#fde047"/><path d="M10,90 L90,90 L50,40 Z" fill="#059669"/></svg>`,
+            // Fragment 5 (Bottom Right / Double wide)
+            `<svg viewBox="0 0 200 100" class="w-full h-full"><rect width="200" height="100" fill="#1e293b"/><text x="100" y="55" font-family="Comfortaa" font-size="20" fill="#38bdf8" font-weight="bold" text-anchor="middle">Мудра Дівчина</text><path d="M20,80 Q100,20 180,80" stroke="#a855f7" stroke-width="4" fill="none"/></svg>`
+        ];
+
+        function unlockPuzzlePiece(pieceNum) {
+            const tile = document.getElementById(`puzzle-tile-${pieceNum}`);
+            if (tile) {
+                tile.classList.remove('locked');
+                tile.className = "puzzle-piece rounded-lg flex items-center justify-center bg-slate-900 border border-cyan-400/50 shadow-lg overflow-hidden transition-all duration-700 transform scale-100";
+                tile.innerHTML = puzzleSVGData[pieceNum - 1];
+            }
+
+            const count = completedGames.filter(Boolean).length;
+            if (count >= 5) {
+                document.getElementById('fairy-tale-title').innerText = "Казка: 'Мудра Дівчина' (Розгадано!)";
+                document.getElementById('fairy-tale-title').className = "mt-3 text-xs font-extrabold text-amber-300 font-heading animate-pulse";
+            }
+        }
+
+        /* MODAL ENGINE */
+        function showModal(title, bodyText, iconClass) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-body').innerText = bodyText;
+            document.getElementById('modal-icon').className = `fa-solid ${iconClass}`;
+
+            const overlay = document.getElementById('modal-overlay');
+            const card = document.getElementById('modal-card');
+
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+            card.classList.remove('scale-90');
+            card.classList.add('scale-100');
+        }
+
+        function closeModal() {
+            playSound('click');
+            const overlay = document.getElementById('modal-overlay');
+            const card = document.getElementById('modal-card');
+
+            overlay.classList.add('opacity-0', 'pointer-events-none');
+            card.classList.remove('scale-100');
+            card.classList.add('scale-90');
+
+            // Switch to next uncompleted game if available
+            const nextUncompleted = completedGames.findIndex(val => !val);
+            if (nextUncompleted !== -1) {
+                switchGame(nextUncompleted + 1);
+            }
+        }
+
+        function triggerVictoryModal() {
+            // Launch celebratory confetti
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 120,
+                    spread: 80,
+                    origin: { y: 0.6 }
+                });
+            }
+
+            showModal(
+                "ВІТАЄМО! Всі завдання виконано!",
+                "Ви чудово засвоїли тему 'Сервіси Інтернету для Творчості та Аватарки', вирішили всі практичні місії та зібрали повну ілюстрацію до казки 'Мудра дівчина'!",
+                "fa-trophy"
+            );
+        }
+
+        function confirmRestartGame() {
+            playSound('click');
+            for (let i = 0; i < 5; i++) completedGames[i] = false;
+            
+            // Re-lock puzzle pieces
+            for (let i = 1; i <= 5; i++) {
+                const tile = document.getElementById(`puzzle-tile-${i}`);
+                if (tile) {
+                    tile.className = "puzzle-piece locked rounded-lg flex items-center justify-center bg-slate-800 text-slate-600 relative overflow-hidden";
+                    tile.innerHTML = `<i class="fa-solid fa-puzzle-piece text-xl"></i>`;
+                }
+            }
+
+            document.getElementById('fairy-tale-title').innerText = "Заблоковано • Пройдіть завдання";
+            document.getElementById('fairy-tale-title').className = "mt-3 text-xs font-semibold text-slate-400 italic";
+
+            switchGame(1);
+        }
+
+        /* INITIALIZATION */
+        window.onload = function() {
+            switchGame(1);
+        };
+    </script>
+</body>
+</html>
