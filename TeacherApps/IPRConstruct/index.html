@@ -1,0 +1,1919 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конструктор розділів ІПР для вчителів-предметників</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vue.js 3 CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+    <div id="app" class="flex-grow flex flex-col">
+        <!-- Header -->
+        <header class="bg-indigo-700 text-white shadow-md py-4 px-6 border-b border-indigo-800 sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2 bg-indigo-600 rounded-lg shadow-inner">
+                        <i class="fa-solid fa-graduation-cap text-2xl text-amber-300"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-xl leading-tight">Конструктор ІПР вчителя-предметника</h1>
+                        <p class="text-xs text-indigo-200">Формування компетентностей, цілей та очікуваних результатів для ООП</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2 text-sm bg-indigo-800/60 px-3 py-1.5 rounded-full text-indigo-100">
+                    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                    <span>Готово для вставки в офіційний документ ІПР</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-7xl w-full mx-auto p-4 sm:p-6 flex-grow grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- LEFT PANEL: Controls and Skill Matrix (7 cols) -->
+            <section class="lg:col-span-7 flex flex-col space-y-6">
+                
+                <!-- Card 0: JSON Database & Saved Profiles -->
+                <div class="bg-indigo-900 text-white p-5 rounded-xl shadow-md border border-indigo-800">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3">
+                        <h2 class="text-base font-semibold flex items-center gap-2 text-amber-300">
+                            <i class="fa-solid fa-database"></i>
+                            База даних учнів (JSON)
+                        </h2>
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <!-- Hidden File Input for JSON import -->
+                            <input 
+                                type="file" 
+                                ref="jsonFileInput" 
+                                @change="importFromJson" 
+                                accept=".json" 
+                                class="hidden" 
+                            />
+                            <button 
+                                @click="triggerFileInput" 
+                                class="flex-1 sm:flex-initial bg-indigo-700 hover:bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center justify-center gap-1.5 border border-indigo-500"
+                                title="Завантажити базу з JSON-файлу"
+                            >
+                                <i class="fa-solid fa-file-import"></i> Завантажити JSON
+                            </button>
+                            <button 
+                                @click="exportToJson" 
+                                class="flex-1 sm:flex-initial bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center justify-center gap-1.5 shadow"
+                                title="Зберегти усю базу даних у JSON-файл"
+                            >
+                                <i class="fa-solid fa-file-export"></i> Зберегти JSON
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                        <!-- Saved students dropdown selector -->
+                        <div class="md:col-span-7">
+                            <label class="block text-[11px] text-indigo-200 mb-1">Обрати учня зі збереженої бази:</label>
+                            <select 
+                                v-model="selectedStudentId" 
+                                @change="onSelectSavedStudent"
+                                class="w-full px-3 py-2 bg-indigo-950 border border-indigo-700 text-white rounded-lg text-xs outline-none focus:ring-2 focus:ring-amber-400"
+                            >
+                                <option value="">-- Новий учень (або оберіть зі списку) --</option>
+                                <option v-for="st in savedStudents" :key="st.id" :value="st.id">
+                                    {{ st.name || 'Без імені' }} <template v-if="st.grade">({{ st.grade }})</template> - {{ st.subjectTitle }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Action buttons for selected profile -->
+                        <div class="md:col-span-5 flex items-end gap-2 pt-1 md:pt-0">
+                            <button 
+                                @click="saveCurrentStudent" 
+                                class="flex-1 bg-amber-500 hover:bg-amber-400 text-indigo-950 font-bold py-2 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1.5 shadow"
+                            >
+                                <i class="fa-solid fa-floppy-disk"></i> Зберегти учня
+                            </button>
+                            <button 
+                                v-if="selectedStudentId"
+                                @click="deleteStudent(selectedStudentId)" 
+                                class="bg-rose-600 hover:bg-rose-500 text-white p-2 rounded-lg text-xs transition flex items-center justify-center"
+                                title="Видалити запис з бази"
+                            >
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 1: Primary Data -->
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <h2 class="text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-user-gear text-indigo-600"></i>
+                        Крок 1. Загальні відомості
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Student Name -->
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Прізвище та ім'я учня/учениці</label>
+                            <input 
+                                type="text" 
+                                v-model="studentName" 
+                                placeholder="напр. Іван Петренко"
+                                class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm outline-none transition"
+                            />
+                        </div>
+
+                        <!-- Student Grade / Class -->
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Клас навчання (автоматично фільтрує навички)</label>
+                            <div class="relative">
+                                <input 
+                                    type="text" 
+                                    v-model="studentGrade" 
+                                    placeholder="напр. 5-А клас або 8 клас"
+                                    list="grades-list"
+                                    class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm outline-none transition"
+                                />
+                                <datalist id="grades-list">
+                                    <option v-for="g in 11" :key="g" :value="g + ' клас'"></option>
+                                </datalist>
+                            </div>
+                            <!-- Quick grade buttons -->
+                            <div class="flex gap-1.5 mt-2 flex-wrap">
+                                <button 
+                                    v-for="g in [1, 3, 5, 7, 8, 9, 10]" 
+                                    :key="g"
+                                    @click="setGradeQuick(g)"
+                                    class="px-2 py-0.5 text-[10px] bg-slate-100 hover:bg-indigo-100 hover:text-indigo-700 text-slate-600 rounded transition font-medium"
+                                >
+                                    {{ g }} кл.
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Gender Selector -->
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Стать учня (для граматики)</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button 
+                                    @click="gender = 'male'"
+                                    :class="gender === 'male' ? 'bg-indigo-50 border-indigo-500 text-indigo-700 font-medium' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+                                    class="border px-3 py-2 rounded-lg text-sm transition flex items-center justify-center gap-2"
+                                >
+                                    <i class="fa-solid fa-mars text-blue-500"></i> Учень
+                                </button>
+                                <button 
+                                    @click="gender = 'female'"
+                                    :class="gender === 'female' ? 'bg-indigo-50 border-indigo-500 text-indigo-700 font-medium' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+                                    class="border px-3 py-2 rounded-lg text-sm transition flex items-center justify-center gap-2"
+                                >
+                                    <i class="fa-solid fa-venus text-pink-500"></i> Учениця
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Subject Selector -->
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Освітня галузь / Навчальний предмет</label>
+                            <select 
+                                v-model="selectedSubjectKey" 
+                                @change="onSubjectChange"
+                                class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm outline-none transition bg-white"
+                            >
+                                <option v-for="(subj, key) in subjects" :key="key" :value="key">
+                                    {{ subj.title }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Competency Skill Level Selector -->
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex-grow flex flex-col">
+                    <div class="flex justify-between items-center mb-2">
+                        <h2 class="text-base font-semibold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-indigo-600"></i>
+                            Крок 2. Оцінювання вмінь за напрямами
+                        </h2>
+                        <button 
+                            @click="resetSelection" 
+                            class="text-xs text-slate-500 hover:text-indigo-600 underline flex items-center gap-1"
+                        >
+                            <i class="fa-solid fa-rotate-left"></i> Скинути
+                        </button>
+                    </div>
+
+                    <!-- Grade Band Filter Indicator Badge -->
+                    <div class="flex items-center justify-between bg-indigo-50/80 border border-indigo-100 px-3 py-2 rounded-lg text-xs text-indigo-900 mb-3">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-filter text-indigo-600"></i>
+                            <span>Відображаються навички для: <strong class="text-indigo-800 font-semibold">{{ activeGradeBandLabel }}</strong></span>
+                        </div>
+                        <span class="text-[10px] bg-indigo-200/60 text-indigo-800 font-bold px-2 py-0.5 rounded-full">
+                            {{ filteredSkills.length }} напрямів
+                        </span>
+                    </div>
+
+                    <p class="text-xs text-slate-500 mb-4">
+                        Оберіть рівень володіння для кожної навички предмета 
+                        <span class="font-medium text-slate-700">"{{ currentSubject.title }}"</span>:
+                    </p>
+
+                    <!-- Skills Accordion / Cards list -->
+                    <div class="space-y-4 overflow-y-auto max-h-[550px] pr-2 custom-scrollbar">
+                        <div 
+                            v-for="(skill, skillIdx) in filteredSkills" 
+                            :key="skill.id"
+                            class="p-4 border rounded-xl bg-slate-50/50 hover:bg-slate-50 transition border-slate-200"
+                        >
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                                    <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs flex items-center justify-center font-bold">
+                                        {{ skillIdx + 1 }}
+                                    </span>
+                                    {{ skill.name }}
+                                </h3>
+                                <span v-if="getSkillLevel(skill.id) === -1" class="text-[10px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded font-medium">
+                                    Пропущено
+                                </span>
+                            </div>
+
+                            <!-- Option to skip skill -->
+                            <div class="mb-2">
+                                <label 
+                                    :class="getSkillLevel(skill.id) === -1 ? 'bg-slate-200 border-slate-400 text-slate-700 font-medium' : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'"
+                                    class="border rounded-lg p-2 text-xs cursor-pointer transition flex items-center gap-2"
+                                >
+                                    <input 
+                                        type="radio" 
+                                        :name="'skill_' + skill.id" 
+                                        :value="-1" 
+                                        :checked="getSkillLevel(skill.id) === -1"
+                                        @change="setSkillLevel(skill.id, -1)"
+                                        class="text-slate-500 focus:ring-slate-400 border-slate-300"
+                                    />
+                                    <span class="flex items-center gap-1.5">
+                                        <i class="fa-solid fa-eye-slash text-slate-400"></i>
+                                        Не потрібний варіант (не додавати цей напрям у строки ІПР)
+                                    </span>
+                                </label>
+                            </div>
+
+                            <!-- Level radio buttons grid -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2">
+                                <label 
+                                    v-for="(level, lvlIdx) in skill.levels" 
+                                    :key="lvlIdx"
+                                    :class="getSkillLevel(skill.id) === lvlIdx ? 'bg-indigo-600 text-white shadow-sm border-indigo-600' : 'bg-white text-slate-700 border-slate-200 hover:border-indigo-300'"
+                                    class="border rounded-lg p-2.5 text-xs cursor-pointer transition flex items-start gap-2.5"
+                                >
+                                    <input 
+                                        type="radio" 
+                                        :name="'skill_' + skill.id" 
+                                        :value="lvlIdx" 
+                                        :checked="getSkillLevel(skill.id) === lvlIdx"
+                                        @change="setSkillLevel(skill.id, lvlIdx)"
+                                        class="mt-0.5 text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                                    />
+                                    <div class="flex-1">
+                                        <div class="font-medium mb-0.5" :class="getSkillLevel(skill.id) === lvlIdx ? 'text-white' : 'text-slate-800'">
+                                            {{ level.label }}
+                                        </div>
+                                        <div class="text-[11px] opacity-85 leading-tight">
+                                            {{ level.shortDesc }}
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- RIGHT PANEL: Generated Output & Direct Copying (5 cols) -->
+            <section class="lg:col-span-5 flex flex-col space-y-4">
+                
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex-grow flex flex-col sticky top-20">
+                    <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
+                        <h2 class="text-base font-semibold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-file-contract text-emerald-600"></i>
+                            Сформований текст для ІПР
+                        </h2>
+                        <span class="text-[11px] bg-slate-100 text-slate-600 px-2 py-1 rounded">3 строкові блоки</span>
+                    </div>
+
+                    <!-- Notification toast -->
+                    <transition name="fade">
+                        <div v-if="toastMessage" class="mb-3 bg-emerald-600 text-white text-xs px-3 py-2 rounded-lg shadow flex items-center justify-between">
+                            <span class="flex items-center gap-2">
+                                <i class="fa-solid fa-circle-check"></i> {{ toastMessage }}
+                            </span>
+                            <i class="fa-solid fa-xmark cursor-pointer" @click="toastMessage = ''"></i>
+                        </div>
+                    </transition>
+
+                    <div class="space-y-4 text-xs flex-grow overflow-y-auto max-h-[620px] pr-1 custom-scrollbar">
+                        
+                        <!-- Line 1: Present Knowledge -->
+                        <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:border-slate-300 transition">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-slate-700 uppercase tracking-wider text-[10px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">
+                                    Строка 1: Наявні знання, вміння і навички (компетентності)
+                                </span>
+                                <button 
+                                    @click="copyToClipboard(line1, 'Строку 1 скопійовано!')"
+                                    class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1 bg-white px-2 py-1 border border-slate-200 rounded hover:bg-slate-50 transition"
+                                >
+                                    <i class="fa-regular fa-copy"></i> Копіювати
+                                </button>
+                            </div>
+                            <textarea 
+                                v-model="line1" 
+                                rows="3"
+                                class="w-full p-2 bg-white border border-slate-200 rounded text-slate-700 text-xs leading-relaxed focus:ring-1 focus:ring-indigo-500 outline-none resize-y"
+                            ></textarea>
+                        </div>
+
+                        <!-- Line 2: Long term goals -->
+                        <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:border-slate-300 transition">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-slate-700 uppercase tracking-wider text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded">
+                                    Строка 2: Довгострокові цілі та завдання
+                                </span>
+                                <button 
+                                    @click="copyToClipboard(line2, 'Строку 2 скопійовано!')"
+                                    class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1 bg-white px-2 py-1 border border-slate-200 rounded hover:bg-slate-50 transition"
+                                >
+                                    <i class="fa-regular fa-copy"></i> Копіювати
+                                </button>
+                            </div>
+                            <textarea 
+                                v-model="line2" 
+                                rows="3"
+                                class="w-full p-2 bg-white border border-slate-200 rounded text-slate-700 text-xs leading-relaxed focus:ring-1 focus:ring-indigo-500 outline-none resize-y"
+                            ></textarea>
+                        </div>
+
+                        <!-- Line 3: Expected outcomes -->
+                        <div class="border border-slate-200 rounded-lg p-3 bg-slate-50 hover:border-slate-300 transition">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-slate-700 uppercase tracking-wider text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">
+                                    Строка 3: Очікувані результати / вміння
+                                </span>
+                                <button 
+                                    @click="copyToClipboard(line3, 'Строку 3 скопійовано!')"
+                                    class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1 bg-white px-2 py-1 border border-slate-200 rounded hover:bg-slate-50 transition"
+                                >
+                                    <i class="fa-regular fa-copy"></i> Копіювати
+                                </button>
+                            </div>
+                            <textarea 
+                                v-model="line3" 
+                                rows="3"
+                                class="w-full p-2 bg-white border border-slate-200 rounded text-slate-700 text-xs leading-relaxed focus:ring-1 focus:ring-indigo-500 outline-none resize-y"
+                            ></textarea>
+                        </div>
+
+                    </div>
+
+                    <!-- Copy All Button -->
+                    <div class="pt-4 border-t border-slate-100 mt-4 flex flex-col sm:flex-row gap-2">
+                        <button 
+                            @click="copyAll" 
+                            class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 px-4 rounded-lg font-medium text-xs flex items-center justify-center gap-2 shadow-sm transition"
+                        >
+                            <i class="fa-solid fa-copy"></i> Скопіювати всі 3 строки разом
+                        </button>
+                    </div>
+                </div>
+
+            </section>
+        </main>
+
+        <footer class="bg-slate-100 border-t border-slate-200 py-3 text-center text-xs text-slate-500 mt-auto">
+            <p>Зручний помічник для заповнення документації ІПР за стандартами НУШ та інклюзивної освіти</p>
+        </footer>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, watch } = Vue;
+
+        createApp({
+            setup() {
+                // Form Data
+                const studentName = ref('');
+                const studentGrade = ref('5-А клас');
+                const gender = ref('male'); // 'male' or 'female'
+                const selectedSubjectKey = ref('informatics');
+                const toastMessage = ref('');
+
+                // JSON Database State
+                const savedStudents = ref([]);
+                const selectedStudentId = ref('');
+                const jsonFileInput = ref(null);
+
+                // Dictionary mapping skill levels by skill ID
+                const selectedLevelsMap = ref({});
+
+                // Helper to quickly set grade
+                const setGradeQuick = (gNum) => {
+                    studentGrade.value = `${gNum} клас`;
+                };
+
+                // Compute numeric grade for filtering
+                const currentGradeNumber = computed(() => {
+                    if (!studentGrade.value) return 5;
+                    const match = studentGrade.value.match(/\d+/);
+                    if (match) {
+                        const num = parseInt(match[0], 10);
+                        if (num >= 1 && num <= 11) return num;
+                    }
+                    return 5;
+                });
+
+                // Grade Band Label
+                const activeGradeBandLabel = computed(() => {
+                    const g = currentGradeNumber.value;
+                    if (g <= 4) return `${g} клас (1-4 класи / Початкова школа)`;
+                    if (g <= 7) return `${g} клас (5-7 класи / Базова школа)`;
+                    if (g <= 9) return `${g} клас (8-9 класи / Базова школа)`;
+                    return `${g} клас (10-11 класи / Старша школа)`;
+                });
+
+                const subjects = {
+                    informatics: {
+                        title: 'Інформатична освітня галузь / Інформатика',
+                        skills: [
+                            // 1-4 grades
+                            {
+                                id: 'inf_kb_1_4',
+                                minGrade: 1, maxGrade: 4,
+                                name: 'Володіння клавіатурою, мишею та робочим столом',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Знаходить клавіші та клікає з підказкою',
+                                        current: 'знаходить окремі клавіші на клавіатурі за підказкою та виконує кліки мишею за допомогою педагога.',
+                                        goal: 'формувати навички впевненого користування клавіатурою та контролю миші;',
+                                        result: 'вміє користуватися клавіатурою для введення коротких слів та виконує точні дії мишею.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Впевнено друкує та здійснює навігацію',
+                                        current: 'вміє користуватися клавіатурою для введення слів, володіє основними прийомами роботи з мишею.',
+                                        goal: 'розвивати швидкість введення інформації та вільну навігацію на робочому столі;',
+                                        result: 'самостійно здійснює текстове введення та відкриває необхідні папки.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Набирає тексти, використовує гарячі клавіші',
+                                        current: 'самостійно та безпомилково здійснює текстове введення, використовує базовi поєднання клавіш.',
+                                        goal: 'вдосконалювати швидкий набір тексту та роботу з файловою системою;',
+                                        result: 'швидко набирає текстовий матеріал та правильно впорядковує файли.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Вільно орієнтується, допомагає іншим',
+                                        current: 'досконало володіє інтерфейсом, використовує швидкі клавіші та допомагає однокласникам.',
+                                        goal: 'розвивати навички оптимальної організації робочого місця та налаштування ПЗ;',
+                                        result: 'демонструє виняткову точність, швидкість та самостійність у роботі з ПК.'
+                                    }
+                                ]
+                            },
+                            {
+                                id: 'inf_paint_1_4',
+                                minGrade: 1, maxGrade: 4,
+                                name: 'Графічний редактор (TuxPaint / Paint)',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Малює за безпосередньою допомогою',
+                                        current: 'використовує базові інструменти малювання у графічному редакторі з допомогою педагога.',
+                                        goal: 'навчати обирати кольори, палітру та формувати прості малюнки;',
+                                        result: 'самостійно обирає інструменти малювання та створює прості фігури.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Створює малюнок за зразком',
+                                        current: 'створює прості зображення, користується пензлем та заливкою за зразком.',
+                                        goal: 'розвивати дрібну моторику та творчий підхід у зображенні сюжетоокреслених картин;',
+                                        result: 'самостійно створює та зберігає графічні роботи в персональній папці.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Компонує сюжети, зберігає файли',
+                                        current: 'самостійно будує сюжетні малюнки, комбінує фігури, штампи та зберігає файли.',
+                                        goal: 'вдосконалювати техніку редагування, трансформації та додавання тексту до зображень;',
+                                        result: 'створює гармонійні графічні композиції з використанням тексту.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Творчо оформлює складні ілюстрації',
+                                        current: 'проявляє високу творчу самостійність, створює деталізовані ілюстрації та листівки.',
+                                        goal: 'стимулювати креативність та експериментування з художніми ефектами;',
+                                        result: 'розробляє оригінальні авторські графічні проєкти.'
+                                    }
+                                ]
+                            },
+                            {
+                                id: 'inf_scratchjr_1_4',
+                                minGrade: 1, maxGrade: 4,
+                                name: 'Базові алгоритми та ScratchJr',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Виконує покрокові інструкції',
+                                        current: 'виконує прості покрокові алгоритми дій за підказками педагога.',
+                                        goal: 'формувати розуміння послідовності команд та поняття алгоритму;',
+                                        result: 'покроково відтворює лінійний алгоритм дій.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Складає лінійні скрипти',
+                                        current: 'складає лінійні алгоритми з блоків у середовищі ScratchJr.',
+                                        goal: 'розвивати алгоритмічне мислення та вміння конструювати послідовності команд;',
+                                        result: 'самостійно створює анімацію з кількох команд у ScratchJr.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Використовує декілька спрайтів та сцен',
+                                        current: 'створює інтерактивні сюжети з кількома персонажами та зміною фонiв.',
+                                        goal: 'навчати використовувати взаємодію між персонажами та звукові ефекти;',
+                                        result: 'будує цілісний інтерактивний сюжет із синхронізованими діями персонажів.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Створює власні складні казки та ігри',
+                                        current: 'вільно конструює розгалужені алгоритми, створює власні анімовані казки та прості ігри.',
+                                        goal: 'поглиблювати логічне мислення та навички самостійного проєктування програм;',
+                                        result: 'розробляє та демонструє власні інтерактивні проєкти в ScratchJr.'
+                                    }
+                                ]
+                            },
+                            {
+                                id: 'inf_safe_1_4',
+                                minGrade: 1, maxGrade: 4,
+                                name: 'Цифрова безпека та гігієна',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Знає правила роботи за нагадуванням',
+                                        current: 'дотримується правил осанки та безпечної поведінки у комп"ютерному класі за нагадуванням.',
+                                        goal: 'формувати звичку робити фізкультхвилинки та берегти зір;',
+                                        result: 'самостійно робить перерви та правильно сидить за комп"ютером.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Самостійно дотримується правил гігієни',
+                                        current: 'самостійно дотримується часового режиму та правил безпечної роботи за пристроєм.',
+                                        goal: 'розвивати критичне ставлення до незнайомих посилань та контенту;',
+                                        result: 'розпізнає небажану інформацію та звертається по допомогу до дорослих.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Розпізнає небезпечний контент',
+                                        current: 'розуміє важливість збереження особистих даних та не розголошує їх у мережі.',
+                                        goal: 'вдосконалювати навички приватного використання пристроїв;',
+                                        result: 'впевнено застосовує правила безпечного пошуку дитячого контенту.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Пояснює правила безпеки іншим',
+                                        current: 'повністю усвідомлює правила цифрової безпеки та навчає безпечній поведінці ровесників.',
+                                        goal: 'стимулювати відповідальну та етичну поведінку в інформаційному просторі;',
+                                        result: 'демонструє відповідальне та безпечне користування будь-якими цифровими гаджетами.'
+                                    }
+                                ]
+                            },
+
+                            // 5-7 grades
+                            {
+                                id: 'inf_docs_5_7',
+                                minGrade: 5, maxGrade: 7,
+                                name: 'Текстові документи (Word / Google Docs)',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Набирає короткий текст з підказками',
+                                        current: 'набирає короткий текст, потребує допомоги для форматування та збереження.',
+                                        goal: 'вчити форматувати текст, змінювати шрифт, розмір та вирівнювання;',
+                                        result: 'самостійно набирає та базово форматує текстові документи.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Змінює шрифти, вирівнювання, списки',
+                                        current: 'самостійно форматує текст, змінює накреслення шрифту, створює нумеровані списки.',
+                                        goal: 'розвивати навички вставки таблиць та графічних об"єктів у документ;',
+                                        result: 'створює структурований документ із таблицями та ілюстраціями.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Вставляє таблиці, зображення, схеми',
+                                        current: 'вільно вставляє зображення, таблиці, настроює обтікання текстом та колонтитули.',
+                                        goal: 'вдосконалювати стиль оформлення та автоматичне структурування документів;',
+                                        result: 'самостійно готує реферати та текстові звіти за вимогами.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Оформлює реферати за вимогами',
+                                        current: 'досконало володіє інструментами форматування, стилями та автозмістом документів.',
+                                        goal: 'розвивати вміння спільного редагування документів у хмарних сервісах;',
+                                        result: 'створює складні багатосторінкові документи з високою естетикою.'
+                                    }
+                                ]
+                            },
+                            {
+                                id: 'inf_presentation_5_7',
+                                minGrade: 5, maxGrade: 7,
+                                name: 'Комп"ютерні презентації (PowerPoint / Canva)',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Заповнює готові шаблони слайдів',
+                                        current: 'заповнює готовий шаблон слайдів текстом за інструкцією педагога.',
+                                        goal: 'навчати додавати нові слайди, зображення та обирати теми;',
+                                        result: 'самостійно наповнює змістом 3-4 слайди за зразком.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Створює слайди, вставляє малюнки',
+                                        current: 'створює презентацію з кількох слайдів, обирає макети та додає зображення.',
+                                        goal: 'розвивати навички налаштування анімації та переходів між слайдами;',
+                                        result: 'створює презентацію з анімаційними ефектами та виступає з нею.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Налаштовує переходи та анімацію',
+                                        current: 'самостійно розробляє дизайн, підбирає колірну гаму, додає звуки та переходи.',
+                                        goal: 'вдосконалювати лаконічність викладу матеріалу на слайдах та виступ;',
+                                        result: 'презентує власні проєкти з високим рівнем наочності.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Створює мультимедійні проєкти',
+                                        current: 'створює виразові інтерактивні презентації з тригерами, відео та гіперпосиланнями.',
+                                        goal: 'стимулювати майстерність публічних виступів та захисту проєктів;',
+                                        result: 'готує професійно оформлені мультимедійні виступи.'
+                                    }
+                                ]
+                            },
+                            {
+                                id: 'inf_scratch_5_7',
+                                minGrade: 5, maxGrade: 7,
+                                name: 'Блочне програмування (Scratch 3.0)',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Складає лінійні алгоритми з підказками',
+                                        current: 'складає прості послідовні алгоритми для спрайта з допомогою вчителя.',
+                                        goal: 'навчати застосовувати цикли (повторення) та умовні оператори;',
+                                        result: 'будує алгоритми з повтореннями в середовищі Scratch.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Використовує цикли та умови',
+                                        current: 'самостійно створює анімації та прості програми з циклами та розгалуженнями.',
+                                        goal: 'розвивати навички створення змінних та обробки подій миші й клавіатури;',
+                                        result: 'створює інтерактивну гру з підрахунком балів.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Створює інтерактивні ігри зі змінними',
+                                        current: 'програмує складні сюжети з декількома спрайтами, змінними та звуковим супроводом.',
+                                        goal: 'вдосконалювати алгоритмічне мислення, оптимізацію коду та власні блоки;',
+                                        result: 'розробляє повноцінну гру з рівнями та рахунком.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Проєктує власні оригінальні ігри',
+                                        current: 'розробляє складні алгоритмічні структури, створює власні блоки та оптимізує скрипти.',
+                                        goal: 'навчати проєктуванню програмних систем та підготовці проєктної документації;',
+                                        result: 'створює складні програмні проєкти з оригінальною механікою.'
+                                    }
+                                ]
+                            },
+                            {
+                                id: 'inf_table_5_7',
+                                minGrade: 5, maxGrade: 7,
+                                name: 'Електронні таблиці (Excel / Google Sheets)',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Вводить дані в осередки за зразком',
+                                        current: 'заповнює дані в комірки таблиці та змінює розміри стовпчиків за зразком.',
+                                        goal: 'вчити застосовувати прості формули додавання та автосуми;',
+                                        result: 'самостійно обчислює підсумки за допомогою формул.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Застосовує формули та автосуму',
+                                        current: 'використовує базові арифметичні формули, форматує комірки та межі таблиці.',
+                                        goal: 'розвивати вміння будувати наочні діаграми на основі даних;',
+                                        result: 'будує та підписує кругові й стовпчасті діаграми.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Будує діаграми та сортує дані',
+                                        current: 'самостійно складає розрахункові таблиці, будує діаграми та здійснює сортування.',
+                                        goal: 'вдосконалювати навички використання функцій AVERAGE, MIN, MAX;',
+                                        result: 'проводить аналіз даних за допомогою статистичних функцій.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Використовує складні формули та аналіз',
+                                        current: 'вільно застосовує розгалужені формули, фільтрацію та графічне представлення даних.',
+                                        goal: 'розвивати навички розв"язування практичних задач за допомогою таблиць;',
+                                        result: 'створює автоматизовані таблиці для фінансових чи навчальних розрахунків.'
+                                    }
+                                ]
+                            },
+
+                            // 8-9 grades
+                            {
+                                id: 'inf_python_8_9',
+                                minGrade: 8, maxGrade: 9,
+                                name: 'Текстове програмування (Python)',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Запускає та редагує готовий код',
+                                        current: 'розуміє структуру коду, редагує змінні та виводиться print() з допомогою.',
+                                        goal: 'навчати використовувати умови if/else та математичні обчислення;',
+                                        result: 'самостійно пише прості розгалужені програми.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Пише консольні скрипти з if/else',
+                                        current: 'самостійно складає програми з використанням змінних, умов та типів даних.',
+                                        goal: 'розвивати навички створення циклів (for, while) та опрацювання списків;',
+                                        result: 'пише програми з циклами та виправляє помилки коду.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Використовує цикли (for/while) та списки',
+                                        current: 'вільно застосовує цикли, списки та функції для розв"язання обчислювальних задач.',
+                                        goal: 'вдосконалювати структурування коду та написання власних функцій;',
+                                        result: 'створює модульні програми для аналізу та обробки даних.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Створює складні алгоритми та модулі',
+                                        current: 'розробляє складні алгоритми, використовує бібліотеки та оптимізує виконання програм.',
+                                        goal: 'поглиблювати знання з об"єктно-орієнтованого та графічного програмування;',
+                                        result: 'проєктує повноцінні програми з графічним інтерфейсом.'
+                                    }
+                                ]
+                            },
+                            {
+                                id: 'inf_cyber_8_9',
+                                minGrade: 8, maxGrade: 9,
+                                name: 'Кібербезпека, фішинг та цифрова гігієна',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Знає базові загрози в мережі',
+                                        current: 'знає про існування вірусів та фішингу, потребує нагадування про захист акаунтів.',
+                                        goal: 'формувати правила створення складних паролів та двофакторної автентифікації;',
+                                        result: 'самостійно створює надійні паролі та вмикає захист.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Розпізнає підозрілі посилання та сайти',
+                                        current: 'виявляє підозрілі посилання, не завантажує неперевірені файли, знає правила 2FA.',
+                                        goal: 'розвивати критичне оцінювання достовірності новин та джерел інформації;',
+                                        result: 'відрізняє фейкові ресурси від офіційних джерел.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Захищає персональні дані та акаунти',
+                                        current: 'застосовує комплексні заходи безпеки, налаштовує приватність у соцмережах.',
+                                        goal: 'вдосконалювати вміння протидіяти кібербулінгу та маніпуляціям;',
+                                        result: 'впевнено захищає персональну інформацію від витоку.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Консультує інших щодо цифрової безпеки',
+                                        current: 'досконало орієнтується в цифровому праві, захисті даних та методиках виявлення шахрайства.',
+                                        goal: 'стимулювати активну позицію у поширенні культури кібербезпеки;',
+                                        result: 'демонструє свідому та відповідальну поведінку в інформаційному суспільстві.'
+                                    }
+                                ]
+                            },
+
+                            // 10-11 grades
+                            {
+                                id: 'inf_cloud_10_11',
+                                minGrade: 10, maxGrade: 11,
+                                name: 'Хмарні технології, проєкти та ШІ',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Користується хмарним диском з підказками',
+                                        current: 'зберігає файли у хмарному сховищі за інструкцією вчителя.',
+                                        goal: 'вчити налаштовувати спільний доступ та працювати в спільних документах;',
+                                        result: 'самостійно ділиться посиланнями та працює у групових документах.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Організовує спільну роботу в хмарі',
+                                        current: 'організовує спільну роботу над проєктами в хмарі, використовує прості промпти для ШІ.',
+                                        goal: 'розвивати критичний аналіз відповідей штучного інтелекту та фактчекінг;',
+                                        result: 'критично оцінює інформацію, згенеровану штучним інтелектом.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Ефективно використовує ШІ та онлайн-інструменти',
+                                        current: 'ефективно застосовує інструменти ШІ для навчання, автоматизує рутинні завдання.',
+                                        goal: 'вдосконалювати навички управління цифровими проєктами та командної співпраці;',
+                                        result: 'керує онлайн-проєктами та створює якісні підсумкові продукти.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Вільно керує цифровими проєктами',
+                                        current: 'вільно інтегрує хмарні сервіси, ШІ-асистенти та аналітичні інструменти у навчальну діяльність.',
+                                        goal: 'стимулювати інноваційне розв"язання складних технологічних завдань;',
+                                        result: 'розробляє та реалізує комплексні цифрові проєкти.'
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+
+                    math: {
+                        title: 'Математична освітня галузь / Математика',
+                        skills: [
+                            // 1-4 grades
+                            {
+                                id: 'math_calc_1_4',
+                                minGrade: 1, maxGrade: 4,
+                                name: 'Арифметичні обчислення та рахунок',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Рахує з наочним матеріалом в межах 10/20',
+                                        current: 'виконує прості обчислення в межах 10/20 з допомогою лічильних паличок чи карток.',
+                                        goal: 'формувати розуміння складу числа та додавання/віднімання без наочності;',
+                                        result: 'самостійно обчислює вирази першого десятка.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Виконує обчислення в межах 100 за алгоритмом',
+                                        current: 'виконує додавання та віднімання у межах 100 за підказкою або алгоритмом.',
+                                        goal: 'розвивати навички усного рахунку та табличного множення/ділення;',
+                                        result: 'впевнено виконує базові арифметичні дії та розв"язує приклади.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Письмово додає/віднімає в межах 1000',
+                                        current: 'самостійно виконує письмові обчислення у межах 1000 та знає таблицю множення.',
+                                        goal: 'вдосконалювати швидкість обчислень та розв"язування складних виразів зі дужками;',
+                                        result: 'швидко та безпомилково обчислює багатозначні вирази.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Вільно виконує всі дії з багатозначними числами',
+                                        current: 'досконало володіє усною та письмовою обчислювальною технікою з багатозначними числами.',
+                                        goal: 'розвивати нестандартне математичне мислення та арифметичні лайфхаки;',
+                                        result: 'розв"язує складні математичні головоломки та приклади підвищеної складності.'
+                                    }
+                                ]
+                            },
+                            {
+                                id: 'math_tasks_1_4',
+                                minGrade: 1, maxGrade: 4,
+                                name: 'Текстові задачі та логіка',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Розв"язує прості задачі на 1 дію з допомогою',
+                                        current: 'розв"язує прості текстові задачі на одну дію за безпосередньою допомогою педагога.',
+                                        goal: 'навчати виділяти умову, запитання та обирати арифметичну дію;',
+                                        result: 'самостійно розв"язує задачі на одну дію.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Розв"язує задачі на 2 дії за схемами',
+                                        current: 'розв"язує складені задачі на 2 дії за допомогою опорної схеми чи малюнка.',
+                                        goal: 'розвивати вміння складати короткий запис та обґрунтовувати вибір дій;',
+                                        result: 'самостійно аналізує умову та розв"язує задачі на 2 дії.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Самостійно аналізує та розв"язує складені задачі',
+                                        current: 'самостійно розв"язує складені задачі різних типів, пояснює хід розв"язання.',
+                                        goal: 'вдосконалювати вміння складати задачі за виразом та малюнком;',
+                                        result: 'складає та розв"язує обернені задачі.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Розв"язує логічні та комбінаторні задачі',
+                                        current: 'знаходить декілька способів розв"язання задач, легко вирішує логічні завдання.',
+                                        goal: 'стимулювати дослідницьку діяльність та участь у математичних конкурсах;',
+                                        result: 'демонструє гнучкість мислення при розв"язанні олімпіадних задач.'
+                                    }
+                                ]
+                            },
+
+                            // 5-7 grades
+                            {
+                                id: 'math_fractions_5_7',
+                                minGrade: 5, maxGrade: 7,
+                                name: 'Дроби, відсотки та пропорції',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Розпізнає звичайні та десяткові дроби',
+                                        current: 'розпізнає дроби, виконує додавання простих десяткових дробів з допомогою.',
+                                        goal: 'вчити виконувати чотири арифметичні дії зі звичайними та десятковими дробами;',
+                                        result: 'самостійно виконує дії з дробами за підказкою.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Виконує дії з дробами за алгоритмом',
+                                        current: 'виконує базові дії зі звичайними та десятковими дробами за вивченим алгоритмом.',
+                                        goal: 'розвивати вміння знаходити відсоток від числа та складати пропорції;',
+                                        result: 'розв"язує задачі на відсотки та пропорції.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Розв"язує текстові задачі з дробами та відсотками',
+                                        current: 'самостійно обчислює багатокрокові вирази з дробами та розв"язує задачі на відсотки.',
+                                        goal: 'вдосконалювати перетворення між звичайними й десятковими дробами;',
+                                        result: 'безпомилково перетворює та порівнює різні види дробів.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Вільно виконує складні розрахунки з відсотками',
+                                        current: 'вільно оперує дробами, пропорціями та відсотками у складних практичних ситуаціях.',
+                                        goal: 'стимулювати застосування математичних знань у фінансовій грамотності;',
+                                        result: 'знаходить раціональні шляхи обчислення складних відсоткових задач.'
+                                    }
+                                ]
+                            },
+
+                            // 8-9 grades
+                            {
+                                id: 'math_algebra_8_9',
+                                minGrade: 8, maxGrade: 9,
+                                name: 'Алгебра: рівняння, функції та системи',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Розв"язує прості лінійні рівняння',
+                                        current: 'розв"язує лінійні рівняння та підставляє значення у формули з допомогою педагога.',
+                                        goal: 'навчати розв"язувати квадратні рівняння за дискримінантом;',
+                                        result: 'самостійно розв"язує квадратні рівняння за алгоритмом.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Розв"язує квадратні рівняння та графіки',
+                                        current: 'самостійно розв"язує квадратні рівняння та будує графіки лінійних функцій.',
+                                        goal: 'розвивати навички розв"язування систем рівнянь та нерівностей;',
+                                        result: 'розв"язує системи двох лінійних рівнянь.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Розв"язує системи рівнянь та нерівності',
+                                        current: 'самостійно розв"язує системи рівнянь, квадратичні нерівності та досліджує функції.',
+                                        goal: 'вдосконалювати перетворення тотожних алгебраїчних виразів;',
+                                        result: 'виконує складні алгебраїчні перетворення.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Вільно володіє апаратом алгебри та функцій',
+                                        current: 'досконало володіє методами розв"язання складних рівнянь, систем та текстових задач.',
+                                        goal: 'розвивати навички математичного моделювання реальних процесів;',
+                                        result: 'будує та аналізує складні математичні моделі.'
+                                    }
+                                ]
+                            },
+
+                            // 10-11 grades
+                            {
+                                id: 'math_analysis_10_11',
+                                minGrade: 10, maxGrade: 11,
+                                name: 'Математичний аналіз та стереометрія',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Знає базові формули тригонометрії та стереометрії',
+                                        current: 'знає основні формули тригонометрії та назви об"ємних тіл за допомогою довідника.',
+                                        goal: 'навчати обчислювати похідні простих функцій та знаходити площі поверхонь тіл;',
+                                        result: 'обчислює похідну за таблицею та площі поверхонь.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Обчислює похідні та площі об"ємних тіл',
+                                        current: 'обчислює похідні базових функцій, розв"язує прості стереометричні задачі.',
+                                        goal: 'розвивати вміння досліджувати функції на екстремуми та обчислювати об"єми тіл;',
+                                        result: 'досліджує функції за допомогою похідної та знаходить об"єми тіл.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Застосовує інтеграли та обчислює об"єми',
+                                        current: 'самостійно застосовує похідну й інтеграл для обчислень, розв"язує стереометричні задачі.',
+                                        goal: 'вдосконалювати просторову уяву та доведення стереометричних теорем;',
+                                        result: 'будує перерізи многогранників та розв"язує задачі із комбінаціями тіл.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Вільно розв"язує складні задачі вищої математики',
+                                        current: 'досконало розв"язує задачі з параметрами, досліджує складні функції та просторові фігури.',
+                                        goal: 'стимулювати готовність до успішного складання НМТ/ЗНО з математики;',
+                                        result: 'демонструє найвищий рівень математичної підготовки.'
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+
+                    language: {
+                        title: 'Мовно-літературна освітня галузь / Українська мова',
+                        skills: [
+                            // 1-4 grades
+                            {
+                                id: 'lang_read_1_4',
+                                minGrade: 1, maxGrade: 4,
+                                name: 'Техніка читання та розуміння прочитаного',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Читає по складах, розуміє коротке',
+                                        current: 'читає доступні тексти по складах, розуміє зміст коротких речень з допомогою вчителя.',
+                                        goal: 'формувати плавну складову та цілословну техніку читання;',
+                                        result: 'читає цілими словами та відповідає на прості запитання за змістом.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Читає цілими словами, відповідає на питання',
+                                        current: 'читає вголос цілими словами, відповідає на прямі запитання за змістом тексту.',
+                                        goal: 'розвивати свідоме та виразне читання, вміння переказувати текст;',
+                                        result: 'виразно читає та переказує зміст за опорним планом.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Свідомо переказує текст та визначає тему',
+                                        current: 'самостійно читає та свідомо переказує текст, визначає головну думку та персонажів.',
+                                        goal: 'вдосконалювати навички виділення причинно-наслідкових зв"язків у тексті;',
+                                        result: 'характеризує учинки персонажів та формулює власний висновок.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Виразно читає, критично аналізує твір',
+                                        current: 'вільно та виразно читає, аналізує художні засоби та висловлює власне ставлення.',
+                                        goal: 'стимулювати критичне мислення та творчий переказ від імені героя;',
+                                        result: 'демонструє глибоке розуміння підтексту та авторської позиції.'
+                                    }
+                                ]
+                            },
+                            {
+                                id: 'lang_write_1_4',
+                                minGrade: 1, maxGrade: 4,
+                                name: 'Письмо, калліграфія та списування',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Списує букви та короткі слова',
+                                        current: 'списує букви та короткі слова з друкованого тексту за зразком та підтримки.',
+                                        goal: 'формувати навички каліграфічного письма та дотримання графічних сіток;',
+                                        result: 'орієнтується в зошиті та охайно списує речення.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Охайно списує речення, знає правила',
+                                        current: 'списує тексти без суттєвих помилок, застосовує правила великої букви та крапки.',
+                                        goal: 'розвивати навички письма під диктовку та перевірки написаного;',
+                                        result: 'пише короткі диктанти з дотриманням базових орфограм.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Пише диктанти та будує власні речення',
+                                        current: 'самостійно пише диктанти, правильно застосовує вивчені орфограми та розділові знаки.',
+                                        goal: 'вдосконалювати грамотність та побудову зв"язного тексту з 4-5 речень;',
+                                        result: 'самостійно складає та записує невеликі тексти-описи.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Пише грамотно, створює власні висловлення',
+                                        current: 'дотримується високого рівня грамотності, самостійно редагує та виправляє свій текст.',
+                                        goal: 'стимулювати творче писемне мовлення (казки, розповіді);',
+                                        result: 'створює грамотно оформлені творчі роботи.'
+                                    }
+                                ]
+                            },
+
+                            // 5-7 grades
+                            {
+                                id: 'lang_grammar_5_7',
+                                minGrade: 5, maxGrade: 7,
+                                name: 'Морфологія, орфографія та будова слова',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Знаходить іменники та дієслова з допомогою',
+                                        current: 'визначає основні частини мови у тексті за допомогою опорних таблиць.',
+                                        goal: 'навчати визначати граматичні ознаки частин мови та застосовувати правила;',
+                                        result: 'самостійно знаходить вивчені частини мови у тексті.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Визначає частини мови та застосовує правила',
+                                        current: 'самостійно розрізняє частини мови та виконує морфологічний розбір за алгоритмом.',
+                                        goal: 'розвивати навички правильного написання вивчених орфограм;',
+                                        result: 'дотримується орфографічних норм у диктантах.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Грамотно застосовує орфограми у тексті',
+                                        current: 'самостійно знаходить та виправляє орфографічні помилки, добре знає правила.',
+                                        goal: 'вдосконалювати синтаксичний розбір простеного речення;',
+                                        result: 'безпомилково розставляє розділові знаки у простих ускладнених реченнях.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Досконало володіє мовними нормами',
+                                        current: 'досконало знає морфологічні та орфографічні норми української мови.',
+                                        goal: 'стимулювати дослідницький аналіз мовних явищ та стилів;',
+                                        result: 'демонструє бездоганну грамотність і мовну культуру.'
+                                    }
+                                ]
+                            },
+
+                            // 8-9 grades
+                            {
+                                id: 'lang_syntax_8_9',
+                                minGrade: 8, maxGrade: 9,
+                                name: 'Синтаксис складного речення та пунктуація',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Знаходить граматичні основи у реченнях',
+                                        current: 'знаходить граматичну основу в реченні з допомогою вчителя.',
+                                        goal: 'навчати розрізняти прості та складні речення;',
+                                        result: 'самостійно знаходить складні речення у тексті.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Розрізняє складносурядні та складнопідрядні',
+                                        current: 'розрізняє типи складних речень, розставляє розділові знаки за алгоритмом.',
+                                        goal: 'розвивати вміння складати схеми складних речень та уникати синтаксичних помилок;',
+                                        result: 'будує та правильно розставляє розділові знаки у складних реченнях.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Будує складні речення, пише роздуми',
+                                        current: 'самостійно будує розгалужені складні речення, розставляє пунктуаційні знаки.',
+                                        goal: 'вдосконалювати вміння писати есе з чіткою аргументацією та висновками;',
+                                        result: 'створює логічно структуровані твори-роздуми.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Вільно створює переконливі власні висловлення',
+                                        current: 'досконало володіє синтаксичними нормами, вільно будує твори-роздуми з аргументацією.',
+                                        goal: 'стимулювати підготовку до публіцистичних та академічних виступів;',
+                                        result: 'створює високограмотні переконливі тексти будь-якого стилю.'
+                                    }
+                                ]
+                            },
+
+                            // 10-11 grades
+                            {
+                                id: 'lang_rhetoric_10_11',
+                                minGrade: 10, maxGrade: 11,
+                                name: 'Стилістика, риторика та підготовка до НМТ',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Розрізняє стилі мовлення за підказками',
+                                        current: 'розрізняє офіційно-діловий та публіцистичний стилі з допомогою вчителя.',
+                                        goal: 'навчати уникати лексичних та стилістичних помилок;',
+                                        result: 'самостійно виявляє та виправляє росіянізми та лексичні помилки.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Уникає лексичних помилок, пише власні тексти',
+                                        current: 'дотримується лексичних та стилістичних норм, будує грамотні власні висловлення.',
+                                        goal: 'розвивати навички публічного виступу та ораторської майстерності;',
+                                        result: 'виступає з промовою на задану тему.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Впевнено виконує тестові завдання НМТ',
+                                        current: 'впевнено виконує тестування з української мови, демонструє глибоку мовну грамотність.',
+                                        goal: 'вдосконалювати швидкість аналізу тестових завдань та редагування текстів;',
+                                        result: 'безпомилково виконує комплексні мовні тести.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Вільно оперує стилістикою та риторикою',
+                                        current: 'досконало володіє багатим словесним запасом, ораторським мистецтвом та всіма нормами мови.',
+                                        goal: 'стимулювати найвищий рівень мовної компетентності та складання НМТ;',
+                                        result: 'демонструє максимальний рівень підготовки з мови та літератури.'
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+
+                    art: {
+                        title: 'Мистецька освітня галузь / Мистецтво',
+                        skills: [
+                            // 1-4 grades
+                            {
+                                id: 'art_draw_1_4',
+                                minGrade: 1, maxGrade: 4,
+                                name: 'Образотворча діяльність та творчі завдання',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Виконує малюнки за безпосередньою допомогою',
+                                        current: 'виконує прості творчі завдання за наслідуванням та постійною допомогою педагога.',
+                                        goal: 'розвивати вміння користуватися олівцями, фарбами та пластиліном;',
+                                        result: 'самостійно виконує базові творчі завдання за зразком.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Малює за зразком, правильно підбирає кольори',
+                                        current: 'виконує творчі завдання за зразком, акуратно розфарбовує та вибирає кольори.',
+                                        goal: 'розвивати фантазію та здатність доповнювати малюнок власними деталями;',
+                                        result: 'додає власні елементи у творчі роботи.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Самостійно створює композиції та ліпить',
+                                        current: 'самостійно будує сюжетні композиції, впевнено працює з фарбами, пластиліном та папером.',
+                                        goal: 'вдосконалювати передачу пропорцій та форм об"єктів;',
+                                        result: 'передає форму та колірну гаму у власних роботах.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Проявляє яскраву художню фантазію',
+                                        current: 'демонструє високу креативність, самостійно обирає техніки та створює оригінальні роботи.',
+                                        goal: 'стимулювати участь у дитячих художніх виставках та конкурсах;',
+                                        result: 'створює оригінальні виставкові творчі роботи.'
+                                    }
+                                ]
+                            },
+
+                            // 5-7 grades
+                            {
+                                id: 'art_genres_5_7',
+                                minGrade: 5, maxGrade: 7,
+                                name: 'Жанри та техніки образотворчого мистецтва',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Розрізняє пейзаж та портрет з допомогою',
+                                        current: 'розрізняє пейзаж і портрет за допомогою ілюстрацій та підказок.',
+                                        goal: 'навчати розрізняти натюрморт, графіку та живопис;',
+                                        result: 'самостійно називає основні жанри мистецтва.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Розрізняє жанри, використовує різні техніки',
+                                        current: 'самостійно розрізняє основні жанри, відтворює художні образи у обраній техніці.',
+                                        goal: 'розвивати навички побудови перспективи та тонального опрацювання;',
+                                        result: 'передає об"єм та світлотінь у малюнках.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Впевнено працює в різних техніках',
+                                        current: 'володіє техніками живопису, графіки, народного декоративного мистецтва.',
+                                        goal: 'вдосконалювати стилізацію та виразність художнього образу;',
+                                        result: 'створює стилізовані та декоративні композиції.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Створює глибокі художні образи',
+                                        current: 'досконало передає пропорції, світлотінь, ритм та власне емоційне ставлення у роботах.',
+                                        goal: 'стимулювати створення власної арт-галереї або портфоліо;',
+                                        result: 'презентує персональне художнє портфоліо.'
+                                    }
+                                ]
+                            },
+
+                            // 8-11 grades
+                            {
+                                id: 'art_styles_8_11',
+                                minGrade: 8, maxGrade: 11,
+                                name: 'Стилі мистецтва, дизайн та медіа-арт',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Впізнає відомі витвори мистецтва',
+                                        current: 'впізнає окремі світові витвори мистецтва за підказками педагога.',
+                                        goal: 'навчати розрізняти стилі мистецтва (бароко, класицизм, імпресіонізм);',
+                                        result: 'характеризує ключові риси стилів мистецтва.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Характеризує стилі та екранні мистецтва',
+                                        current: 'аналізує стилі мистецтва та екранні види (кіно, фотографію), висловлює судження.',
+                                        goal: 'розвивати вміння створювати цифрові дизайн-проєкти та колажі;',
+                                        result: 'створює власні дизайн-макети.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Аналізує мистецькі твори та розробляє дизайн',
+                                        current: 'порівнює мистецькі напрями, створює власні графічні та інтер"єрні дизайни.',
+                                        goal: 'вдосконалювати критичну оцінку художніх явищ та сучасної культури;',
+                                        result: 'висловлює обґрунтовану позицію щодо мистецьких творів.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Глибоко розуміє світову культуру та дизайн',
+                                        current: 'вільно орієнтується в історії світового мистецтва, створює високоестетичні проєкти.',
+                                        goal: 'стимулювати активну участь у культурологічних проєктах;',
+                                        result: 'створює та захищає комплексні концептуальні арт-проєкти.'
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+
+                    nature: {
+                        title: 'Природнича освітня галузь / Я досліджую світ / Природничі науки',
+                        skills: [
+                            // 1-4 grades
+                            {
+                                id: 'nat_obs_1_4',
+                                minGrade: 1, maxGrade: 4,
+                                name: 'Спостереження за природою та живий світ',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Розпізнає об"єкти за малюнками',
+                                        current: 'розпізнає об"єкти живої та неживої природи за підказками й ілюстраціями.',
+                                        goal: 'розширювати уявлення про навколишній світ та сезонні зміни;',
+                                        result: 'самостійно називає об"єкти природи та їх властивості.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Описує сезонні зміни та тварин',
+                                        current: 'самостійно описує сезонні явища, розрізняє рослини та тварин своєї місцевості.',
+                                        goal: 'розвивати навички проведення простих спостережень та дослідів;',
+                                        result: 'проводить нескладні природничі спостереження за інструкцією.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Проводить прості досліди та фіксує результати',
+                                        current: 'самостійно проводити досліди, занотовує результати спостережень у календар природи.',
+                                        goal: 'вдосконалювати розуміння взаємозв"язків між живими організмами;',
+                                        result: 'пояснює взаємозв"язки в природі та правила її охорони.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Пояснює природні явища та охороняє довкілля',
+                                        current: 'проявляє високу допитливість, пояснює складні природні явища та пропонує заходи з охорони.',
+                                        goal: 'стимулювати проведення власних міні-досліджень;',
+                                        result: 'презентує власні дослідницькі міні-проєкти про природу.'
+                                    }
+                                ]
+                            },
+
+                            // 5-7 grades
+                            {
+                                id: 'nat_sci_5_7',
+                                minGrade: 5, maxGrade: 7,
+                                name: 'Природничі науки (Пізнаємо природу)',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Знає будову речовин та клітини з допомогою',
+                                        current: 'знає базові поняття про клітину та будову речовини з допомогою наочних схем.',
+                                        goal: 'навчати використовувати лабораторне обладнання (мікроскоп, термометр);',
+                                        result: 'користується просим лабораторним обладнанням.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Користується вимірювальними приладами',
+                                        current: 'проводить вимірювання за допомогою термометра, лінійки, проводить прості досліди.',
+                                        goal: 'розвивати вміння аналізувати результати експериментів та формулювати висновки;',
+                                        result: 'самостійно формулює висновки за результатами досліду.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Пояснює колообіг речовин та екосистеми',
+                                        current: 'самостійно пояснює колообіг речовин, будову екосистем та карти.',
+                                        goal: 'вдосконалювати навички систематизації природничих знань;',
+                                        result: 'побудує ланцюги живлення та пояснює екологічні зв"язки.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Проводить самостійні експерименти',
+                                        current: 'досконало розуміє физичні, хімічні та біологічні процеси довкілля.',
+                                        goal: 'стимулювати екологічні ініціативи та наукові дослідження;',
+                                        result: 'розробляє та демонструє власні наукові експерименти.'
+                                    }
+                                ]
+                            },
+
+                            // 8-11 grades
+                            {
+                                id: 'nat_bio_phys_8_11',
+                                minGrade: 8, maxGrade: 11,
+                                name: 'Біологія, фізика, хімія та геологія',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Розуміє базові закони фізики й біології з підказкою',
+                                        current: 'розуміє основні закони збереження та будову організмів за допомогою підказок.',
+                                        goal: 'навчати розв"язувати розрахункові фізичні та хімічні задачі;',
+                                        result: 'розв"язує базові задачі за формулами.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Розв"язує типові задачі та формули',
+                                        current: 'самостійно розв"язує типові фізичні й хімічні задачі, пояснює біологічні норми.',
+                                        goal: 'розвивати вміння аналізувати генетичні та хімічні реакції;',
+                                        result: 'складає рівняння хімічних реакцій та розв"язує генетичні задачі.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Аналізує складні закони та проводить лаб. роботи',
+                                        current: 'самостійно проводить лабораторні роботи, аналізує фізичні й хімічні процеси.',
+                                        goal: 'вдосконалювати практичне застосування природничих знань у побуті;',
+                                        result: 'використовує знання для безпечної життєдіяльності та екологічної поведінки.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Глибоко володіє природничими дисциплінами',
+                                        current: 'демонструє глибокі знання природничих наук, вільно оперує науковими поняттями.',
+                                        goal: 'стимулювати проведення науково-дослідних робіт МАН;',
+                                        result: 'захищає науково-дослідницькі проєкти природничого спрямування.'
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+
+                    tech: {
+                        title: 'Технологічна галузь / Трудове навчання / Технології',
+                        skills: [
+                            {
+                                id: 'tech_tools_1_11',
+                                minGrade: 1, maxGrade: 11,
+                                name: 'Робота з матеріалами та інструментами',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Виконує операції за допомогою',
+                                        current: 'виконує прості операції (різання, згинання, наклеювання) за безпосередньою допомогою.',
+                                        goal: 'формувати точність рухів та правила безпечної роботи з ножницями й клеєм;',
+                                        result: 'самостійно та безпечно використовує базові інструменти.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Виготовляє вироби за шаблоном',
+                                        current: 'самостійно виготовляє вироби за шаблоном, дотримуючись послідовності дій.',
+                                        goal: 'розвивати акуратність та самостійність у розмічанні матеріалів;',
+                                        result: 'самостійно виконує розмічання та збирання виріб.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Створює проєктні вироби за кресленням',
+                                        current: 'самостійно читає креслення/схеми, обирає матеріали та створює готові вироби.',
+                                        goal: 'вдосконалювати оздоблення та естетичне оформлення виробу;',
+                                        result: 'оздоблює вироби вишивкою, різьбленням або декором.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Розробляє власні дизайн-проєкти',
+                                        current: 'проєктує та створює оригінальні авторські вироби з високою якістю виконання.',
+                                        goal: 'стимулювати підприємливість та раціональне використання ресурсів;',
+                                        result: 'виготовляє та презентує власні творчі проєкти.'
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+
+                    history: {
+                        title: 'Історична та громадянська галузь / Історія',
+                        skills: [
+                            {
+                                id: 'hist_time_1_11',
+                                minGrade: 1, maxGrade: 11,
+                                name: 'Часові, просторові та історичні уявлення',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Впізнає прапор, герб, часові поняття',
+                                        current: 'орієнтується у часових поняттях (минуле, сьогодення) та державній символіці з підказкою.',
+                                        goal: 'навчати працювати з стрічкою часу та історичною картою;',
+                                        result: 'показує події на стрічці часу.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Орієнтується на карті та стрічці часу',
+                                        current: 'показує на карті історичні об"єкти, встановлює послідовність подій за алгоритмом.',
+                                        goal: 'розвивати вміння характеристикувати історичних діячів;',
+                                        result: 'самостійно дає характеристику історичним постатям.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Аналізує причини та наслідки подій',
+                                        current: 'самостійно встановлює причинно-наслідкові зв"язки між історичними подіями.',
+                                        goal: 'вдосконалювати критичний аналіз історичних джерел;',
+                                        result: 'порівнює та аналізує текстові й візуальні джерела.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Глибоко аналізує історію та громадянське суспільство',
+                                        current: 'вільно володіє історичним матеріалом, аналізує сучасні демократичні процеси.',
+                                        goal: 'стимулювати формування свідомої громадянської позиції;',
+                                        result: 'демонструє глибоку громадянську та історичну свідомість.'
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+
+                    foreign: {
+                        title: 'Іноземна мова / Англійська мова',
+                        skills: [
+                            {
+                                id: 'foreign_vocab_1_11',
+                                minGrade: 1, maxGrade: 11,
+                                name: 'Сприйняття на слух, говоріння та письмо',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Розуміє окремі слова з візуалізацією',
+                                        current: 'розуміє окремі слова та коротки фрази за допомогою жестового та наочного супроводу.',
+                                        goal: 'навчати читати та вимовляти базові слова й фрази;',
+                                        result: 'самостійно читає та вимовляє вивчені фрази.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Будує короткі діалоги та читає тексти',
+                                        current: 'складає коротки діалоги за зразком, читає та перекладає адаптовані тексти.',
+                                        goal: 'розвивати навички опису малюнка та використання базової граматики;',
+                                        result: 'описує малюнок з 4-5 речень за планом.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Впевнено спілкується на повсякденні теми',
+                                        current: 'самостійно спілкується за вивченими темами, пише короткі листи та есе.',
+                                        goal: 'вдосконалювати беглість мовлення та спонтанний діалог;',
+                                        result: 'вільно бере участь у обговоренні навчальних тем.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Вільно володіє мовою у мовленні та письмі',
+                                        current: 'вільно висловлює думки іноземною мовою, розуміє автентичні аудіозаписи.',
+                                        goal: 'стимулювати підготовку до міжнародних мовних іспитів;',
+                                        result: 'демонструє високий рівень володіння іноземною мовою.'
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+
+                    pe: {
+                        title: 'Фізична культура та здоров"я',
+                        skills: [
+                            {
+                                id: 'pe_moves_1_11',
+                                minGrade: 1, maxGrade: 11,
+                                name: 'Рухова діяльність та фізичний розвиток',
+                                levels: [
+                                    {
+                                        label: 'Початковий рівень',
+                                        shortDesc: 'Виконує вправи за показом',
+                                        current: 'виконує базові загальнорозвиваючі вправи за безпосереднім показом та допомогою.',
+                                        goal: 'розвивати координацію рухів та орієнтування у просторі;',
+                                        result: 'самостійно виконує комплекс ранкової гімнастики.'
+                                    },
+                                    {
+                                        label: 'Середній рівень',
+                                        shortDesc: 'Дотримується правил рухливих ігор',
+                                        current: 'виконує основні рухові дії (біг, стрибки, кидки), дотримується правил ігор.',
+                                        goal: 'розвивати витривалість, швидкість та командну взаємодію;',
+                                        result: 'активно бере участь у спортивних іграх.'
+                                    },
+                                    {
+                                        label: 'Достатній рівень',
+                                        shortDesc: 'Складе навчальні нормативи',
+                                        current: 'самостійно виконує техніку спортивних вправ, демонструє хорошу фізичну форму.',
+                                        goal: 'вдосконалювати самоконтроль під час фізичних навантажень;',
+                                        result: 'контролює пульс та самопочуття під час тренувань.'
+                                    },
+                                    {
+                                        label: 'Високий рівень',
+                                        shortDesc: 'Високий рівень фізичної підготовленості',
+                                        current: 'показує високі результати у спортивних дисциплінах, проявляє лідерство у команді.',
+                                        goal: 'стимулювати постійне ведення здорового способу життя;',
+                                        result: 'демонструє зразкову фізичну культуру та активність.'
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                };
+
+                // Filter skills relevant for the currently selected grade number
+                const filteredSkills = computed(() => {
+                    const subj = subjects[selectedSubjectKey.value] || subjects.informatics;
+                    const gradeNum = currentGradeNumber.value;
+                    return subj.skills.filter(s => gradeNum >= s.minGrade && gradeNum <= s.maxGrade);
+                });
+
+                // Get level selection for a given skill ID
+                const getSkillLevel = (skillId) => {
+                    return selectedLevelsMap.value[skillId] !== undefined ? selectedLevelsMap.value[skillId] : 0;
+                };
+
+                // Set level selection for a given skill ID
+                const setSkillLevel = (skillId, levelIdx) => {
+                    selectedLevelsMap.value[skillId] = levelIdx;
+                };
+
+                const onSubjectChange = () => {
+                    // Retain existing skill selections
+                };
+
+                const resetSelection = () => {
+                    selectedLevelsMap.value = {};
+                };
+
+                const currentSubject = computed(() => {
+                    return subjects[selectedSubjectKey.value] || subjects.informatics;
+                });
+
+                // Name formatting helper according to gender
+                const formattedStudentPronoun = computed(() => {
+                    if (!studentName.value.trim()) {
+                        return gender.value === 'female' ? 'Учениця' : 'Учень';
+                    }
+                    return studentName.value.trim();
+                });
+
+                // Generated Output Lines
+                const line1 = ref('');
+                const line2 = ref('');
+                const line3 = ref('');
+
+                const generateTexts = () => {
+                    const skills = filteredSkills.value;
+                    if (!skills || skills.length === 0) return;
+
+                    let currentParts = [];
+                    let goalParts = [];
+                    let resultParts = [];
+
+                    skills.forEach((skill) => {
+                        const lvlIdx = getSkillLevel(skill.id);
+                        if (lvlIdx !== undefined && lvlIdx !== null && lvlIdx >= 0) {
+                            const levelData = skill.levels[lvlIdx];
+                            if (levelData) {
+                                if (levelData.current) currentParts.push(levelData.current);
+                                if (levelData.goal) goalParts.push(levelData.goal);
+                                if (levelData.result) resultParts.push(levelData.result);
+                            }
+                        }
+                    });
+
+                    const prefix = formattedStudentPronoun.value;
+
+                    // Synthesize Line 1 (Current)
+                    if (currentParts.length > 0) {
+                        line1.value = `${prefix} ${currentParts.join(' ')}`;
+                    } else {
+                        line1.value = 'Оберіть хоча б один потрібний напрям дій для формування першої строки.';
+                    }
+
+                    // Synthesize Line 2 (Goals)
+                    if (goalParts.length > 0) {
+                        line2.value = goalParts.join(' ');
+                    } else {
+                        line2.value = 'Оберіть хоча б один потрібний напрям дій для формування цілей.';
+                    }
+
+                    // Synthesize Line 3 (Results)
+                    if (resultParts.length > 0) {
+                        const combinedResult = resultParts.join(' ');
+                        const capitalized = combinedResult.charAt(0).toUpperCase() + combinedResult.slice(1);
+                        line3.value = `${prefix}: ${capitalized}`;
+                    } else {
+                        line3.value = 'Оберіть хоча б один потрібний напрям дій для формування очікуваних результатів.';
+                    }
+                };
+
+                // Watch inputs to reactively regenerate text
+                watch([studentName, studentGrade, gender, selectedSubjectKey, selectedLevelsMap], () => {
+                    generateTexts();
+                }, { deep: true, immediate: true });
+
+                // Save or Update Current Student in Database
+                const saveCurrentStudent = () => {
+                    if (!studentName.value.trim()) {
+                        showToast('Введіть прізвище та ім\'я учня перед збереженням!');
+                        return;
+                    }
+
+                    const recordId = selectedStudentId.value || 'st_' + Date.now();
+                    const record = {
+                        id: recordId,
+                        name: studentName.value.trim(),
+                        grade: studentGrade.value.trim(),
+                        gender: gender.value,
+                        subjectKey: selectedSubjectKey.value,
+                        subjectTitle: currentSubject.value.title,
+                        levelsMap: { ...selectedLevelsMap.value },
+                        line1: line1.value,
+                        line2: line2.value,
+                        line3: line3.value,
+                        updatedAt: new Date().toISOString()
+                    };
+
+                    const existingIndex = savedStudents.value.findIndex(s => s.id === recordId);
+                    if (existingIndex !== -1) {
+                        savedStudents.value[existingIndex] = record;
+                    } else {
+                        savedStudents.value.push(record);
+                    }
+
+                    selectedStudentId.value = recordId;
+                    showToast(`Дані учня "${record.name}" успішно збережено в базу!`);
+                };
+
+                // Load Saved Student Data into Controls
+                const onSelectSavedStudent = () => {
+                    if (!selectedStudentId.value) return;
+                    const st = savedStudents.value.find(s => s.id === selectedStudentId.value);
+                    if (!st) return;
+
+                    studentName.value = st.name || '';
+                    studentGrade.value = st.grade || '5 клас';
+                    gender.value = st.gender || 'male';
+                    selectedSubjectKey.value = st.subjectKey || 'informatics';
+                    
+                    if (st.levelsMap) {
+                        selectedLevelsMap.value = { ...st.levelsMap };
+                    }
+
+                    showToast(`Завантажено профіль учня: ${st.name}`);
+                };
+
+                const deleteStudent = (id) => {
+                    const st = savedStudents.value.find(s => s.id === id);
+                    const name = st ? st.name : 'цього учня';
+                    
+                    savedStudents.value = savedStudents.value.filter(s => s.id !== id);
+                    if (selectedStudentId.value === id) {
+                        selectedStudentId.value = '';
+                    }
+                    showToast(`Запис для "${name}" видалено з бази.`);
+                };
+
+                const exportToJson = () => {
+                    if (savedStudents.value.length === 0) {
+                        showToast('База даних порожня. Спочатку збережіть принаймні одного учня!');
+                        return;
+                    }
+
+                    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(savedStudents.value, null, 2));
+                    const downloadAnchor = document.createElement('a');
+                    downloadAnchor.setAttribute("href", dataStr);
+                    downloadAnchor.setAttribute("download", `ipr_students_database_${new Date().toISOString().slice(0, 10)}.json`);
+                    document.body.appendChild(downloadAnchor);
+                    downloadAnchor.click();
+                    downloadAnchor.remove();
+
+                    showToast('Файл бази даних JSON успішно завантажено на ваш пристрій!');
+                };
+
+                const triggerFileInput = () => {
+                    if (jsonFileInput.value) {
+                        jsonFileInput.value.click();
+                    }
+                };
+
+                const importFromJson = (event) => {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const importedData = JSON.parse(e.target.result);
+                            if (Array.isArray(importedData)) {
+                                let addedCount = 0;
+                                importedData.forEach(item => {
+                                    if (item.id && item.name) {
+                                        const existsIndex = savedStudents.value.findIndex(s => s.id === item.id);
+                                        if (existsIndex !== -1) {
+                                            savedStudents.value[existsIndex] = item;
+                                        } else {
+                                            savedStudents.value.push(item);
+                                        }
+                                        addedCount++;
+                                    }
+                                });
+                                showToast(`Успішно імпортовано/оновлено ${addedCount} записів з JSON-файлу!`);
+                            } else {
+                                showToast('Помилка: Файл повинен містити масив записів учнів!');
+                            }
+                        } catch (err) {
+                            console.error(err);
+                            showToast('Помилка зчитування JSON-файлу. Перевірте формат!');
+                        }
+                    };
+                    reader.readAsText(file);
+                    event.target.value = '';
+                };
+
+                // Copy functionality
+                const copyToClipboard = (text, successMsg) => {
+                    if (!text) return;
+                    
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    textarea.style.position = 'fixed';
+                    textarea.style.opacity = '0';
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    
+                    try {
+                        document.execCommand('copy');
+                        showToast(successMsg || 'Скопійовано в буфер обміну!');
+                    } catch (err) {
+                        console.error('Помилка при копіюванні: ', err);
+                    } finally {
+                        document.body.removeChild(textarea);
+                    }
+                };
+
+                const copyAll = () => {
+                    const gradeStr = studentGrade.value ? ` (${studentGrade.value})` : '';
+                    const fullText = `Учень/Учениця: ${studentName.value}${gradeStr}\nГалузь/Предмет: ${currentSubject.value.title}\n\nНаявні знання, вміння і навички учня (компетентності):\n${line1.value}\n\nДовгострокові цілі та завдання на період виконання індивідуальної програми розвитку:\n${line2.value}\n\nОчікувані результати/ вміння, які планується досягти:\n${line3.value}`;
+                    copyToClipboard(fullText, 'Усі 3 строки успішно скопійовано!');
+                };
+
+                const showToast = (msg) => {
+                    toastMessage.value = msg;
+                    setTimeout(() => {
+                        toastMessage.value = '';
+                    }, 3000);
+                };
+
+                return {
+                    studentName,
+                    studentGrade,
+                    gender,
+                    selectedSubjectKey,
+                    subjects,
+                    currentSubject,
+                    filteredSkills,
+                    getSkillLevel,
+                    setSkillLevel,
+                    setGradeQuick,
+                    activeGradeBandLabel,
+                    line1,
+                    line2,
+                    line3,
+                    toastMessage,
+                    savedStudents,
+                    selectedStudentId,
+                    jsonFileInput,
+                    saveCurrentStudent,
+                    onSelectSavedStudent,
+                    deleteStudent,
+                    exportToJson,
+                    triggerFileInput,
+                    importFromJson,
+                    onSubjectChange,
+                    resetSelection,
+                    copyToClipboard,
+                    copyAll
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
