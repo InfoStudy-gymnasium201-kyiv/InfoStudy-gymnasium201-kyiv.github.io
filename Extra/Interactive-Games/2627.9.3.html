@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Бази Даних & СУБД: Кібер-Лабораторія</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts: Comfortaa (Headers) & Nunito (Body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* Base typography & dark cosmic radial background */
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #0f172a 70%);
+            background-attachment: fixed;
+            color: #f8fafc;
+            min-height: 100vh;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        h1, h2, h3, h4, .font-heading {
+            font-family: 'Comfortaa', cursive, sans-serif;
+        }
+
+        /* Glassmorphism utility classes */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card-hover:hover {
+            transform: translateY(-4px);
+            border-color: rgba(56, 189, 248, 0.4);
+            box-shadow: 0 12px 30px -10px rgba(56, 189, 248, 0.3);
+        }
+
+        /* Neon Glow Effects */
+        .neon-glow-cyan {
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+        }
+        .neon-glow-purple {
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+        }
+        .neon-glow-emerald {
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+        .neon-glow-rose {
+            box-shadow: 0 0 15px rgba(244, 63, 94, 0.4);
+        }
+
+        /* Floating & Pulse Keyframes */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(1deg); }
+        }
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(1.02); }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 3s infinite ease-in-out;
+        }
+
+        /* Gradient Text Helper */
+        .text-gradient-cyan-purple {
+            background: linear-gradient(135deg, #38bdf8 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .text-gradient-emerald-cyan {
+            background: linear-gradient(135deg, #10b981 0%, #38bdf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .text-gradient-amber-rose {
+            background: linear-gradient(135deg, #f59e0b 0%, #f43f5e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #38bdf8;
+        }
+
+        /* Active selection styling for tactile touch items */
+        .tactile-selected {
+            border-color: #38bdf8 !important;
+            background-color: rgba(56, 189, 248, 0.25) !important;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.6) !important;
+            transform: scale(1.03);
+        }
+
+        .drop-zone-active {
+            border-color: #10b981 !important;
+            background: rgba(16, 185, 129, 0.15) !important;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4) !important;
+        }
+
+        /* Canvas Particle Layer */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body class="relative flex flex-col min-h-screen text-slate-100">
+
+    <!-- Background Particle Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Header Navigation -->
+    <header class="relative z-10 w-full px-4 py-4 sm:px-8 glass-card border-b border-slate-700/50">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <!-- Logo & Title -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="showScreen('hub')">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center shadow-lg shadow-cyan-500/30 animate-float">
+                    <i class="fa-solid font-bold fa-database text-white text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold text-gradient-cyan-purple tracking-wide">
+                        СУБД Кібер-Лабораторія
+                    </h1>
+                    <p class="text-xs text-slate-400 font-semibold">Інтерактивний курс з Інформатики</p>
+                </div>
+            </div>
+
+            <!-- Stats Bar & Controls -->
+            <div class="flex items-center gap-3 sm:gap-6">
+                <!-- Score Counter -->
+                <div class="flex items-center gap-2 px-4 py-2 rounded-2xl glass-card border border-amber-500/30">
+                    <i class="fa-solid fa-bolt text-amber-400 text-lg animate-pulse"></i>
+                    <div class="text-xs">
+                        <span class="block text-slate-400 uppercase tracking-wider font-bold">Очки</span>
+                        <span id="global-score" class="text-lg font-black text-amber-400">0</span>
+                    </div>
+                </div>
+
+                <!-- Sound FX Toggle -->
+                <button id="sound-btn" onclick="toggleSound()" class="p-3 rounded-2xl glass-card hover:bg-slate-700/50 text-cyan-400 transition-all border border-cyan-500/30" title="Звукові ефекти">
+                    <i id="sound-icon" class="fa-solid fa-volume-high text-lg"></i>
+                </button>
+
+                <!-- Hub Return Button -->
+                <button onclick="showScreen('hub')" class="px-4 py-2 rounded-2xl bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-slate-200 text-sm font-bold border border-slate-600 shadow-md transition-all active:scale-95 flex items-center gap-2">
+                    <i class="fa-solid fa-house"></i>
+                    <span class="hidden sm:inline">Хаб Місій</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="relative z-10 flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col justify-center">
+
+        <!-- ==================== HUB SCREEN ==================== -->
+        <section id="screen-hub" class="space-y-8 animate-fadeIn">
+            <!-- Hero Banner -->
+            <div class="glass-card rounded-3xl p-6 sm:p-10 relative overflow-hidden border border-purple-500/30">
+                <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -left-10 -top-10 w-64 h-64 bg-cyan-600/10 rounded-full blur-3xl pointer-events-none"></div>
+                
+                <div class="relative z-10 max-w-3xl space-y-4">
+                    <span class="inline-block px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-bold uppercase tracking-widest">
+                        Академія Даних &bull; Урок Інформатики
+                    </span>
+                    <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-100 leading-tight">
+                        Опануй світ <span class="text-gradient-cyan-purple">Баз Даних та СУБД</span>
+                    </h2>
+                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                        Пройди 4 тактильні випробування! Досліджуй реляційні таблиці, класифікуй СУБД, виявляй первинні ключі та будуй конвеєри об'єктів без нудних тестів.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Mini-Game Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Game 1 Card -->
+                <div onclick="startGame(1)" class="glass-card glass-card-hover rounded-3xl p-6 cursor-pointer flex flex-col justify-between relative group border border-cyan-500/20">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="w-14 h-14 rounded-2xl bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-table text-2xl"></i>
+                            </div>
+                            <span id="badge-g1" class="text-xs px-3 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">Не пройдено</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-100 group-hover:text-cyan-300 transition-colors">
+                                1. Анатомія & Типи Таблиці
+                            </h3>
+                            <p class="text-slate-400 text-sm mt-1">
+                                Розподіляй Поля (Стовпці) та Записи (Рядки). Визначай типи даних (Текст, Число, Дата, Логічний).
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex items-center justify-between text-xs font-bold text-cyan-400 group-hover:translate-x-1 transition-transform">
+                        <span>Тактильний Конструктор</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Game 2 Card -->
+                <div onclick="startGame(2)" class="glass-card glass-card-hover rounded-3xl p-6 cursor-pointer flex flex-col justify-between relative group border border-purple-500/20">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="w-14 h-14 rounded-2xl bg-purple-500/20 border border-purple-400/40 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-sitemap text-2xl"></i>
+                            </div>
+                            <span id="badge-g2" class="text-xs px-3 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">Не пройдено</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-100 group-hover:text-purple-300 transition-colors">
+                                2. Класифікатор СУБД
+                            </h3>
+                            <p class="text-slate-400 text-sm mt-1">
+                                Сортуй системи: Локальні vs Розподілені, MS Access, MySQL, Oracle, SQLite та форми подання даних.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex items-center justify-between text-xs font-bold text-purple-400 group-hover:translate-x-1 transition-transform">
+                        <span>Сортування & Орбіти</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Game 3 Card -->
+                <div onclick="startGame(3)" class="glass-card glass-card-hover rounded-3xl p-6 cursor-pointer flex flex-col justify-between relative group border border-emerald-500/20">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-key text-2xl"></i>
+                            </div>
+                            <span id="badge-g3" class="text-xs px-3 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">Не пройдено</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-100 group-hover:text-emerald-300 transition-colors">
+                                3. Детектив Первинного Ключа
+                            </h3>
+                            <p class="text-slate-400 text-sm mt-1">
+                                Скануй таблиці на наявність Primary Key, виявляй дублікати та порушення унікальності й цілісності.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex items-center justify-between text-xs font-bold text-emerald-400 group-hover:translate-x-1 transition-transform">
+                        <span>Кібер-Сканер Даних</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Game 4 Card -->
+                <div onclick="startGame(4)" class="glass-card glass-card-hover rounded-3xl p-6 cursor-pointer flex flex-col justify-between relative group border border-amber-500/20">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-network-wired text-2xl"></i>
+                            </div>
+                            <span id="badge-g4" class="text-xs px-3 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">Не пройдено</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-100 group-hover:text-amber-300 transition-colors">
+                                4. Архітектор Об'єктів СУБД
+                            </h3>
+                            <p class="text-slate-400 text-sm mt-1">
+                                З'єднуй об'єкти (Таблиці, Запити, Форми, Звіти) з їхнім реальним призначенням та сценаріями.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex items-center justify-between text-xs font-bold text-amber-400 group-hover:translate-x-1 transition-transform">
+                        <span>Термінал Комутацій</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== MINI-GAME 1: TABLE ANATOMY ==================== -->
+        <section id="screen-game1" class="hidden space-y-6">
+            <!-- Level Bar -->
+            <div class="glass-card rounded-2xl p-4 flex items-center justify-between border border-cyan-500/30">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-400 font-bold">
+                        1
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-lg text-slate-100">Анатомія & Типи Даних Таблиці</h2>
+                        <p class="text-xs text-slate-400">Виберіть картку, а потім натисніть на відповідне цільове поле</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span id="g1-progress" class="text-sm font-bold text-cyan-400">0 / 6</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Cards Stock Pool -->
+                <div class="glass-card rounded-3xl p-5 space-y-4 border border-slate-700">
+                    <h3 class="font-bold text-slate-300 text-sm uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-layer-group text-cyan-400"></i> Елементи для розподілу:
+                    </h3>
+                    <div id="g1-pool" class="space-y-3 min-h-[220px]">
+                        <!-- Dynamic items will be injected here -->
+                    </div>
+                </div>
+
+                <!-- Targets Grid -->
+                <div class="lg:col-span-2 space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="g1-targets-grid">
+                        <!-- Targets injected dynamically -->
+                    </div>
+                    <!-- Submit / Check Button -->
+                    <button id="g1-check-btn" onclick="checkGame1()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-900 font-black text-lg shadow-lg shadow-cyan-500/30 transition-all active:scale-95 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-circle-check"></i> Перевірити Анатомію Таблиці
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== MINI-GAME 2: DBMS CLASSIFIER ==================== -->
+        <section id="screen-game2" class="hidden space-y-6">
+            <div class="glass-card rounded-2xl p-4 flex items-center justify-between border border-purple-500/30">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400 font-bold">
+                        2
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-lg text-slate-100">Класифікатор & Орбіти СУБД</h2>
+                        <p class="text-xs text-slate-400">Натисніть на об'єкт, щоб відправити його у відповідну категорію</p>
+                    </div>
+                </div>
+                <span id="g2-progress" class="text-sm font-bold text-purple-400">0 / 6</span>
+            </div>
+
+            <!-- Current Active Card Selector -->
+            <div class="glass-card rounded-3xl p-6 text-center space-y-4 border border-purple-500/40 neon-glow-purple">
+                <span class="text-xs font-bold uppercase tracking-widest text-purple-300">Поточний елемент для розподілу:</span>
+                <div id="g2-active-card-container" class="py-4 flex justify-center">
+                    <!-- Active card rendered dynamically -->
+                </div>
+            </div>
+
+            <!-- Category Bins Grid -->
+            <div id="g2-bins-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <!-- Bins injected dynamically -->
+            </div>
+        </section>
+
+        <!-- ==================== MINI-GAME 3: PRIMARY KEY DETECTIVE ==================== -->
+        <section id="screen-game3" class="hidden space-y-6">
+            <div class="glass-card rounded-2xl p-4 flex items-center justify-between border border-emerald-500/30">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold">
+                        3
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-lg text-slate-100">Детектив Первинного Ключа (Primary Key)</h2>
+                        <p class="text-xs text-slate-400">Вивчіть таблицю та оберіть стовпець, який є ідеальним Первинним Ключем!</p>
+                    </div>
+                </div>
+                <span id="g3-step-indicator" class="text-sm font-bold text-emerald-400">Сценарій 1 з 3</span>
+            </div>
+
+            <!-- Interactive DB Table Viewer -->
+            <div class="glass-card rounded-3xl p-6 space-y-6 border border-emerald-500/30">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                        <h3 id="g3-table-title" class="text-xl font-bold text-gradient-emerald-cyan">
+                            Таблиця: Учні Школи
+                        </h3>
+                        <p id="g3-table-desc" class="text-xs text-slate-400">
+                            Пам'ятайте: Первинний ключ НЕ МОЖЕ повторюватися та бути порожнім (null)!
+                        </p>
+                    </div>
+                    <div class="text-xs px-3 py-1.5 rounded-xl bg-slate-800 text-emerald-400 border border-emerald-500/30 font-semibold">
+                        <i class="fa-solid fa-circle-info mr-1"></i> Натисніть на заголовок стовпця
+                    </div>
+                </div>
+
+                <!-- Table Wrapper -->
+                <div class="overflow-x-auto rounded-2xl border border-slate-700 bg-slate-900/60">
+                    <table id="g3-data-table" class="w-full text-left border-collapse text-sm">
+                        <!-- Dynamic Table Headers and Body injected here -->
+                    </table>
+                </div>
+
+                <!-- Column Action Status -->
+                <div id="g3-status-box" class="hidden p-4 rounded-2xl glass-card border">
+                    <!-- Dynamic feedback response -->
+                </div>
+
+                <!-- Next Scenario Button -->
+                <button id="g3-next-btn" onclick="nextGame3Step()" class="hidden w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-900 font-black text-lg shadow-lg shadow-emerald-500/30 transition-all active:scale-95 flex items-center justify-center gap-2">
+                    <span>Наступний Сценарій</span> <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- ==================== MINI-GAME 4: DB OBJECTS ARCHITECT ==================== -->
+        <section id="screen-game4" class="hidden space-y-6">
+            <div class="glass-card rounded-2xl p-4 flex items-center justify-between border border-amber-500/30">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 font-bold">
+                        4
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-lg text-slate-100">Архітектор Об'єктів СУБД</h2>
+                        <p class="text-xs text-slate-400">З'єднайте об'єкт СУБД із його описом/призначенням</p>
+                    </div>
+                </div>
+                <span id="g4-progress" class="text-sm font-bold text-amber-400">0 / 4</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Objects Node Column -->
+                <div class="glass-card rounded-3xl p-5 space-y-4 border border-amber-500/20">
+                    <h3 class="font-bold text-amber-400 text-sm uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-cubes"></i> Об'єкти СУБД:
+                    </h3>
+                    <div id="g4-objects-list" class="space-y-3">
+                        <!-- Dynamic objects list -->
+                    </div>
+                </div>
+
+                <!-- Descriptions Node Column -->
+                <div class="glass-card rounded-3xl p-5 space-y-4 border border-amber-500/20">
+                    <h3 class="font-bold text-cyan-400 text-sm uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-sliders"></i> Призначення та Функції:
+                    </h3>
+                    <div id="g4-targets-list" class="space-y-3">
+                        <!-- Dynamic targets list -->
+                    </div>
+                </div>
+            </div>
+
+            <button id="g4-check-btn" onclick="checkGame4()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-400 hover:to-rose-400 text-slate-900 font-black text-lg shadow-lg shadow-amber-500/30 transition-all active:scale-95 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-plug-circle-check"></i> Перевірити Комутацію Об'єктів
+            </button>
+        </section>
+
+        <!-- ==================== SUMMARY & CERTIFICATE SCREEN ==================== -->
+        <section id="screen-summary" class="hidden space-y-8 animate-fadeIn text-center">
+            <div class="glass-card rounded-3xl p-8 sm:p-12 border border-cyan-500/40 relative overflow-hidden max-w-2xl mx-auto space-y-6">
+                <div class="w-24 h-24 mx-auto rounded-3xl bg-gradient-to-tr from-amber-400 to-rose-500 flex items-center justify-center shadow-xl shadow-amber-500/30 animate-float">
+                    <i class="fa-solid fa-trophy text-slate-900 text-4xl"></i>
+                </div>
+
+                <div class="space-y-2">
+                    <span class="inline-block px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-xs font-bold uppercase tracking-widest">
+                        Місію Виконано Успішно!
+                    </span>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-100">
+                        Сертифікат Кібер-Архітектора СУБД
+                    </h2>
+                    <p class="text-slate-400 text-sm">
+                        Ви успішно опанували основні поняття баз даних, класифікацію СУБД та структуру реляційних таблиць.
+                    </p>
+                </div>
+
+                <!-- Final Stats -->
+                <div class="grid grid-cols-2 gap-4 py-4">
+                    <div class="glass-card p-4 rounded-2xl border border-slate-700">
+                        <span class="block text-xs text-slate-400 font-bold uppercase">Загальний Рахунок</span>
+                        <span id="final-score" class="text-3xl font-black text-amber-400">0</span>
+                    </div>
+                    <div class="glass-card p-4 rounded-2xl border border-slate-700">
+                        <span class="block text-xs text-slate-400 font-bold uppercase">Звання</span>
+                        <span id="final-rank" class="text-lg font-bold text-cyan-400">Експерт БД</span>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                    <button onclick="restartAll()" class="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-900 font-bold shadow-lg shadow-cyan-500/30 hover:scale-105 active:scale-95 transition-all">
+                        <i class="fa-solid fa-rotate-right mr-2"></i> Пройти Знову
+                    </button>
+                    <button onclick="showScreen('hub')" class="w-full sm:w-auto px-8 py-3.5 rounded-2xl glass-card hover:bg-slate-700/50 text-slate-200 font-bold border border-slate-600 transition-all">
+                        Повернутися в Хаб
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 py-4 text-center text-xs text-slate-500 border-t border-slate-800/80">
+        <p>Інтерактивний навчальний модуль з Інформатики &bull; Бази даних та СУБД</p>
+    </footer>
+
+    <!-- Application Logic Script -->
+    <script>
+        /* ==================== GLOBAL STATE ==================== */
+        const state = {
+            score: 0,
+            soundEnabled: true,
+            completedGames: { 1: false, 2: false, 3: false, 4: false },
+            
+            // Game 1 state
+            g1SelectedCardId: null,
+            g1Assignments: {}, // targetId -> card
+            
+            // Game 2 state
+            g2CurrentIndex: 0,
+            g2Items: [],
+            
+            // Game 3 state
+            g3Step: 0,
+            
+            // Game 4 state
+            g4SelectedObj: null,
+            g4Matches: {} // objId -> targetId
+        };
+
+        /* Utility Helper: Shuffle Array */
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        /* Web Audio Synthesizer for tactile Sound FX */
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playTone(freq, type = 'sine', duration = 0.15) {
+            if (!state.soundEnabled) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                // Ignore audio context autoplay restrictions
+            }
+        }
+
+        function playSoundEffect(type) {
+            if (type === 'click') playTone(400, 'sine', 0.08);
+            if (type === 'select') playTone(600, 'triangle', 0.1);
+            if (type === 'success') {
+                playTone(523.25, 'sine', 0.1);
+                setTimeout(() => playTone(659.25, 'sine', 0.1), 100);
+                setTimeout(() => playTone(783.99, 'sine', 0.2), 200);
+            }
+            if (type === 'error') {
+                playTone(220, 'sawtooth', 0.15);
+                setTimeout(() => playTone(180, 'sawtooth', 0.2), 150);
+            }
+        }
+
+        function toggleSound() {
+            state.soundEnabled = !state.soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            if (state.soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high text-lg';
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-lg text-slate-500';
+            }
+        }
+
+        function addScore(points) {
+            state.score += points;
+            document.getElementById('global-score').innerText = state.score;
+        }
+
+        /* Navigation Controller */
+        function showScreen(screenId) {
+            playSoundEffect('click');
+            const screens = ['hub', 'game1', 'game2', 'game3', 'game4', 'summary'];
+            screens.forEach(s => {
+                const el = document.getElementById(`screen-${s}`);
+                if (el) el.classList.add('hidden');
+            });
+            const target = document.getElementById(`screen-${screenId}`);
+            if (target) target.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateBadges() {
+            for (let i = 1; i <= 4; i++) {
+                const badge = document.getElementById(`badge-g1`.replace('1', i));
+                if (badge && state.completedGames[i]) {
+                    badge.innerText = 'Пройдено';
+                    badge.className = 'text-xs px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-bold';
+                }
+            }
+
+            // Check if all games finished
+            if (Object.values(state.completedGames).every(Boolean)) {
+                setTimeout(() => showSummaryScreen(), 800);
+            }
+        }
+
+        function startGame(num) {
+            if (num === 1) initGame1();
+            if (num === 2) initGame2();
+            if (num === 3) initGame3();
+            if (num === 4) initGame4();
+            showScreen(`game${num}`);
+        }
+
+        /* ==================== MINI-GAME 1 LOGIC ==================== */
+        const g1MasterCards = [
+            { id: 'c1', label: 'Поле "Дата Народження"', category: 'Дата/Час', desc: 'Стовпець для сортування за віком' },
+            { id: 'c2', label: 'Поле "Ціна Товару"', category: 'Числовий', desc: 'Стовпець для здійснення розрахунків' },
+            { id: 'c3', label: 'Поле "Прізвище Учня"', category: 'Текстовий', desc: 'Характеристика об\'єкта у вигляді слів' },
+            { id: 'c4', label: 'Поле "Пільги Наявні"', category: 'Логічний', desc: 'Прапорець Так / Ні або True / False' },
+            { id: 'c5', label: 'Поле "Стипендія"', category: 'Грошовий', desc: 'Стовпець для відображення валютних сум' },
+            { id: 'c6', label: 'Запис "Учень №101"', category: 'Запис (Рядок)', desc: 'Повний набір даних про один об\'єкт' }
+        ];
+
+        const g1MasterTargets = [
+            { id: 't_text', name: 'Текстовий Тип', expectedCat: 'Текстовий' },
+            { id: 't_date', name: 'Тип Дата/Час', expectedCat: 'Дата/Час' },
+            { id: 't_num', name: 'Числовий Тип', expectedCat: 'Числовий' },
+            { id: 't_bool', name: 'Логічний Тип', expectedCat: 'Логічний' },
+            { id: 't_curr', name: 'Грошовий Тип', expectedCat: 'Грошовий' },
+            { id: 't_row', name: 'Структура: Запис', expectedCat: 'Запис (Рядок)' }
+        ];
+
+        function initGame1() {
+            state.g1SelectedCardId = null;
+            state.g1Assignments = {};
+
+            const poolEl = document.getElementById('g1-pool');
+            const targetsGrid = document.getElementById('g1-targets-grid');
+            
+            // Shuffle cards & targets
+            const shuffledCards = shuffleArray(g1MasterCards);
+            const shuffledTargets = shuffleArray(g1MasterTargets);
+
+            // Render Pool Cards
+            poolEl.innerHTML = shuffledCards.map(card => `
+                <div id="g1-card-${card.id}" onclick="selectG1Card('${card.id}')" 
+                     class="p-3.5 rounded-2xl glass-card border border-cyan-500/30 cursor-pointer transition-all hover:scale-[1.02] flex flex-col gap-1">
+                    <span class="font-bold text-sm text-cyan-300 flex items-center gap-2">
+                        <i class="fa-solid fa-cube text-xs"></i> ${card.label}
+                    </span>
+                    <span class="text-xs text-slate-400">${card.desc}</span>
+                </div>
+            `).join('');
+
+            // Render Targets
+            targetsGrid.innerHTML = shuffledTargets.map(target => `
+                <div id="g1-target-${target.id}" onclick="assignG1Card('${target.id}')" 
+                     class="glass-card rounded-2xl p-4 border-2 border-dashed border-slate-700 min-h-[110px] flex flex-col justify-between cursor-pointer hover:border-cyan-500/50 transition-all">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-300">${target.name}</span>
+                        <i class="fa-solid fa-bullseye text-slate-500"></i>
+                    </div>
+                    <div id="g1-slot-${target.id}" class="text-sm font-semibold text-cyan-400 mt-2 italic">
+                        [ Натисніть сюди для вставки ]
+                    </div>
+                </div>
+            `).join('');
+
+            updateG1Progress();
+        }
+
+        function selectG1Card(cardId) {
+            playSoundEffect('select');
+            state.g1SelectedCardId = cardId;
+            
+            // Highlight visual selection
+            g1MasterCards.forEach(c => {
+                const el = document.getElementById(`g1-card-${c.id}`);
+                if (el) {
+                    if (c.id === cardId) el.classList.add('tactile-selected');
+                    else el.classList.remove('tactile-selected');
+                }
+            });
+        }
+
+        function assignG1Card(targetId) {
+            if (!state.g1SelectedCardId) {
+                playSoundEffect('error');
+                return;
+            }
+            playSoundEffect('click');
+
+            const cardId = state.g1SelectedCardId;
+            const cardObj = g1MasterCards.find(c => c.id === cardId);
+
+            // Remove previous target assigned to this card if any
+            Object.keys(state.g1Assignments).forEach(t => {
+                if (state.g1Assignments[t].id === cardId) {
+                    delete state.g1Assignments[t];
+                    document.getElementById(`g1-slot-${t}`).innerText = '[ Натисніть сюди для вставки ]';
+                    document.getElementById(`g1-slot-${t}`).className = 'text-sm font-semibold text-cyan-400 mt-2 italic';
+                }
+            });
+
+            // Assign
+            state.g1Assignments[targetId] = cardObj;
+            
+            const slotEl = document.getElementById(`g1-slot-${targetId}`);
+            slotEl.innerHTML = `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-check-circle"></i> ${cardObj.label}</span>`;
+            slotEl.className = 'text-sm mt-2';
+
+            // Clear selection glow
+            const cardEl = document.getElementById(`g1-card-${cardId}`);
+            if (cardEl) cardEl.classList.remove('tactile-selected');
+            state.g1SelectedCardId = null;
+
+            updateG1Progress();
+        }
+
+        function updateG1Progress() {
+            const count = Object.keys(state.g1Assignments).length;
+            document.getElementById('g1-progress').innerText = `${count} / ${g1MasterCards.length}`;
+        }
+
+        function checkGame1() {
+            if (Object.keys(state.g1Assignments).length < g1MasterCards.length) {
+                playSoundEffect('error');
+                return;
+            }
+
+            let correct = 0;
+            g1MasterTargets.forEach(t => {
+                const assignedCard = state.g1Assignments[t.id];
+                const targetBox = document.getElementById(`g1-target-${t.id}`);
+                if (assignedCard && assignedCard.category === t.expectedCat) {
+                    correct++;
+                    targetBox.className = 'glass-card rounded-2xl p-4 border-2 border-emerald-500 bg-emerald-500/10 min-h-[110px] flex flex-col justify-between';
+                } else {
+                    targetBox.className = 'glass-card rounded-2xl p-4 border-2 border-rose-500 bg-rose-500/10 min-h-[110px] flex flex-col justify-between';
+                }
+            });
+
+            if (correct === g1MasterCards.length) {
+                playSoundEffect('success');
+                addScore(250);
+                state.completedGames[1] = true;
+                updateBadges();
+                setTimeout(() => showScreen('hub'), 1500);
+            } else {
+                playSoundEffect('error');
+            }
+        }
+
+        /* ==================== MINI-GAME 2 LOGIC ==================== */
+        const g2MasterItems = [
+            { id: 'i1', title: 'MS Access', targetBin: 'b_local', desc: 'Персональна СУБД для одного комп\'ютера' },
+            { id: 'i2', title: 'Google-Сервіси / Facebook', targetBin: 'b_distrib', desc: 'БД розповсюджені на багатьох серверах' },
+            { id: 'i3', title: 'MySQL & PostgreSQL', targetBin: 'b_web', desc: 'Використовуються у веб-сайтах та магазинах' },
+            { id: 'i4', title: 'Oracle', targetBin: 'b_corp', desc: 'Використовується корпораціями та банками' },
+            { id: 'i5', title: 'SQLite', targetBin: 'b_mobile', desc: 'Вбудована в смартфони для контактів' },
+            { id: 'i6', title: 'Папки у Windows', targetBin: 'b_hier', desc: 'Ієрархічна структура за формою подання' }
+        ];
+
+        const g2MasterBins = [
+            { id: 'b_local', name: 'Локальні СУБД', icon: 'fa-desktop' },
+            { id: 'b_distrib', name: 'Розподілені БД', icon: 'fa-network-wired' },
+            { id: 'b_web', name: 'Веб & Інтернет-магазини', icon: 'fa-globe' },
+            { id: 'b_corp', name: 'Банки & Корпорації', icon: 'fa-building-columns' },
+            { id: 'b_mobile', name: 'Смартфон / SQLite', icon: 'fa-mobile-screen-button' },
+            { id: 'b_hier', name: 'Ієрархічна Форма', icon: 'fa-folder-tree' }
+        ];
+
+        function initGame2() {
+            state.g2CurrentIndex = 0;
+            state.g2Items = shuffleArray(g2MasterItems);
+
+            const binsGrid = document.getElementById('g2-bins-grid');
+            binsGrid.innerHTML = shuffleArray(g2MasterBins).map(bin => `
+                <div onclick="sortG2Item('${bin.id}')" 
+                     class="glass-card glass-card-hover rounded-2xl p-5 border border-purple-500/30 cursor-pointer flex flex-col items-center justify-center text-center gap-2 group">
+                    <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid ${bin.icon} text-xl"></i>
+                    </div>
+                    <span class="font-bold text-sm text-slate-200">${bin.name}</span>
+                </div>
+            `).join('');
+
+            renderG2CurrentCard();
+        }
+
+        function renderG2CurrentCard() {
+            const container = document.getElementById('g2-active-card-container');
+            const progress = document.getElementById('g2-progress');
+
+            if (state.g2CurrentIndex >= state.g2Items.length) {
+                container.innerHTML = `
+                    <div class="text-emerald-400 font-bold text-lg animate-bounce">
+                        <i class="fa-solid fa-circle-check"></i> Усі елементи успішно розсортовано!
+                    </div>
+                `;
+                progress.innerText = `${state.g2Items.length} / ${state.g2Items.length}`;
+                playSoundEffect('success');
+                addScore(250);
+                state.completedGames[2] = true;
+                updateBadges();
+                setTimeout(() => showScreen('hub'), 1500);
+                return;
+            }
+
+            const item = state.g2Items[state.g2CurrentIndex];
+            progress.innerText = `${state.g2CurrentIndex} / ${state.g2Items.length}`;
+
+            container.innerHTML = `
+                <div class="p-4 rounded-2xl glass-card border-2 border-purple-400/50 bg-purple-950/40 text-center max-w-sm w-full animate-float">
+                    <h4 class="text-lg font-black text-purple-300">${item.title}</h4>
+                    <p class="text-xs text-slate-300 mt-1">${item.desc}</p>
+                </div>
+            `;
+        }
+
+        function sortG2Item(binId) {
+            const currentItem = state.g2Items[state.g2CurrentIndex];
+            if (!currentItem) return;
+
+            if (currentItem.targetBin === binId) {
+                playSoundEffect('success');
+                state.g2CurrentIndex++;
+                renderG2CurrentCard();
+            } else {
+                playSoundEffect('error');
+            }
+        }
+
+        /* ==================== MINI-GAME 3 LOGIC ==================== */
+        const g3Scenarios = [
+            {
+                title: 'Сценарій 1: Таблиця "Учні Школи"',
+                desc: 'Знайдіть Первинний Ключ (Primary Key). Він має бути унікальним та не мати порожніх значень!',
+                headers: ['ID_Учня', 'Прізвище', 'Класи', 'Дата_Народження'],
+                rows: [
+                    ['101', 'Коваленко', '10-А', '12.05.2008'],
+                    ['102', 'Шевченко', '10-А', '03.09.2008'],
+                    ['103', 'Бондаренко', '10-Б', '15.01.2008'],
+                    ['104', 'Коваленко', '10-Б', '22.11.2007']
+                ],
+                correctCol: 0,
+                explanations: {
+                    0: 'Правильно! ID_Учня є унікальним для кожного запису та виключає повтори.',
+                    1: 'Помилка! Прізвища повторюються ("Коваленко"). Вони не можуть бути первинним ключем.',
+                    2: 'Помилка! Класи повторюються для багатьох учнів.',
+                    3: 'Помилка! Дати народження можуть збігатися у кількох учнів.'
+                }
+            },
+            {
+                title: 'Сценарій 2: Таблиця "Каталог Книг"',
+                desc: 'Оберіть правильний первинний ключ для бібліотеки.',
+                headers: ['Назва Книги', 'ISBN Код', 'Рік Видання', 'Ціна'],
+                rows: [
+                    ['Кобзар', '978-966-01-01', '2020', '250 грн'],
+                    ['Захар Беркут', '978-966-01-02', '2019', '180 грн'],
+                    ['Кобзар', '978-966-01-03', '2022', '300 грн'],
+                    ['Маруся', '978-966-01-04', '2020', '150 грн']
+                ],
+                correctCol: 1,
+                explanations: {
+                    0: 'Помилка! Назви книг можуть повторюватися у різних перевиданнях.',
+                    1: 'Правильно! Унікальний номер ISBN ідентифікує кожне конкретне видання книги!',
+                    2: 'Помилка! Рік видання однаковий для сотень книг.',
+                    3: 'Помилка! Ціна не є унікальним ідентифікатором.'
+                }
+            },
+            {
+                title: 'Сценарій 3: Таблиця "Інтернет-Магазин"',
+                desc: 'Яке поле забезпечить унікальність замовлення?',
+                headers: ['Місто Доставки', 'Сума', 'Код_Замовлення', 'Спосіб Оплати'],
+                rows: [
+                    ['Київ', '1200 грн', 'ORD-8801', 'Картка'],
+                    ['Львів', '450 грн', 'ORD-8802', 'Готівка'],
+                    ['Одеса', '1200 грн', 'ORD-8803', 'Картка'],
+                    ['Київ', '890 грн', 'ORD-8804', 'Картка']
+                ],
+                correctCol: 2,
+                explanations: {
+                    0: 'Помилка! Міста повторюються.',
+                    1: 'Помилка! Сума замовлень може збігатися.',
+                    2: 'Правильно! Код_Замовлення — унікальний первинний ключ для кожного чека.',
+                    3: 'Помилка! Спосіб оплати має лише кілька фіксованих варіантів.'
+                }
+            }
+        ];
+
+        function initGame3() {
+            state.g3Step = 0;
+            renderG3Step();
+        }
+
+        function renderG3Step() {
+            const scenario = g3Scenarios[state.g3Step];
+            document.getElementById('g3-step-indicator').innerText = `Сценарій ${state.g3Step + 1} з ${g3Scenarios.length}`;
+            document.getElementById('g3-table-title').innerText = scenario.title;
+            document.getElementById('g3-table-desc').innerText = scenario.desc;
+
+            const statusBox = document.getElementById('g3-status-box');
+            statusBox.className = 'hidden p-4 rounded-2xl glass-card border';
+            document.getElementById('g3-next-btn').classList.add('hidden');
+
+            const table = document.getElementById('g3-data-table');
+            
+            // Build Table Header
+            const headerHTML = `
+                <thead>
+                    <tr class="border-b border-slate-700 bg-slate-800/80">
+                        ${scenario.headers.map((h, colIdx) => `
+                            <th onclick="selectG3Col(${colIdx})" 
+                                class="p-3 font-bold text-cyan-400 hover:bg-slate-700/60 cursor-pointer transition-colors border-r border-slate-700 last:border-0 text-center">
+                                <div class="flex items-center justify-center gap-1">
+                                    <span>${h}</span>
+                                    <i class="fa-solid fa-key text-xs opacity-50"></i>
+                                </div>
+                            </th>
+                        `).join('')}
+                    </tr>
+                </thead>
+            `;
+
+            // Build Table Body
+            const bodyHTML = `
+                <tbody>
+                    ${scenario.rows.map(row => `
+                        <tr class="border-b border-slate-800/60 hover:bg-slate-800/30">
+                            ${row.map(cell => `<td class="p-3 text-center text-slate-300 border-r border-slate-800 last:border-0">${cell}</td>`).join('')}
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+
+            table.innerHTML = headerHTML + bodyHTML;
+        }
+
+        function selectG3Col(colIdx) {
+            const scenario = g3Scenarios[state.g3Step];
+            const statusBox = document.getElementById('g3-status-box');
+            const nextBtn = document.getElementById('g3-next-btn');
+
+            statusBox.classList.remove('hidden');
+
+            if (colIdx === scenario.correctCol) {
+                playSoundEffect('success');
+                statusBox.className = 'p-4 rounded-2xl glass-card border border-emerald-500 bg-emerald-500/10 text-emerald-300 text-sm font-bold flex items-center gap-3';
+                statusBox.innerHTML = `<i class="fa-solid fa-circle-check text-2xl text-emerald-400"></i> <div>${scenario.explanations[colIdx]}</div>`;
+                nextBtn.classList.remove('hidden');
+            } else {
+                playSoundEffect('error');
+                statusBox.className = 'p-4 rounded-2xl glass-card border border-rose-500 bg-rose-500/10 text-rose-300 text-sm font-bold flex items-center gap-3';
+                statusBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-2xl text-rose-400"></i> <div>${scenario.explanations[colIdx]}</div>`;
+            }
+        }
+
+        function nextGame3Step() {
+            playSoundEffect('click');
+            state.g3Step++;
+            if (state.g3Step < g3Scenarios.length) {
+                renderG3Step();
+            } else {
+                playSoundEffect('success');
+                addScore(250);
+                state.completedGames[3] = true;
+                updateBadges();
+                showScreen('hub');
+            }
+        }
+
+        /* ==================== MINI-GAME 4 LOGIC ==================== */
+        const g4MasterObjects = [
+            { id: 'o_tab', name: 'Таблиця', icon: 'fa-table' },
+            { id: 'o_req', name: 'Запит', icon: 'fa-filter' },
+            { id: 'o_form', name: 'Форма', icon: 'fa-window-maximize' },
+            { id: 'o_rep', name: 'Звіт', icon: 'fa-file-invoice' }
+        ];
+
+        const g4MasterTargets = [
+            { id: 't_tab', matchId: 'o_tab', text: 'Базовий об\'єкт для збереження впорядкованих даних у вигляді рядків і стовпців' },
+            { id: 't_req', matchId: 'o_req', text: 'Автоматичний відбір та фільтрація даних за умовами (наприклад: показати учнів травні)' },
+            { id: 't_form', matchId: 'o_form', text: 'Об\'єкт для зручного введення та перегляду даних у графічному інтерфейсі (анкета)' },
+            { id: 't_rep', matchId: 'o_rep', text: 'Форматоване виведення підсумкових даних для друку або аналізу' }
+        ];
+
+        function initGame4() {
+            state.g4SelectedObj = null;
+            state.g4Matches = {};
+
+            const objectsList = document.getElementById('g4-objects-list');
+            const targetsList = document.getElementById('g4-targets-list');
+
+            const shuffledObjs = shuffleArray(g4MasterObjects);
+            const shuffledTargets = shuffleArray(g4MasterTargets);
+
+            objectsList.innerHTML = shuffledObjs.map(obj => `
+                <div id="g4-obj-${obj.id}" onclick="selectG4Object('${obj.id}')"
+                     class="p-4 rounded-2xl glass-card border border-amber-500/30 cursor-pointer flex items-center gap-3 transition-all hover:scale-[1.02]">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400">
+                        <i class="fa-solid ${obj.icon}"></i>
+                    </div>
+                    <span class="font-bold text-slate-200">${obj.name}</span>
+                </div>
+            `).join('');
+
+            targetsList.innerHTML = shuffledTargets.map(target => `
+                <div id="g4-target-${target.id}" onclick="matchG4Target('${target.id}')"
+                     class="p-4 rounded-2xl glass-card border-2 border-dashed border-slate-700 cursor-pointer flex flex-col justify-between hover:border-cyan-500/50 transition-all min-h-[90px]">
+                    <span class="text-xs text-slate-300">${target.text}</span>
+                    <div id="g4-slot-${target.id}" class="text-xs font-bold text-cyan-400 mt-2 italic">
+                        [ Натисніть для підключення об'єкта ]
+                    </div>
+                </div>
+            `).join('');
+
+            updateG4Progress();
+        }
+
+        function selectG4Object(objId) {
+            playSoundEffect('select');
+            state.g4SelectedObj = objId;
+
+            g4MasterObjects.forEach(o => {
+                const el = document.getElementById(`g4-obj-${o.id}`);
+                if (el) {
+                    if (o.id === objId) el.classList.add('tactile-selected');
+                    else el.classList.remove('tactile-selected');
+                }
+            });
+        }
+
+        function matchG4Target(targetId) {
+            if (!state.g4SelectedObj) {
+                playSoundEffect('error');
+                return;
+            }
+            playSoundEffect('click');
+
+            const objId = state.g4SelectedObj;
+            const objObj = g4MasterObjects.find(o => o.id === objId);
+
+            // Clear previous matches for this object
+            Object.keys(state.g4Matches).forEach(t => {
+                if (state.g4Matches[t] === objId) {
+                    delete state.g4Matches[t];
+                    document.getElementById(`g4-slot-${t}`).innerText = '[ Натисніть для підключення об\'єкта ]';
+                }
+            });
+
+            state.g4Matches[targetId] = objId;
+
+            const slot = document.getElementById(`g4-slot-${targetId}`);
+            slot.innerHTML = `<span class="text-amber-400 font-bold"><i class="fa-solid fa-link"></i> Підключено: ${objObj.name}</span>`;
+
+            const objEl = document.getElementById(`g4-obj-${objId}`);
+            if (objEl) objEl.classList.remove('tactile-selected');
+            state.g4SelectedObj = null;
+
+            updateG4Progress();
+        }
+
+        function updateG4Progress() {
+            const count = Object.keys(state.g4Matches).length;
+            document.getElementById('g4-progress').innerText = `${count} / ${g4MasterObjects.length}`;
+        }
+
+        function checkGame4() {
+            if (Object.keys(state.g4Matches).length < g4MasterObjects.length) {
+                playSoundEffect('error');
+                return;
+            }
+
+            let correct = 0;
+            g4MasterTargets.forEach(t => {
+                const matchedObjId = state.g4Matches[t.id];
+                const box = document.getElementById(`g4-target-${t.id}`);
+
+                if (matchedObjId === t.matchId) {
+                    correct++;
+                    box.className = 'p-4 rounded-2xl glass-card border-2 border-emerald-500 bg-emerald-500/10 flex flex-col justify-between';
+                } else {
+                    box.className = 'p-4 rounded-2xl glass-card border-2 border-rose-500 bg-rose-500/10 flex flex-col justify-between';
+                }
+            });
+
+            if (correct === g4MasterObjects.length) {
+                playSoundEffect('success');
+                addScore(250);
+                state.completedGames[4] = true;
+                updateBadges();
+                setTimeout(() => showScreen('hub'), 1500);
+            } else {
+                playSoundEffect('error');
+            }
+        }
+
+        function showSummaryScreen() {
+            document.getElementById('final-score').innerText = state.score;
+            showScreen('summary');
+        }
+
+        function restartAll() {
+            state.score = 0;
+            state.completedGames = { 1: false, 2: false, 3: false, 4: false };
+            document.getElementById('global-score').innerText = 0;
+            updateBadges();
+            showScreen('hub');
+        }
+
+        /* Interactive Background Particles */
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function createParticles() {
+            particles = [];
+            const count = Math.floor(window.innerWidth / 20);
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 2 + 0.5,
+                    vx: (Math.random() - 0.5) * 0.4,
+                    vy: (Math.random() - 0.5) * 0.4,
+                    color: Math.random() > 0.5 ? 'rgba(56, 189, 248, ' : 'rgba(139, 92, 246, ',
+                    alpha: Math.random() * 0.5 + 0.2
+                });
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+
+                if (p.x < 0) p.x = canvas.width;
+                if (p.x > canvas.width) p.x = 0;
+                if (p.y < 0) p.y = canvas.height;
+                if (p.y > canvas.height) p.y = 0;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = p.color + p.alpha + ')';
+                ctx.fill();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+
+        window.onload = function() {
+            resizeCanvas();
+            createParticles();
+            animateParticles();
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+                createParticles();
+            });
+        };
+    </script>
+</body>
+</html>
