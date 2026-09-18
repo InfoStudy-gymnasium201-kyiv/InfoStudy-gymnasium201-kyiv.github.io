@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Авторське Право: Векторна Гра-Пригода</title>
+    
+    <!-- Google Fonts: Fredoka & Nunito -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --bg-pattern: #EBF3FA;
+            --dark-border: #2D3436;
+            --pink-accent: #FD79A8;
+            --purple-accent: #6C5CE7;
+            --teal-accent: #00B894;
+            --blue-accent: #0984E3;
+            --orange-accent: #E17055;
+            --yellow-accent: #FDCB6E;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-pattern);
+            background-image: radial-gradient(#a3b1c6 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+            color: #2D3436;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        h1, h2, h3, h4, .font-heading {
+            font-family: 'Fredoka', cursive;
+        }
+
+        /* Playful Neo-Brutalism UI Utilities */
+        .neo-card {
+            background-color: #FFFFFF;
+            border: 3.5px solid var(--dark-border);
+            box-shadow: 5px 5px 0px var(--dark-border);
+            border-radius: 1.25rem;
+            transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .neo-btn {
+            border: 3.5px solid var(--dark-border);
+            box-shadow: 4px 4px 0px var(--dark-border);
+            border-radius: 1rem;
+            font-family: 'Fredoka', cursive;
+            font-weight: 700;
+            transition: all 0.1s ease;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+        }
+
+        .neo-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 6px 6px 0px var(--dark-border);
+        }
+
+        .neo-btn:active:not(:disabled) {
+            transform: translateY(3px);
+            box-shadow: 1px 1px 0px var(--dark-border);
+        }
+
+        .neo-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: 2px 2px 0px var(--dark-border);
+        }
+
+        /* Keyframes Animations */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px) rotate(-2deg); }
+            40%, 80% { transform: translateX(8px) rotate(2deg); }
+        }
+
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            70% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animate-pop {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .animate-float {
+            animation: floatSlow 3s ease-in-out infinite;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #EBF3FA;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2D3436;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-3 md:p-6 overflow-x-hidden">
+
+    <header class="max-w-5xl mx-auto w-full mb-4">
+        <div class="neo-card p-4 bg-[#FFEAA7] flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="showScreen('hub-screen')">
+                <span class="text-4xl animate-float">📜</span>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-black tracking-wide text-[#2D3436]">АВТОРСЬКЕ ПРАВО</h1>
+                    <p class="text-xs md:text-sm font-bold text-[#636E72]">Інтерактивна гра з інформатики (7 клас)</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button id="sound-btn" onclick="toggleSound()" class="neo-btn bg-[#00B894] text-white p-2.5 px-3 text-sm">
+                    🔊 Звук: УВІМК
+                </button>
+                <button onclick="showScreen('hub-screen')" class="neo-btn bg-[#6C5CE7] text-white p-2.5 px-4 text-sm">
+                    🏠 Меню
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto w-full flex-grow flex flex-col justify-center my-2">
+
+        <!-- SCREEN 1: HUB / MENU -->
+        <section id="hub-screen" class="space-y-6 animate-pop">
+            <div class="neo-card p-6 bg-white text-center relative overflow-hidden">
+                <span class="absolute -right-6 -bottom-6 text-9xl opacity-10 font-heading">©</span>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-[#2D3436] mb-3">Ласкаво просимо, Юний Захиснику Творчості! 🎨</h2>
+                <p class="text-base md:text-lg max-w-2xl mx-auto text-[#636E72] font-semibold">
+                    Пройди 4 випробування з теми «Авторське право», здобудь відзнаки та отримай іменний **Сертифікат Знавця**!
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <!-- Mini-Game 1 Card -->
+                <div class="neo-card p-5 bg-[#74B9FF] flex flex-col justify-between hover:scale-[1.01]">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-4xl p-2 bg-white rounded-2xl border-2 border-[#2D3436]">💡</span>
+                            <span id="badge-g1" class="neo-card px-3 py-1 bg-white text-xs font-black">❌ НЕ ПРОЙДЕНО</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-[#2D3436] mb-2">1. Ідея чи Конкретне Втілення?</h3>
+                        <p class="text-sm font-semibold text-[#2D3436] opacity-90 mb-4">
+                            Розподіли картки: що підпадає під захист закону, а що є лише незахищеною ідеєю або фактом.
+                        </p>
+                    </div>
+                    <button onclick="startMiniGame1()" class="neo-btn bg-[#FFEAA7] text-[#2D3436] w-full py-3 text-lg">
+                        Грати (Сортування) 🚀
+                    </button>
+                </div>
+
+                <!-- Mini-Game 2 Card -->
+                <div class="neo-card p-5 bg-[#FD79A8] flex flex-col justify-between hover:scale-[1.01]">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-4xl p-2 bg-white rounded-2xl border-2 border-[#2D3436]">🕵️‍♂️</span>
+                            <span id="badge-g2" class="neo-card px-3 py-1 bg-white text-xs font-black">❌ НЕ ПРОЙДЕНО</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-[#2D3436] mb-2">2. Інтернет-Інспектор</h3>
+                        <p class="text-sm font-semibold text-[#2D3436] opacity-90 mb-4">
+                            Проаналізуй дії користувачів у мережі. Визначай: це дозволено чи порушення (плагіат)?
+                        </p>
+                    </div>
+                    <button onclick="startMiniGame2()" class="neo-btn bg-[#55E6C1] text-[#2D3436] w-full py-3 text-lg">
+                        Грати (Перевірка) 🔍
+                    </button>
+                </div>
+
+                <!-- Mini-Game 3 Card -->
+                <div class="neo-card p-5 bg-[#FDCB6E] flex flex-col justify-between hover:scale-[1.01]">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-4xl p-2 bg-white rounded-2xl border-2 border-[#2D3436]">🧩</span>
+                            <span id="badge-g3" class="neo-card px-3 py-1 bg-white text-xs font-black">❌ НЕ ПРОЙДЕНО</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-[#2D3436] mb-2">3. Конструктор Копірайту</h3>
+                        <p class="text-sm font-semibold text-[#2D3436] opacity-90 mb-4">
+                            Збери правильний знак авторського права © та грамотні посилання із перемішаних фрагментів.
+                        </p>
+                    </div>
+                    <button onclick="startMiniGame3()" class="neo-btn bg-[#6C5CE7] text-white w-full py-3 text-lg">
+                        Грати (Пазл) 🛠️
+                    </button>
+                </div>
+
+                <!-- Mini-Game 4 Card -->
+                <div class="neo-card p-5 bg-[#55E6C1] flex flex-col justify-between hover:scale-[1.01]">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-4xl p-2 bg-white rounded-2xl border-2 border-[#2D3436]">⚡</span>
+                            <span id="badge-g4" class="neo-card px-3 py-1 bg-white text-xs font-black">❌ НЕ ПРОЙДЕНО</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-[#2D3436] mb-2">4. Ловець Легального Контенту</h3>
+                        <p class="text-sm font-semibold text-[#2D3436] opacity-90 mb-4">
+                            Аркадне випробування! Лови відкриті ліцензії (Creative Commons, Unsplash) та уникай піратства.
+                        </p>
+                    </div>
+                    <button onclick="startMiniGame4()" class="neo-btn bg-[#FF7675] text-white w-full py-3 text-lg">
+                        Грати (Аркада) 🎯
+                    </button>
+                </div>
+            </div>
+
+            <!-- Certificate Unlock Section -->
+            <div id="cert-panel" class="neo-card p-6 bg-[#A29BFE] text-center hidden animate-pop">
+                <h3 class="text-2xl font-black text-[#2D3436] mb-2">🎉 Вітаємо! Усі випробування пройдено!</h3>
+                <p class="font-bold text-[#2D3436] mb-4">Тепер ти готовий отримати персональний офіційний сертифікат знавця авторського права.</p>
+                <button onclick="openCertificateModal()" class="neo-btn bg-[#FFEAA7] text-[#2D3436] px-8 py-3 text-xl">
+                    Отримати Сертифікат 📜✨
+                </button>
+            </div>
+        </section>
+
+        <section id="game1-screen" class="hidden animate-pop space-y-4">
+            <div class="neo-card p-4 bg-[#74B9FF] flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl md:text-2xl font-bold text-[#2D3436]">Гра 1: Захищається чи Ні?</h2>
+                    <p class="text-xs md:text-sm font-semibold text-[#2D3436]">Натисни на картку, а потім обри контейнер (або перетягни)</p>
+                </div>
+                <span id="g1-score" class="neo-card px-3 py-1 bg-white font-black text-sm">Прогрес: 0 / 8</span>
+            </div>
+
+            <!-- Active Card Container -->
+            <div class="neo-card p-6 bg-white text-center min-h-[160px] flex flex-col justify-center items-center relative">
+                <div id="g1-current-card" class="neo-card p-4 bg-[#FFEAA7] text-lg font-bold max-w-lg cursor-pointer transform transition-all active:scale-95 shadow-md">
+                    <!-- Dynamic content -->
+                </div>
+            </div>
+
+            <!-- Target Drop Zones / Selection Buttons -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button onclick="sortG1Item('protected')" class="neo-card p-5 bg-[#55E6C1] hover:bg-[#00B894] text-left group">
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl p-2 bg-white rounded-xl border-2 border-[#2D3436]">🛡️</span>
+                        <div>
+                            <h3 class="text-lg font-extrabold text-[#2D3436]">ЗАХИЩАЄТЬСЯ</h3>
+                            <p class="text-xs font-bold text-[#2D3436] opacity-80">Конкретний виражений твір (текст, код, фото, пісня)</p>
+                        </div>
+                    </div>
+                </button>
+
+                <button onclick="sortG1Item('not_protected')" class="neo-card p-5 bg-[#FF7675] hover:bg-[#D63031] text-left group">
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl p-2 bg-white rounded-xl border-2 border-[#2D3436]">💭</span>
+                        <div>
+                            <h3 class="text-lg font-extrabold text-white">НЕ ЗАХИЩАЄТЬСЯ</h3>
+                            <p class="text-xs font-bold text-white opacity-90">Лише загальна ідея, усна думка або математичний факт</p>
+                        </div>
+                    </div>
+                </button>
+            </div>
+        </section>
+
+        <section id="game2-screen" class="hidden animate-pop space-y-4">
+            <div class="neo-card p-4 bg-[#FD79A8] flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl md:text-2xl font-bold text-[#2D3436]">Гра 2: Інтернет-Інспектор</h2>
+                    <p class="text-xs md:text-sm font-semibold text-[#2D3436]">Оціни поведінку користувача в мережі</p>
+                </div>
+                <span id="g2-score" class="neo-card px-3 py-1 bg-white font-black text-sm">Справа: 1 / 8</span>
+            </div>
+
+            <div class="neo-card p-6 bg-white min-h-[220px] flex flex-col justify-between items-center text-center relative overflow-hidden">
+                <span class="text-5xl my-2" id="g2-card-emoji">🌐</span>
+                <p id="g2-card-text" class="text-lg md:text-xl font-extrabold text-[#2D3436] my-2 max-w-xl">
+                    <!-- Dynamic scenario text -->
+                </p>
+                <div class="text-xs font-bold text-[#636E72] bg-[#EBF3FA] px-3 py-1 rounded-full border border-[#2D3436]">
+                    Обери вердикт інспектора
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="answerG2(true)" class="neo-btn bg-[#00B894] text-white py-4 text-lg md:text-xl flex items-center justify-center gap-2">
+                    <span>👍</span> МОЖНА (Законно)
+                </button>
+                <button onclick="answerG2(false)" class="neo-btn bg-[#D63031] text-white py-4 text-lg md:text-xl flex items-center justify-center gap-2">
+                    <span>❌</span> ПОРУШЕННЯ
+                </button>
+            </div>
+        </section>
+
+        <section id="game3-screen" class="hidden animate-pop space-y-4">
+            <div class="neo-card p-4 bg-[#FDCB6E] flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl md:text-2xl font-bold text-[#2D3436]">Гра 3: Конструктор Копірайту</h2>
+                    <p class="text-xs md:text-sm font-semibold text-[#2D3436]">Збери правильний елемент, натискаючи на плашки у потрібному порядку</p>
+                </div>
+                <span id="g3-step" class="neo-card px-3 py-1 bg-white font-black text-sm">Завдання: 1 / 4</span>
+            </div>
+
+            <!-- Task Instruction & Slot Line -->
+            <div class="neo-card p-5 bg-white space-y-4">
+                <div class="bg-[#FFEAA7] p-3 rounded-xl border-2 border-[#2D3436] font-bold text-sm text-[#2D3436]" id="g3-task-desc">
+                    <!-- Task description -->
+                </div>
+
+                <div class="text-xs font-extrabold text-[#636E72] uppercase tracking-wider">Твій зібраний рядок:</div>
+                <div id="g3-selected-slots" class="min-h-[60px] p-3 bg-[#EBF3FA] rounded-xl border-2 border-dashed border-[#2D3436] flex flex-wrap gap-2 items-center">
+                    <!-- Selected tiles appear here -->
+                </div>
+            </div>
+
+            <!-- Available Options Pool -->
+            <div class="neo-card p-4 bg-[#A29BFE]">
+                <div class="text-xs font-extrabold text-white uppercase tracking-wider mb-3">Доступні блоки (натискай для вибору):</div>
+                <div id="g3-tiles-pool" class="flex flex-wrap gap-2 justify-center">
+                    <!-- Shuffled tile buttons -->
+                </div>
+            </div>
+
+            <div class="flex gap-3 justify-end">
+                <button onclick="resetG3Current()" class="neo-btn bg-[#FF7675] text-white px-5 py-2.5 text-sm">
+                    🔄 Скинути
+                </button>
+                <button onclick="checkG3Solution()" class="neo-btn bg-[#00B894] text-white px-6 py-2.5 text-base">
+                    Перевірити 🚀
+                </button>
+            </div>
+        </section>
+
+        <section id="game4-screen" class="hidden animate-pop space-y-4">
+            <div class="neo-card p-4 bg-[#55E6C1] flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl md:text-2xl font-bold text-[#2D3436]">Гра 4: Ловець Легального Контенту</h2>
+                    <p class="text-xs md:text-sm font-semibold text-[#2D3436]">Тисни ТІЛЬКИ на безпечні та легальні елементи! (Помилка = -1 життя)</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span id="g4-lives" class="neo-card px-3 py-1 bg-[#FF7675] text-white font-black text-sm">❤️❤️❤️</span>
+                    <span id="g4-score" class="neo-card px-3 py-1 bg-white font-black text-sm">Очки: 0 / 10</span>
+                </div>
+            </div>
+
+            <!-- Arcade Playfield -->
+            <div id="g4-playfield" class="neo-card bg-white h-[340px] relative overflow-hidden flex items-center justify-center border-4 border-[#2D3436]">
+                <div id="g4-start-overlay" class="text-center p-6 bg-[#FFEAA7] neo-card max-w-sm z-10">
+                    <span class="text-5xl block mb-2">🎯</span>
+                    <h3 class="text-xl font-bold text-[#2D3436] mb-2">Готовий до перевірки реакції?</h3>
+                    <p class="text-xs font-semibold text-[#636E72] mb-4">Збирай легальні ресурси (Creative Commons, Unsplash, Spotify, Власний вірш). Уникай піратського софту та плагіату!</p>
+                    <button onclick="runG4Arcade()" class="neo-btn bg-[#6C5CE7] text-white px-6 py-3 text-lg w-full">
+                        СТАРТ! ⚡
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="cert-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="neo-card p-6 md:p-8 bg-[#FFEAA7] max-w-2xl w-full space-y-5 relative animate-pop text-center border-4 border-[#2D3436]">
+            <button onclick="closeCertificateModal()" class="absolute top-3 right-3 neo-btn bg-[#FF7675] text-white w-9 h-9 p-0 text-lg">✕</button>
+            
+            <div id="cert-printable" class="border-4 border-dashed border-[#2D3436] p-6 bg-white rounded-2xl space-y-4">
+                <span class="text-6xl block">📜✨</span>
+                <h2 class="text-2xl md:text-3xl font-black text-[#2D3436] tracking-wider uppercase">СЕРТИФІКАТ ЗНАВЦЯ</h2>
+                <p class="text-xs md:text-sm font-bold text-[#636E72]">Цей сертифікат засвідчує, що</p>
+                
+                <input id="student-name-input" type="text" placeholder="Введи своє Ім'я та Прізвище" 
+                       class="text-xl font-black text-center text-[#6C5CE7] border-b-4 border-[#2D3436] focus:outline-none w-full max-w-md py-1 bg-transparent">
+                
+                <p class="text-sm font-semibold text-[#2D3436] max-w-md mx-auto">
+                    упішно пройшов(ла) усі практичні випробування з теми <br>
+                    <strong class="text-[#00B894] font-black text-base">«АВТОРСЬКЕ ПРАВО ТА ВЗАЄМОДІЯ В ІНТЕРНЕТІ»</strong>
+                </p>
+
+                <div class="flex justify-between items-center text-xs font-extrabold text-[#636E72] pt-4 border-t-2 border-[#EBF3FA]">
+                    <span>Дата: <span id="cert-date">18.09.2026</span></span>
+                    <span>Код знавця: <strong class="text-[#2D3436]">© INF-2026-OK</strong></span>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-3">
+                <button onclick="window.print()" class="neo-btn bg-[#00B894] text-white px-6 py-2.5 text-sm">
+                    🖨️ Роздрукувати / Зберегти PDF
+                </button>
+                <button onclick="closeCertificateModal()" class="neo-btn bg-[#6C5CE7] text-white px-6 py-2.5 text-sm">
+                    Закрити 👍
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 neo-card px-6 py-3 bg-[#2D3436] text-white font-bold text-sm z-50 hidden transition-all duration-300">
+        <!-- Toast message -->
+    </div>
+
+    <footer class="max-w-5xl mx-auto w-full text-center py-2 text-xs font-bold text-[#636E72]">
+        Інформатика 7 клас • Тема 1: Комунікація та взаємодія • Навчальний веб-ресурс
+    </footer>
+
+    <script>
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.muted = false;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                }
+            }
+
+            playTone(freq, type, duration, gainValue = 0.1) {
+                if (this.muted) return;
+                try {
+                    this.init();
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(gainValue, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch (e) {
+                    console.log("Audio play error", e);
+                }
+            }
+
+            playClick() {
+                this.playTone(400, 'sine', 0.08, 0.05);
+            }
+
+            playSuccess() {
+                if (this.muted) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                    setTimeout(() => this.playTone(freq, 'triangle', 0.15, 0.08), idx * 70);
+                });
+            }
+
+            playError() {
+                if (this.muted) return;
+                this.init();
+                this.playTone(180, 'sawtooth', 0.25, 0.12);
+            }
+
+            playFanfare() {
+                if (this.muted) return;
+                this.init();
+                const notes = [440, 554.37, 659.25, 880];
+                notes.forEach((freq, i) => {
+                    setTimeout(() => this.playTone(freq, 'square', 0.3, 0.1), i * 120);
+                });
+            }
+        }
+
+        const sound = new SoundEngine();
+
+        function toggleSound() {
+            sound.muted = !sound.muted;
+            const btn = document.getElementById('sound-btn');
+            btn.innerText = sound.muted ? '🔇 Звук: ВИМК' : '🔊 Звук: УВІМК';
+            if (!sound.muted) sound.playClick();
+        }
+
+        const gameState = {
+            completed: {
+                g1: false,
+                g2: false,
+                g3: false,
+                g4: false
+            }
+        };
+
+        // Utility Helper: Shuffle Array (Fisher-Yates)
+        function shuffle(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // Show Screen Router
+        function showScreen(screenId) {
+            sound.playClick();
+            ['hub-screen', 'game1-screen', 'game2-screen', 'game3-screen', 'game4-screen'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+            updateHubBadges();
+        }
+
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.style.backgroundColor = isError ? '#D63031' : '#2D3436';
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 2200);
+        }
+
+        function updateHubBadges() {
+            for (let i = 1; i <= 4; i++) {
+                const badge = document.getElementById(`badge-g${i}`);
+                if (gameState.completed[`g${i}`]) {
+                    badge.innerText = '✅ ПРОЙДЕНО';
+                    badge.className = 'neo-card px-3 py-1 bg-[#55E6C1] text-[#2D3436] text-xs font-black';
+                }
+            }
+
+            const allDone = Object.values(gameState.completed).every(Boolean);
+            if (allDone) {
+                document.getElementById('cert-panel').classList.remove('hidden');
+            }
+        }
+
+        const g1DataRaw = [
+            { text: "💻 Готовий код розробленої мобільної гри", type: "protected" },
+            { text: "🎨 Намальований комікс про пригоди кошеняти", type: "protected" },
+            { text: "🎵 Записана пісня та авторська мелодія", type: "protected" },
+            { text: "📖 Написаний вірш у шкільному зошиті", type: "protected" },
+            { text: "💭 Ідея створити гру про космічні кораблі", type: "not_protected" },
+            { text: "➕ Формула додавання 2 + 2 = 4", type: "not_protected" },
+            { text: "💡 Думка про відкриття кав'ярні у місті", type: "not_protected" },
+            { text: "🗣️ Усна пропозиція зняти фільм без запису", type: "not_protected" }
+        ];
+
+        let g1Items = [];
+        let g1Index = 0;
+        let g1Score = 0;
+
+        function startMiniGame1() {
+            g1Items = shuffle(g1DataRaw);
+            g1Index = 0;
+            g1Score = 0;
+            showScreen('game1-screen');
+            renderG1Card();
+        }
+
+        function renderG1Card() {
+            const scoreEl = document.getElementById('g1-score');
+            scoreEl.innerText = `Прогрес: ${g1Index} / ${g1Items.length}`;
+
+            if (g1Index >= g1Items.length) {
+                gameState.completed.g1 = true;
+                sound.playSuccess();
+                confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
+                showToast("Вітаємо! Гра 1 успішно пройдена! 🎉");
+                setTimeout(() => showScreen('hub-screen'), 1500);
+                return;
+            }
+
+            const card = document.getElementById('g1-current-card');
+            card.innerText = g1Items[g1Index].text;
+            card.classList.remove('animate-pop', 'animate-shake');
+            void card.offsetWidth; // trigger reflow
+            card.classList.add('animate-pop');
+        }
+
+        function sortG1Item(chosenType) {
+            const current = g1Items[g1Index];
+            const card = document.getElementById('g1-current-card');
+
+            if (current.type === chosenType) {
+                sound.playSuccess();
+                g1Score++;
+                g1Index++;
+                renderG1Card();
+            } else {
+                sound.playError();
+                card.classList.add('animate-shake');
+                showToast("Упс! Пам'ятай: Закон захищає конкретне втілення, а не просто ідею!", true);
+            }
+        }
+
+        const g2DataRaw = [
+            {
+                emoji: "📚",
+                text: "Учень вставив цитату з Вікіпедії у свій реферат та вказав джерело і автора.",
+                allowed: true
+            },
+            {
+                emoji: "🖼️",
+                text: "Блогер завантажив фото з Google і заявив у соцмережах, що намалював його сам.",
+                allowed: false
+            },
+            {
+                emoji: "🎵",
+                text: "Використання безкоштовної фонової музики з ліцензією Creative Commons у ролик.",
+                allowed: true
+            },
+            {
+                emoji: "💾",
+                text: "Завантаження та встановлення піратської версії дорогого відеоредактора.",
+                allowed: false
+            },
+            {
+                emoji: "✉️",
+                text: "Школяр написав художнику в Instagram і попросив дозвіл використати його малюнок.",
+                allowed: true
+            },
+            {
+                emoji: "🎬",
+                text: "Додавання популярного хіта у YouTube-відео без дозволу правовласника.",
+                allowed: false
+            },
+            {
+                emoji: "📷",
+                text: "Завантаження безкоштовного якісного фото із фотостоку Unsplash для презентації.",
+                allowed: true
+            },
+            {
+                emoji: "📑",
+                text: "Повне копіювання тексту чужої статті та подача її як власної шкільної роботи.",
+                allowed: false
+            }
+        ];
+
+        let g2Items = [];
+        let g2Index = 0;
+
+        function startMiniGame2() {
+            g2Items = shuffle(g2DataRaw);
+            g2Index = 0;
+            showScreen('game2-screen');
+            renderG2Card();
+        }
+
+        function renderG2Card() {
+            document.getElementById('g2-score').innerText = `Справа: ${g2Index + 1} / ${g2Items.length}`;
+
+            if (g2Index >= g2Items.length) {
+                gameState.completed.g2 = true;
+                sound.playSuccess();
+                confetti({ particleCount: 70, spread: 80, origin: { y: 0.6 } });
+                showToast("Інспектор провів відмінне розслідування! 🎉");
+                setTimeout(() => showScreen('hub-screen'), 1500);
+                return;
+            }
+
+            const current = g2Items[g2Index];
+            document.getElementById('g2-card-emoji').innerText = current.emoji;
+            document.getElementById('g2-card-text').innerText = current.text;
+        }
+
+        function answerG2(userChoice) {
+            const current = g2Items[g2Index];
+            if (userChoice === current.allowed) {
+                sound.playSuccess();
+                g2Index++;
+                renderG2Card();
+            } else {
+                sound.playError();
+                showToast("Помилковий вердикт! Проаналізуй ситуацію ще раз.", true);
+            }
+        }
+
+        const g3Tasks = [
+            {
+                desc: "Завдання 1: Збери класичний знак авторського права © для компанії 'Infostudy' за 2026 рік.",
+                tiles: ["©", "2026", "Infostudy"],
+                correctSequence: ["©", "2026", "Infostudy"]
+            },
+            {
+                desc: "Завдання 2: Склади правильну атрибуцію для картини автора Олександра за 2025 рік.",
+                tiles: ["©", "2025", "Олександр", "Усі права захищені"],
+                correctSequence: ["©", "2025", "Олександр", "Усі права захищені"]
+            },
+            {
+                desc: "Завдання 3: Склади коректне цитування джерела для шкільної роботи.",
+                tiles: ["Джерело:", "wikipedia.org", "Автор:", "Тарас Шевченко"],
+                correctSequence: ["Автор:", "Тарас Шевченко", "Джерело:", "wikipedia.org"]
+            },
+            {
+                desc: "Завдання 4: Збери назву безпечної відкритої ліцензії для фотографій.",
+                tiles: ["Ліцензія", "Creative", "Commons"],
+                correctSequence: ["Ліцензія", "Creative", "Commons"]
+            }
+        ];
+
+        let g3TaskIndex = 0;
+        let g3SelectedTiles = [];
+
+        function startMiniGame3() {
+            g3TaskIndex = 0;
+            showScreen('game3-screen');
+            loadG3Task();
+        }
+
+        function loadG3Task() {
+            if (g3TaskIndex >= g3Tasks.length) {
+                gameState.completed.g3 = true;
+                sound.playSuccess();
+                confetti({ particleCount: 80, spread: 90, origin: { y: 0.6 } });
+                showToast("Чудово! Всі копірайт-пазли зібрано! 🧩");
+                setTimeout(() => showScreen('hub-screen'), 1500);
+                return;
+            }
+
+            const current = g3Tasks[g3TaskIndex];
+            document.getElementById('g3-step').innerText = `Завдання: ${g3TaskIndex + 1} / ${g3Tasks.length}`;
+            document.getElementById('g3-task-desc').innerText = current.desc;
+
+            g3SelectedTiles = [];
+            renderG3Slots();
+
+            // Render shuffled available tiles
+            const pool = document.getElementById('g3-tiles-pool');
+            pool.innerHTML = '';
+            const shuffledTiles = shuffle(current.tiles);
+
+            shuffledTiles.forEach((tileText) => {
+                const btn = document.createElement('button');
+                btn.className = 'neo-btn bg-white text-[#2D3436] px-4 py-2 text-sm md:text-base hover:bg-[#FFEAA7]';
+                btn.innerText = tileText;
+                btn.onclick = () => selectG3Tile(tileText, btn);
+                pool.appendChild(btn);
+            });
+        }
+
+        function selectG3Tile(text, btnElement) {
+            sound.playClick();
+            g3SelectedTiles.push(text);
+            btnElement.disabled = true;
+            renderG3Slots();
+        }
+
+        function renderG3Slots() {
+            const container = document.getElementById('g3-selected-slots');
+            container.innerHTML = '';
+
+            if (g3SelectedTiles.length === 0) {
+                container.innerHTML = `<span class="text-xs font-bold text-[#A0AEC0]">Обирай плашки нижче...</span>`;
+                return;
+            }
+
+            g3SelectedTiles.forEach((t) => {
+                const badge = document.createElement('span');
+                badge.className = 'neo-card px-3 py-1.5 bg-[#FFEAA7] text-[#2D3436] font-bold text-sm animate-pop';
+                badge.innerText = t;
+                container.appendChild(badge);
+            });
+        }
+
+        function resetG3Current() {
+            sound.playClick();
+            loadG3Task();
+        }
+
+        function checkG3Solution() {
+            const current = g3Tasks[g3TaskIndex];
+            const isCorrect = JSON.stringify(g3SelectedTiles) === JSON.stringify(current.correctSequence);
+
+            if (isCorrect) {
+                sound.playSuccess();
+                g3TaskIndex++;
+                loadG3Task();
+            } else {
+                sound.playError();
+                showToast("Порядок фрагментів невірний! Спробуй ще раз.", true);
+                resetG3Current();
+            }
+        }
+
+        const g4LegalItems = [
+            "🎨 Creative Commons", "📷 Unsplash Foto", "🎵 Spotify Premium", 
+            "📝 Власний вірш", "🍿 Netflix", "📚 Посилання на автора"
+        ];
+
+        const g4IllegalItems = [
+            "☠️ Піратський софт", "🚫 Скопійований малюнок", "💥 Бездозвільний трек", 
+            "⚡ Плагіат реферату", "🔓 Зламаний акаунт"
+        ];
+
+        let g4Score = 0;
+        let g4Lives = 3;
+        let g4Interval = null;
+
+        function startMiniGame4() {
+            g4Score = 0;
+            g4Lives = 3;
+            showScreen('game4-screen');
+            document.getElementById('g4-start-overlay').classList.remove('hidden');
+            updateG4Header();
+        }
+
+        function updateG4Header() {
+            document.getElementById('g4-score').innerText = `Очки: ${g4Score} / 8`;
+            let hearts = '';
+            for (let i = 0; i < g4Lives; i++) hearts += '❤️';
+            document.getElementById('g4-lives').innerText = hearts || '💔';
+        }
+
+        function runG4Arcade() {
+            document.getElementById('g4-start-overlay').classList.add('hidden');
+            g4Score = 0;
+            g4Lives = 3;
+            updateG4Header();
+            spawnG4Target();
+        }
+
+        function spawnG4Target() {
+            if (g4Lives <= 0) {
+                endG4Arcade(false);
+                return;
+            }
+
+            if (g4Score >= 8) {
+                endG4Arcade(true);
+                return;
+            }
+
+            const playfield = document.getElementById('g4-playfield');
+            // Remove previous target if exists
+            const oldTarget = document.getElementById('g4-active-target');
+            if (oldTarget) oldTarget.remove();
+
+            const isLegal = Math.random() > 0.35; // 65% legal, 35% illegal
+            const pool = isLegal ? g4LegalItems : g4IllegalItems;
+            const itemText = pool[Math.floor(Math.random() * pool.length)];
+
+            const target = document.createElement('button');
+            target.id = 'g4-active-target';
+            target.className = `neo-btn absolute px-5 py-3 text-sm md:text-base font-black transition-all animate-pop ${
+                isLegal ? 'bg-[#55E6C1] text-[#2D3436]' : 'bg-[#FF7675] text-white'
+            }`;
+            target.innerText = itemText;
+
+            // Random positions inside playfield
+            const x = Math.floor(Math.random() * (playfield.clientWidth - 160));
+            const y = Math.floor(Math.random() * (playfield.clientHeight - 80));
+            target.style.left = `${Math.max(10, x)}px`;
+            target.style.top = `${Math.max(10, y)}px`;
+
+            target.onclick = () => {
+                if (isLegal) {
+                    sound.playSuccess();
+                    g4Score++;
+                    updateG4Header();
+                } else {
+                    sound.playError();
+                    g4Lives--;
+                    updateG4Header();
+                    showToast("Обережно! Це порушення авторських прав!", true);
+                }
+                spawnG4Target();
+            };
+
+            playfield.appendChild(target);
+
+            // Timeout if user fails to click in time
+            clearTimeout(g4Interval);
+            g4Interval = setTimeout(() => {
+                if (document.getElementById('g4-active-target') === target) {
+                    if (isLegal) {
+                        // Missed a legal item
+                        g4Lives--;
+                        updateG4Header();
+                    }
+                    spawnG4Target();
+                }
+            }, 2200);
+        }
+
+        function endG4Arcade(success) {
+            clearTimeout(g4Interval);
+            const oldTarget = document.getElementById('g4-active-target');
+            if (oldTarget) oldTarget.remove();
+
+            if (success) {
+                gameState.completed.g4 = true;
+                sound.playFanfare();
+                confetti({ particleCount: 100, spread: 100, origin: { y: 0.6 } });
+                showToast("Чудова реакція! Легальний контент під захистом! ⚡");
+                setTimeout(() => showScreen('hub-screen'), 1500);
+            } else {
+                sound.playError();
+                showToast("Спроба невдала. Спробуй ще раз!", true);
+                document.getElementById('g4-start-overlay').classList.remove('hidden');
+            }
+        }
+
+        function openCertificateModal() {
+            sound.playFanfare();
+            confetti({ particleCount: 120, spread: 100, origin: { y: 0.5 } });
+            
+            const today = new Date();
+            const dateStr = today.toLocaleDateString('uk-UA');
+            document.getElementById('cert-date').innerText = dateStr;
+            
+            document.getElementById('cert-modal').classList.remove('hidden');
+        }
+
+        function closeCertificateModal() {
+            sound.playClick();
+            document.getElementById('cert-modal').classList.add('hidden');
+        }
+
+        // Initialize App on window load
+        window.onload = function() {
+            updateHubBadges();
+        };
+    </script>
+</body>
+</html>
