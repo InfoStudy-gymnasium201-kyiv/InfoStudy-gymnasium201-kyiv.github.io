@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Апаратна та Програмна Складові ІС — Інтерактивна Гра</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Comfortaa & Nunito -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        heading: ['Comfortaa', 'cursive'],
+                        body: ['Nunito', 'sans-serif'],
+                    },
+                    colors: {
+                        cyber: {
+                            bg: '#0f172a',
+                            card: 'rgba(30, 41, 59, 0.7)',
+                            cyan: '#38bdf8',
+                            purple: '#8b5cf6',
+                            emerald: '#10b981',
+                            rose: '#f43f5e',
+                            amber: '#f59e0b'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #0f172a 70%);
+            min-height: 100vh;
+            color: #f8fafc;
+            overflow-x: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        h1, h2, h3, h4, .font-heading {
+            font-family: 'Comfortaa', cursive;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(56, 189, 248, 0.4);
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.2);
+        }
+
+        .glow-cyan {
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.35);
+        }
+        
+        .glow-purple {
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.35);
+        }
+
+        .glow-emerald {
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.35);
+        }
+
+        .glow-rose {
+            box-shadow: 0 0 20px rgba(244, 63, 94, 0.35);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(2deg); }
+        }
+
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(0.98); }
+        }
+
+        .animate-pulse-slow {
+            animation: pulse-slow 3s infinite ease-in-out;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #38bdf8;
+        }
+
+        /* Drag & Drop outline pulse */
+        .drop-target-active {
+            border-color: #38bdf8 !important;
+            background: rgba(56, 189, 248, 0.15) !important;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.5) !important;
+        }
+
+        .selected-item {
+            border-color: #f59e0b !important;
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.6) !important;
+            transform: scale(1.03);
+        }
+    </style>
+</head>
+<body class="flex flex-col justify-between min-h-screen relative text-slate-100 pb-8">
+
+    <!-- Top Bar Navigation -->
+    <header class="w-full max-w-7xl mx-auto px-4 py-4 sm:px-6 flex flex-wrap items-center justify-between gap-4 z-20">
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="switchScreen('hub')">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/30 animate-float">
+                <i class="fa-solid fa-microchip text-2xl text-white"></i>
+            </div>
+            <div>
+                <h1 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-sky-400 via-purple-300 to-emerald-400 bg-clip-text text-transparent">
+                    CyberInfo 5-6
+                </h1>
+                <p class="text-xs text-slate-400">Апаратне & Програмне Забезпечення</p>
+            </div>
+        </div>
+
+        <!-- Global Header Stats & Controls -->
+        <div class="flex items-center gap-3 sm:gap-4">
+            <!-- Score Counter -->
+            <div class="glass-card px-4 py-2 rounded-2xl flex items-center gap-2 border border-slate-700">
+                <i class="fa-solid fa-trophy text-amber-400"></i>
+                <span class="text-xs text-slate-400 font-semibold uppercase hidden sm:inline">Бали:</span>
+                <span id="global-score" class="font-bold text-amber-400 text-lg">0</span>
+            </div>
+
+            <!-- Sound Toggle Button -->
+            <button id="sound-btn" onclick="toggleSound()" class="glass-card p-3 rounded-2xl hover:border-sky-400 transition-all active:scale-95 text-sky-400" title="Увімкнути/Вимкнути Звук">
+                <i class="fa-solid fa-volume-high text-lg"></i>
+            </button>
+
+            <!-- Reset All Button -->
+            <button onclick="confirmReset()" class="glass-card p-3 rounded-2xl hover:border-rose-400 transition-all active:scale-95 text-rose-400" title="Скинути прогрес">
+                <i class="fa-solid fa-rotate-left text-lg"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="w-full max-w-7xl mx-auto px-4 py-4 sm:px-6 flex-grow flex flex-col justify-center z-10">
+        
+        <!-- ================= MAIN HUB SCREEN ================= -->
+        <section id="screen-hub" class="w-full py-4 space-y-8 transition-all duration-500">
+            <!-- Hero Banner -->
+            <div class="glass-card rounded-3xl p-6 sm:p-10 text-center relative overflow-hidden border border-slate-700">
+                <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-purple-600/20 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -left-10 -top-10 w-60 h-60 bg-sky-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+                <span class="inline-block px-4 py-1.5 rounded-full bg-sky-500/10 text-sky-400 text-xs font-bold tracking-wider uppercase border border-sky-500/20 mb-4">
+                    Інформатика 5-6 Клас • Тема 3
+                </span>
+                <h2 class="text-2xl sm:text-4xl lg:text-5xl font-extrabold mb-4 bg-gradient-to-r from-sky-400 via-purple-300 to-emerald-300 bg-clip-text text-transparent leading-tight">
+                    Апаратне та Програмне Забезпечення ПК
+                </h2>
+                <p class="text-slate-300 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed mb-6">
+                    Опануй будову комп’ютера, навчись розрізняти "залізо" від програм, налаштовувати драйвери та діагностувати несправності у 4 інтерактивних кібер-місіях!
+                </p>
+
+                <!-- Overall Progress Bar -->
+                <div class="max-w-md mx-auto bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
+                    <div class="flex justify-between text-xs mb-1.5 px-1 font-semibold">
+                        <span class="text-slate-400">Прогрес проходження</span>
+                        <span id="hub-progress-text" class="text-emerald-400">0%</span>
+                    </div>
+                    <div class="w-full h-3 bg-slate-800 rounded-full overflow-hidden">
+                        <div id="hub-progress-bar" class="h-full bg-gradient-to-r from-sky-400 to-emerald-400 rounded-full transition-all duration-700" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mini Game Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- Game 1 Card -->
+                <div onclick="launchGame(1)" class="glass-card rounded-3xl p-6 cursor-pointer flex flex-col justify-between hover:-translate-y-1 group relative overflow-hidden">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-14 h-14 rounded-2xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 group-hover:scale-110 group-hover:bg-sky-500 group-hover:text-slate-900 transition-all">
+                            <i class="fa-solid fa-wrench text-2xl"></i>
+                        </div>
+                        <span id="badge-g1" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">
+                            0/100 б.
+                        </span>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-white group-hover:text-sky-400 transition-colors mb-2 flex items-center justify-between">
+                            1. Лабораторія ПК
+                            <i class="fa-solid fa-arrow-right text-sm opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-sky-400"></i>
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-400 mb-4">
+                            Склади комп'ютер власними руками! Розмісти процессори, оперативку, відеокарту та живлення на платі.
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs font-bold text-sky-400">
+                        <i class="fa-solid fa-hand-pointer"></i> Тактильне перетягування / Тапи
+                    </div>
+                </div>
+
+                <!-- Game 2 Card -->
+                <div onclick="launchGame(2)" class="glass-card rounded-3xl p-6 cursor-pointer flex flex-col justify-between hover:-translate-y-1 group relative overflow-hidden">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 group-hover:scale-110 group-hover:bg-purple-500 group-hover:text-slate-900 transition-all">
+                            <i class="fa-solid fa-boxes-stacked text-2xl"></i>
+                        </div>
+                        <span id="badge-g2" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">
+                            0/100 б.
+                        </span>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-white group-hover:text-purple-400 transition-colors mb-2 flex items-center justify-between">
+                            2. Конвеєр Сортування
+                            <i class="fa-solid fa-arrow-right text-sm opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-purple-400"></i>
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-400 mb-4">
+                            Розподіли елементи по контейнерах: Введення, Виведення, Пам'ять/Обробка та Програмне Забезпечення.
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs font-bold text-purple-400">
+                        <i class="fa-solid fa-arrows-split-up-and-left"></i> Швидке сортування по контейнерах
+                    </div>
+                </div>
+
+                <!-- Game 3 Card -->
+                <div onclick="launchGame(3)" class="glass-card rounded-3xl p-6 cursor-pointer flex flex-col justify-between hover:-translate-y-1 group relative overflow-hidden">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-slate-900 transition-all">
+                            <i class="fa-solid fa-network-wired text-2xl"></i>
+                        </div>
+                        <span id="badge-g3" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">
+                            0/100 б.
+                        </span>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-white group-hover:text-emerald-400 transition-colors mb-2 flex items-center justify-between">
+                            3. Матриця Зв'язків
+                            <i class="fa-solid fa-arrow-right text-sm opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-emerald-400"></i>
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-400 mb-4">
+                            З'єднай пристрої «заліза» з їх відповідними драйверами та системними модулями ОС.
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs font-bold text-emerald-400">
+                        <i class="fa-solid fa-link"></i> З'єднання вузлів & Драйверів
+                    </div>
+                </div>
+
+                <!-- Game 4 Card -->
+                <div onclick="launchGame(4)" class="glass-card rounded-3xl p-6 cursor-pointer flex flex-col justify-between hover:-translate-y-1 group relative overflow-hidden">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 group-hover:scale-110 group-hover:bg-rose-500 group-hover:text-slate-900 transition-all">
+                            <i class="fa-solid fa-user-doctor text-2xl"></i>
+                        </div>
+                        <span id="badge-g4" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">
+                            0/100 б.
+                        </span>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-white group-hover:text-rose-400 transition-colors mb-2 flex items-center justify-between">
+                            4. Кібер-Діагностика
+                            <i class="fa-solid fa-arrow-right text-sm opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-rose-400"></i>
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-400 mb-4">
+                            Проаналізуй проблеми ПК. Визнач: це збій Апаратного забезпечення чи помилка Програмного забезпечення?
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs font-bold text-rose-400">
+                        <i class="fa-solid fa-stethoscopes"></i> Аналіз логів та виправлення систем
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ================= MINI-GAME 1: PC BUILDER ================= -->
+        <section id="screen-game-1" class="hidden w-full py-4 space-y-6">
+            <!-- Header bar for mini game -->
+            <div class="flex flex-wrap items-center justify-between gap-4 glass-card p-4 rounded-2xl">
+                <button onclick="switchScreen('hub')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs sm:text-sm flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-chevron-left"></i> В меню
+                </button>
+                <div class="text-center">
+                    <h2 class="text-lg sm:text-xl font-bold text-sky-400">Лабораторія Складання ПК</h2>
+                    <p class="text-xs text-slate-400">Встановіть усі деталі в правильні слоти системного блоку</p>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-slate-400 block">Прогрес складання</span>
+                    <span id="g1-progress" class="font-bold text-sky-400 text-base sm:text-lg">0 / 6</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Spare Parts Bin (Left column on desktop) -->
+                <div class="lg:col-span-5 glass-card p-4 sm:p-6 rounded-3xl border border-slate-700 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-200 mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-box-open text-sky-400"></i> Доступні Комплектуючі
+                        </h3>
+                        <p class="text-xs text-slate-400 mb-4">Натисніть на деталь або перетягніть її у відповідне гніздо комп'ютера:</p>
+                        
+                        <div id="g1-parts-bin" class="grid grid-cols-2 gap-3 min-h-[220px]">
+                            <!-- Dynamic Hardware Parts injected by JS -->
+                        </div>
+                    </div>
+                    <div class="mt-4 p-3 bg-slate-900/60 rounded-xl text-xs text-slate-400 flex items-center gap-2 border border-slate-800">
+                        <i class="fa-solid fa-circle-info text-sky-400 text-base"></i>
+                        <span>Підказка: якщо ви граєте на смартфоні, просто натисніть на деталь, а потім на потрібний слот!</span>
+                    </div>
+                </div>
+
+                <!-- Computer Chassis Visual Board (Right column) -->
+                <div class="lg:col-span-7 glass-card p-4 sm:p-6 rounded-3xl border border-slate-700 relative flex flex-col items-center justify-center min-h-[420px]">
+                    <h3 class="text-sm font-bold text-slate-300 mb-4 self-start flex items-center gap-2">
+                        <i class="fa-solid fa-desktop text-sky-400"></i> Материнська плата та Корпус ПК
+                    </h3>
+                    
+                    <!-- Motherboard Grid representation -->
+                    <div class="w-full max-w-lg bg-slate-900/90 border-2 border-slate-700 rounded-2xl p-4 sm:p-6 relative grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+                        
+                        <!-- CPU Slot -->
+                        <div data-slot="cpu" onclick="handleSlotClick('cpu')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'cpu')"
+                             class="g1-slot border-2 border-dashed border-sky-500/40 hover:border-sky-400 bg-slate-800/40 rounded-xl p-3 flex flex-col items-center justify-center text-center transition-all cursor-pointer min-h-[110px]">
+                            <i class="fa-solid fa-microchip text-sky-400 text-2xl mb-1"></i>
+                            <span class="text-xs font-bold text-slate-300">Сокет Процесора</span>
+                            <span class="text-[10px] text-slate-500 font-semibold">(CPU)</span>
+                            <div class="slot-content mt-1"></div>
+                        </div>
+
+                        <!-- RAM Slot -->
+                        <div data-slot="ram" onclick="handleSlotClick('ram')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'ram')"
+                             class="g1-slot border-2 border-dashed border-purple-500/40 hover:border-purple-400 bg-slate-800/40 rounded-xl p-3 flex flex-col items-center justify-center text-center transition-all cursor-pointer min-h-[110px]">
+                            <i class="fa-solid fa-memory text-purple-400 text-2xl mb-1"></i>
+                            <span class="text-xs font-bold text-slate-300">Слоти ОЗП</span>
+                            <span class="text-[10px] text-slate-500 font-semibold">(RAM)</span>
+                            <div class="slot-content mt-1"></div>
+                        </div>
+
+                        <!-- GPU Slot -->
+                        <div data-slot="gpu" onclick="handleSlotClick('gpu')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'gpu')"
+                             class="g1-slot border-2 border-dashed border-emerald-500/40 hover:border-emerald-400 bg-slate-800/40 rounded-xl p-3 flex flex-col items-center justify-center text-center transition-all cursor-pointer min-h-[110px]">
+                            <i class="fa-solid fa-tv text-emerald-400 text-2xl mb-1"></i>
+                            <span class="text-xs font-bold text-slate-300">PCIe Слот</span>
+                            <span class="text-[10px] text-slate-500 font-semibold">(Відеокарта)</span>
+                            <div class="slot-content mt-1"></div>
+                        </div>
+
+                        <!-- SSD Slot -->
+                        <div data-slot="ssd" onclick="handleSlotClick('ssd')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'ssd')"
+                             class="g1-slot border-2 border-dashed border-amber-500/40 hover:border-amber-400 bg-slate-800/40 rounded-xl p-3 flex flex-col items-center justify-center text-center transition-all cursor-pointer min-h-[110px]">
+                            <i class="fa-regular fa-hard-drive text-amber-400 text-2xl mb-1"></i>
+                            <span class="text-xs font-bold text-slate-300">M.2 Connector</span>
+                            <span class="text-[10px] text-slate-500 font-semibold">(Накопичувач SSD)</span>
+                            <div class="slot-content mt-1"></div>
+                        </div>
+
+                        <!-- Cooler Slot -->
+                        <div data-slot="cooler" onclick="handleSlotClick('cooler')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'cooler')"
+                             class="g1-slot border-2 border-dashed border-rose-500/40 hover:border-rose-400 bg-slate-800/40 rounded-xl p-3 flex flex-col items-center justify-center text-center transition-all cursor-pointer min-h-[110px]">
+                            <i class="fa-solid fa-fan text-rose-400 text-2xl mb-1"></i>
+                            <span class="text-xs font-bold text-slate-300">Кулер ЦП</span>
+                            <span class="text-[10px] text-slate-500 font-semibold">(Охолодження)</span>
+                            <div class="slot-content mt-1"></div>
+                        </div>
+
+                        <!-- Power Supply Unit (PSU) Slot -->
+                        <div data-slot="psu" onclick="handleSlotClick('psu')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'psu')"
+                             class="g1-slot border-2 border-dashed border-cyan-500/40 hover:border-cyan-400 bg-slate-800/40 rounded-xl p-3 flex flex-col items-center justify-center text-center transition-all cursor-pointer min-h-[110px]">
+                            <i class="fa-solid fa-plug text-cyan-400 text-2xl mb-1"></i>
+                            <span class="text-xs font-bold text-slate-300">Відсік БЖ</span>
+                            <span class="text-[10px] text-slate-500 font-semibold">(Блок живлення)</span>
+                            <div class="slot-content mt-1"></div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= MINI-GAME 2: SORTING CONVEYOR ================= -->
+        <section id="screen-game-2" class="hidden w-full py-4 space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-4 glass-card p-4 rounded-2xl">
+                <button onclick="switchScreen('hub')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs sm:text-sm flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-chevron-left"></i> В меню
+                </button>
+                <div class="text-center">
+                    <h2 class="text-lg sm:text-xl font-bold text-purple-400">Конвеєр Сортування</h2>
+                    <p class="text-xs text-slate-400">Розподіліть елементи інформаційної системи по відповідних категоріях</p>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-slate-400 block">Залишилось об'єктів</span>
+                    <span id="g2-left" class="font-bold text-purple-400 text-base sm:text-lg">8 / 8</span>
+                </div>
+            </div>
+
+            <!-- Current Item Display Area -->
+            <div class="glass-card p-6 rounded-3xl text-center border border-purple-500/30 max-w-xl mx-auto flex flex-col items-center justify-center relative overflow-hidden">
+                <span class="text-xs uppercase tracking-widest text-slate-400 font-bold mb-2">Поточний елемент для класифікації:</span>
+                
+                <div id="g2-active-card" class="my-4 px-6 py-4 bg-slate-800/90 rounded-2xl border-2 border-purple-400/50 shadow-xl flex items-center gap-4 transition-all animate-pulse-slow">
+                    <div id="g2-item-icon-box" class="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-2xl">
+                        <i id="g2-item-icon" class="fa-solid fa-microchip"></i>
+                    </div>
+                    <div class="text-left">
+                        <h4 id="g2-item-title" class="text-lg font-bold text-white">Оперативна пам'ять</h4>
+                        <p id="g2-item-desc" class="text-xs text-slate-400">Тимчасове збереження даних під час роботи комп'ютера</p>
+                    </div>
+                </div>
+
+                <p class="text-xs text-slate-400">Оберіть відповідну категорію нижче:</p>
+            </div>
+
+            <!-- 4 Drop Target Categories Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                <!-- Category 1: Input -->
+                <button onclick="submitSortCategory('input')" class="glass-card p-5 rounded-2xl border border-sky-500/30 hover:border-sky-400 hover:bg-sky-500/10 transition-all text-center group flex flex-col items-center justify-between min-h-[140px] active:scale-95">
+                    <div class="w-12 h-12 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-xl mb-2 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-keyboard"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sky-400 text-sm mb-1">Пристрої Введення</h4>
+                        <p class="text-[11px] text-slate-400">Клавіатура, миша, сканер, мікрофон...</p>
+                    </div>
+                </button>
+
+                <!-- Category 2: Output -->
+                <button onclick="submitSortCategory('output')" class="glass-card p-5 rounded-2xl border border-emerald-500/30 hover:border-emerald-400 hover:bg-emerald-500/10 transition-all text-center group flex flex-col items-center justify-between min-h-[140px] active:scale-95">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl mb-2 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-print"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-emerald-400 text-sm mb-1">Пристрої Виведення</h4>
+                        <p class="text-[11px] text-slate-400">Монітор, принтер, навушники, колонки...</p>
+                    </div>
+                </button>
+
+                <!-- Category 3: Processing & Storage -->
+                <button onclick="submitSortCategory('storage')" class="glass-card p-5 rounded-2xl border border-amber-500/30 hover:border-amber-400 hover:bg-amber-500/10 transition-all text-center group flex flex-col items-center justify-between min-h-[140px] active:scale-95">
+                    <div class="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl mb-2 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-hard-drive"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-amber-400 text-sm mb-1">Обробка та Пам'ять</h4>
+                        <p class="text-[11px] text-slate-400">Процесор, ОЗП, SSD, накопичувачі...</p>
+                    </div>
+                </button>
+
+                <!-- Category 4: Software -->
+                <button onclick="submitSortCategory('software')" class="glass-card p-5 rounded-2xl border border-rose-500/30 hover:border-rose-400 hover:bg-rose-500/10 transition-all text-center group flex flex-col items-center justify-between min-h-[140px] active:scale-95">
+                    <div class="w-12 h-12 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-xl mb-2 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-code"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-rose-400 text-sm mb-1">Програмне Забезпечення</h4>
+                        <p class="text-[11px] text-slate-400">ОС, драйвери, браузер, графічний редактор...</p>
+                    </div>
+                </button>
+
+            </div>
+        </section>
+
+        <!-- ================= MINI-GAME 3: NODE LINKER MATRIX ================= -->
+        <section id="screen-game-3" class="hidden w-full py-4 space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-4 glass-card p-4 rounded-2xl">
+                <button onclick="switchScreen('hub')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs sm:text-sm flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-chevron-left"></i> В меню
+                </button>
+                <div class="text-center">
+                    <h2 class="text-lg sm:text-xl font-bold text-emerald-400">Матриця Зв'язків: Залізо & ПЗ</h2>
+                    <p class="text-xs text-slate-400">З'єднайте апаратну деталь з відповідною функцією Програмного забезпечення чи Драйвера</p>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-slate-400 block">З'єднано пар</span>
+                    <span id="g3-pairs" class="font-bold text-emerald-400 text-base sm:text-lg">0 / 5</span>
+                </div>
+            </div>
+
+            <!-- Matching Columns UI -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
+                
+                <!-- Left Column: Hardware Nodes -->
+                <div class="glass-card p-4 sm:p-6 rounded-3xl border border-slate-700">
+                    <h3 class="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-microchip text-emerald-400"></i> Апаратне забезпечення ("Залізо")
+                    </h3>
+                    <div id="g3-left-nodes" class="space-y-3">
+                        <!-- Left Node Buttons Injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Right Column: Software / Driver Nodes -->
+                <div class="glass-card p-4 sm:p-6 rounded-3xl border border-slate-700">
+                    <h3 class="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-gears text-emerald-400"></i> Програмна функція / Драйвер / ОС
+                    </h3>
+                    <div id="g3-right-nodes" class="space-y-3">
+                        <!-- Right Node Buttons Injected by JS -->
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ================= MINI-GAME 4: CYBER DIAGNOSTICS ================= -->
+        <section id="screen-game-4" class="hidden w-full py-4 space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-4 glass-card p-4 rounded-2xl">
+                <button onclick="switchScreen('hub')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs sm:text-sm flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-chevron-left"></i> В меню
+                </button>
+                <div class="text-center">
+                    <h2 class="text-lg sm:text-xl font-bold text-rose-400">Кібер-Діагностика Системи</h2>
+                    <p class="text-xs text-slate-400">Проаналізуйте скаргу користувача та виправте несправність</p>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-slate-400 block">Вирішено завдань</span>
+                    <span id="g4-progress-text" class="font-bold text-rose-400 text-base sm:text-lg">1 / 5</span>
+                </div>
+            </div>
+
+            <!-- Diagnostic Screen & Terminal -->
+            <div class="glass-card p-6 rounded-3xl border border-rose-500/30 max-w-2xl mx-auto space-y-6">
+                <!-- Case Terminal Header -->
+                <div class="bg-slate-900 rounded-2xl p-4 border border-slate-800">
+                    <div class="flex items-center gap-2 border-b border-slate-800 pb-2 mb-3">
+                        <div class="w-3 h-3 rounded-full bg-rose-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+                        <span class="text-xs text-slate-500 ml-2 font-mono">DIAGNOSTIC_TERMINAL_v4.2</span>
+                    </div>
+                    
+                    <div class="space-y-2 font-mono text-xs sm:text-sm">
+                        <p class="text-rose-400 font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i> СКАРГА КОРИСТУВАЧА:</p>
+                        <p id="g4-problem-desc" class="text-slate-200 bg-slate-950/60 p-3 rounded-xl border border-slate-800 leading-relaxed">
+                            "При натисканні клавіш на клавіатурі букви не з'являються на екрані, а світловий індикатор CapsLock не горить."
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Step 1: Categorize Problem Type -->
+                <div class="space-y-3">
+                    <h4 class="text-xs uppercase font-bold text-slate-400 tracking-wider">Крок 1: Який тип проблеми виявлено?</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button onclick="selectDiagCategory('hardware')" id="g4-btn-hw" class="glass-card p-4 rounded-xl border border-slate-700 hover:border-rose-400 flex items-center justify-center gap-3 transition-all active:scale-95">
+                            <i class="fa-solid fa-microchip text-rose-400 text-xl"></i>
+                            <span class="font-bold text-sm text-slate-200">Апаратна (Залізо)</span>
+                        </button>
+                        <button onclick="selectDiagCategory('software')" id="g4-btn-sw" class="glass-card p-4 rounded-xl border border-slate-700 hover:border-purple-400 flex items-center justify-center gap-3 transition-all active:scale-95">
+                            <i class="fa-solid fa-code text-purple-400 text-xl"></i>
+                            <span class="font-bold text-sm text-slate-200">Програмна (ПЗ / ОС)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Choose Correct Action Solution (Revealed after selecting step 1) -->
+                <div id="g4-solution-box" class="space-y-3 hidden opacity-0 transition-all duration-300">
+                    <h4 class="text-xs uppercase font-bold text-slate-400 tracking-wider">Крок 2: Оберіть правильну дію для виправлення:</h4>
+                    <div id="g4-solutions-container" class="space-y-2">
+                        <!-- Dynamic Solution Buttons -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= VICTORY / SUMMARY MODAL ================= -->
+        <div id="modal-victory" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+            <div class="glass-card max-w-lg w-full p-6 sm:p-8 rounded-3xl border border-amber-500/40 text-center space-y-6 relative overflow-hidden">
+                <div class="w-20 h-20 rounded-3xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-4xl mx-auto shadow-lg shadow-amber-500/20 animate-bounce">
+                    <i class="fa-solid fa-crown"></i>
+                </div>
+                
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-white mb-2">Вітаємо, Кібер-Експерте!</h2>
+                    <p class="text-xs sm:text-sm text-slate-300">Ви успішно опанували тему «Апаратна та програмна складові інформаційної системи»!</p>
+                </div>
+
+                <!-- Score breakdown -->
+                <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 space-y-3">
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-slate-400">Загальний підсумковий бал:</span>
+                        <span id="modal-total-score" class="text-xl font-bold text-amber-400">0 / 400</span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                        <div id="modal-progress-bar" class="h-full bg-amber-400 rounded-full" style="width: 0%"></div>
+                    </div>
+                    <p id="modal-eval-text" class="text-xs text-emerald-400 font-semibold italic">Відмінний результат!</p>
+                </div>
+
+                <div class="flex gap-4">
+                    <button onclick="closeVictoryModal()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 font-bold text-white hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-sky-500/30">
+                        Повернутися в Меню
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full max-w-7xl mx-auto px-4 py-3 text-center text-xs text-slate-500 z-10">
+        Урок інформатики • 5-6 Клас • Навчальна веб-гра
+    </footer>
+
+    <script>
+        // Game State Engine
+        const gameState = {
+            scores: { g1: 0, g2: 0, g3: 0, g4: 0 },
+            soundEnabled: true,
+            
+            // Mini Game 1 State
+            g1: {
+                parts: [],
+                placed: {},
+                selectedPartId: null,
+                total: 6
+            },
+
+            // Mini Game 2 State
+            g2: {
+                items: [],
+                currentIndex: 0,
+                total: 8
+            },
+
+            // Mini Game 3 State
+            g3: {
+                selectedLeft: null,
+                selectedRight: null,
+                connections: [],
+                totalPairs: 5
+            },
+
+            // Mini Game 4 State
+            g4: {
+                cases: [],
+                currentIndex: 0,
+                selectedCategory: null,
+                totalCases: 5
+            }
+        };
+
+        // Web Audio API Sound Synthesizer (No external asset dependencies)
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) audioCtx = new AudioContext();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playSound(type) {
+            if (!gameState.soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                const now = ctx.currentTime;
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                } else if (type === 'success') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, now);
+                    osc.frequency.linearRampToValueAtTime(110, now + 0.2);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                } else if (type === 'victory') {
+                    // Victory fanfare chord
+                    [440, 554.37, 659.25, 880].forEach((freq, idx) => {
+                        const subOsc = ctx.createOscillator();
+                        const subGain = ctx.createGain();
+                        subOsc.type = 'triangle';
+                        subOsc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                        subOsc.connect(subGain);
+                        subGain.connect(ctx.destination);
+                        subGain.gain.setValueAtTime(0.15, now + idx * 0.08);
+                        subGain.gain.linearRampToValueAtTime(0.01, now + 0.6);
+                        subOsc.start(now + idx * 0.08);
+                        subOsc.stop(now + 0.6);
+                    });
+                }
+            } catch (e) {
+                console.warn('Audio playback issue', e);
+            }
+        }
+
+        function toggleSound() {
+            gameState.soundEnabled = !gameState.soundEnabled;
+            const btn = document.getElementById('sound-btn');
+            if (gameState.soundEnabled) {
+                btn.innerHTML = `<i class="fa-solid fa-volume-high text-lg"></i>`;
+                btn.classList.replace('text-slate-500', 'text-sky-400');
+                playSound('click');
+            } else {
+                btn.innerHTML = `<i class="fa-solid fa-volume-xmark text-lg"></i>`;
+                btn.classList.replace('text-sky-400', 'text-slate-500');
+            }
+        }
+
+        // Shuffle Utility (Fisher-Yates)
+        function shuffle(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function switchScreen(screenId) {
+            playSound('click');
+            ['hub', 'game-1', 'game-2', 'game-3', 'game-4'].forEach(id => {
+                const el = document.getElementById(`screen-${id}`);
+                if (el) el.classList.add('hidden');
+            });
+
+            const target = document.getElementById(`screen-${screenId}`);
+            if (target) {
+                target.classList.remove('hidden');
+            }
+            updateGlobalStats();
+        }
+
+        function launchGame(gameNum) {
+            playSound('click');
+            if (gameNum === 1) initGame1();
+            if (gameNum === 2) initGame2();
+            if (gameNum === 3) initGame3();
+            if (gameNum === 4) initGame4();
+            switchScreen(`game-${gameNum}`);
+        }
+
+        function updateGlobalStats() {
+            const total = gameState.scores.g1 + gameState.scores.g2 + gameState.scores.g3 + gameState.scores.g4;
+            document.getElementById('global-score').innerText = total;
+
+            document.getElementById('badge-g1').innerText = `${gameState.scores.g1}/100 б.`;
+            document.getElementById('badge-g2').innerText = `${gameState.scores.g2}/100 б.`;
+            document.getElementById('badge-g3').innerText = `${gameState.scores.g3}/100 б.`;
+            document.getElementById('badge-g4').innerText = `${gameState.scores.g4}/100 б.`;
+
+            const percentage = Math.round((total / 400) * 100);
+            document.getElementById('hub-progress-bar').style.width = `${percentage}%`;
+            document.getElementById('hub-progress-text').innerText = `${percentage}%`;
+
+            if (total === 400) {
+                showVictoryModal();
+            }
+        }
+
+        function confirmReset() {
+            playSound('error');
+            if (confirm("Бажаєте скинути весь свій прогрес у грі?")) {
+                gameState.scores = { g1: 0, g2: 0, g3: 0, g4: 0 };
+                updateGlobalStats();
+                switchScreen('hub');
+            }
+        }
+
+        // ================= MINI GAME 1 LOGIC =================
+        const G1_PARTS_DATA = [
+            { id: 'cpu', name: 'Процесор (CPU)', icon: 'fa-microchip', color: 'text-sky-400', desc: 'Мозок комп\'ютера, який виконує всі інструкції та обчислення' },
+            { id: 'ram', name: 'Оперативна Пам\'ять', icon: 'fa-memory', color: 'text-purple-400', desc: 'Тимчасова швидкісна пам\'ять для працюючих програм' },
+            { id: 'gpu', name: 'Відеокарта (GPU)', icon: 'fa-tv', color: 'text-emerald-400', desc: 'Пристрій для обробки та виведення графічного зображення' },
+            { id: 'ssd', name: 'Накопичувач SSD', icon: 'fa-hard-drive', color: 'text-amber-400', desc: 'Постійна пам\'ять для зберігання ОС, файлів та програм' },
+            { id: 'cooler', name: 'Кулер Охолодження', icon: 'fa-fan', color: 'text-rose-400', desc: 'Вентилятор для відведення тепла від процесора' },
+            { id: 'psu', name: 'Блок Живлення', icon: 'fa-plug', color: 'text-cyan-400', desc: 'Постачає електроенергію потрібної напруги до всіх вузлів' }
+        ];
+
+        function initGame1() {
+            gameState.g1.parts = shuffle(G1_PARTS_DATA);
+            gameState.g1.placed = {};
+            gameState.g1.selectedPartId = null;
+            renderGame1();
+        }
+
+        function renderGame1() {
+            const container = document.getElementById('g1-parts-bin');
+            container.innerHTML = '';
+
+            const unplacedParts = gameState.g1.parts.filter(p => !gameState.g1.placed[p.id]);
+
+            if (unplacedParts.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-2 p-6 text-center text-emerald-400 font-bold glass-card rounded-2xl border border-emerald-500/30">
+                        <i class="fa-solid fa-circle-check text-3xl mb-2 block"></i>
+                        Системний блок успішно зібрано!
+                    </div>
+                `;
+            } else {
+                unplacedParts.forEach(part => {
+                    const isSelected = gameState.g1.selectedPartId === part.id;
+                    const card = document.createElement('div');
+                    card.className = `glass-card p-3 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${isSelected ? 'selected-item border-amber-400' : 'border-slate-700 hover:border-sky-400'}`;
+                    card.draggable = true;
+
+                    card.innerHTML = `
+                        <div class="flex items-center gap-2 mb-1">
+                            <i class="fa-solid ${part.icon} ${part.color} text-xl"></i>
+                            <span class="text-xs font-bold text-white leading-tight">${part.name}</span>
+                        </div>
+                        <p class="text-[10px] text-slate-400 leading-tight">${part.desc}</p>
+                    `;
+
+                    // Drag handlers
+                    card.ondragstart = (e) => {
+                        gameState.g1.selectedPartId = part.id;
+                        e.dataTransfer.setData('text/plain', part.id);
+                        playSound('click');
+                    };
+
+                    // Click handler (for mobile/tap interface)
+                    card.onclick = () => {
+                        playSound('click');
+                        if (gameState.g1.selectedPartId === part.id) {
+                            gameState.g1.selectedPartId = null;
+                        } else {
+                            gameState.g1.selectedPartId = part.id;
+                        }
+                        renderGame1();
+                    };
+
+                    container.appendChild(card);
+                });
+            }
+
+            // Render slots state
+            document.querySelectorAll('.g1-slot').forEach(slotEl => {
+                const targetSlotId = slotEl.getAttribute('data-slot');
+                const contentDiv = slotEl.querySelector('.slot-content');
+                contentDiv.innerHTML = '';
+
+                if (gameState.g1.placed[targetSlotId]) {
+                    const partInfo = G1_PARTS_DATA.find(p => p.id === targetSlotId);
+                    slotEl.classList.remove('border-dashed');
+                    slotEl.classList.add('border-solid', 'border-emerald-500', 'bg-emerald-950/20');
+                    contentDiv.innerHTML = `
+                        <span class="inline-block px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">
+                            <i class="fa-solid fa-check mr-1"></i> Встановлено
+                        </span>
+                    `;
+                } else {
+                    slotEl.classList.add('border-dashed');
+                    slotEl.classList.remove('border-solid', 'border-emerald-500', 'bg-emerald-950/20');
+                }
+            });
+
+            // Update score
+            const count = Object.keys(gameState.g1.placed).length;
+            document.getElementById('g1-progress').innerText = `${count} / ${gameState.g1.total}`;
+            gameState.scores.g1 = Math.round((count / gameState.g1.total) * 100);
+            updateGlobalStats();
+        }
+
+        function handleSlotClick(slotId) {
+            if (!gameState.g1.selectedPartId) return;
+            tryPlacePart(gameState.g1.selectedPartId, slotId);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drop-target-active');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drop-target-active');
+        }
+
+        function handleDrop(e, slotId) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drop-target-active');
+            const partId = e.dataTransfer.getData('text/plain') || gameState.g1.selectedPartId;
+            if (partId) tryPlacePart(partId, slotId);
+        }
+
+        function tryPlacePart(partId, slotId) {
+            if (partId === slotId) {
+                playSound('success');
+                gameState.g1.placed[slotId] = true;
+                gameState.g1.selectedPartId = null;
+                renderGame1();
+            } else {
+                playSound('error');
+                // Visual error feedback on slot
+                const slotEl = document.querySelector(`.g1-slot[data-slot="${slotId}"]`);
+                if (slotEl) {
+                    slotEl.classList.add('border-rose-500', 'bg-rose-950/30');
+                    setTimeout(() => {
+                        slotEl.classList.remove('border-rose-500', 'bg-rose-950/30');
+                    }, 500);
+                }
+            }
+        }
+
+        // ================= MINI GAME 2 LOGIC =================
+        const G2_ITEMS_DATA = [
+            { id: 1, title: 'Миша та Клавіатура', category: 'input', icon: 'fa-keyboard', desc: 'Введення тексту, команд та рух курсора' },
+            { id: 2, title: 'Монітор та Екран', category: 'output', icon: 'fa-desktop', desc: 'Візуальне виведення текстової та графічної інформації' },
+            { id: 3, title: 'Процесор (CPU)', category: 'storage', icon: 'fa-microchip', desc: 'Головний чип для виконання обчислень та команд' },
+            { id: 4, title: 'Операційна Система (Windows/Linux)', category: 'software', icon: 'fa-window-restore', desc: 'Систематичне ПЗ для управління ресурсами ПК' },
+            { id: 5, title: 'Акустичні Колонки', category: 'output', icon: 'fa-volume-high', desc: 'Пристрій для виведення звукового сигналу' },
+            { id: 6, title: 'Графічний Редактор', category: 'software', icon: 'fa-paintbrush', desc: 'Прикладне програмне забезпечення для малювання' },
+            { id: 7, title: 'Веб-Камера та Мікрофон', category: 'input', icon: 'fa-camera', desc: 'Введення зображення та звуку до комп\'ютера' },
+            { id: 8, title: 'Твердотільний Накопичувач (SSD)', category: 'storage', icon: 'fa-hard-drive', desc: 'Пристрій тривалого збереження файлів та даних' }
+        ];
+
+        function initGame2() {
+            gameState.g2.items = shuffle(G2_ITEMS_DATA);
+            gameState.g2.currentIndex = 0;
+            renderGame2();
+        }
+
+        function renderGame2() {
+            const currentItem = gameState.g2.items[gameState.g2.currentIndex];
+            const remaining = gameState.g2.items.length - gameState.g2.currentIndex;
+            document.getElementById('g2-left').innerText = `${remaining} / ${gameState.g2.items.length}`;
+
+            if (!currentItem) {
+                // Completed
+                document.getElementById('g2-active-card').innerHTML = `
+                    <div class="text-emerald-400 py-4 font-bold">
+                        <i class="fa-solid fa-circle-check text-4xl mb-2 block"></i>
+                        Чудово! Усі елементи класифіковано правильно!
+                    </div>
+                `;
+                return;
+            }
+
+            document.getElementById('g2-item-icon').className = `fa-solid ${currentItem.icon}`;
+            document.getElementById('g2-item-title').innerText = currentItem.title;
+            document.getElementById('g2-item-desc').innerText = currentItem.desc;
+        }
+
+        function submitSortCategory(chosenCategory) {
+            const currentItem = gameState.g2.items[gameState.g2.currentIndex];
+            if (!currentItem) return;
+
+            if (currentItem.category === chosenCategory) {
+                playSound('success');
+                gameState.g2.currentIndex++;
+                gameState.scores.g2 = Math.round((gameState.g2.currentIndex / gameState.g2.items.length) * 100);
+                updateGlobalStats();
+                renderGame2();
+            } else {
+                playSound('error');
+                const card = document.getElementById('g2-active-card');
+                card.classList.add('border-rose-500');
+                setTimeout(() => card.classList.remove('border-rose-500'), 500);
+            }
+        }
+
+        // ================= MINI GAME 3 LOGIC =================
+        const G3_PAIRS_DATA = [
+            { id: 1, left: 'Принтер', right: 'Драйвер Друку' },
+            { id: 2, left: 'Процесор (CPU)', right: 'Ядро Операційної Системи' },
+            { id: 3, left: 'Відеокарта', right: 'Графічний Драйвер (DirectX / OpenGL)' },
+            { id: 4, left: 'Клавіатура', right: 'Служба Обробки Введення ОС' },
+            { id: 5, left: 'Мережева Карта', right: 'Протокол Мережі (TCP/IP)' }
+        ];
+
+        function initGame3() {
+            gameState.g3.selectedLeft = null;
+            gameState.g3.selectedRight = null;
+            gameState.g3.connections = [];
+
+            const lefts = shuffle(G3_PAIRS_DATA.map(p => ({ id: p.id, text: p.left })));
+            const rights = shuffle(G3_PAIRS_DATA.map(p => ({ id: p.id, text: p.right })));
+
+            renderGame3Nodes(lefts, rights);
+        }
+
+        function renderGame3Nodes(lefts, rights) {
+            const leftCol = document.getElementById('g3-left-nodes');
+            const rightCol = document.getElementById('g3-right-nodes');
+            leftCol.innerHTML = '';
+            rightCol.innerHTML = '';
+
+            lefts.forEach(node => {
+                const isConnected = gameState.g3.connections.includes(node.id);
+                const isSelected = gameState.g3.selectedLeft === node.id;
+                
+                const btn = document.createElement('button');
+                btn.className = `w-full p-4 rounded-2xl font-bold text-xs sm:text-sm text-left border transition-all flex items-center justify-between ${
+                    isConnected ? 'border-emerald-500/50 bg-emerald-950/20 text-emerald-300 cursor-default' :
+                    isSelected ? 'border-amber-400 bg-amber-500/10 text-amber-300' :
+                    'border-slate-700 hover:border-emerald-400 bg-slate-800/60 text-slate-200 active:scale-95'
+                }`;
+                btn.innerHTML = `
+                    <span>${node.text}</span>
+                    <i class="fa-solid ${isConnected ? 'fa-check text-emerald-400' : 'fa-circle-dot text-slate-500'}"></i>
+                `;
+                if (!isConnected) {
+                    btn.onclick = () => selectLeftNode(node.id, lefts, rights);
+                }
+                leftCol.appendChild(btn);
+            });
+
+            rights.forEach(node => {
+                const isConnected = gameState.g3.connections.includes(node.id);
+                const isSelected = gameState.g3.selectedRight === node.id;
+
+                const btn = document.createElement('button');
+                btn.className = `w-full p-4 rounded-2xl font-bold text-xs sm:text-sm text-left border transition-all flex items-center justify-between ${
+                    isConnected ? 'border-emerald-500/50 bg-emerald-950/20 text-emerald-300 cursor-default' :
+                    isSelected ? 'border-amber-400 bg-amber-500/10 text-amber-300' :
+                    'border-slate-700 hover:border-emerald-400 bg-slate-800/60 text-slate-200 active:scale-95'
+                }`;
+                btn.innerHTML = `
+                    <i class="fa-solid ${isConnected ? 'fa-check text-emerald-400' : 'fa-circle-dot text-slate-500'}"></i>
+                    <span>${node.text}</span>
+                `;
+                if (!isConnected) {
+                    btn.onclick = () => selectRightNode(node.id, lefts, rights);
+                }
+                rightCol.appendChild(btn);
+            });
+
+            const connectedCount = gameState.g3.connections.length;
+            document.getElementById('g3-pairs').innerText = `${connectedCount} / ${gameState.g3.totalPairs}`;
+            gameState.scores.g3 = Math.round((connectedCount / gameState.g3.totalPairs) * 100);
+            updateGlobalStats();
+        }
+
+        function selectLeftNode(id, lefts, rights) {
+            playSound('click');
+            gameState.g3.selectedLeft = id;
+            checkG3Pair(lefts, rights);
+        }
+
+        function selectRightNode(id, lefts, rights) {
+            playSound('click');
+            gameState.g3.selectedRight = id;
+            checkG3Pair(lefts, rights);
+        }
+
+        function checkG3Pair(lefts, rights) {
+            if (gameState.g3.selectedLeft !== null && gameState.g3.selectedRight !== null) {
+                if (gameState.g3.selectedLeft === gameState.g3.selectedRight) {
+                    playSound('success');
+                    gameState.g3.connections.push(gameState.g3.selectedLeft);
+                } else {
+                    playSound('error');
+                }
+                gameState.g3.selectedLeft = null;
+                gameState.g3.selectedRight = null;
+                renderGame3Nodes(lefts, rights);
+            } else {
+                renderGame3Nodes(lefts, rights);
+            }
+        }
+
+        // ================= MINI GAME 4 LOGIC =================
+        const G4_CASES_DATA = [
+            {
+                id: 1,
+                problem: "Після ввімкнення комп'ютера кулери крутяться, але екран монітора залишається абсолютно чорним та не світиться кнопка живлення на ньому.",
+                category: 'hardware',
+                solutions: [
+                    { text: "Перевірити кабелі живлення та відеокабель монітора", correct: true },
+                    { text: "Перевстановити текстовий редактор Word", correct: false },
+                    { text: "Оновити антивірусну програму", correct: false }
+                ]
+            },
+            {
+                id: 2,
+                problem: "Музичний програвач відмовляється відкривати файл пісні та видає помилку: 'Відсутній відповідний аудіо-кодек / драйвер'.",
+                category: 'software',
+                solutions: [
+                    { text: "Замінити звукові колонки на нові", correct: false },
+                    { text: "Встановити або оновити аудіо-драйвер та кодеки в ОС", correct: true },
+                    { text: "Купити новий процесор", correct: false }
+                ]
+            },
+            {
+                id: 3,
+                problem: "Користувач натискає на клавіші миші, але курсор на екрані не рухається, а з під мишки не горить оптичний датчик.",
+                category: 'hardware',
+                solutions: [
+                    { text: "Оновити фоновий малюнок робочого столу", correct: false },
+                    { text: "Перевірити USB-кабель миші або замінити батарейку", correct: true },
+                    { text: "Перезавантажити браузер", correct: false }
+                ]
+            },
+            {
+                id: 4,
+                problem: "Операційна система видає повідомлення: 'Недостатньо оперативної пам'яті для відкриття 50 вкладок браузера'.",
+                category: 'software',
+                solutions: [
+                    { text: "Закрити зайві вкладки / програми або збільшити ОЗП", correct: true },
+                    { text: "Протерти монітор від пилу", correct: false },
+                    { text: "Переставити клавіатуру у інший порт", correct: false }
+                ]
+            },
+            {
+                id: 5,
+                problem: "Комп'ютер вимикається через 5 хвилин після запуску важкої гри, а корпус стає дуже гарячим.",
+                category: 'hardware',
+                solutions: [
+                    { text: "Видалити гру з комп'ютера", correct: false },
+                    { text: "Почистити кулер та замінити термопасту процесора", correct: true },
+                    { text: "Перевстановити калькулятор", correct: false }
+                ]
+            }
+        ];
+
+        function initGame4() {
+            gameState.g4.cases = shuffle(G4_CASES_DATA);
+            gameState.g4.currentIndex = 0;
+            gameState.g4.selectedCategory = null;
+            renderGame4();
+        }
+
+        function renderGame4() {
+            const currentCase = gameState.g4.cases[gameState.g4.currentIndex];
+            document.getElementById('g4-progress-text').innerText = `${gameState.g4.currentIndex + 1} / ${gameState.g4.cases.length}`;
+
+            if (!currentCase) {
+                // Done
+                document.getElementById('g4-problem-desc').innerText = "Усі кібер-діагностики успішно виконано!";
+                document.getElementById('g4-solution-box').classList.add('hidden');
+                return;
+            }
+
+            document.getElementById('g4-problem-desc').innerText = `"${currentCase.problem}"`;
+            
+            // Reset buttons
+            const btnHW = document.getElementById('g4-btn-hw');
+            const btnSW = document.getElementById('g4-btn-sw');
+            btnHW.className = "glass-card p-4 rounded-xl border border-slate-700 hover:border-rose-400 flex items-center justify-center gap-3 transition-all active:scale-95";
+            btnSW.className = "glass-card p-4 rounded-xl border border-slate-700 hover:border-purple-400 flex items-center justify-center gap-3 transition-all active:scale-95";
+            
+            const solBox = document.getElementById('g4-solution-box');
+            solBox.classList.add('hidden', 'opacity-0');
+            gameState.g4.selectedCategory = null;
+        }
+
+        function selectDiagCategory(cat) {
+            playSound('click');
+            gameState.g4.selectedCategory = cat;
+
+            const btnHW = document.getElementById('g4-btn-hw');
+            const btnSW = document.getElementById('g4-btn-sw');
+
+            if (cat === 'hardware') {
+                btnHW.classList.add('border-rose-400', 'bg-rose-500/10');
+                btnSW.classList.remove('border-purple-400', 'bg-purple-500/10');
+            } else {
+                btnSW.classList.add('border-purple-400', 'bg-purple-500/10');
+                btnHW.classList.remove('border-rose-400', 'bg-rose-500/10');
+            }
+
+            // Reveal step 2 solutions
+            const currentCase = gameState.g4.cases[gameState.g4.currentIndex];
+            const solContainer = document.getElementById('g4-solutions-container');
+            solContainer.innerHTML = '';
+
+            const shuffledSolutions = shuffle(currentCase.solutions);
+            shuffledSolutions.forEach(sol => {
+                const btn = document.createElement('button');
+                btn.className = "w-full p-3 rounded-xl border border-slate-700 hover:border-rose-400 bg-slate-900/60 font-semibold text-xs sm:text-sm text-left text-slate-200 transition-all active:scale-95";
+                btn.innerText = sol.text;
+                btn.onclick = () => submitDiagSolution(cat, sol.correct);
+                solContainer.appendChild(btn);
+            });
+
+            const solBox = document.getElementById('g4-solution-box');
+            solBox.classList.remove('hidden');
+            setTimeout(() => solBox.classList.remove('opacity-0'), 50);
+        }
+
+        function submitDiagSolution(chosenCat, isSolCorrect) {
+            const currentCase = gameState.g4.cases[gameState.g4.currentIndex];
+            if (chosenCat === currentCase.category && isSolCorrect) {
+                playSound('success');
+                gameState.g4.currentIndex++;
+                gameState.scores.g4 = Math.round((gameState.g4.currentIndex / gameState.g4.cases.length) * 100);
+                updateGlobalStats();
+                if (gameState.g4.currentIndex < gameState.g4.cases.length) {
+                    renderGame4();
+                } else {
+                    document.getElementById('g4-problem-desc').innerText = "Діагностику завершено з відзнакою!";
+                    document.getElementById('g4-solution-box').classList.add('hidden');
+                }
+            } else {
+                playSound('error');
+            }
+        }
+
+        function showVictoryModal() {
+            playSound('victory');
+            const modal = document.getElementById('modal-victory');
+            const total = gameState.scores.g1 + gameState.scores.g2 + gameState.scores.g3 + gameState.scores.g4;
+            
+            document.getElementById('modal-total-score').innerText = `${total} / 400`;
+            const pct = Math.round((total / 400) * 100);
+            document.getElementById('modal-progress-bar').style.width = `${pct}%`;
+
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 50);
+        }
+
+        function closeVictoryModal() {
+            playSound('click');
+            const modal = document.getElementById('modal-victory');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                switchScreen('hub');
+            }, 300);
+        }
+
+        // Initialize App on Window Load
+        window.onload = function() {
+            updateGlobalStats();
+        };
+    </script>
+</body>
+</html>
