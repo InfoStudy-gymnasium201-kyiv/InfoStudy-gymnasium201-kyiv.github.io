@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="uk" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кібер-Захисник: Місія Безпека | Урок Інформатики</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #0f172a 70%);
+            background-attachment: fixed;
+            color: #f8fafc;
+            min-height: 100vh;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        h1, h2, h3, h4, .font-comfortaa {
+            font-family: 'Comfortaa', cursive;
+        }
+
+        /* Glassmorphism custom styles */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(56, 189, 248, 0.5);
+            box-shadow: 0 10px 25px -5px rgba(56, 189, 248, 0.2);
+        }
+
+        /* Floating Animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(2deg); }
+        }
+
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        /* Glowing Effects */
+        .glow-cyan {
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+        }
+        .glow-purple {
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+        }
+        .glow-emerald {
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+        }
+        .glow-rose {
+            box-shadow: 0 0 20px rgba(244, 63, 94, 0.4);
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #38bdf8;
+        }
+
+        /* Active touch state */
+        .touch-active {
+            transform: scale(0.96);
+            opacity: 0.9;
+        }
+
+        /* Selected State */
+        .selected-item {
+            border-color: #38bdf8 !important;
+            background: rgba(56, 189, 248, 0.2) !important;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+        }
+    </style>
+</head>
+<body class="flex flex-col justify-between p-3 sm:p-6 overflow-x-hidden">
+
+    <header class="max-w-6xl w-full mx-auto mb-6">
+        <div class="glass-card rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+            <!-- Brand / Title -->
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="showScreen('hub-screen')">
+                <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-cyan-400 text-2xl shadow-lg shadow-cyan-500/20">
+                    <i class="fa-solid fa-shield-halved animate-pulse"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-sky-300 to-purple-400">
+                        КІБЕР-ЗАХИСНИК
+                    </h1>
+                    <p class="text-xs text-slate-400">Навчальна гра з цифрової безпеки</p>
+                </div>
+            </div>
+
+            <!-- Stats & Progress Hub -->
+            <div class="flex items-center gap-3 sm:gap-6 ml-auto">
+                <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-1.5 rounded-xl border border-white/5">
+                    <i class="fa-solid fa-star text-amber-400 text-lg"></i>
+                    <span id="score-display" class="font-bold text-amber-300 text-base sm:text-lg">0</span>
+                    <span class="text-xs text-slate-400">балів</span>
+                </div>
+
+                <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-1.5 rounded-xl border border-white/5">
+                    <i class="fa-solid fa-award text-purple-400 text-lg"></i>
+                    <span id="progress-display" class="font-bold text-purple-300 text-base sm:text-lg">0/4</span>
+                    <span class="text-xs text-slate-400">місій</span>
+                </div>
+
+                <button onclick="resetGame()" title="Перезапустити гру" class="w-10 h-10 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 border border-rose-500/30 flex items-center justify-center transition active:scale-95">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl w-full mx-auto flex-1 flex flex-col justify-center">
+
+        <!-- ================= HUB SCREEN ================= -->
+        <section id="hub-screen" class="space-y-8 py-2">
+            <!-- Hero Banner -->
+            <div class="glass-card rounded-3xl p-6 sm:p-10 relative overflow-hidden text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-6">
+                <div class="space-y-3 max-w-2xl z-10">
+                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-semibold">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <span>Ключовий урок цифрової грамотності</span>
+                    </div>
+                    <h2 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight">
+                        Готовий стати фахівцем з <span class="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-400">безпеки даних</span>?
+                    </h2>
+                    <p class="text-slate-300 text-sm sm:text-base">
+                        Пройди 4 інтерактивні випробування, розпізнай шкідливі програми, знешкодь віруси та налаштуй антивірусний захист системи.
+                    </p>
+                </div>
+                <!-- Floating Icon Graphic -->
+                <div class="relative flex-shrink-0">
+                    <div class="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl bg-gradient-to-tr from-purple-600 to-cyan-500 flex items-center justify-center shadow-2xl shadow-cyan-500/40 animate-float">
+                        <i class="fa-solid fa-laptop-code text-5xl sm:text-6xl text-white"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mini Games Selection Grid -->
+            <div>
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center space-x-2">
+                    <i class="fa-solid fa-gamepad text-cyan-400"></i>
+                    <span>Обери місію:</span>
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- Mini Game 1 Card -->
+                    <div onclick="startMiniGame(1)" class="glass-card rounded-3xl p-6 cursor-pointer hover:-translate-y-1 group relative overflow-hidden">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-14 h-14 rounded-2xl bg-cyan-500/20 border border-cyan-400/30 flex items-center justify-center text-cyan-400 text-2xl group-hover:scale-110 transition">
+                                <i class="fa-solid fa-bug"></i>
+                            </div>
+                            <span id="badge-g1" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Не пройдено</span>
+                        </div>
+                        <h4 class="text-xl font-bold text-white mb-2 group-hover:text-cyan-300 transition">Місія 1: Лабораторія Загроз</h4>
+                        <p class="text-slate-300 text-sm mb-4">Класифікуй шкідливі програми (Malware) за способом дії та характером загроз. Перетягуй або тапай картки.</p>
+                        <div class="flex items-center text-xs text-cyan-400 font-semibold space-x-2">
+                            <span>Розпочати місію</span>
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
+                        </div>
+                    </div>
+
+                    <!-- Mini Game 2 Card -->
+                    <div onclick="startMiniGame(2)" class="glass-card rounded-3xl p-6 cursor-pointer hover:-translate-y-1 group relative overflow-hidden">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-14 h-14 rounded-2xl bg-purple-500/20 border border-purple-400/30 flex items-center justify-center text-purple-400 text-2xl group-hover:scale-110 transition">
+                                <i class="fa-solid fa-stethoscope"></i>
+                            </div>
+                            <span id="badge-g2" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Не пройдено</span>
+                        </div>
+                        <h4 class="text-xl font-bold text-white mb-2 group-hover:text-purple-300 transition">Місія 2: Детектор Симптомів</h4>
+                        <p class="text-slate-300 text-sm mb-4">Аналізуй аномалії ПК! Відрізняй прямі ознаки зараження від непрямих та класифікуй віруси за маскуванням і пам'яттю.</p>
+                        <div class="flex items-center text-xs text-purple-400 font-semibold space-x-2">
+                            <span>Розпочати місію</span>
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
+                        </div>
+                    </div>
+
+                    <!-- Mini Game 3 Card -->
+                    <div onclick="startMiniGame(3)" class="glass-card rounded-3xl p-6 cursor-pointer hover:-translate-y-1 group relative overflow-hidden">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-400 text-2xl group-hover:scale-110 transition">
+                                <i class="fa-solid fa-shield-virus"></i>
+                            </div>
+                            <span id="badge-g3" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Не пройдено</span>
+                        </div>
+                        <h4 class="text-xl font-bold text-white mb-2 group-hover:text-emerald-300 transition">Місія 3: Антивірусний Брандмауер</h4>
+                        <p class="text-slate-300 text-sm mb-4">Обирай потрібний антивірусний модуль (Сканери, Ревізори, Монітори, Лікарі) та режим сканування під симуляцію інциденту.</p>
+                        <div class="flex items-center text-xs text-emerald-400 font-semibold space-x-2">
+                            <span>Розпочати місію</span>
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
+                        </div>
+                    </div>
+
+                    <!-- Mini Game 4 Card -->
+                    <div onclick="startMiniGame(4)" class="glass-card rounded-3xl p-6 cursor-pointer hover:-translate-y-1 group relative overflow-hidden">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-14 h-14 rounded-2xl bg-rose-500/20 border border-rose-400/30 flex items-center justify-center text-rose-400 text-2xl group-hover:scale-110 transition">
+                                <i class="fa-solid fa-file-medical"></i>
+                            </div>
+                            <span id="badge-g4" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">Не пройдено</span>
+                        </div>
+                        <h4 class="text-xl font-bold text-white mb-2 group-hover:text-rose-300 transition">Місія 4: Центр Дій з Файлами</h4>
+                        <p class="text-slate-300 text-sm mb-4">Приймай швидкі рішення: Вилікувати, Карантин, Видалити чи Винятки! Та перевір знання правил безпеки.</p>
+                        <div class="flex items-center text-xs text-rose-400 font-semibold space-x-2">
+                            <span>Розпочати місію</span>
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Did You Know Block -->
+            <div class="glass-card rounded-2xl p-5 border-amber-500/30 bg-amber-500/5 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 text-2xl flex-shrink-0">
+                    <i class="fa-solid fa-lightbulb"></i>
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold text-amber-300">Цікавий факт з історії кібербезпеки:</h4>
+                    <p class="text-xs sm:text-sm text-slate-300">
+                        За 5 годин роботи вірус-хробак <strong class="text-white">ILOVEYOU</strong> (4 травня 2000 р.) вразив десятки мільйонів комп'ютерів у всьому світі та спричинив збитки на $10 мільярдів!
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= MINI GAME 1 ================= -->
+        <section id="game1-screen" class="hidden space-y-6">
+            <!-- Game Header -->
+            <div class="glass-card rounded-2xl p-4 flex items-center justify-between">
+                <button onclick="showScreen('hub-screen')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs sm:text-sm font-bold border border-white/10 transition active:scale-95">
+                    <i class="fa-solid fa-chevron-left mr-2"></i> До меню
+                </button>
+                <div class="text-center">
+                    <h3 class="text-base sm:text-lg font-bold text-cyan-300">Місія 1: Лабораторія Загроз</h3>
+                    <p class="text-xs text-slate-400">Розподіли загрози за відповідними категоріями</p>
+                </div>
+                <div class="text-right font-bold text-cyan-400 text-sm sm:text-base">
+                    <span id="g1-matched">0</span> / <span id="g1-total">6</span>
+                </div>
+            </div>
+
+            <div class="text-xs sm:text-sm text-slate-300 bg-cyan-500/10 border border-cyan-500/20 rounded-xl p-3 flex items-center gap-2">
+                <i class="fa-solid fa-hand-pointer text-cyan-400 text-base"></i>
+                <span>Натисни на картку загрози, а потім на відповідний контейнер категорії (або перетягни її).</span>
+            </div>
+
+            <!-- Source Items (Threats) -->
+            <div id="g1-cards-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 min-h-[100px]">
+                <!-- Dynamic cards insertion -->
+            </div>
+
+            <!-- Target Containers -->
+            <div id="g1-targets-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <!-- Dynamic target boxes insertion -->
+            </div>
+        </section>
+
+        <!-- ================= MINI GAME 2 ================= -->
+        <section id="game2-screen" class="hidden space-y-6">
+            <!-- Game Header -->
+            <div class="glass-card rounded-2xl p-4 flex items-center justify-between">
+                <button onclick="showScreen('hub-screen')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs sm:text-sm font-bold border border-white/10 transition active:scale-95">
+                    <i class="fa-solid fa-chevron-left mr-2"></i> До меню
+                </button>
+                <div class="text-center">
+                    <h3 class="text-base sm:text-lg font-bold text-purple-300">Місія 2: Детектор Симптомів та Класифікація</h3>
+                    <p class="text-xs text-slate-400">Проаналізуй випадок та обери правильні характеристики</p>
+                </div>
+                <div class="text-right font-bold text-purple-400 text-sm sm:text-base">
+                    Крок <span id="g2-step">1</span> / <span id="g2-total-steps">5</span>
+                </div>
+            </div>
+
+            <!-- Diagnostic Card -->
+            <div class="glass-card rounded-3xl p-6 space-y-6 relative border-purple-500/30">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 rounded-xl bg-purple-500/20 border border-purple-400/30 flex items-center justify-center text-purple-400 text-xl">
+                        <i class="fa-solid fa-terminal"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-purple-400">Системний лог / Аналіз вірусу</span>
+                        <h4 id="g2-question-title" class="text-lg sm:text-xl font-bold text-white">...</h4>
+                    </div>
+                </div>
+
+                <div id="g2-scenario-box" class="p-4 rounded-2xl bg-slate-900/80 border border-white/5 text-slate-200 text-sm sm:text-base leading-relaxed">
+                    <!-- Dynamic text -->
+                </div>
+
+                <!-- Answer Options -->
+                <div id="g2-options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- Dynamic options -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= MINI GAME 3 ================= -->
+        <section id="game3-screen" class="hidden space-y-6">
+            <!-- Game Header -->
+            <div class="glass-card rounded-2xl p-4 flex items-center justify-between">
+                <button onclick="showScreen('hub-screen')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs sm:text-sm font-bold border border-white/10 transition active:scale-95">
+                    <i class="fa-solid fa-chevron-left mr-2"></i> До меню
+                </button>
+                <div class="text-center">
+                    <h3 class="text-base sm:text-lg font-bold text-emerald-300">Місія 3: Антивірусний Брандмауер</h3>
+                    <p class="text-xs text-slate-400">Підбери тип антивірусу та режим сканування під загрозу</p>
+                </div>
+                <div class="text-right font-bold text-emerald-400 text-sm sm:text-base">
+                    Ситуація <span id="g3-step">1</span> / <span id="g3-total-steps">4</span>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-3xl p-6 space-y-6 border-emerald-500/30">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-400 text-xl">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-emerald-400">Запит від операційної системи</span>
+                        <h4 id="g3-scenario-title" class="text-lg font-bold text-white">...</h4>
+                    </div>
+                </div>
+
+                <div id="g3-scenario-desc" class="p-4 rounded-2xl bg-slate-900/80 border border-white/5 text-slate-200 text-sm sm:text-base">
+                    <!-- Dynamic scenario text -->
+                </div>
+
+                <div class="space-y-4">
+                    <label class="block text-sm font-bold text-emerald-300">Обери оптимальний засіб захисту чи дію:</label>
+                    <div id="g3-options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <!-- Dynamic options -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= MINI GAME 4 ================= -->
+        <section id="game4-screen" class="hidden space-y-6">
+            <!-- Game Header -->
+            <div class="glass-card rounded-2xl p-4 flex items-center justify-between">
+                <button onclick="showScreen('hub-screen')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs sm:text-sm font-bold border border-white/10 transition active:scale-95">
+                    <i class="fa-solid fa-chevron-left mr-2"></i> До меню
+                </button>
+                <div class="text-center">
+                    <h3 class="text-base sm:text-lg font-bold text-rose-300">Місія 4: Дії з файлами та Правила безпеки</h3>
+                    <p class="text-xs text-slate-400">Вирішуй долю інфікованих файлів та контролюй інструкції</p>
+                </div>
+                <div class="text-right font-bold text-rose-400 text-sm sm:text-base">
+                    Файл <span id="g4-step">1</span> / <span id="g4-total-steps">5</span>
+                </div>
+            </div>
+
+            <!-- Interactive File Incident Decision Matrix -->
+            <div class="glass-card rounded-3xl p-6 space-y-6 border-rose-500/30">
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 rounded-xl bg-rose-500/20 border border-rose-400/30 flex items-center justify-center text-rose-400 text-xl">
+                            <i class="fa-solid fa-file-circle-exclamation"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-rose-400">Детектор антивірусного монітора</span>
+                            <h4 id="g4-filename" class="text-lg font-bold text-white">...</h4>
+                        </div>
+                    </div>
+                    <span id="g4-status-tag" class="px-3 py-1 rounded-full text-xs font-bold bg-rose-500/20 border border-rose-500/40 text-rose-300">Увага! Потенційна загроза</span>
+                </div>
+
+                <div id="g4-file-desc" class="p-4 rounded-2xl bg-slate-900/80 border border-white/5 text-slate-200 text-sm sm:text-base">
+                    <!-- Dynamic text -->
+                </div>
+
+                <div class="space-y-3">
+                    <span class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Яку дію необхідно застосувати?</span>
+                    <div id="g4-actions-container" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <!-- Dynamic buttons for Cure, Quarantine, Delete, Exclude -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= CERTIFICATE MODAL ================= -->
+        <div id="modal-certificate" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+            <div class="glass-card rounded-3xl p-6 sm:p-8 max-w-lg w-full border-cyan-500/50 text-center space-y-6 relative overflow-hidden animate-float">
+                <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-amber-400 to-yellow-500 mx-auto flex items-center justify-center text-slate-950 text-4xl shadow-lg shadow-amber-500/30">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+
+                <div class="space-y-2">
+                    <span class="text-xs font-bold uppercase tracking-widest text-cyan-400">Сертифікат успішного проходження</span>
+                    <h3 class="text-2xl sm:text-3xl font-extrabold text-white">ФАХІВЕЦЬ З БЕЗПЕКИ ДАНИХ</h3>
+                    <p class="text-slate-300 text-sm">Вітаємо! Ти успішно пройшов усі 4 навчальні місії з захисту інформації!</p>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-slate-900/90 border border-white/10 grid grid-cols-2 gap-4">
+                    <div>
+                        <span class="block text-xs text-slate-400">Загальний рахунок</span>
+                        <span id="final-score" class="text-2xl font-black text-amber-400">0</span>
+                    </div>
+                    <div>
+                        <span class="block text-xs text-slate-400">Рівень знань</span>
+                        <span id="final-rank" class="text-base font-bold text-emerald-400">Експерт</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button onclick="closeModal(); showScreen('hub-screen');" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold shadow-lg shadow-cyan-500/30 hover:opacity-90 transition active:scale-95">
+                        <i class="fa-solid fa-house mr-2"></i> До головного меню
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="max-w-6xl w-full mx-auto mt-6 text-center text-xs text-slate-400 py-3 border-t border-white/5">
+        <p>© Урок інформатики: «Які програми важливі для захисту даних?» • Інтерактивний векторний тренажер</p>
+    </footer>
+
+    <script>
+        // Global Game State
+        const gameState = {
+            score: 0,
+            completedGames: new Set(),
+            selectedG1Card: null,
+            g1MatchedCount: 0,
+            g2StepIndex: 0,
+            g3StepIndex: 0,
+            g4StepIndex: 0
+        };
+
+        // Utility to shuffle arrays (Fisher-Yates) for scramble rule
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // Screen Switcher
+        function showScreen(screenId) {
+            const screens = ['hub-screen', 'game1-screen', 'game2-screen', 'game3-screen', 'game4-screen'];
+            screens.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+            const target = document.getElementById(screenId);
+            if (target) target.classList.remove('hidden');
+        }
+
+        function updateUI() {
+            document.getElementById('score-display').innerText = gameState.score;
+            document.getElementById('progress-display').innerText = `${gameState.completedGames.size}/4`;
+
+            // Update Hub badges
+            for (let i = 1; i <= 4; i++) {
+                const badge = document.getElementById(`badge-g${i}`);
+                if (badge) {
+                    if (gameState.completedGames.has(i)) {
+                        badge.innerText = 'Пройдено';
+                        badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+                    } else {
+                        badge.innerText = 'Не пройдено';
+                        badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700';
+                    }
+                }
+            }
+        }
+
+        function addScore(points) {
+            gameState.score += points;
+            updateUI();
+        }
+
+        function resetGame() {
+            gameState.score = 0;
+            gameState.completedGames.clear();
+            gameState.selectedG1Card = null;
+            gameState.g1MatchedCount = 0;
+            gameState.g2StepIndex = 0;
+            gameState.g3StepIndex = 0;
+            gameState.g4StepIndex = 0;
+            updateUI();
+            showScreen('hub-screen');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-certificate').classList.add('hidden');
+            document.getElementById('modal-certificate').classList.remove('flex');
+        }
+
+        function checkOverallCompletion() {
+            if (gameState.completedGames.size === 4) {
+                document.getElementById('final-score').innerText = gameState.score;
+
+                let rank = "Фахівець Початківець";
+                if (gameState.score >= 120) rank = "Кібер-Експерт 1-го Рангу";
+                else if (gameState.score >= 80) rank = "Досвідчений Аналітик";
+
+                document.getElementById('final-rank').innerText = rank;
+
+                setTimeout(() => {
+                    const modal = document.getElementById('modal-certificate');
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                }, 600);
+            }
+        }
+
+        const game1Data = [
+            { id: 'm1', name: 'Хробаки (Worms)', category: 'worm', icon: 'fa-shield-worm', desc: 'Самостійно розповсюджуються мережею без участі користувача, перевантажуючи ресурси.' },
+            { id: 'm2', name: 'Троянські програми', category: 'trojan', icon: 'fa-horse-head', desc: 'Маскуються під корисні програми, відкриваючи доступ зловмисникам чи викрадаючи паролі.' },
+            { id: 'm3', name: 'Шпигунські (Spyware)', category: 'spyware', icon: 'fa-user-secret', desc: 'Таємно збирають інформацію: паролі, клавіатурний ввід та історію браузера.' },
+            { id: 'm4', name: 'Програми-вимагачі (Ransomware)', category: 'ransom', icon: 'fa-lock', desc: 'Заблоковують доступ до ПК або шифрують файли, вимагаючи викуп за відновлення.' },
+            { id: 'm5', name: 'Рекламні (Adware)', category: 'adware', icon: 'fa-rectangle-ad', desc: 'Демонструють небажану рекламу у спливаючих вікнах та збирають маркетинг-дані.' },
+            { id: 'm6', name: 'Комп\'ютерні Віруси', category: 'virus', icon: 'fa-virus', desc: 'Прикріплюються до інших файлів і поширюються при їх відкритті, пошкоджуючи дані.' }
+        ];
+
+        const game1Categories = [
+            { category: 'worm', title: 'Мережеві Хробаки', color: 'border-cyan-500/40 bg-cyan-500/10' },
+            { category: 'trojan', title: 'Трояни / Маскувальники', color: 'border-purple-500/40 bg-purple-500/10' },
+            { category: 'spyware', title: 'Шпигунське ПЗ (Spyware)', color: 'border-emerald-500/40 bg-emerald-500/10' },
+            { category: 'ransom', title: 'Вимагачі (Ransomware)', color: 'border-rose-500/40 bg-rose-500/10' },
+            { category: 'adware', title: 'Рекламне ПЗ (Adware)', color: 'border-amber-500/40 bg-amber-500/10' },
+            { category: 'virus', title: 'Файлові Віруси', color: 'border-sky-500/40 bg-sky-500/10' }
+        ];
+
+        function initGame1() {
+            gameState.selectedG1Card = null;
+            gameState.g1MatchedCount = 0;
+            document.getElementById('g1-matched').innerText = '0';
+
+            const cardsContainer = document.getElementById('g1-cards-container');
+            const targetsContainer = document.getElementById('g1-targets-container');
+
+            cardsContainer.innerHTML = '';
+            targetsContainer.innerHTML = '';
+
+            // Scramble cards and target categories
+            const scrambledCards = shuffleArray(game1Data);
+            const scrambledTargets = shuffleArray(game1Categories);
+
+            scrambledCards.forEach(item => {
+                const card = document.createElement('div');
+                card.id = `card-${item.id}`;
+                card.setAttribute('draggable', 'true');
+                card.className = 'glass-card p-3 rounded-xl cursor-pointer hover:border-cyan-400 transition flex items-center space-x-3 bg-slate-800/80 border border-white/10';
+                card.innerHTML = `
+                    <div class="w-10 h-10 rounded-lg bg-cyan-500/20 border border-cyan-400/30 flex items-center justify-center text-cyan-300 text-lg flex-shrink-0">
+                        <i class="fa-solid ${item.icon}"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <h5 class="text-xs sm:text-sm font-bold text-white truncate">${item.name}</h5>
+                        <p class="text-[11px] text-slate-300 line-clamp-2">${item.desc}</p>
+                    </div>
+                `;
+
+                // Touch/Tap select logic
+                card.onclick = () => selectG1Card(item.id);
+
+                // Drag & Drop logic for desktop
+                card.ondragstart = (e) => {
+                    e.dataTransfer.setData('text/plain', item.id);
+                    selectG1Card(item.id);
+                };
+
+                cardsContainer.appendChild(card);
+            });
+
+            scrambledTargets.forEach(target => {
+                const box = document.createElement('div');
+                box.dataset.category = target.category;
+                box.className = `glass-card p-4 rounded-2xl border-2 ${target.color} min-h-[110px] flex flex-col justify-between transition cursor-pointer hover:scale-[1.01]`;
+                box.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold uppercase tracking-wide text-slate-300">${target.title}</span>
+                        <i class="fa-solid fa-box-archive text-slate-400 text-sm"></i>
+                    </div>
+                    <div id="target-slot-${target.category}" class="flex-1 border-2 border-dashed border-white/10 rounded-xl flex items-center justify-center p-2 text-xs text-slate-400 text-center">
+                        Помісти загрозу сюди
+                    </div>
+                `;
+
+                // Drop & Tap target logic
+                box.onclick = () => handleG1DropTarget(target.category);
+
+                box.ondragover = (e) => e.preventDefault();
+                box.ondrop = (e) => {
+                    e.preventDefault();
+                    const itemId = e.dataTransfer.getData('text/plain');
+                    if (itemId) {
+                        const itemObj = game1Data.find(x => x.id === itemId);
+                        if (itemObj) handleG1Placement(itemObj, target.category);
+                    }
+                };
+
+                targetsContainer.appendChild(box);
+            });
+        }
+
+        function selectG1Card(id) {
+            // Unselect previous
+            if (gameState.selectedG1Card) {
+                const prev = document.getElementById(`card-${gameState.selectedG1Card}`);
+                if (prev) prev.classList.remove('selected-item');
+            }
+
+            gameState.selectedG1Card = id;
+            const current = document.getElementById(`card-${id}`);
+            if (current) current.classList.add('selected-item');
+        }
+
+        function handleG1DropTarget(targetCategory) {
+            if (!gameState.selectedG1Card) return;
+            const itemObj = game1Data.find(x => x.id === gameState.selectedG1Card);
+            if (itemObj) {
+                handleG1Placement(itemObj, targetCategory);
+            }
+        }
+
+        function handleG1Placement(itemObj, targetCategory) {
+            if (itemObj.category === targetCategory) {
+                // Correct match
+                const slot = document.getElementById(`target-slot-${targetCategory}`);
+                const cardEl = document.getElementById(`card-${itemObj.id}`);
+
+                if (slot && cardEl) {
+                    slot.innerHTML = `
+                        <div class="w-full bg-emerald-500/20 border border-emerald-400/40 p-2 rounded-lg flex items-center space-x-2 text-emerald-300">
+                            <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                            <span class="text-xs font-bold">${itemObj.name}</span>
+                        </div>
+                    `;
+                    cardEl.remove();
+                }
+
+                gameState.selectedG1Card = null;
+                gameState.g1MatchedCount++;
+                document.getElementById('g1-matched').innerText = gameState.g1MatchedCount;
+                addScore(10);
+
+                if (gameState.g1MatchedCount === game1Data.length) {
+                    gameState.completedGames.add(1);
+                    checkOverallCompletion();
+                    setTimeout(() => {
+                        alert("Чудова робота! Лабораторію загроз знешкоджено! +60 балів");
+                        showScreen('hub-screen');
+                    }, 300);
+                }
+            } else {
+                // Incorrect match
+                alert("Невірно! Прочитай уважно характер дії цієї програми та спробуй іншу категорію.");
+            }
+        }
+
+        const game2QuestionsScrambled = [
+            {
+                title: 'Аномалія 1: Несподіваний вихід в інтернет',
+                scenario: 'Користувач отримує сповіщення мережевого екранa про спроби незнайомих програм вийти в мережу. Також від його імені друзям надсилаються розсилки спаму.',
+                options: [
+                    { text: 'Пряма (явна) ознака зараження', correct: true },
+                    { text: 'Непряма (прихована) ознака зараження', correct: false },
+                    { text: 'Звичайна апаратна несправність диска', correct: false },
+                    { text: 'Планове оновлення баз даних', correct: false }
+                ]
+            },
+            {
+                title: 'Аномалія 2: Системні затримки та миготіння накопичувача',
+                scenario: 'Комп\'ютер постійно «зависає», а індикатор накопичувача безперервно миготить, хоча відкриті лише прості текстові файли.',
+                options: [
+                    { text: 'Непряма (прихована) ознака зараження', correct: true },
+                    { text: 'Пряма ознака зараження', correct: false },
+                    { text: 'Нормальний режим швидкої роботи ПЗ', correct: false },
+                    { text: 'Макровірусне сповіщення Word', correct: false }
+                ]
+            },
+            {
+                title: 'Класифікація: Вірус в ОЗП (Пам\'яті)',
+                scenario: 'Вірус під час завантаження системи потрапляє в оперативну пам\'ять і перебуває там постійно, перехоплюючи звернення.',
+                options: [
+                    { text: 'Резидентний вірус', correct: true },
+                    { text: 'Нерезидентний вірус', correct: false },
+                    { text: 'Макровірус Excel', correct: false },
+                    { text: 'Умовно безпечний вірус', correct: false }
+                ]
+            },
+            {
+                title: 'Класифікація: Зміна коду вірусу',
+                scenario: 'Шкідливий код постійно змінюється, зашифровуючись новими комбінаціями, щоб його не знайшли за зразком.',
+                options: [
+                    { text: 'Поліморфний вірус', correct: true },
+                    { text: 'Stealth-вірус (Невидимий)', correct: false },
+                    { text: 'Звичайний файловий вірус', correct: false },
+                    { text: 'Завантажувальний MBR вірус', correct: false }
+                ]
+            },
+            {
+                title: 'Класифікація: Приховування файлів',
+                scenario: 'Вірус перехоплює звернення системи до файлової структури та приховує свій код від файлових операцій.',
+                options: [
+                    { text: 'Stealth-вірус (Невидимий)', correct: true },
+                    { text: 'Поліморфний вірус', correct: false },
+                    { text: 'Нерезидентний вірус', correct: false },
+                    { text: 'Завантажувальний вірус', correct: false }
+                ]
+            }
+        ];
+
+        let g2CurrentQuestions = [];
+
+        function initGame2() {
+            gameState.g2StepIndex = 0;
+            g2CurrentQuestions = shuffleArray(game2QuestionsScrambled);
+            document.getElementById('g2-total-steps').innerText = g2CurrentQuestions.length;
+            renderG2Step();
+        }
+
+        function renderG2Step() {
+            const current = g2CurrentQuestions[gameState.g2StepIndex];
+            document.getElementById('g2-step').innerText = gameState.g2StepIndex + 1;
+            document.getElementById('g2-question-title').innerText = current.title;
+            document.getElementById('g2-scenario-box').innerText = current.scenario;
+
+            const container = document.getElementById('g2-options-container');
+            container.innerHTML = '';
+
+            const scrambledOpts = shuffleArray(current.options);
+            scrambledOpts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'glass-card p-4 rounded-2xl text-left font-bold text-sm text-slate-200 hover:border-purple-400 hover:text-purple-300 transition active:scale-95 border border-white/10 flex items-center space-x-3 bg-slate-800/60';
+                btn.innerHTML = `
+                    <div class="w-8 h-8 rounded-lg bg-purple-500/20 border border-purple-400/30 flex items-center justify-center text-purple-400 text-xs flex-shrink-0">
+                        <i class="fa-solid fa-terminal"></i>
+                    </div>
+                    <span>${opt.text}</span>
+                `;
+                btn.onclick = () => handleG2Answer(opt.correct);
+                container.appendChild(btn);
+            });
+        }
+
+        function handleG2Answer(isCorrect) {
+            if (isCorrect) {
+                addScore(10);
+                gameState.g2StepIndex++;
+                if (gameState.g2StepIndex >= g2CurrentQuestions.length) {
+                    gameState.completedGames.add(2);
+                    checkOverallCompletion();
+                    setTimeout(() => {
+                        alert("Детективну місію виконано! Всі симптоми розшифровано. +50 балів");
+                        showScreen('hub-screen');
+                    }, 300);
+                } else {
+                    renderG2Step();
+                }
+            } else {
+                alert("Помилка в аналізі! Згадай різницю між прямими ознаками та класифікацією вірусів і спробуй ще раз.");
+            }
+        }
+
+        const game3ScenariosScrambled = [
+            {
+                title: 'Ситуація 1: Перевірка постійних змін файлів',
+                desc: 'Потрібно запам\'ятати початковий стан файлової системи (розміри та контрольні суми) та регулярно порівнювати поточний стан із вихідним.',
+                options: [
+                    { text: 'Програми-ревізори (Auditors)', correct: true },
+                    { text: 'Програми-сканери (Scanners)', correct: false },
+                    { text: 'Вакцини / Імунізатори', correct: false },
+                    { text: 'Швидке сканування (Quick Scan)', correct: false }
+                ]
+            },
+            {
+                title: 'Ситуація 2: Захист мережевого трафіку в реальному часі',
+                desc: 'Софт перебуває в оперативній пам\'яті, миттєво реагує на звернення до системи та блокує підозрілі мережеві з\'єднання.',
+                options: [
+                    { text: 'Програми-монітори / Брандмауери', correct: true },
+                    { text: 'Програми-ревізори (Auditors)', correct: false },
+                    { text: 'Сигнатурний аналіз за базою', correct: false },
+                    { text: 'Вибіркове сканування', correct: false }
+                ]
+            },
+            {
+                title: 'Ситуація 3: Виявлення нових невідомих загроз',
+                desc: 'Аналіз базується на пошуку підозрілої та аномальної поведінки програм, яка схожа на дію заражених об\'єктів (проактивний захист).',
+                options: [
+                    { text: 'Евристичний аналіз', correct: true },
+                    { text: 'Сигнатурний аналіз', correct: false },
+                    { text: 'Реактивний захист за базою', correct: false },
+                    { text: 'Карантинний модуль', correct: false }
+                ]
+            },
+            {
+                title: 'Ситуація 4: Відновлення інфікованого файлу',
+                desc: 'Необхідно модифікувати програму так, щоб вірус вважав її вже зараженою, або вирізати шкідливий код із збереженням функцій.',
+                options: [
+                    { text: 'Вакцини / Лікарі (Фаги)', correct: true },
+                    { text: 'Програми-сканери', correct: false },
+                    { text: 'Повне сканування (Full Scan)', correct: false },
+                    { text: 'Модуль оновлення баз', correct: false }
+                ]
+            }
+        ];
+
+        let g3CurrentScenarios = [];
+
+        function initGame3() {
+            gameState.g3StepIndex = 0;
+            g3CurrentScenarios = shuffleArray(game3ScenariosScrambled);
+            document.getElementById('g3-total-steps').innerText = g3CurrentScenarios.length;
+            renderG3Step();
+        }
+
+        function renderG3Step() {
+            const current = g3CurrentScenarios[gameState.g3StepIndex];
+            document.getElementById('g3-step').innerText = gameState.g3StepIndex + 1;
+            document.getElementById('g3-scenario-title').innerText = current.title;
+            document.getElementById('g3-scenario-desc').innerText = current.desc;
+
+            const container = document.getElementById('g3-options-container');
+            container.innerHTML = '';
+
+            const scrambledOpts = shuffleArray(current.options);
+            scrambledOpts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'glass-card p-4 rounded-2xl text-left font-bold text-sm text-slate-200 hover:border-emerald-400 hover:text-emerald-300 transition active:scale-95 border border-white/10 flex items-center space-x-3 bg-slate-800/60';
+                btn.innerHTML = `
+                    <div class="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-400 text-xs flex-shrink-0">
+                        <i class="fa-solid fa-shield text-xs"></i>
+                    </div>
+                    <span>${opt.text}</span>
+                `;
+                btn.onclick = () => handleG3Answer(opt.correct);
+                container.appendChild(btn);
+            });
+        }
+
+        function handleG3Answer(isCorrect) {
+            if (isCorrect) {
+                addScore(15);
+                gameState.g3StepIndex++;
+                if (gameState.g3StepIndex >= g3CurrentScenarios.length) {
+                    gameState.completedGames.add(3);
+                    checkOverallCompletion();
+                    setTimeout(() => {
+                        alert("Вітаємо! Антивірусний брандмауер повністю налаштовано! +60 балів");
+                        showScreen('hub-screen');
+                    }, 300);
+                } else {
+                    renderG3Step();
+                }
+            } else {
+                alert("Некоректний засіб захисту! Подумай про відмінності між сканерами, моніторами, ревізорами та видами аналізу.");
+            }
+        }
+
+        const game4FilesScrambled = [
+            {
+                filename: 'Document_Contract2026.docx',
+                desc: 'Файл містить відомий макровірус. Корисний текстовий вміст документа цілісний і може бути відновлений без видалення самого файла.',
+                correctAction: 'cure',
+                correctLabel: 'Вилікувати (Cure)'
+            },
+            {
+                filename: 'Unknown_Payload_Setup.exe',
+                desc: 'Файл завантажено з підозрілого джерела. Він містить агресивний зашифрований поліморфний код. Лікування неможливе.',
+                correctAction: 'delete',
+                correctLabel: 'Видалити (Delete)'
+            },
+            {
+                filename: 'System_Service_Patch.tmp',
+                desc: 'Файл виявляє підозрілу поведінку (аномальну активність), але сигнатур у базі немає. Потрібна ізоляція для подальшого аналізу.',
+                correctAction: 'quarantine',
+                correctLabel: 'В Карантин (Quarantine)'
+            },
+            {
+                filename: 'Game_Mod_Authorized.dll',
+                desc: 'Надійний ліцензійний файл від офіційного розробника. Антивірус дав хибне спрацьовування (False Positive).',
+                correctAction: 'exclude',
+                correctLabel: 'Додати у винятки'
+            },
+            {
+                filename: 'Rule_Check: Вкладення електронної пошти',
+                desc: 'Правило безпеки: Як вчинити, якщо на пошту надійшов лист із вкладенням .exe від невідомого адресата?',
+                correctAction: 'delete',
+                correctLabel: 'Видалити / Не відкривати'
+            }
+        ];
+
+        const game4Actions = [
+            { action: 'cure', label: 'Вилікувати', icon: 'fa-kit-medical', color: 'hover:border-emerald-400 hover:text-emerald-300' },
+            { action: 'quarantine', label: 'Карантин', icon: 'fa-box-tissue', color: 'hover:border-amber-400 hover:text-amber-300' },
+            { action: 'delete', label: 'Видалити', icon: 'fa-trash-can', color: 'hover:border-rose-400 hover:text-rose-300' },
+            { action: 'exclude', label: 'У Винятки', icon: 'fa-square-check', color: 'hover:border-cyan-400 hover:text-cyan-300' }
+        ];
+
+        let g4CurrentFiles = [];
+
+        function initGame4() {
+            gameState.g4StepIndex = 0;
+            g4CurrentFiles = shuffleArray(game4FilesScrambled);
+            document.getElementById('g4-total-steps').innerText = g4CurrentFiles.length;
+            renderG4Step();
+        }
+
+        function renderG4Step() {
+            const current = g4CurrentFiles[gameState.g4StepIndex];
+            document.getElementById('g4-step').innerText = gameState.g4StepIndex + 1;
+            document.getElementById('g4-filename').innerText = current.filename;
+            document.getElementById('g4-file-desc').innerText = current.desc;
+
+            const container = document.getElementById('g4-actions-container');
+            container.innerHTML = '';
+
+            const scrambledActions = shuffleArray(game4Actions);
+            scrambledActions.forEach(act => {
+                const btn = document.createElement('button');
+                btn.className = `glass-card p-4 rounded-2xl flex flex-col items-center justify-center space-y-2 font-bold text-xs sm:text-sm text-slate-200 ${act.color} transition active:scale-95 border border-white/10 bg-slate-800/80`;
+                btn.innerHTML = `
+                    <i class="fa-solid ${act.icon} text-xl"></i>
+                    <span>${act.label}</span>
+                `;
+                btn.onclick = () => handleG4Answer(act.action);
+                container.appendChild(btn);
+            });
+        }
+
+        function handleG4Answer(actionChosen) {
+            const current = g4CurrentFiles[gameState.g4StepIndex];
+            if (actionChosen === current.correctAction) {
+                addScore(10);
+                gameState.g4StepIndex++;
+                if (gameState.g4StepIndex >= g4CurrentFiles.length) {
+                    gameState.completedGames.add(4);
+                    checkOverallCompletion();
+                    setTimeout(() => {
+                        alert("Центр дій з файлами повністю знешкодив загрози! +50 балів");
+                        showScreen('hub-screen');
+                    }, 300);
+                } else {
+                    renderG4Step();
+                }
+            } else {
+                alert(`Помилкове рішення! Для цього файлу правильна дія: ${current.correctLabel}. Спробуй ще раз!`);
+            }
+        }
+
+        function startMiniGame(gameId) {
+            if (gameId === 1) {
+                initGame1();
+                showScreen('game1-screen');
+            } else if (gameId === 2) {
+                initGame2();
+                showScreen('game2-screen');
+            } else if (gameId === 3) {
+                initGame3();
+                showScreen('game3-screen');
+            } else if (gameId === 4) {
+                initGame4();
+                showScreen('game4-screen');
+            }
+        }
+
+        // Initialize App on load
+        window.onload = function() {
+            updateUI();
+        };
+    </script>
+</body>
+</html>
