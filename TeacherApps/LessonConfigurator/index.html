@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="uk" class="h-full bg-slate-900 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактор JSON електронного підручника</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Vue 3 CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
+</head>
+<body class="h-full font-sans antialiased bg-slate-950 text-slate-100 selection:bg-brand-500 selection:text-white">
+
+    <div id="app" class="min-h-screen flex flex-col">
+        
+        <!-- Header Nav -->
+        <header class="bg-slate-900/90 border-b border-slate-800 sticky top-0 z-50 backdrop-blur-md">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-brand-500/20">
+                        <i class="fa-solid fa-file-code"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg text-slate-100 leading-tight">Конфігуратор підручника</h1>
+                        <p class="text-xs text-slate-400">Редактор метаданих, медіа та ресурсів</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <div class="flex items-center space-x-2 bg-slate-800/80 p-1 rounded-xl border border-slate-700">
+                    <button @click="activeTab = 'editor'" 
+                            :class="activeTab === 'editor' ? 'bg-brand-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'" 
+                            class="px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        <span>Редактор</span>
+                    </button>
+                    <button @click="activeTab = 'preview'" 
+                            :class="activeTab === 'preview' ? 'bg-brand-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'" 
+                            class="px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition flex items-center gap-2">
+                        <i class="fa-solid fa-eye"></i>
+                        <span>Превью</span>
+                    </button>
+                    <button @click="activeTab = 'export'" 
+                            :class="activeTab === 'export' ? 'bg-brand-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'" 
+                            class="px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition flex items-center gap-2">
+                        <i class="fa-solid fa-code"></i>
+                        <span>JSON</span>
+                    </button>
+                </div>
+
+                <!-- Action Controls -->
+                <div class="hidden md:flex items-center space-x-2">
+                    <button @click="resetToDefault" class="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-rotate-left"></i> Скинути
+                    </button>
+                    <button @click="generateAndExport" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-medium transition flex items-center gap-2 shadow-lg shadow-emerald-600/20">
+                        <i class="fa-solid fa-bolt"></i>
+                        <span>Згенерувати JSON</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+
+            <div v-show="activeTab === 'editor'" class="space-y-8">
+                
+                <!-- Quick Info / Status Bar -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-3 bg-brand-500/10 text-brand-500 rounded-xl">
+                            <i class="fa-solid fa-circle-info text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-semibold text-slate-200">Панель швидкого редагування</h2>
+                            <p class="text-xs text-slate-400">Змінюйте метадані, всі зображення та навчальні ресурси. Всі інші блоки збережуться без змін.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-1 bg-slate-800 text-slate-300 rounded-lg text-xs font-mono">
+                            <i class="fa-regular fa-image text-brand-500 mr-1"></i> Зображень: {{ extractedImages.length }}
+                        </span>
+                        <span class="px-2.5 py-1 bg-slate-800 text-slate-300 rounded-lg text-xs font-mono">
+                            <i class="fa-solid fa-link text-brand-500 mr-1"></i> Ресурсів: {{ extractedResources.length }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- SECTION 1: Meta Data -->
+                <section class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1.5 h-full bg-brand-500"></div>
+                    <div class="flex items-center space-x-3 mb-6">
+                        <span class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center text-sm font-bold">1</span>
+                        <div>
+                            <h2 class="text-lg font-bold text-white">Метадані уроку</h2>
+                            <p class="text-xs text-slate-400">Назва, тег теми та тексти badges</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Topic Tag -->
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-2">
+                                <i class="fa-solid fa-tag text-brand-500 mr-1"></i> Тема / Тег (topicTag)
+                            </label>
+                            <input v-model="jsonDoc.meta.topicTag" type="text" 
+                                   class="w-full bg-slate-950 border border-slate-700 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 outline-none transition">
+                        </div>
+
+                        <!-- Badge Text -->
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-2">
+                                <i class="fa-solid fa-certificate text-brand-500 mr-1"></i> Текст плашки (badgeText)
+                            </label>
+                            <input v-model="jsonDoc.meta.badgeText" type="text" 
+                                   class="w-full bg-slate-950 border border-slate-700 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 outline-none transition">
+                        </div>
+
+                        <!-- Main Title -->
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-medium text-slate-300 mb-2">
+                                <i class="fa-solid fa-heading text-brand-500 mr-1"></i> Заголовок параграфа (title)
+                            </label>
+                            <input v-model="jsonDoc.meta.title" type="text" 
+                                   class="w-full bg-slate-950 border border-slate-700 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 outline-none transition font-semibold">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 2: Images Management -->
+                <section class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1.5 h-full bg-indigo-500"></div>
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-sm font-bold">2</span>
+                            <div>
+                                <h2 class="text-lg font-bold text-white">Управління зображеннями</h2>
+                                <p class="text-xs text-slate-400">Редагування всіх медіафайлів у контенті уроку</p>
+                            </div>
+                        </div>
+                        <span class="text-xs text-slate-400 bg-slate-800 px-3 py-1 rounded-full border border-slate-700">
+                            Знайдено: {{ extractedImages.length }} малюнків
+                        </span>
+                    </div>
+
+                    <div v-if="extractedImages.length === 0" class="text-center py-8 text-slate-500 text-sm">
+                        <i class="fa-solid fa-image-slash text-3xl mb-2 block"></i>
+                        У документі немає блоків з зображеннями.
+                    </div>
+
+                    <div class="space-y-6">
+                        <div v-for="(imgRef, idx) in extractedImages" :key="idx" 
+                             class="bg-slate-950 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition space-y-4">
+                            
+                            <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+                                <span class="text-xs font-mono text-indigo-400 bg-indigo-950/50 px-2.5 py-1 rounded-md border border-indigo-900">
+                                    <i class="fa-regular fa-folder-open mr-1"></i> Секція {{ imgRef.sectionStep }}: {{ imgRef.sectionTitle }}
+                                </span>
+                                <span class="text-xs text-slate-500 font-mono">#{{ idx + 1 }}</span>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+                                <!-- Preview box -->
+                                <div class="lg:col-span-1 bg-slate-900 border border-slate-800 rounded-lg p-2 text-center group relative overflow-hidden">
+                                    <img :src="imgRef.item.src" :alt="imgRef.item.alt" 
+                                         class="w-full h-32 object-cover rounded bg-slate-950"
+                                         @error="handleImgError($event)">
+                                    <p class="text-[10px] text-slate-400 mt-1 truncate">{{ imgRef.item.alt || 'Без опису' }}</p>
+                                    
+                                    <!-- AI Generator Button -->
+                                    <button @click="generateAIImage(imgRef.item)" 
+                                            :disabled="imgRef.item.isGenerating"
+                                            class="w-full mt-2 py-1.5 px-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-50 text-white rounded-lg text-[11px] font-medium transition flex items-center justify-center gap-1.5 shadow">
+                                        <i v-if="imgRef.item.isGenerating" class="fa-solid fa-spinner fa-spin"></i>
+                                        <i v-else class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+                                        <span>{{ imgRef.item.isGenerating ? 'Генерується...' : 'Згенерувати AI' }}</span>
+                                    </button>
+                                </div>
+
+                                <!-- Fields -->
+                                <div class="lg:col-span-3 space-y-3">
+                                    <div>
+                                        <label class="block text-[11px] font-medium text-slate-400 mb-1">
+                                            URL Зображення (src)
+                                        </label>
+                                        <input v-model="imgRef.item.src" type="text" 
+                                               class="w-full bg-slate-900 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 outline-none">
+                                    </div>
+
+                                    <!-- Added Prompt Field -->
+                                    <div>
+                                        <label class="block text-[11px] font-medium text-amber-400 mb-1 flex items-center gap-1">
+                                            <i class="fa-solid fa-lightbulb"></i> Промпт для генерації зображення (prompt)
+                                        </label>
+                                        <textarea v-model="imgRef.item.prompt" rows="3" 
+                                                  placeholder="Опишіть підказку або контекст для створення малюнка..."
+                                                  class="w-full bg-slate-900 border border-slate-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-lg px-3 py-2 text-xs text-slate-200 outline-none leading-relaxed resize-y"></textarea>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="block text-[11px] font-medium text-slate-400 mb-1">
+                                                Альтернативний текст (alt)
+                                            </label>
+                                            <input v-model="imgRef.item.alt" type="text" 
+                                                   class="w-full bg-slate-900 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg px-3 py-2 text-xs text-slate-200 outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-medium text-slate-400 mb-1">
+                                                Підпис (caption)
+                                            </label>
+                                            <input v-model="imgRef.item.caption" type="text" 
+                                                   class="w-full bg-slate-900 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg px-3 py-2 text-xs text-slate-200 outline-none">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 3: Learning Resources -->
+                <section class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1.5 h-full bg-emerald-500"></div>
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm font-bold">3</span>
+                            <div>
+                                <h2 class="text-lg font-bold text-white">Навчальні ресурси уроку</h2>
+                                <p class="text-xs text-slate-400">Редагуйте посилання на інтерактивні ігри, конспекти та тести</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-if="extractedResources.length === 0" class="text-center py-8 text-slate-500 text-sm">
+                        <i class="fa-solid fa-link-slash text-3xl mb-2 block"></i>
+                        Секцій з навчальними ресурсами не знайдено.
+                    </div>
+
+                    <div v-for="(resBlock, bIdx) in extractedResources" :key="bIdx" class="space-y-4">
+                        <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 space-y-4">
+                            
+                            <div class="flex items-center justify-between">
+                                <label class="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-bookmark"></i> Заголовок блоку ресурсів
+                                </label>
+                                <button @click="addResourceLink(resBlock.item)" 
+                                        class="px-3 py-1 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 border border-emerald-500/30 rounded-lg text-xs transition flex items-center gap-1 font-medium">
+                                    <i class="fa-solid fa-plus"></i> Додати посилання
+                                </button>
+                            </div>
+
+                            <input v-model="resBlock.item.title" type="text" 
+                                   class="w-full bg-slate-900 border border-slate-700 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs font-semibold text-slate-200 outline-none">
+
+                            <!-- Links list -->
+                            <div class="space-y-3 pt-2">
+                                <div v-for="(link, lIdx) in resBlock.item.links" :key="lIdx" 
+                                     class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center bg-slate-900 p-3 rounded-lg border border-slate-800">
+                                    
+                                    <div class="md:col-span-4">
+                                        <label class="block text-[10px] font-medium text-slate-400 mb-1">Назва посилання (label)</label>
+                                        <input v-model="link.label" type="text" 
+                                               class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500 rounded px-2.5 py-1.5 text-xs text-slate-200 outline-none">
+                                    </div>
+
+                                    <div class="md:col-span-7">
+                                        <label class="block text-[10px] font-medium text-slate-400 mb-1">URL адреса (url)</label>
+                                        <input v-model="link.url" type="text" 
+                                               class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500 rounded px-2.5 py-1.5 text-xs font-mono text-slate-200 outline-none">
+                                    </div>
+
+                                    <div class="md:col-span-1 flex justify-end">
+                                        <button @click="removeResourceLink(resBlock.item, lIdx)" 
+                                                title="Видалити" 
+                                                class="text-rose-400 hover:text-rose-300 p-2 hover:bg-rose-950/50 rounded-lg transition">
+                                            <i class="fa-solid fa-trash-can text-sm"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Bottom CTA Button -->
+                <div class="flex justify-end pt-4">
+                    <button @click="generateAndExport" 
+                            class="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold rounded-xl shadow-xl shadow-emerald-600/20 transition flex items-center justify-center gap-3 text-base">
+                        <i class="fa-solid fa-bolt text-lg"></i>
+                        <span>Згенерувати оновлений JSON</span>
+                    </button>
+                </div>
+
+            </div>
+
+            <div v-show="activeTab === 'preview'" class="space-y-6">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-display text-brand-500"></i>
+                        <span class="text-sm font-medium text-slate-200">Інтерактивний попередній перегляд сторінки</span>
+                    </div>
+                    <span class="text-xs text-slate-400">Стилізовано під макет електронного підручника</span>
+                </div>
+
+                <!-- Textbook Mockup Card -->
+                <div class="bg-white text-slate-900 rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+                    
+                    <!-- Lesson Header Meta -->
+                    <div class="bg-slate-900 text-white p-6 sm:p-8 border-b border-slate-800">
+                        <div class="flex flex-wrap items-center gap-2 mb-3">
+                            <span class="bg-brand-600/30 text-brand-300 border border-brand-500/30 px-3 py-1 rounded-full text-xs font-semibold">
+                                {{ jsonDoc.meta.topicTag || 'Тема не вказана' }}
+                            </span>
+                            <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-semibold">
+                                {{ jsonDoc.meta.badgeText || 'Badge' }}
+                            </span>
+                        </div>
+                        <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-3">
+                            {{ jsonDoc.meta.title || 'Без назви' }}
+                        </h1>
+                        <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-4xl">
+                            {{ jsonDoc.meta.description }}
+                        </p>
+                        <div v-if="jsonDoc.meta.careerNote" class="mt-4 p-3 bg-slate-800/80 rounded-xl border border-slate-700 text-xs text-amber-300 flex items-center gap-2">
+                            <i class="fa-solid fa-lightbulb text-amber-400 text-base"></i>
+                            <span>{{ jsonDoc.meta.careerNote }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Lesson Sections Loop -->
+                    <div class="p-6 sm:p-8 space-y-10">
+                        <div v-for="section in jsonDoc.sections" :key="section.id" class="border-b border-slate-100 pb-8 last:border-0">
+                            <div class="flex items-start gap-3 mb-4">
+                                <span class="bg-brand-600 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                                    {{ section.stepNumber }}
+                                </span>
+                                <h2 class="text-xl font-bold text-slate-800">{{ section.title }}</h2>
+                            </div>
+
+                            <!-- Content Blocks Render -->
+                            <div class="space-y-4 pl-9">
+                                <template v-for="(block, bIdx) in section.content" :key="bIdx">
+                                    
+                                    <!-- Paragraph -->
+                                    <p v-if="block.type === 'paragraph'" class="text-slate-700 text-sm leading-relaxed" v-html="block.text"></p>
+
+                                    <!-- Callout -->
+                                    <div v-else-if="block.type === 'callout'" class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-xl my-3">
+                                        <h4 class="font-bold text-amber-900 text-xs uppercase tracking-wider mb-2">{{ block.title }}</h4>
+                                        <ul v-if="block.items" class="list-disc pl-5 text-xs text-amber-800 space-y-1">
+                                            <li v-for="(item, iIdx) in block.items" :key="iIdx">{{ item }}</li>
+                                        </ul>
+                                        <p v-if="block.text" class="text-xs text-amber-800">{{ block.text }}</p>
+                                    </div>
+
+                                    <!-- Definition -->
+                                    <div v-else-if="block.type === 'definition'" class="bg-sky-50 border-l-4 border-sky-500 p-4 rounded-r-xl my-3">
+                                        <span class="font-bold text-sky-900 text-sm block mb-1">{{ block.term }}</span>
+                                        <p class="text-xs text-sky-800">{{ block.text }}</p>
+                                    </div>
+
+                                    <!-- Image Block -->
+                                    <div v-else-if="block.type === 'image'" class="my-6 bg-slate-50 border border-slate-200 rounded-xl p-3 max-w-2xl">
+                                        <img :src="block.src" :alt="block.alt" class="w-full h-auto rounded-lg shadow-sm max-h-96 object-contain bg-white">
+                                        <p class="text-center text-xs text-slate-500 mt-2 font-medium italic">{{ block.caption }}</p>
+                                    </div>
+
+                                    <!-- Acronym Card -->
+                                    <div v-else-if="block.type === 'acronymCard'" class="bg-indigo-50/50 border border-indigo-100 rounded-xl p-4 my-4">
+                                        <h4 class="font-bold text-indigo-900 text-xs uppercase mb-3">{{ block.title }}</h4>
+                                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                            <div v-for="(item, aIdx) in block.items" :key="aIdx" class="bg-white p-2 rounded border border-indigo-100 text-center">
+                                                <span class="text-lg font-extrabold text-indigo-600 block">{{ item.letter }}</span>
+                                                <span class="text-[11px] font-bold text-slate-800 block">{{ item.term }}</span>
+                                                <span class="text-[10px] text-slate-500 block leading-tight">{{ item.description }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Category Block -->
+                                    <div v-else-if="block.type === 'categoryBlock'" class="bg-slate-50 border border-slate-200 rounded-xl p-4 my-3">
+                                        <h4 class="font-bold text-slate-800 text-sm">{{ block.title }}</h4>
+                                        <p class="text-xs text-slate-600 mb-2">{{ block.description }}</p>
+                                        <div v-if="block.items" class="space-y-2 mt-2">
+                                            <div v-for="(sub, sIdx) in block.items" :key="sIdx" class="bg-white p-2.5 rounded border border-slate-200 text-xs">
+                                                <span class="font-bold text-brand-600 block">{{ sub.name }}</span>
+                                                <span class="text-slate-600">{{ sub.text }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Summary List -->
+                                    <div v-else-if="block.type === 'summaryList'" class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 my-3">
+                                        <h4 class="font-bold text-emerald-900 text-xs uppercase mb-2">{{ block.title }}</h4>
+                                        <ul class="list-disc pl-5 text-xs text-emerald-800 space-y-1">
+                                            <li v-for="(sumItem, smIdx) in block.items" :key="smIdx" v-html="sumItem"></li>
+                                        </ul>
+                                    </div>
+
+                                    <!-- Questions List -->
+                                    <div v-else-if="block.type === 'questionsList'" class="bg-purple-50 border border-purple-200 rounded-xl p-4 my-3">
+                                        <h4 class="font-bold text-purple-900 text-xs uppercase mb-2">{{ block.title }}</h4>
+                                        <ol class="list-decimal pl-5 text-xs text-purple-800 space-y-1">
+                                            <li v-for="(qItem, qIdx) in block.items" :key="qIdx">{{ qItem }}</li>
+                                        </ol>
+                                    </div>
+
+                                    <!-- Resources List -->
+                                    <div v-else-if="block.type === 'resources'" class="bg-slate-900 text-white rounded-xl p-5 my-4">
+                                        <h4 class="font-bold text-sm text-brand-400 mb-3 flex items-center gap-2">
+                                            <i class="fa-solid fa-graduation-cap"></i> {{ block.title }}
+                                        </h4>
+                                        <div class="flex flex-wrap gap-2">
+                                            <a v-for="(link, lIdx) in block.links" :key="lIdx" 
+                                               :href="link.url" target="_blank"
+                                               class="inline-flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-brand-600 border border-slate-700 rounded-lg text-xs font-medium transition text-slate-200 hover:text-white">
+                                                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                                                <span>{{ link.label }}</span>
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div v-show="activeTab === 'export'" class="space-y-6">
+                
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                    <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-code text-brand-500"></i> Згенерований JSON документ
+                            </h2>
+                            <p class="text-xs text-slate-400">Остаточна структура зі збереженими вашими змінами</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button @click="copyJSON" 
+                                    class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium transition flex items-center gap-2 border border-slate-700">
+                                <i class="fa-regular fa-copy"></i>
+                                <span>Скопіювати</span>
+                            </button>
+                            <button @click="downloadJSON" 
+                                    class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-medium transition flex items-center gap-2 shadow-md shadow-brand-600/20">
+                                <i class="fa-solid fa-download"></i>
+                                <span>Завантажити .json</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- JSON Code Display Area -->
+                    <div class="relative">
+                        <textarea v-model="generatedJsonString" 
+                                  rows="22" 
+                                  readonly
+                                  class="w-full bg-slate-950 text-emerald-400 font-mono text-xs p-4 rounded-xl border border-slate-800 focus:outline-none selection:bg-brand-600 selection:text-white leading-relaxed resize-y"></textarea>
+                    </div>
+                </div>
+
+                <!-- Input JSON Raw Section -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                    <h3 class="text-sm font-bold text-slate-200 mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-file-import text-indigo-400"></i> Вставити власний JSON для редагування
+                    </h3>
+                    <p class="text-xs text-slate-400 mb-3">Ви можете вставити інший файл у цьому форматі й відредагувати його:</p>
+                    <textarea v-model="pastedJsonInput" 
+                              placeholder="Вставте JSON код сюди..."
+                              rows="6" 
+                              class="w-full bg-slate-950 text-slate-300 font-mono text-xs p-3 rounded-xl border border-slate-800 focus:border-indigo-500 outline-none mb-3"></textarea>
+                    <button @click="loadPastedJson" 
+                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium transition flex items-center gap-2">
+                        <i class="fa-solid fa-upload"></i> Завантажити JSON
+                    </button>
+                </div>
+
+            </div>
+
+        </main>
+
+        <!-- Toast Notification -->
+        <div v-if="toast.show" 
+             class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white border border-slate-700 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition transform duration-300">
+            <i class="fa-solid text-emerald-400" :class="toast.icon || 'fa-circle-check'"></i>
+            <span class="text-xs font-medium">{{ toast.message }}</span>
+        </div>
+
+    </div>
+
+    <script>
+        const initialJsonData = {
+          "meta": {
+            "topicTag": "Тема 3 • Відкриття 5-6",
+            "badgeText": "Електронний підручник",
+            "title": "Апаратна та програмна складові інформаційної системи",
+            "description": "Опануйте фундаментальні принципи будови комп'ютера, взаємозв'язок між «залізом» і програмним забезпеченням, а також дізнайтеся, як здійснюється управління пристроями та програмами в сучасних ОС.",
+            "careerNote": "Що важливіше: «залізо» (апаратне забезпечення) чи програми (програмне забезпечення)?"
+          },
+          "sections": [
+            {
+              "id": "prereq",
+              "stepNumber": 1,
+              "title": "Актуалізація знань",
+              "content": [
+                {
+                  "type": "callout",
+                  "title": "Пригадай перед вивченням:",
+                  "items": [
+                    "Які комп'ютерні пристрої використовують для роботи з даними (введення, зберігання, виведення);",
+                    "Які існують основні інформаційні процеси (пошук, збір, опрацювання, зберігання, передавання, захист);",
+                    "Які базові функції виконує операційна система комп'ютера."
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "what-is-computer",
+              "stepNumber": 2,
+              "title": "Що робить комп'ютер комп'ютером?",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Будь-яка сучасна обчислювальна система працює за чітким принципом інформаційного циклу: отримання даних, їхнє збереження, обробка та видача результату."
+                },
+                {
+                  "type": "image",
+                  "src": "https://placehold.co/800x400/f8fafc/0369a1?text=Мал.+3.1.+Інформаційний+цикл+персонального+комп'ютера",
+                  "alt": "Інформаційний цикл персонального комп'ютера",
+                  "caption": "Мал. 3.1. Інформаційний цикл персонального комп'ютера: введення, опрацювання, зберігання та виведення даних.",
+                  "prompt": "Що робить комп'ютер комп'ютером?\nБудь-яка сучасна обчислювальна система працює за чітким принципом інформаційного циклу: отримання даних, їхнє збереження, обробка та видача результату.\nМал. 3.1. Інформаційний цикл персонального комп'ютера: введення, опрацювання, зберігання та виведення даних."
+                },
+                {
+                  "type": "acronymCard",
+                  "title": "Цікаво знати: Що ховається за літерами слова C-O-M-P-U-T-E-R?",
+                  "items": [
+                    { "letter": "C", "term": "Common", "description": "загального призначення" },
+                    { "letter": "O", "term": "Operating", "description": "робоча / операційна" },
+                    { "letter": "M", "term": "Machine", "description": "машина / пристрій" },
+                    { "letter": "P", "term": "Purposely", "description": "спеціально розроблена" },
+                    { "letter": "U", "term": "Used for", "description": "використовується для" },
+                    { "letter": "T", "term": "Technological", "description": "технологічних" },
+                    { "letter": "E", "term": "Educational", "description": "навчальних" },
+                    { "letter": "R", "term": "Research", "description": "досліджень" }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "hardware-classification",
+              "stepNumber": 3,
+              "title": "Класифікація пристроїв сучасного ПК",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Люди різних професій використовують комп'ютер, щоб вводити дані, зберігати їх, працювати з ними та передавати іншим людям. Для кожного із цих інформаційних процесів використовують різні пристрої комп'ютера, які ділять на <strong>внутрішні</strong> та <strong>зовнішні</strong>."
+                },
+                {
+                  "type": "image",
+                  "src": "https://placehold.co/800x400/f8fafc/1e293b?text=Мал.+3.2.+Класифікаційне+дерево+пристроїв+ПК",
+                  "alt": "Класифікація пристроїв персонального комп'ютера",
+                  "caption": "Мал. 3.2 — Класифікаційне дерево пристроїв персонального комп'ютера.",
+                  "prompt": "Класифікація пристроїв сучасного ПК. Внутрішні та зовнішні пристрої комп'ютера: пристрої введення, опрацювання, зберігання та виведення даних.\nМал. 3.2 — Класифікаційне дерево пристроїв персонального комп'ютера."
+                }
+              ]
+            },
+            {
+              "id": "is-structure",
+              "stepNumber": 4,
+              "title": "Складові комп'ютерної системи",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Комп'ютер як один із пристроїв, що забезпечує функціонування інформаційної системи, об'єднує дві головні взаємозалежні складові."
+                },
+                {
+                  "type": "image",
+                  "src": "https://placehold.co/800x350/f0fdf4/15803d?text=Мал.+3.3.+Складові+комп'ютерної+системи+(Hardware+i+Software)",
+                  "alt": "Складові комп'ютерної системи",
+                  "caption": "Мал. 3.3 — Складові комп'ютерної системи: Апаратне (Hardware) та Програмне забезпечення (Software).",
+                  "prompt": "Складові комп'ютерної системи. Інфографіка взаємозв'язку апаратного забезпечення (Hardware - залізо) та програмного забезпечення (Software - програми).\nМал. 3.3 — Складові комп'ютерної системи: Апаратне (Hardware) та Програмне забезпечення (Software)."
+                }
+              ]
+            },
+            {
+              "id": "software-types",
+              "stepNumber": 5,
+              "title": "Що таке Програмне Забезпечення?",
+              "content": [
+                {
+                  "type": "definition",
+                  "term": "Програмне забезпечення (Software)",
+                  "text": "це сукупність програм і правил, а також документації щодо функціонування комп'ютера для опрацювання даних."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Без програм комп'ютер не зможе виконувати жодної функції з даними, а буде лише набором електронних та механічних пристроїв."
+                },
+                {
+                  "type": "image",
+                  "src": "https://placehold.co/800x350/f8fafc/0f172a?text=Мал.+3.4.+Класифікаційна+схема+програмного+забезпечення",
+                  "alt": "Класифікація програмного забезпечення",
+                  "caption": "Мал. 3.4 — Класифікаційна схема програмного забезпечення.",
+                  "prompt": "Що таке Програмне Забезпечення? Класифікація ПЗ: Системне, Прикладне та Інструментальне програмне забезпечення.\nМал. 3.4 — Класифікаційна схема програмного забезпечення."
+                }
+              ]
+            },
+            {
+              "id": "hardware-classification",
+              "stepNumber": 3,
+              "title": "Класифікація пристроїв сучасного ПК",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Люди різних професій використовують комп'ютер, щоб вводити дані, зберігати їх, працювати з ними та передавати іншим людям. Для кожного із цих інформаційних процесів використовують різні пристрої комп'ютера, які ділять на <strong>внутрішні</strong> та <strong>зовнішні</strong>."
+                },
+                {
+                  "type": "image",
+                  "src": "https://placehold.co/800x400/f8fafc/1e293b?text=Мал.+3.2.+Класифікаційне+дерево+пристроїв+ПК",
+                  "alt": "Класифікація пристроїв персонального комп'ютера",
+                  "caption": "Мал. 3.2 — Класифікаційне дерево пристроїв персонального комп'ютера."
+                }
+              ]
+            },
+            {
+              "id": "is-structure",
+              "stepNumber": 4,
+              "title": "Складові комп'ютерної системи",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Комп'ютер як один із пристроїв, що забезпечує функціонування інформаційної системи, об'єднує дві головні взаємозалежні складові."
+                },
+                {
+                  "type": "image",
+                  "src": "https://placehold.co/800x350/f0fdf4/15803d?text=Мал.+3.3.+Складові+комп'ютерної+системи+(Hardware+i+Software)",
+                  "alt": "Складові комп'ютерної системи",
+                  "caption": "Мал. 3.3 — Складові комп'ютерної системи: Апаратне (Hardware) та Програмне забезпечення (Software)."
+                }
+              ]
+            },
+            {
+              "id": "software-types",
+              "stepNumber": 5,
+              "title": "Що таке Програмне Забезпечення?",
+              "content": [
+                {
+                  "type": "definition",
+                  "term": "Програмне забезпечення (Software)",
+                  "text": "це сукупність програм і правил, а також документації щодо функціонування комп'ютера для опрацювання даних."
+                },
+                {
+                  "type": "paragraph",
+                  "text": "Без програм комп'ютер не зможе виконувати жодної функції з даними, а буде лише набором електронних та механічних пристроїв."
+                },
+                {
+                  "type": "image",
+                  "src": "https://placehold.co/800x350/f8fafc/0f172a?text=Мал.+3.4.+Класифікаційна+схема+програмного+забезпечення",
+                  "alt": "Класифікація програмного забезпечення",
+                  "caption": "Мал. 3.4 — Класифікаційна схема програмного забезпечення."
+                }
+              ]
+            },
+            {
+              "id": "software-detail",
+              "stepNumber": 6,
+              "title": "Детальний огляд категорій ПЗ",
+              "content": [
+                {
+                  "type": "categoryBlock",
+                  "title": "Системне програмне забезпечення",
+                  "description": "Забезпечує взаємодію інших програм із апаратним забезпеченням комп'ютера.",
+                  "items": [
+                    {
+                      "name": "Драйвери",
+                      "text": "Програми, що забезпечують взаємозв'язок операційної системи та інших програм з конкретними апаратними пристроями (відеокартою, принтером, мишею тощо)."
+                    },
+                    {
+                      "name": "Службові програми (утиліти)",
+                      "text": "Автоматизують перевірку й налаштування ПК, підвищують ефективність роботи. До них належать архіватори (7-Zip, WinRAR), антивірусні програми (Zillya!, Norton, McAfee)."
+                    }
+                  ]
+                },
+                {
+                  "type": "categoryBlock",
+                  "title": "Прикладне програмне забезпечення",
+                  "description": "Призначене для виконання конкретних користувацьких завдань.",
+                  "subcategories": [
+                    {
+                      "title": "Загального призначення",
+                      "text": "Використовується більшістю користувачів для вирішення щоденних завдань: текстові й графічні процесори, табличні процесори, мультимедійні програвачі, браузери, електронні енциклопедії."
+                    },
+                    {
+                      "title": "Спеціального (професійного) призначення",
+                      "text": "Для вузькоспеціалізованих задач фахівців різних галузей: математичні обчислення (MathLab, MathCad), 3D-моделювання й анімація (3D MAX Studio), системи обліку товарів у магазинах тощо."
+                    }
+                  ]
+                },
+                {
+                  "type": "categoryBlock",
+                  "title": "Інструментальне програмне забезпечення",
+                  "description": "Спеціальні програми для розробників. До них належать системи програмування (мови C, C++, C#, Python) та інтегровані середовища розробки (наприклад, Microsoft Visual Studio)."
+                }
+              ]
+            },
+            {
+              "id": "user-interaction",
+              "stepNumber": 7,
+              "title": "Рівні взаємодії користувача з ПК",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Користувач взаємодіє з апаратним забезпеченням не напряму, а через багатошарову структуру програмних інтерфейсів."
+                },
+                {
+                  "type": "image",
+                  "src": "https://placehold.co/800x400/f8fafc/3b82f6?text=Мал.+3.5.+Багаторівнева+схема+взаємодії+користувача+з+складовими+ПК",
+                  "alt": "Рівні взаємодії користувача та складових ПК",
+                  "caption": "Мал. 3.5 — Багаторівнева схема взаємодії користувача з складовими ПК.",
+                  "prompt": "Рівні взаємодії користувача з ПК. Багатошарова схема: Користувач -> Прикладна програма -> Операційна система та драйвери -> Апаратне забезпечення (Hardware).\nМал. 3.5 — Багаторівнева схема взаємодії користувача з складовими ПК."
+                }
+              ]
+            },
+            {
+              "id": "os-management",
+              "stepNumber": 8,
+              "title": "Перегляд пристроїв та програм в ОС",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "text": "Сучасна операційна система дає змогу переглядати список підключеного обладнання та встановленого софту, а також керувати ним."
+                },
+                {
+                  "type": "image",
+                  "src": "https://placehold.co/600x350/ffffff/0284c7?text=Мал.+3.6.+Вікно+«Інстальовані+програми»+в+ОС+Windows",
+                  "alt": "Інстальовані програми",
+                  "caption": "Мал. 3.6 — Вікно «Інстальовані програми» в ОС Windows",
+                  "prompt": "Скріншот системного вікна інстальованих програм та додатків в операційній системі Windows.\nМал. 3.6 — Вікно «Інстальовані програми» в ОС Windows"
+                },
+                {
+                  "type": "image",
+                  "src": "https://placehold.co/600x350/ffffff/1e293b?text=Мал.+3.7.+Системне+вікно+«Диспетчер+пристроїв»",
+                  "alt": "Диспетчер пристроїв",
+                  "caption": "Мал. 3.7 — Системне вікно «Диспетчер пристроїв»",
+                  "prompt": "Скріншот системного диспетчера пристроїв у Windows зі списком обладнання: процесор, відеокарта, диску тощо.\nМал. 3.7 — Системне вікно «Диспетчер пристроїв»"
+                },
+                {
+                  "type": "callout",
+                  "title": "📌 Пам'ятай:",
+                  "text": "Будь-яка програма перед використанням повинна бути встановлена (інстальована) у системі й взаємодіяти з операційною системою."
+                }
+              ]
+            },
+            {
+              "id": "summary",
+              "stepNumber": 9,
+              "title": "Підсумки та оцінювання знань",
+              "content": [
+                {
+                  "type": "summaryList",
+                  "title": "Головні висновки параграфа:",
+                  "items": [
+                    "Інформаційна система комп'ютера складається з двох невід'ємних частин: <strong>апаратної</strong> (Hardware) та <strong>інформаційної / програмної</strong> (Software).",
+                    "Програмне забезпечення поділяється на <strong>системне</strong> (ОС, драйвери, утиліти), <strong>прикладне</strong> (загального й спеціального призначення) та <strong>інструментальне</strong> (мови й середовища програмування).",
+                    "Взаємодія користувача з комп'ютером відбувається поетапно: Користувач → Прикладна програма → ОС та драйвери → Апаратний пристрій."
+                  ]
+                },
+                {
+                  "type": "questionsList",
+                  "title": "Запитання для самоперевірки:",
+                  "items": [
+                    "Що станеться з комп'ютером, якщо вилучити з нього все програмне забезпечення?",
+                    "Для чого потрібні драйвери пристроїв і до якої групи ПЗ вони належать?",
+                    "Чим прикладне ПЗ загального призначення відрізняється від спеціального? Наведіть приклади.",
+                    "Які пристрої входять до групи внутрішніх, а які — до зовнішніх?"
+                  ]
+                },
+                {
+                  "type": "resources",
+                  "title": "Навчальні ресурси уроку",
+                  "links": [
+                    {
+                      "label": "Інтерактивна гра",
+                      "url": "https://infostudy-gymnasium201-kyiv.github.io/Extra/Interactive-Games/2627.6.5.html"
+                    },
+                    {
+                      "label": "Веб-конспект",
+                      "url": "https://infostudy-gymnasium201-kyiv.github.io/Extra/LessonWriter/?=2627.6.5"
+                    },
+                    {
+                      "label": "Тестування",
+                      "url": "https://infostudy-gymnasium201-kyiv.github.io/Informatica-Forms/?=2627.6.5"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        };
+
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    activeTab: 'editor',
+                    jsonDoc: JSON.parse(JSON.stringify(initialJsonData)),
+                    generatedJsonString: '',
+                    pastedJsonInput: '',
+                    toast: {
+                        show: false,
+                        message: '',
+                        icon: 'fa-circle-check'
+                    }
+                };
+            },
+            computed: {
+                // Dynamically collect references to all image items inside all sections
+                extractedImages() {
+                    const list = [];
+                    if (!this.jsonDoc || !this.jsonDoc.sections) return list;
+
+                    this.jsonDoc.sections.forEach(section => {
+                        if (Array.isArray(section.content)) {
+                            section.content.forEach(item => {
+                                if (item && item.type === 'image') {
+                                    list.push({
+                                        sectionStep: section.stepNumber,
+                                        sectionTitle: section.title,
+                                        item: item
+                                    });
+                                }
+                            });
+                        }
+                    });
+                    return list;
+                },
+                // Dynamically collect references to resources blocks
+                extractedResources() {
+                    const list = [];
+                    if (!this.jsonDoc || !this.jsonDoc.sections) return list;
+
+                    this.jsonDoc.sections.forEach(section => {
+                        if (Array.isArray(section.content)) {
+                            section.content.forEach(item => {
+                                if (item && item.type === 'resources') {
+                                    list.push({
+                                        sectionStep: section.stepNumber,
+                                        sectionTitle: section.title,
+                                        item: item
+                                    });
+                                }
+                            });
+                        }
+                    });
+                    return list;
+                }
+            },
+            methods: {
+                async generateAIImage(imgItem) {
+                    if (!imgItem.prompt || !imgItem.prompt.trim()) {
+                        this.showToast('Будь ласка, вкажіть промпт для генерації!', 'fa-triangle-exclamation text-amber-400');
+                        return;
+                    }
+                    imgItem.isGenerating = true;
+                    try {
+                        const apiKey = "";
+                        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-image:generateContent?key=${apiKey}`;
+                        const payload = {
+                            contents: [{
+                                parts: [{ text: `Create a high-quality educational illustration or diagram for a textbook based on this description: ${imgItem.prompt}` }]
+                            }],
+                            generationConfig: {
+                                responseModalities: ['TEXT', 'IMAGE']
+                            }
+                        };
+                        const res = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        const data = await res.json();
+                        const base64Data = data?.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+                        if (base64Data) {
+                            imgItem.src = `data:image/png;base64,${base64Data}`;
+                            this.showToast('Зображення успішно згенеровано за допомогою AI!', 'fa-wand-magic-sparkles text-emerald-400');
+                        } else {
+                            throw new Error('Модель не повернула зображення.');
+                        }
+                    } catch (err) {
+                        console.error('AI Generation Error:', err);
+                        this.showToast('Помилка генерації зображення: ' + err.message, 'fa-circle-xmark text-rose-400');
+                    } finally {
+                        imgItem.isGenerating = false;
+                    }
+                },
+                generateAndExport() {
+                    this.generatedJsonString = JSON.stringify(this.jsonDoc, null, 2);
+                    this.activeTab = 'export';
+                    this.showToast('Новий JSON успішно згенеровано!');
+                },
+                addResourceLink(resourceBlockItem) {
+                    if (!resourceBlockItem.links) {
+                        resourceBlockItem.links = [];
+                    }
+                    resourceBlockItem.links.push({
+                        label: 'Новий ресурс',
+                        url: 'https://'
+                    });
+                    this.showToast('Посилання додано!');
+                },
+                removeResourceLink(resourceBlockItem, linkIndex) {
+                    resourceBlockItem.links.splice(linkIndex, 1);
+                    this.showToast('Посилання видалено');
+                },
+                resetToDefault() {
+                    this.jsonDoc = JSON.parse(JSON.stringify(initialJsonData));
+                    this.generatedJsonString = JSON.stringify(this.jsonDoc, null, 2);
+                    this.showToast('Повернуто початкові дані.');
+                },
+                handleImgError(e) {
+                    e.target.src = 'https://placehold.co/600x300/334155/ffffff?text=Помилка+завантаження+зображення';
+                },
+                loadPastedJson() {
+                    try {
+                        const parsed = JSON.parse(this.pastedJsonInput);
+                        if (!parsed.meta || !parsed.sections) {
+                            throw new Error('JSON повинен містити ключі "meta" та "sections"');
+                        }
+                        this.jsonDoc = parsed;
+                        this.generatedJsonString = JSON.stringify(this.jsonDoc, null, 2);
+                        this.pastedJsonInput = '';
+                        this.activeTab = 'editor';
+                        this.showToast('Власний JSON успішно завантажено!');
+                    } catch (err) {
+                        this.showToast('Помилка JSON: ' + err.message, 'fa-triangle-exclamation text-rose-400');
+                    }
+                },
+                copyJSON() {
+                    if (!this.generatedJsonString) {
+                        this.generatedJsonString = JSON.stringify(this.jsonDoc, null, 2);
+                    }
+                    
+                    // Fallback copy execution
+                    const textarea = document.createElement('textarea');
+                    textarea.value = this.generatedJsonString;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    try {
+                        document.execCommand('copy');
+                        this.showToast('JSON скопійовано в буфер обміну!');
+                    } catch (err) {
+                        this.showToast('Помилка копіювання', 'fa-triangle-exclamation');
+                    }
+                    document.body.removeChild(textarea);
+                },
+                downloadJSON() {
+                    if (!this.generatedJsonString) {
+                        this.generatedJsonString = JSON.stringify(this.jsonDoc, null, 2);
+                    }
+                    const blob = new Blob([this.generatedJsonString], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `textbook_edited_${Date.now()}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    this.showToast('Файл завантажується...');
+                },
+                showToast(msg, icon = 'fa-circle-check text-emerald-400') {
+                    this.toast.message = msg;
+                    this.toast.icon = icon;
+                    this.toast.show = true;
+                    setTimeout(() => {
+                        this.toast.show = false;
+                    }, 3000);
+                }
+            },
+            mounted() {
+                // Pre-generate JSON string on load
+                this.generatedJsonString = JSON.stringify(this.jsonDoc, null, 2);
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
