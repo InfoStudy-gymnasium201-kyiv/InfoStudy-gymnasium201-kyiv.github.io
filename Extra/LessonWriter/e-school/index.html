@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="uk" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конспектус - Інтерактивний Конспект</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2pdf.js for exporting PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700;800&family=Nunito:wght@600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            purple: '#6C5CE7',
+                            pink: '#FD79A8',
+                            yellow: '#FDCB6E',
+                            green: '#00B894',
+                            blue: '#0984E3',
+                            orange: '#E17055',
+                            dark: '#2D3436',
+                            bg: '#EBF3FA'
+                        }
+                    },
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'cursive'],
+                        sans: ['Nunito', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #EBF3FA;
+            background-image: radial-gradient(#CBD5E1 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        .heading-font {
+            font-family: 'Fredoka', cursive;
+        }
+
+        /* Neo-Brutalism / Vector Styling */
+        .vector-card {
+            background: #ffffff;
+            border: 3.5px solid #2D3436;
+            box-shadow: 5px 5px 0px #2D3436;
+            border-radius: 20px;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .vector-btn {
+            border: 3px solid #2D3436;
+            box-shadow: 4px 4px 0px #2D3436;
+            border-radius: 16px;
+            font-weight: 800;
+            transition: all 0.1s ease;
+        }
+
+        .vector-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 6px 6px 0px #2D3436;
+        }
+
+        .vector-btn:active:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: 1px 1px 0px #2D3436;
+        }
+
+        /* Diff Styles */
+        .diff-correct { background-color: #d1fae5; color: #047857; font-weight: 700; padding: 0 2px; border-radius: 4px; }
+        .diff-missing { background-color: #fee2e2; color: #b91c1c; text-decoration: underline; text-decoration-color: #ef4444; font-weight: 700; padding: 0 2px; border-radius: 4px; }
+        .diff-extra { background-color: #fef3c7; color: #b45309; text-decoration: line-through; font-weight: 700; padding: 0 2px; border-radius: 4px; }
+
+        .no-select {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #E2E8F0; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #94A3B8; border-radius: 10px; }
+
+        .pop-in {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between p-3 sm:p-6 overflow-x-hidden">
+
+    <!-- HEADER BAR -->
+    <header class="max-w-7xl w-full mx-auto bg-white border-4 border-slate-800 rounded-2xl p-4 shadow-[6px_6px_0px_#2D3436] flex flex-wrap items-center justify-between gap-4 mb-6">
+        <!-- Brand Logo -->
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-amber-400 border-3 border-slate-800 rounded-xl flex items-center justify-center text-2xl shadow-[2px_2px_0px_#2D3436]">
+                <i class="fa-solid fa-laptop-code text-slate-900"></i>
+            </div>
+            <div>
+                <h1 class="heading-font text-2xl font-black text-slate-800 leading-tight">
+                    Конспектус
+                </h1>
+                <p class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Інтерактивний Конспект</p>
+            </div>
+        </div>
+
+        <!-- Top Actions -->
+        <div class="flex items-center gap-2 sm:gap-3">
+            <!-- Sound Toggle -->
+            <button id="sound-btn" onclick="toggleSound()" class="vector-btn bg-sky-300 p-2.5 text-slate-800 text-lg flex items-center justify-center w-11 h-11" title="Звукові ефекти">
+                <i id="sound-icon" class="fa-solid fa-volume-high"></i>
+            </button>
+
+            <!-- PDF Export Button -->
+            <button onclick="openPdfModal()" class="vector-btn bg-emerald-400 hover:bg-emerald-500 text-slate-900 px-4 py-2 flex items-center gap-2 text-sm sm:text-base">
+                <i class="fa-solid fa-file-pdf text-lg"></i>
+                <span class="hidden sm:inline">Зберегти PDF</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-7xl w-full mx-auto flex-1 flex flex-col gap-6">
+
+        <!-- Global Progress Header -->
+        <div class="vector-card p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="w-full sm:w-auto flex items-center justify-between sm:justify-start gap-4">
+                <div>
+                    <span class="text-xs font-black uppercase tracking-wider text-slate-400">Загальний прогрес</span>
+                    <h2 id="lesson-status-text" class="heading-font text-lg sm:text-xl font-bold text-slate-800">Завантаження конспекту...</h2>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full sm:w-1/2 flex items-center gap-3">
+                <div class="flex-1 bg-slate-200 border-2 border-slate-800 h-6 rounded-xl overflow-hidden p-0.5 shadow-[2px_2px_0px_#2D3436]">
+                    <div id="main-progress-bar" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-full rounded-lg transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <span id="progress-percent-text" class="heading-font text-lg font-black text-indigo-600 min-w-[45px] text-right">0%</span>
+            </div>
+        </div>
+
+        <!-- Layout Grid: Sidebar Topics + Main Practice Box -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+            <!-- Sidebar Topics -->
+            <div class="lg:col-span-4 vector-card p-4 space-y-3">
+                <div class="flex items-center justify-between pb-2 border-b-2 border-slate-200">
+                    <h3 class="heading-font font-bold text-lg text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-indigo-600"></i> Теми конспекту
+                    </h3>
+                    <span id="completed-badge-count" class="text-xs bg-amber-200 border border-slate-800 font-mono font-bold px-2.5 py-1 rounded-lg text-slate-800">0/0</span>
+                </div>
+
+                <div id="topics-list-container" class="space-y-2.5 max-h-[600px] overflow-y-auto pr-1">
+                    <!-- Topics rendered via JavaScript -->
+                </div>
+            </div>
+
+            <!-- Main Interactive Practice Box -->
+            <div class="lg:col-span-8 space-y-6">
+
+                <!-- Sentence View Card (КОНСПЕКТ ДЛЯ ЧИТАННЯ) -->
+                <div class="vector-card rounded-2xl p-5 sm:p-6 relative overflow-hidden no-select" oncopy="return false" oncut="return false" ondragstart="return false">
+                    <div class="flex items-center justify-between mb-3 text-xs font-bold text-slate-500">
+                        <span class="flex items-center gap-2 text-indigo-600 font-black uppercase tracking-wider">
+                            <i class="fa-solid fa-book-open text-base"></i>Зразок конспекту для запису
+                        </span>
+                        <span id="active-sentence-counter" class="bg-indigo-100 border border-slate-800 text-indigo-900 px-3 py-1 rounded-lg font-bold">
+                            Речення 1 з 3
+                        </span>
+                    </div>
+
+                    <!-- Topic Sub-title -->
+                    <h4 id="active-topic-title" class="heading-font text-base sm:text-lg font-bold text-slate-700 mb-2">
+                        Завантаження теми...
+                    </h4>
+
+                    <!-- Sentence to copy -->
+                    <div class="bg-amber-50/80 p-4 sm:p-5 rounded-xl border-2 border-slate-800 shadow-[3px_3px_0px_#2D3436]">
+                        <p id="target-sentence-text" class="text-base sm:text-lg lg:text-xl font-bold leading-relaxed text-slate-900 tracking-wide no-select">
+                            Завантаження тексту речення...
+                        </p>
+                    </div>
+
+                    <!-- Instruction Hint -->
+                    <div class="mt-3 flex items-center justify-end text-xs font-bold text-slate-400">
+                        <span class="italic">Уважно перепишіть текст у поле нижче</span>
+                    </div>
+                </div>
+
+                <!-- Interactive Typing Area (ЗОНА ДЛЯ ПЕРЕПИСУВАННЯ) -->
+                <div class="vector-card rounded-2xl p-5 sm:p-6 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <label for="student-input" class="heading-font text-sm font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-keyboard text-indigo-600 text-lg"></i> Ваша зона для переписування
+                        </label>
+                        <div class="flex items-center gap-2 text-xs font-mono font-bold text-slate-600">
+                            <span id="char-counter" class="bg-slate-100 border border-slate-800 px-2.5 py-1 rounded-lg">Символи: 0</span>
+                            <span id="accuracy-live" class="hidden sm:inline bg-emerald-100 border border-slate-800 px-2.5 py-1 rounded-lg text-emerald-800 font-bold">100% точності</span>
+                        </div>
+                    </div>
+
+                    <!-- Input Text Area -->
+                    <div class="relative">
+                        <textarea
+                            id="student-input"
+                            rows="4"
+                            placeholder="Почніть набирати текст точно так, як вказано вище..."
+                            class="w-full p-4 rounded-xl border-3 border-slate-800 bg-white text-slate-900 text-base sm:text-lg font-bold focus:outline-none focus:ring-4 focus:ring-indigo-300 transition shadow-[inner_2px_2px_0px_#2D3436] font-sans leading-relaxed resize-y"
+                            oninput="handleLiveTyping()"
+                            onkeydown="handleKeyDown(event)"
+                            onpaste="handlePaste(event)"
+                            ondrop="handleDrop(event)"
+                        ></textarea>
+                    </div>
+
+                    <!-- Error Alert / Visual Diff Feedback Box -->
+                    <div id="feedback-box" class="hidden rounded-xl p-4 transition-all no-select" oncopy="return false" oncut="return false" ondragstart="return false">
+                        <!-- Dynamic content injected via JS -->
+                    </div>
+
+                    <!-- Control Buttons -->
+                    <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+                        <button onclick="clearTypingArea()" class="vector-btn bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-2.5 text-xs sm:text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-rotate-left"></i> Очистити
+                        </button>
+
+                        <div class="flex items-center gap-2">
+                            <button id="prev-btn" onclick="goToPrevSentence()" class="vector-btn bg-sky-200 hover:bg-sky-300 text-slate-800 px-4 py-2.5 text-sm disabled:opacity-40 disabled:hover:transform-none">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+
+                            <!-- Check Button -->
+                            <button id="check-btn" onclick="checkAnswer()" class="vector-btn bg-amber-400 hover:bg-amber-500 text-slate-900 px-6 py-2.5 text-sm sm:text-base flex items-center gap-2">
+                                <i class="fa-solid fa-circle-check text-lg"></i>
+                                <span>Перевірити</span>
+                            </button>
+
+                            <button id="next-btn" onclick="goToNextSentence()" class="vector-btn bg-sky-200 hover:bg-sky-300 text-slate-800 px-4 py-2.5 text-sm disabled:opacity-40 disabled:hover:transform-none">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lesson Completion Banner -->
+                <div id="lesson-complete-card" class="hidden vector-card rounded-2xl p-6 text-center space-y-4 bg-gradient-to-br from-emerald-100 to-green-50 pop-in">
+                    <div class="w-20 h-20 bg-amber-300 border-4 border-slate-800 rounded-3xl mx-auto flex items-center justify-center text-4xl shadow-[4px_4px_0px_#2D3436] animate-bounce">
+                        🏆
+                    </div>
+                    <div>
+                        <h3 class="heading-font text-2xl sm:text-3xl font-black text-slate-900">Вітаємо! Конспект повністю переписано!</h3>
+                        <p class="text-sm sm:text-base font-bold text-slate-600 mt-1">Ви успішно пройшли всі теми та закріпили важливі поняття інформатики.</p>
+                    </div>
+                    <div class="pt-2 flex flex-wrap justify-center gap-3">
+                        <button onclick="openPdfModal()" class="vector-btn bg-emerald-400 hover:bg-emerald-500 text-slate-900 px-6 py-3 text-base flex items-center gap-2">
+                            <i class="fa-solid fa-file-pdf text-xl"></i>
+                            <span>Завантажити PDF Конспект</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer class="max-w-7xl w-full mx-auto text-center py-4 text-xs font-bold text-slate-500">
+        Урок Інформатики • Тренажер «Конспектус»
+    </footer>
+
+    <!-- Modal for Student Name & PDF Export -->
+    <div id="pdf-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="vector-card bg-white max-w-md w-full p-6 text-left space-y-5 pop-in">
+            <div class="flex justify-between items-center pb-2 border-b-2 border-slate-200">
+                <h3 class="heading-font text-xl font-black text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-file-pdf text-emerald-600"></i> Експорт у PDF
+                </h3>
+                <button onclick="closePdfModal()" class="text-slate-400 hover:text-slate-700 text-2xl">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-500 mb-1">Прізвище та Ім'я учня/учениці</label>
+                    <input type="text" id="student-name-input" placeholder="Наприклад: Шевченко Тарас, 8-А клас" class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-800 bg-slate-50 text-slate-800 font-bold focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black uppercase text-slate-500 mb-1">Назва навчального закладу</label>
+                    <input type="text" id="school-name-input" value="Гімназія №201 м. Києва" class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-800 bg-slate-50 text-slate-800 font-bold focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm">
+                </div>
+
+                <div class="bg-amber-50 p-3 rounded-xl border-2 border-slate-800 text-xs font-bold text-amber-900 flex gap-2">
+                    <i class="fa-solid fa-circle-info text-amber-500 text-base flex-shrink-0 mt-0.5"></i>
+                    <span>PDF документ міститиме всі опрацьовані теми, речення конспекту, ваші записи та дату виконання.</span>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <button onclick="closePdfModal()" class="vector-btn bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-2 text-xs">Скасувати</button>
+                <button onclick="generatePDF()" class="vector-btn bg-emerald-400 hover:bg-emerald-500 text-slate-900 px-5 py-2.5 text-xs flex items-center gap-2">
+                    <i class="fa-solid fa-download"></i> Сформувати PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden container for PDF rendering -->
+    <div id="pdf-wrapper" style="position: fixed; top: 0; left: 0; z-index: -9999; opacity: 0; pointer-events: none; width: 190mm;">
+        <div id="pdf-export-template" style="width: 190mm; box-sizing: border-box; background: #ffffff; color: #0f172a; font-family: 'Nunito', sans-serif; padding: 0; margin: 0; word-break: break-word; overflow-wrap: break-word;">
+            <!-- PDF Header -->
+            <div style="border-bottom: 2px solid #4f46e5; padding-bottom: 10px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: flex-end; box-sizing: border-box; width: 100%;">
+                <div>
+                    <h1 style="font-size: 18px; font-weight: 800; color: #312e81; margin: 0; line-height: 1.2;">Конспект з Інформатики</h1>
+                    <p id="pdf-school-header" style="font-size: 11px; color: #64748b; margin: 3px 0 0 0;">Гімназія №201 м. Києва</p>
+                </div>
+                <div style="text-align: right;">
+                    <p id="pdf-student-header" style="font-size: 12px; font-weight: 700; color: #1e293b; margin: 0;">Учень: -</p>
+                    <p id="pdf-date-header" style="font-size: 10px; color: #64748b; margin: 2px 0 0 0;">Дата: -</p>
+                </div>
+            </div>
+
+            <!-- PDF Content topics -->
+            <div id="pdf-topics-body" style="font-size: 11px; line-height: 1.45; box-sizing: border-box; width: 100%;">
+                <!-- Injected via JS -->
+            </div>
+
+            <!-- PDF Footer -->
+            <div style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 8px; text-align: center; font-size: 9px; color: #94a3b8; page-break-inside: avoid; break-inside: avoid;">
+                Згенеровано в Інтерактивному тренажері InfoStudy &bull; Самостійна робота з конспектування
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Default Demo Data
+        const DEFAULT_LESSON_DATA = {
+            "topics": [
+                {
+                    "topic_id": 1,
+                    "title": "Базові поняття інформатики",
+                    "sentences_to_remember": [
+                        "Інформація — це відомості про навколишній світ та процеси, що в ньому відбуваються.",
+                        "Основними інформаційними процесами є: пошук, збирання, обробка, зберігання та передавання даних.",
+                        "Найменшою одиницею вимірювання обсягу даних є біт, а один байт складається з 8 бітів."
+                    ]
+                },
+                {
+                    "topic_id": 2,
+                    "title": "Апаратне забезпечення (Hardware)",
+                    "sentences_to_remember": [
+                        "Процесор — це «мозок» комп'ютера, який виконує обчислення та керує роботою всіх інших пристроїв.",
+                        "Оперативна пам'ять (RAM) є енергозалежною та використовується для тимчасового зберігання даних під час роботи програм.",
+                        "Пристрої введення (клавіатура, миша, сканер) передають дані в комп'ютер, а пристрої виведення (монітор, принтер) демонструють результат користувачеві."
+                    ]
+                },
+                {
+                    "topic_id": 3,
+                    "title": "Алгоритми та програмування",
+                    "sentences_to_remember": [
+                        "Алгоритм — це чітка послідовність команд, виконання яких приводить до розв'язання поставленої задачі.",
+                        "Основні алгоритмічні структури: слідування (лінійний), розгалуження (умова) та повторення (цикл).",
+                        "Змінна — це пойменована ділянка пам'яті, значення якої може змінюватися під час виконання програми."
+                    ]
+                },
+                {
+                    "topic_id": 4,
+                    "title": "Інтернет та кібербезпека",
+                    "sentences_to_remember": [
+                        "IP-адреса — це унікальний цифровий ідентифікатор пристрою в комп'ютерній мережі.",
+                        "Надійний пароль має містити не менше 8 символів, включаючи великі й малі літери, цифри та спеціальні знаки.",
+                        "Фішинг — це вид інтернет-шахрайства, метою якого є отримання доступу до конфіденційних даних користувача."
+                    ]
+                }
+            ]
+        };
+
+        // Application state
+        let appState = {
+            topics: [],
+            currentTopicIdx: 0,
+            currentSentenceIdx: 0,
+            completedSentences: {},
+            soundEnabled: true,
+            currentFileName: 'test1'
+        };
+
+        // Audio synthesizer using Web Audio API
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (!appState.soundEnabled) return;
+            try {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'key') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.05);
+                } else if (type === 'success') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+                    osc.frequency.setValueAtTime(150, audioCtx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                }
+            } catch (e) {
+                console.log('Audio error', e);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            parseUrlParamsAndLoad();
+        });
+
+        function parseUrlParamsAndLoad() {
+            let fileParam = '';
+            const search = window.location.search;
+
+            if (search.startsWith('?=') || search.startsWith('?%3D')) {
+                fileParam = decodeURIComponent(search.replace(/^\?\=?/, ''));
+            }
+
+            if (!fileParam) {
+                const urlParams = new URLSearchParams(search);
+                fileParam = urlParams.get('') || urlParams.get('file') || urlParams.get('json') || urlParams.get('lesson');
+            }
+
+            if (!fileParam) {
+                if (search.length > 1 && !search.includes('=')) {
+                    fileParam = decodeURIComponent(search.substring(1));
+                }
+            }
+
+            if (!fileParam) {
+                const hash = window.location.hash.replace('#', '').trim();
+                if (hash) fileParam = hash;
+            }
+
+            if (!fileParam) {
+                fileParam = 'test1';
+            }
+
+            loadLessonFile(fileParam);
+        }
+
+        async function loadLessonFile(fileNameOrUrl) {
+            let fetchUrl = fileNameOrUrl;
+
+            if (!fileNameOrUrl.startsWith('http://') && !fileNameOrUrl.startsWith('https://')) {
+                let cleanName = fileNameOrUrl;
+                if (!cleanName.endsWith('.json')) cleanName += '.json';
+                fetchUrl = `https://raw.githubusercontent.com/InfoStudy-gymnasium201-kyiv/InfoStudy-gymnasium201-kyiv.github.io/refs/heads/main/Extra/LessonWriter/${cleanName}`;
+                appState.currentFileName = cleanName;
+            } else {
+                appState.currentFileName = fileNameOrUrl.split('/').pop() || 'custom';
+            }
+
+            try {
+                const response = await fetch(fetchUrl);
+                if (!response.ok) {
+                    throw new Error(`Статус: ${response.status}`);
+                }
+                const data = await response.json();
+                if (data && data.topics && Array.isArray(data.topics)) {
+                    initAppWithData(data);
+                } else {
+                    throw new Error('Невірний формат JSON');
+                }
+            } catch (err) {
+                console.warn('Неможливо завантажити файл з GitHub, використовуємо локальний конспект:', err);
+                initAppWithData(DEFAULT_LESSON_DATA);
+            }
+        }
+
+        function initAppWithData(data) {
+            appState.topics = data.topics || [];
+            appState.currentTopicIdx = 0;
+            appState.currentSentenceIdx = 0;
+            appState.completedSentences = {};
+
+            renderTopicsSidebar();
+            loadActiveSentence();
+            updateOverallProgress();
+        }
+
+        function renderTopicsSidebar() {
+            const container = document.getElementById('topics-list-container');
+            container.innerHTML = '';
+
+            let totalSentencesCount = 0;
+            let completedSentencesCount = Object.keys(appState.completedSentences).length;
+
+            appState.topics.forEach((topic, tIdx) => {
+                const numSentences = topic.sentences_to_remember ? topic.sentences_to_remember.length : 0;
+                totalSentencesCount += numSentences;
+
+                let topicDone = 0;
+                for (let sIdx = 0; sIdx < numSentences; sIdx++) {
+                    if (appState.completedSentences[`${tIdx}-${sIdx}`]) topicDone++;
+                }
+
+                const isAllDone = topicDone === numSentences && numSentences > 0;
+                const isActive = tIdx === appState.currentTopicIdx;
+
+                const topicDiv = document.createElement('div');
+                topicDiv.className = `rounded-xl p-3 text-sm cursor-pointer transition border-2 border-slate-800 shadow-[2px_2px_0px_#2D3436] ${
+                    isActive 
+                        ? 'bg-amber-100 font-bold' 
+                        : 'bg-white hover:bg-slate-50'
+                }`;
+
+                topicDiv.onclick = () => {
+                    appState.currentTopicIdx = tIdx;
+                    appState.currentSentenceIdx = 0;
+                    renderTopicsSidebar();
+                    loadActiveSentence();
+                };
+
+                topicDiv.innerHTML = `
+                    <div class="flex items-center justify-between gap-2 font-bold text-slate-800">
+                        <span class="truncate">
+                            <span class="text-xs text-indigo-600 font-black mr-1">#${topic.topic_id || tIdx + 1}</span>
+                            ${escapeHtml(topic.title)}
+                        </span>
+                        ${isAllDone 
+                            ? '<i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>' 
+                            : `<span class="text-xs font-mono px-2 py-0.5 rounded-md border border-slate-800 ${isActive ? 'bg-amber-300' : 'bg-slate-100'}">${topicDone}/${numSentences}</span>`
+                        }
+                    </div>
+                `;
+
+                container.appendChild(topicDiv);
+            });
+
+            document.getElementById('completed-badge-count').innerText = `${completedSentencesCount}/${totalSentencesCount}`;
+        }
+
+        function loadActiveSentence() {
+            const topic = appState.topics[appState.currentTopicIdx];
+            if (!topic) return;
+
+            const sentences = topic.sentences_to_remember || [];
+            const sentenceText = sentences[appState.currentSentenceIdx] || '';
+
+            document.getElementById('active-topic-title').innerText = `Тема ${topic.topic_id || appState.currentTopicIdx + 1}: ${topic.title}`;
+            document.getElementById('active-sentence-counter').innerText = `Речення ${appState.currentSentenceIdx + 1} з ${sentences.length}`;
+            document.getElementById('target-sentence-text').innerText = sentenceText;
+
+            const key = `${appState.currentTopicIdx}-${appState.currentSentenceIdx}`;
+            const existingInput = appState.completedSentences[key] || '';
+            const textarea = document.getElementById('student-input');
+            textarea.value = existingInput;
+
+            hideFeedback();
+            handleLiveTyping();
+
+            document.getElementById('prev-btn').disabled = (appState.currentTopicIdx === 0 && appState.currentSentenceIdx === 0);
+
+            const isLastTopic = appState.currentTopicIdx === appState.topics.length - 1;
+            const isLastSentence = appState.currentSentenceIdx === sentences.length - 1;
+            document.getElementById('next-btn').disabled = (isLastTopic && isLastSentence);
+
+            textarea.focus();
+        }
+
+        function handleLiveTyping() {
+            const input = document.getElementById('student-input').value;
+            const target = document.getElementById('target-sentence-text').innerText;
+
+            document.getElementById('char-counter').innerText = `Символи: ${input.length} / ${target.length}`;
+
+            let matchCount = 0;
+            const minLen = Math.min(input.length, target.length);
+            for (let i = 0; i < minLen; i++) {
+                if (input[i] === target[i]) matchCount++;
+            }
+            const acc = input.length > 0 ? Math.round((matchCount / Math.max(input.length, target.length)) * 100) : 100;
+            const accElem = document.getElementById('accuracy-live');
+            accElem.innerText = `${acc}% точності`;
+            accElem.className = `hidden sm:inline px-2.5 py-1 rounded-lg border border-slate-800 font-bold text-xs ${acc === 100 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`;
+        }
+
+        function handleKeyDown(e) {
+            playSound('key');
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                checkAnswer();
+            }
+        }
+
+        function handlePaste(e) {
+            e.preventDefault();
+            showFeedback('warning', '<i class="fa-solid fa-ban text-lg mr-2"></i> Вставка тексту заборонена! Будь ласка, перепишіть конспект вручну з клавіатури.');
+            playSound('error');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            showFeedback('warning', '<i class="fa-solid fa-ban text-lg mr-2"></i> Перетягування тексту заборонено! Перепишіть конспект вручну.');
+            playSound('error');
+        }
+
+        function clearTypingArea() {
+            document.getElementById('student-input').value = '';
+            handleLiveTyping();
+            hideFeedback();
+            document.getElementById('student-input').focus();
+        }
+
+        /* CHECK ANSWER FUNCTION */
+        function checkAnswer() {
+            const inputVal = document.getElementById('student-input').value.trim();
+            const targetVal = document.getElementById('target-sentence-text').innerText.trim();
+
+            if (!inputVal) {
+                showFeedback('warning', 'Будь ласка, перепишіть речення у поле для відповіді.');
+                playSound('error');
+                return;
+            }
+
+            const cleanInput = inputVal.replace(/\s+/g, ' ');
+            const cleanTarget = targetVal.replace(/\s+/g, ' ');
+
+            if (cleanInput === cleanTarget) {
+                playSound('success');
+                showFeedback('success', '<i class="fa-solid fa-circle-check text-xl mr-2"></i> Чудово! Переписано без жодної помилки!');
+
+                const key = `${appState.currentTopicIdx}-${appState.currentSentenceIdx}`;
+                appState.completedSentences[key] = inputVal;
+
+                renderTopicsSidebar();
+                updateOverallProgress();
+
+                confetti({ particleCount: 35, spread: 60, origin: { y: 0.8 } });
+
+                setTimeout(() => {
+                    autoAdvanceNext();
+                }, 1300);
+
+            } else {
+                playSound('error');
+                const diffHtml = computeDiffHighlight(cleanInput, cleanTarget);
+
+                showFeedback('error', `
+                    <div class="space-y-2">
+                        <div class="font-bold flex items-center gap-2 text-rose-800">
+                            <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                            Знайдено помилки або розбіжності в тексті!
+                        </div>
+                        <p class="text-xs font-bold text-slate-600">Порівняйте ваш варіант із правильним (червоним/жовтим підсвічено помилки та пропущені символи):</p>
+                        <div class="p-3 bg-white rounded-lg border-2 border-slate-800 font-sans text-sm sm:text-base leading-relaxed no-select" oncopy="return false">
+                            ${diffHtml}
+                        </div>
+                        <div class="text-xs font-bold text-slate-500 pt-1">
+                            <span class="inline-block w-3 h-3 diff-missing rounded border border-slate-800 mr-1"></span> - Пропущено/Помилка 
+                            <span class="inline-block w-3 h-3 diff-extra rounded border border-slate-800 ml-3 mr-1"></span> - Зайве
+                        </div>
+                    </div>
+                `);
+            }
+        }
+
+        function computeDiffHighlight(userText, targetText) {
+            let resultHtml = '';
+            let uIdx = 0;
+            let tIdx = 0;
+
+            while (tIdx < targetText.length || uIdx < userText.length) {
+                if (tIdx < targetText.length && uIdx < userText.length && targetText[tIdx] === userText[uIdx]) {
+                    resultHtml += `<span class="diff-correct">${escapeHtml(targetText[tIdx])}</span>`;
+                    tIdx++;
+                    uIdx++;
+                } else {
+                    if (tIdx < targetText.length && (uIdx >= userText.length || targetText[tIdx] !== userText[uIdx])) {
+                        resultHtml += `<span class="diff-missing">${escapeHtml(targetText[tIdx])}</span>`;
+                        tIdx++;
+                    } 
+                    if (uIdx < userText.length && (tIdx >= targetText.length || userText[uIdx] !== targetText[tIdx - 1])) {
+                        resultHtml += `<span class="diff-extra">${escapeHtml(userText[uIdx])}</span>`;
+                        uIdx++;
+                    }
+                }
+            }
+            return resultHtml;
+        }
+
+        function showFeedback(type, message) {
+            const fbBox = document.getElementById('feedback-box');
+            fbBox.classList.remove('hidden', 'bg-emerald-100', 'bg-rose-100', 'bg-amber-100', 'text-emerald-900', 'text-rose-900', 'text-amber-900', 'border-2', 'border-slate-800');
+
+            fbBox.classList.add('border-2', 'border-slate-800');
+
+            if (type === 'success') {
+                fbBox.classList.add('bg-emerald-100', 'text-emerald-900');
+            } else if (type === 'error') {
+                fbBox.classList.add('bg-rose-100', 'text-rose-900');
+            } else {
+                fbBox.classList.add('bg-amber-100', 'text-amber-900');
+            }
+
+            fbBox.innerHTML = message;
+        }
+
+        function hideFeedback() {
+            const fbBox = document.getElementById('feedback-box');
+            fbBox.classList.add('hidden');
+        }
+
+        function autoAdvanceNext() {
+            const currentTopic = appState.topics[appState.currentTopicIdx];
+            const sentences = currentTopic.sentences_to_remember || [];
+
+            if (appState.currentSentenceIdx < sentences.length - 1) {
+                appState.currentSentenceIdx++;
+                loadActiveSentence();
+            } else if (appState.currentTopicIdx < appState.topics.length - 1) {
+                appState.currentTopicIdx++;
+                appState.currentSentenceIdx = 0;
+                renderTopicsSidebar();
+                loadActiveSentence();
+            } else {
+                showLessonCompleteCard();
+            }
+        }
+
+        function goToNextSentence() {
+            autoAdvanceNext();
+        }
+
+        function goToPrevSentence() {
+            if (appState.currentSentenceIdx > 0) {
+                appState.currentSentenceIdx--;
+                loadActiveSentence();
+            } else if (appState.currentTopicIdx > 0) {
+                appState.currentTopicIdx--;
+                const prevTopicSentences = appState.topics[appState.currentTopicIdx].sentences_to_remember || [];
+                appState.currentSentenceIdx = Math.max(0, prevTopicSentences.length - 1);
+                renderTopicsSidebar();
+                loadActiveSentence();
+            }
+        }
+
+        function updateOverallProgress() {
+            let totalSentences = 0;
+            appState.topics.forEach(t => {
+                totalSentences += (t.sentences_to_remember ? t.sentences_to_remember.length : 0);
+            });
+
+            const completedCount = Object.keys(appState.completedSentences).length;
+            const percent = totalSentences > 0 ? Math.round((completedCount / totalSentences) * 100) : 0;
+
+            document.getElementById('main-progress-bar').style.width = `${percent}%`;
+            document.getElementById('progress-percent-text').innerText = `${percent}%`;
+
+            if (percent === 100) {
+                document.getElementById('lesson-status-text').innerText = 'Конспект виконано на 100%! 🎉';
+                showLessonCompleteCard();
+            } else {
+                document.getElementById('lesson-status-text').innerText = `Виконано ${completedCount} з ${totalSentences} речень`;
+            }
+        }
+
+        function showLessonCompleteCard() {
+            const completeCard = document.getElementById('lesson-complete-card');
+            completeCard.classList.remove('hidden');
+            confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
+        }
+
+        function openPdfModal() {
+            document.getElementById('pdf-modal').classList.remove('hidden');
+        }
+
+        function closePdfModal() {
+            document.getElementById('pdf-modal').classList.add('hidden');
+        }
+
+        async function generatePDF() {
+            const studentName = document.getElementById('student-name-input').value.trim() || 'Учень / Учениця';
+            const schoolName = document.getElementById('school-name-input').value.trim() || 'Гімназія №201 м. Києва';
+            const dateStr = new Date().toLocaleDateString('uk-UA', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            document.getElementById('pdf-student-header').innerText = `Учень: ${studentName}`;
+            document.getElementById('pdf-school-header').innerText = schoolName;
+            document.getElementById('pdf-date-header').innerText = `Дата: ${dateStr}`;
+
+            const pdfBody = document.getElementById('pdf-topics-body');
+            pdfBody.innerHTML = '';
+
+            appState.topics.forEach((topic, tIdx) => {
+                const topicBlock = document.createElement('div');
+                topicBlock.style.cssText = 'margin-bottom: 14px; page-break-inside: avoid; break-inside: avoid; box-sizing: border-box; width: 100%;';
+
+                let sentencesHtml = '';
+                (topic.sentences_to_remember || []).forEach((sentence, sIdx) => {
+                    const savedText = appState.completedSentences[`${tIdx}-${sIdx}`];
+                    const isDone = !!savedText;
+
+                    sentencesHtml += `
+                        <div style="margin-top: 6px; padding: 6px 10px; background: ${isDone ? '#f0fdf4' : '#f8fafc'}; border-left: 3px solid ${isDone ? '#16a34a' : '#cbd5e1'}; border-radius: 4px; page-break-inside: avoid; break-inside: avoid; box-sizing: border-box; width: 100%; word-break: break-word; overflow-wrap: break-word;">
+                            <p style="margin: 0; font-size: 11px; line-height: 1.4; font-weight: 600; color: #0f172a; word-break: break-word; overflow-wrap: break-word;">${sIdx + 1}. ${escapeHtml(sentence)}</p>
+                            ${isDone ? `<p style="margin: 3px 0 0 0; font-size: 10px; line-height: 1.35; color: #15803d; font-style: italic; word-break: break-word; overflow-wrap: break-word;"><i class="fa-solid fa-pen" style="margin-right: 4px;"></i><strong>Записано:</strong> "${escapeHtml(savedText)}"</p>` : ''}
+                        </div>
+                    `;
+                });
+
+                topicBlock.innerHTML = `
+                    <h3 style="font-size: 13px; font-weight: 700; color: #3730a3; margin: 0 0 4px 0; border-bottom: 1.5px solid #e0e7ff; padding-bottom: 3px; page-break-after: avoid; break-after: avoid; word-break: break-word;">
+                        Тема ${topic.topic_id || tIdx + 1}: ${escapeHtml(topic.title)}
+                    </h3>
+                    ${sentencesHtml}
+                `;
+
+                pdfBody.appendChild(topicBlock);
+            });
+
+            closePdfModal();
+
+            const wrapper = document.getElementById('pdf-wrapper');
+            wrapper.style.opacity = '1';
+
+            const element = document.getElementById('pdf-export-template');
+
+            const opt = {
+                margin:       [10, 10, 10, 10],
+                filename:     `Конспект_Інформатика_${studentName.replace(/\s+/g, '_')}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { 
+                    scale: 2, 
+                    useCORS: true, 
+                    logging: false,
+                    scrollX: 0,
+                    scrollY: 0
+                },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+            };
+
+            try {
+                await html2pdf().set(opt).from(element).save();
+            } finally {
+                wrapper.style.opacity = '0';
+            }
+        }
+
+        function toggleSound() {
+            appState.soundEnabled = !appState.soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            const btn = document.getElementById('sound-btn');
+            if (appState.soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high';
+                btn.className = 'vector-btn bg-sky-300 p-2.5 text-slate-800 text-lg flex items-center justify-center w-11 h-11';
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark';
+                btn.className = 'vector-btn bg-slate-300 p-2.5 text-slate-800 text-lg flex items-center justify-center w-11 h-11';
+            }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
