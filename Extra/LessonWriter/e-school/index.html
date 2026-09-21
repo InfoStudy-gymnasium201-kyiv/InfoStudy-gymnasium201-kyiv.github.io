@@ -111,19 +111,19 @@
             100% { transform: scale(1); opacity: 1; }
         }
 
-        /* Пряма анімація кожної літери в полі вводу */
+        /* Анімація для кожного символу при натисканні клавіші */
         .char-animated {
             display: inline-block;
-            animation: letterBounce 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            animation: keyBounce 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
-        @keyframes letterBounce {
+        @keyframes keyBounce {
             0% {
-                transform: scale(0.2) translateY(-12px) rotate(-10deg);
+                transform: scale(0.3) translateY(-10px) rotate(-8deg);
                 opacity: 0;
             }
             60% {
-                transform: scale(1.3) translateY(2px) rotate(5deg);
+                transform: scale(1.25) translateY(2px) rotate(4deg);
             }
             100% {
                 transform: scale(1) translateY(0) rotate(0deg);
@@ -131,7 +131,7 @@
             }
         }
 
-        /* Placeholder для editable div */
+        /* Placeholder для порожнього контейнера */
         .editor-input:empty:before {
             content: attr(data-placeholder);
             color: #94a3b8;
@@ -242,7 +242,7 @@
                     </div>
                 </div>
 
-                <!-- Interactive Typing Area (ЗОНА ДЛЯ ПЕРЕПИСУВАННЯ З АНІМАЦІЄЮ) -->
+                <!-- Interactive Typing Area (ЗОНА ДЛЯ ПЕРЕПИСУВАННЯ) -->
                 <div class="vector-card rounded-2xl p-5 sm:p-6 space-y-4">
                     <div class="flex items-center justify-between">
                         <label for="student-input" class="heading-font text-sm font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
@@ -260,8 +260,7 @@
                             id="student-input"
                             contenteditable="true"
                             data-placeholder="Почніть набирати текст точно так, як вказано вище..."
-                            class="editor-input w-full p-4 min-h-[110px] max-h-[220px] overflow-y-auto rounded-xl border-3 border-slate-800 bg-white text-slate-900 text-base sm:text-lg font-bold focus:outline-none focus:ring-4 focus:ring-indigo-300 transition shadow-[inner_2px_2px_0px_#2D3436] font-sans leading-relaxed break-words whitespace-pre-wrap"
-                            oninput="handleInput(event)"
+                            class="editor-input w-full p-4 min-h-[110px] max-h-[220px] overflow-y-auto rounded-xl border-3 border-slate-800 bg-white text-slate-900 text-base sm:text-lg font-bold focus:outline-none focus:ring-4 focus:ring-indigo-300 transition shadow-[inner_2px_2px_0px_#2D3436] font-sans leading-relaxed break-words whitespace-pre-wrap cursor-text"
                             onkeydown="handleKeyDown(event)"
                             onpaste="handlePaste(event)"
                             ondrop="handleDrop(event)"
@@ -654,46 +653,6 @@
             editor.focus();
         }
 
-        /* DIRECT LETTER ANIMATION LOGIC */
-        function handleInput(e) {
-            const editor = document.getElementById('student-input');
-            
-            // Якщо використовується не заповнений або очищений редактор
-            const selection = window.getSelection();
-            if (!selection.rangeCount) return;
-
-            // Отримуємо останній введений синтаксичний вузол/текст
-            const range = selection.getRangeAt(0);
-            const node = range.startContainer;
-
-            if (node.nodeType === Node.TEXT_NODE && node.parentElement === editor) {
-                const text = node.nodeValue;
-                const frag = document.createDocumentFragment();
-                let lastSpan = null;
-
-                for (let i = 0; i < text.length; i++) {
-                    const span = document.createElement('span');
-                    span.className = 'char-animated';
-                    span.innerHTML = text[i] === ' ' ? '&nbsp;' : escapeHtml(text[i]);
-                    frag.appendChild(span);
-                    lastSpan = span;
-                }
-
-                node.parentNode.replaceChild(frag, node);
-
-                // Відновлення позиції курсора в кінці введеного елемента
-                if (lastSpan) {
-                    const newRange = document.createRange();
-                    newRange.setStartAfter(lastSpan);
-                    newRange.collapse(true);
-                    selection.removeAllRanges();
-                    selection.addRange(newRange);
-                }
-            }
-
-            updateLiveStats();
-        }
-
         function updateLiveStats() {
             const input = getRawText();
             const target = document.getElementById('target-sentence-text').innerText;
@@ -711,11 +670,44 @@
             accElem.className = `hidden sm:inline px-2.5 py-1 rounded-lg border border-slate-800 font-bold text-xs ${acc === 100 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`;
         }
 
+        /* DIRECT KEYDOWN LETTER ANIMATION LOGIC */
         function handleKeyDown(e) {
             playSound('key');
+
             if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
                 e.preventDefault();
                 checkAnswer();
+                return;
+            }
+
+            // Перевіряємо, чи була натиснута звичайна друкована клавіша (літера, цифра, пробіл)
+            if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                e.preventDefault();
+
+                const editor = document.getElementById('student-input');
+                const sel = window.getSelection();
+                if (!sel.rangeCount) return;
+
+                const range = sel.getRangeAt(0);
+                range.deleteContents();
+
+                // Створюємо елемент з анімацією
+                const span = document.createElement('span');
+                span.className = 'char-animated';
+                span.innerHTML = e.key === ' ' ? '&nbsp;' : escapeHtml(e.key);
+
+                range.insertNode(span);
+
+                // Переміщуємо курсор одразу після вставленого символу
+                range.setStartAfter(span);
+                range.setEndAfter(span);
+                sel.removeAllRanges();
+                sel.addRange(range);
+
+                // Автоматичне прокручування до курсора
+                editor.scrollTop = editor.scrollHeight;
+
+                updateLiveStats();
             }
         }
 
