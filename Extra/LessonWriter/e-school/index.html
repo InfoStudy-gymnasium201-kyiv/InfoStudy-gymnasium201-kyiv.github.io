@@ -110,6 +110,26 @@
             0% { transform: scale(0.8); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
+
+        /* Анімація кожної літери */
+        .animated-char {
+            display: inline-block;
+            animation: charPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes charPop {
+            0% {
+                transform: scale(0.3) translateY(-10px);
+                opacity: 0;
+            }
+            70% {
+                transform: scale(1.2) translateY(2px);
+            }
+            100% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body class="min-h-screen text-slate-800 flex flex-col justify-between p-3 sm:p-6 overflow-x-hidden">
@@ -225,11 +245,16 @@
                         </div>
                     </div>
 
-                    <!-- Input Text Area -->
+                    <!-- Visual Animated Overlay Display for Typed Letters -->
+                    <div id="animated-text-display" class="w-full p-4 min-h-[90px] max-h-[160px] overflow-y-auto rounded-xl border-3 border-slate-800 bg-amber-50/50 text-slate-900 text-base sm:text-lg font-bold shadow-[inner_2px_2px_0px_#2D3436] font-sans leading-relaxed break-words whitespace-pre-wrap">
+                        <span class="text-slate-400 italic font-normal">Анімований текст з'явиться тут...</span>
+                    </div>
+
+                    <!-- Hidden Actual Textarea for typing input -->
                     <div class="relative">
                         <textarea
                             id="student-input"
-                            rows="4"
+                            rows="3"
                             placeholder="Почніть набирати текст точно так, як вказано вище..."
                             class="w-full p-4 rounded-xl border-3 border-slate-800 bg-white text-slate-900 text-base sm:text-lg font-bold focus:outline-none focus:ring-4 focus:ring-indigo-300 transition shadow-[inner_2px_2px_0px_#2D3436] font-sans leading-relaxed resize-y"
                             oninput="handleLiveTyping()"
@@ -408,7 +433,8 @@
             currentSentenceIdx: 0,
             completedSentences: {},
             soundEnabled: true,
-            currentFileName: 'test1'
+            currentFileName: 'test1',
+            lastLength: 0
         };
 
         // Audio synthesizer using Web Audio API
@@ -598,6 +624,8 @@
             const textarea = document.getElementById('student-input');
             textarea.value = existingInput;
 
+            appState.lastLength = existingInput.length;
+
             hideFeedback();
             handleLiveTyping();
 
@@ -610,12 +638,37 @@
             textarea.focus();
         }
 
+        /* LIVE TYPING WITH LETTER ANIMATION */
         function handleLiveTyping() {
             const input = document.getElementById('student-input').value;
             const target = document.getElementById('target-sentence-text').innerText;
+            const display = document.getElementById('animated-text-display');
 
             document.getElementById('char-counter').innerText = `Символи: ${input.length} / ${target.length}`;
 
+            // Render animated characters
+            if (input.length === 0) {
+                display.innerHTML = `<span class="text-slate-400 italic font-normal">Анімований текст з'явиться тут...</span>`;
+            } else {
+                let html = '';
+                const isNewCharAdded = input.length > appState.lastLength;
+
+                for (let i = 0; i < input.length; i++) {
+                    const char = escapeHtml(input[i]);
+                    // Apply animation class strictly to the newly typed character at the end
+                    if (isNewCharAdded && i === input.length - 1) {
+                        html += `<span class="animated-char text-indigo-700 bg-amber-200 border border-slate-800 px-0.5 rounded shadow-[1px_1px_0px_#2D3436]">${char === ' ' ? '&nbsp;' : char}</span>`;
+                    } else {
+                        html += `<span>${char === ' ' ? '&nbsp;' : char}</span>`;
+                    }
+                }
+                display.innerHTML = html;
+                display.scrollTop = display.scrollHeight;
+            }
+
+            appState.lastLength = input.length;
+
+            // Accuracy calculation
             let matchCount = 0;
             const minLen = Math.min(input.length, target.length);
             for (let i = 0; i < minLen; i++) {
