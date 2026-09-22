@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduMail - Навчальний симулятор пошти</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbars and transition effects */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.4);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(107, 114, 128, 0.7);
+        }
+        .theme-purple { --brand-color: #8b5cf6; }
+        .theme-emerald { --brand-color: #10b981; }
+        .theme-amber { --brand-color: #f59e0b; }
+        .theme-rose { --brand-color: #f43f5e; }
+        
+        .pulse-subtle {
+            animation: pulseSubtle 2s infinite;
+        }
+        @keyframes pulseSubtle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.95; transform: scale(0.99); }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-100 font-sans h-screen flex flex-col overflow-hidden transition-colors duration-200">
+
+    <script>
+        // Simple Audio Synthesizer for notifications (No external files needed)
+        const playSound = (type) => {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                if (type === 'newmail') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+                    osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1); // A5
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.3);
+                } else if (type === 'success') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+                    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2); // G5
+                    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.5);
+                } else if (type === 'spam') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(200, ctx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(120, ctx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.25);
+                }
+            } catch(e) { console.log('Audio disabled or not supported'); }
+        };
+    </script>
+
+    <!-- REGISTRATION MODAL -->
+    <div id="registrationModal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 border border-slate-200 dark:border-slate-700 transform transition-all">
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 mb-4 text-2xl font-bold">
+                    <i class="fa-solid fa-envelope-open-text"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Ласкаво просимо в EduMail</h1>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Навчальний симулятор електронної пошти для школярів</p>
+            </div>
+
+            <form id="regForm" onsubmit="handleRegistration(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1">Твоє ім'я та прізвище</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><i class="fa-regular fa-user"></i></span>
+                        <input type="text" id="regFullName" required placeholder="напр. Максим Коваленко" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1">Бажаний логін (адреса пошти)</label>
+                    <div class="flex">
+                        <input type="text" id="regUsername" required placeholder="maksum" class="w-full pl-4 pr-2 py-2.5 rounded-l-xl border border-r-0 border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-right">
+                        <span class="inline-flex items-center px-3 rounded-r-xl border border-l-0 border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-sm font-medium">@edumail.ua</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1">Твій клас</label>
+                    <select id="regGrade" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+                        <option value="2-А">2-А клас</option>
+                        <option value="2-Б">2-Б клас</option>
+                        <option value="2-В">2-В клас</option>
+                        <option value="3-А">3-А клас</option>
+                        <option value="3-Б">3-Б клас</option>
+                        <option value="3-В">3-В клас</option>
+                        <option value="4-А">4-А клас</option>
+                        <option value="4-Б">4-Б клас</option>
+                        <option value="4-В">4-В клас</option>
+                        <option value="5-А" selected>5-А клас</option>
+                        <option value="5-Б">5-Б клас</option>
+                        <option value="5-В">5-В клас</option>
+                        <option value="6-А">6-А клас</option>
+                        <option value="6-Б">6-Б клас</option>
+                        <option value="6-В">6-В клас</option>
+                        <option value="7-А">7-А клас</option>
+                        <option value="7-Б">7-Б клас</option>
+                        <option value="7-В">7-В клас</option>
+                        <option value="8-А">8-А клас</option>
+                        <option value="8-Б">8-Б клас</option>
+                        <option value="8-В">8-В клас</option>
+                        <option value="9-А">9-А клас</option>
+                        <option value="9-Б">9-Б клас</option>
+                        <option value="9-В">9-В клас</option>
+                        <option value="Інший">Інший клас</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1">Придумай пароль</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" id="regPassword" required placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full mt-2 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/30 transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2">
+                    <span>Зареєструватися та увійти</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+            <div class="mt-4 text-center">
+                <span class="text-xs text-slate-400 dark:text-slate-500">🛡️ Це безпечна симуляція. Справжні дані нікуди не передаються.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP HEADER -->
+    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-4 py-2.5 flex items-center justify-between shrink-0">
+        <!-- Logo -->
+        <div class="flex items-center space-x-3 w-64">
+            <button id="toggleMobileSidebar" class="md:hidden text-slate-500 hover:text-slate-700 dark:text-slate-400 p-1">
+                <i class="fa-solid fa-bars text-xl"></i>
+            </button>
+            <div class="flex items-center space-x-2">
+                <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-blue-500/20">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </div>
+                <div>
+                    <span class="font-bold text-lg tracking-tight text-slate-900 dark:text-white leading-none block">EduMail</span>
+                    <span class="text-[10px] uppercase font-bold text-blue-600 dark:text-blue-400 tracking-wider">Шкільна пошта</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="hidden sm:flex flex-1 max-w-xl mx-4">
+            <div class="relative w-full">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input type="text" id="searchInput" onkeyup="filterEmails()" placeholder="Пошук у листуванні..." class="w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-700/60 text-slate-900 dark:text-white rounded-xl border border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-slate-700 outline-none text-sm transition">
+            </div>
+        </div>
+
+        <!-- Quests Button & User Profile -->
+        <div class="flex items-center space-x-3">
+            <!-- Quest Toggle Button -->
+            <button onclick="toggleQuestPanel()" class="flex items-center space-x-2 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 px-3 py-1.5 rounded-xl text-xs font-semibold hover:bg-amber-100 dark:hover:bg-amber-900/50 transition">
+                <i class="fa-solid fa-list-check text-amber-500"></i>
+                <span class="hidden md:inline">Завдання уроку:</span>
+                <span id="questCounterBadge" class="bg-amber-500 text-white px-2 py-0.5 rounded-full font-bold">0/5</span>
+            </button>
+
+            <!-- User Info Badge -->
+            <div class="flex items-center space-x-2 pl-2 border-l border-slate-200 dark:border-slate-700">
+                <div id="userAvatar" class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm uppercase shadow">
+                    U
+                </div>
+                <div class="hidden lg:block text-left text-xs">
+                    <div id="userNameDisplay" class="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[120px]">Учень</div>
+                    <div id="userEmailDisplay" class="text-slate-400 dark:text-slate-500 truncate max-w-[120px]">user@edumail.ua</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- QUEST TRACKER PANEL (Collapsible Banner/Modal) -->
+    <div id="questPanel" class="bg-amber-50 dark:bg-slate-800/95 border-b border-amber-200 dark:border-slate-700 px-4 py-3 text-xs shadow-inner transition-all duration-300">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center space-x-2">
+                    <span class="text-base font-bold text-amber-800 dark:text-amber-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-trophy text-amber-500"></i> Чек-лист практикуму
+                    </span>
+                    <span class="text-slate-500 dark:text-slate-400">(Виконуй завдання по черзі для завершення практичної роботи)</span>
+                </div>
+                <button onclick="toggleQuestPanel()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full mb-3 overflow-hidden">
+                <div id="questProgressBar" class="bg-gradient-to-r from-amber-500 to-green-500 h-full w-0 transition-all duration-500"></div>
+            </div>
+
+            <!-- Tasks List Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2" id="questListContainer">
+                <!-- Quests will be injected dynamically via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN WORKSPACE LAYOUT -->
+    <div class="flex flex-1 overflow-hidden relative">
+
+        <!-- SIDEBAR NAVIGATION -->
+        <aside id="sidebar" class="w-60 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col shrink-0 absolute md:static inset-y-0 left-0 z-30 transform -translate-x-full md:translate-x-0 transition-transform duration-200">
+            <!-- Compose Button -->
+            <div class="p-4">
+                <button onclick="openComposeModal()" class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-lg shadow-blue-500/20 font-semibold flex items-center justify-center space-x-2 transition transform hover:-translate-y-0.5 active:translate-y-0">
+                    <i class="fa-solid fa-pen"></i>
+                    <span>Написати листа</span>
+                </button>
+            </div>
+
+            <!-- Folders List -->
+            <nav class="flex-1 px-3 space-y-1 overflow-y-auto">
+                <button onclick="switchFolder('inbox')" id="folder-inbox" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-medium text-xs sm:text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 transition">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-inbox text-base w-5 text-center"></i>
+                        <span>Вхідні</span>
+                    </div>
+                    <span id="unreadInboxBadge" class="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full hidden">0</span>
+                </button>
+
+                <button onclick="switchFolder('sent')" id="folder-sent" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-medium text-xs sm:text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-paper-plane text-base w-5 text-center"></i>
+                        <span>Відправлені</span>
+                    </div>
+                    <span id="sentCountBadge" class="text-slate-400 text-xs">0</span>
+                </button>
+
+                <button onclick="switchFolder('spam')" id="folder-spam" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-medium text-xs sm:text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-triangle-exclamation text-base w-5 text-center text-amber-500"></i>
+                        <span>Спам</span>
+                    </div>
+                    <span id="spamCountBadge" class="bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full hidden">0</span>
+                </button>
+
+                <button onclick="switchFolder('trash')" id="folder-trash" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-medium text-xs sm:text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-trash-can text-base w-5 text-center"></i>
+                        <span>Кошик</span>
+                    </div>
+                </button>
+
+                <div class="pt-4 mt-4 border-t border-slate-200 dark:border-slate-700">
+                    <div class="px-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Налаштування</div>
+                    <button onclick="showSettingsView()" id="btn-settings" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-xs sm:text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition">
+                        <i class="fa-solid fa-gear text-base w-5 text-center"></i>
+                        <span>Налаштування теми</span>
+                    </button>
+                </div>
+            </nav>
+
+            <!-- Bottom Info Banner -->
+            <div class="p-3 m-3 bg-blue-50 dark:bg-slate-700/40 rounded-xl text-[11px] text-slate-500 dark:text-slate-400 border border-blue-100 dark:border-slate-600">
+                <i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i>
+                <b>Порада:</b> Завжди перевіряй адресу відправника перед тим, як відкривати посилання!
+            </div>
+        </aside>
+
+        <!-- MIDDLE SECTION: EMAIL LIST -->
+        <section id="emailListSection" class="w-full md:w-80 lg:w-96 bg-slate-50 dark:bg-slate-800/50 border-r border-slate-200 dark:border-slate-700 flex flex-col shrink-0">
+            <!-- Filter Toolbar -->
+            <div class="p-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between bg-white dark:bg-slate-800">
+                <h2 id="currentFolderName" class="font-bold text-slate-800 dark:text-white text-base">Вхідні</h2>
+                <div class="text-xs text-slate-400">
+                    <span id="mailListCounter">0 листів</span>
+                </div>
+            </div>
+
+            <!-- List Container -->
+            <div id="emailListContainer" class="flex-1 overflow-y-auto divide-y divide-slate-200 dark:divide-slate-700/60">
+                <!-- Dynamically populated emails -->
+            </div>
+        </section>
+
+        <!-- RIGHT SECTION: EMAIL CONTENT VIEW / SETTINGS PANEL -->
+        <main class="flex-1 bg-white dark:bg-slate-900 flex flex-col overflow-y-auto relative">
+
+            <!-- EMPTY STATE -->
+            <div id="emptyMailState" class="flex-1 flex flex-col items-center justify-center p-8 text-center">
+                <div class="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-300 dark:text-slate-600 mb-4 text-3xl">
+                    <i class="fa-regular fa-envelope-open"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-700 dark:text-slate-200">Обери лист для перегляду</h3>
+                <p class="text-sm text-slate-400 max-w-sm mt-1">Клацни на будь-який лист зі списку ліворуч, щоб прочитати його зміст та відповісти.</p>
+            </div>
+
+            <!-- EMAIL DETAIL VIEW -->
+            <div id="emailDetailView" class="hidden flex-1 flex-col h-full">
+                <!-- Mail Header / Actions Bar -->
+                <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-2 bg-slate-50/50 dark:bg-slate-800/30">
+                    <div class="flex items-center space-x-2">
+                        <button onclick="closeMobileMailDetail()" class="md:hidden text-slate-500 p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                        <button onclick="markCurrentAsSpam()" title="Позначити як спам" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-slate-700 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 text-xs font-semibold flex items-center space-x-1.5 transition">
+                            <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
+                            <span>В Спам</span>
+                        </button>
+                        <button onclick="deleteCurrentEmail()" title="Видалити" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-700 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 text-xs font-semibold flex items-center space-x-1.5 transition">
+                            <i class="fa-solid fa-trash-can text-slate-400"></i>
+                            <span>Видалити</span>
+                        </button>
+                    </div>
+
+                    <div class="text-xs text-slate-400" id="mailDetailDate">
+                        Сьогодні, 10:00
+                    </div>
+                </div>
+
+                <!-- Mail Content Header -->
+                <div class="p-6 border-b border-slate-100 dark:border-slate-800">
+                    <h1 id="mailDetailSubject" class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-4">Тема листа</h1>
+
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div id="mailDetailAvatar" class="w-11 h-11 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                                В
+                            </div>
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <span id="mailDetailSenderName" class="font-bold text-slate-800 dark:text-slate-100 text-sm">Вчитель</span>
+                                    <span id="mailDetailSenderEmail" class="text-xs text-slate-400">&lt;teacher@school.edu.ua&gt;</span>
+                                </div>
+                                <div class="text-xs text-slate-400 mt-0.5">
+                                    Кому: <span id="mailDetailRecipient" class="text-slate-600 dark:text-slate-300">вам</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mail Body Container -->
+                <div id="mailDetailBody" class="p-6 text-slate-700 dark:text-slate-200 leading-relaxed text-sm flex-1 overflow-y-auto space-y-4">
+                    <!-- Dynamic Body -->
+                </div>
+
+                <!-- Quick Reply Box -->
+                <div id="quickReplySection" class="p-4 sm:p-6 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/40">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2 flex items-center gap-1.5">
+                        <i class="fa-solid fa-reply"></i> Швидка відповідь відправнику
+                    </h4>
+                    <form onsubmit="handleSendReply(event)" class="space-y-3">
+                        <textarea id="replyTextarea" required rows="3" placeholder="Напишіть вашу відповідь тут..." class="w-full p-3 text-sm rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none"></textarea>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-slate-400">💡 Порада: Напишіть привітно та грамотно.</span>
+                            <button type="submit" class="py-2 px-5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-xs shadow hover:shadow-md transition flex items-center space-x-2">
+                                <span>Надіслати відповідь</span>
+                                <i class="fa-solid fa-paper-plane text-xs"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- SETTINGS VIEW -->
+            <div id="settingsView" class="hidden flex-1 p-6 max-w-3xl mx-auto w-full">
+                <div class="mb-6 pb-4 border-b border-slate-200 dark:border-slate-700">
+                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-blue-600"></i> Налаштування поштової скриньки
+                    </h2>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Персоналiзуй свій акаунт та налаштуй зовнішній вигляд сайту.</p>
+                </div>
+
+                <div class="space-y-8">
+                    <!-- Theme Mode Toggle -->
+                    <div class="bg-slate-50 dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <h3 class="font-bold text-slate-800 dark:text-white text-sm mb-1">Режим оформлення (Тема)</h3>
+                        <p class="text-xs text-slate-400 mb-4">Обери світлу або темну тему для комфортної роботи.</p>
+                        <div class="grid grid-cols-2 gap-4 max-w-xs">
+                            <button type="button" onclick="setThemeMode('light')" id="btnThemeLight" class="p-3 rounded-xl border-2 border-blue-600 bg-white text-slate-800 font-semibold text-xs flex items-center justify-center space-x-2 shadow-sm">
+                                <i class="fa-regular fa-sun text-amber-500 text-base"></i>
+                                <span>Світла</span>
+                            </button>
+                            <button type="button" onclick="setThemeMode('dark')" id="btnThemeDark" class="p-3 rounded-xl border-2 border-transparent bg-slate-700 text-white font-semibold text-xs flex items-center justify-center space-x-2 shadow-sm">
+                                <i class="fa-regular fa-moon text-blue-400 text-base"></i>
+                                <span>Темна</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Email Signature Setup -->
+                    <div class="bg-slate-50 dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <h3 class="font-bold text-slate-800 dark:text-white text-sm mb-1">Автоматичний підпис</h3>
+                        <p class="text-xs text-slate-400 mb-3">Цей текст буде автоматично додаватися в кінці кожного вашого листа.</p>
+                        <textarea id="settingsSignatureInput" rows="3" placeholder="З повагою, учень 5-А класу..." class="w-full p-3 text-sm rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition resize-none"></textarea>
+                    </div>
+
+                    <!-- Profile Avatar Color -->
+                    <div class="bg-slate-50 dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <h3 class="font-bold text-slate-800 dark:text-white text-sm mb-1">Колір вашої аватарки</h3>
+                        <p class="text-xs text-slate-400 mb-3">Оберіть колір значка профілю.</p>
+                        <div class="flex items-center space-x-3" id="avatarColorPicker">
+                            <button type="button" onclick="setAvatarColor('bg-blue-600')" data-color="bg-blue-600" class="w-9 h-9 rounded-full bg-blue-600 text-white ring-2 ring-offset-2 ring-slate-400 dark:ring-slate-200 flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-check"></i></button>
+                            <button type="button" onclick="setAvatarColor('bg-purple-600')" data-color="bg-purple-600" class="w-9 h-9 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold text-xs"></button>
+                            <button type="button" onclick="setAvatarColor('bg-emerald-600')" data-color="bg-emerald-600" class="w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs"></button>
+                            <button type="button" onclick="setAvatarColor('bg-rose-600')" data-color="bg-rose-600" class="w-9 h-9 rounded-full bg-rose-600 text-white flex items-center justify-center font-bold text-xs"></button>
+                            <button type="button" onclick="setAvatarColor('bg-amber-500')" data-color="bg-amber-500" class="w-9 h-9 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-xs"></button>
+                        </div>
+                    </div>
+
+                    <!-- Save Settings Button -->
+                    <div class="flex justify-end pt-2">
+                        <button onclick="saveSettings()" class="py-3 px-8 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm shadow-lg shadow-blue-500/20 transition transform hover:-translate-y-0.5">
+                            Зберегти всі налаштування
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- COMPOSE MAIL MODAL -->
+    <div id="composeModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-200 dark:border-slate-700 flex flex-col max-h-[90vh]">
+            <!-- Header -->
+            <div class="bg-slate-100 dark:bg-slate-700/60 px-5 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                <h3 class="font-bold text-slate-800 dark:text-white text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-blue-600"></i> Новий лист
+                </h3>
+                <button onclick="closeComposeModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <!-- Form -->
+            <form onsubmit="handleSendNewMail(event)" class="flex-1 flex flex-col p-5 space-y-3 overflow-y-auto">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">Кому (Отримувач):</label>
+                    <input type="email" id="composeTo" required placeholder="teacher@school.edu.ua або friend@edumail.ua" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">Тема листа:</label>
+                    <input type="text" id="composeSubject" required placeholder="Коротко про що лист..." class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+
+                <div class="flex-1 flex flex-col min-h-[150px]">
+                    <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">Текст повідомлення:</label>
+                    <textarea id="composeBody" required rows="6" placeholder="Доброго дня! Пишу вам з приводу..." class="w-full flex-1 p-3 text-sm rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
+                </div>
+
+                <!-- Footer buttons -->
+                <div class="pt-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                    <button type="button" onclick="closeComposeModal()" class="px-4 py-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 text-xs font-semibold">
+                        Скасувати
+                    </button>
+                    <button type="submit" class="py-2.5 px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md transition flex items-center space-x-2">
+                        <span>Надіслати</span>
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- COMPLETION CERTIFICATE MODAL -->
+    <div id="completionModal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-lg w-full p-8 text-center border-2 border-amber-400 relative overflow-hidden transform animate-bounce-short">
+            <div class="absolute -right-12 -top-12 w-32 h-32 bg-amber-400/20 rounded-full blur-2xl"></div>
+            
+            <div class="w-20 h-20 bg-amber-100 dark:bg-amber-900/50 text-amber-500 rounded-full flex items-center justify-center mx-auto text-4xl mb-4 border-4 border-amber-200 dark:border-amber-700 shadow-inner">
+                <i class="fa-solid fa-award"></i>
+            </div>
+
+            <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white">Вітаємо! Завдання виконано! 🎉</h2>
+            <p class="text-sm text-slate-600 dark:text-slate-300 mt-2">
+                Ти успішно засвоїв(ла) основи користування електронною поштою, відрізняєш безпечні листи від спаму та вмієш налаштовувати свій акаунт.
+            </p>
+
+            <div class="my-6 p-4 bg-amber-50 dark:bg-slate-700/60 rounded-2xl border border-amber-200 dark:border-slate-600 text-left space-y-1 text-xs text-slate-700 dark:text-slate-200">
+                <div class="font-bold text-amber-800 dark:text-amber-400 text-sm mb-1">📊 Результати тренінгу:</div>
+                <div>✅ Зареєстровано поштову скриньку</div>
+                <div>✅ Надіслано відповідь вчителю</div>
+                <div>✅ Виявлено та заблоковано спам-атаку</div>
+                <div>✅ Персоналізовано налаштування та підпис</div>
+                <div>✅ Надіслано власного листа</div>
+            </div>
+
+            <button onclick="closeCompletionModal()" class="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold rounded-xl shadow-lg shadow-amber-500/30 hover:opacity-95 transition">
+                Продовжити користуватися поштою
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // GLOBAL APP STATE
+        const state = {
+            currentUser: null,
+            currentFolder: 'inbox', // inbox, sent, spam, trash
+            selectedEmailId: null,
+            emails: [],
+            themeMode: 'light',
+            avatarColor: 'bg-blue-600',
+            signature: '',
+            quests: [
+                { id: 1, title: "Реєстрація", desc: "Створити акаунт", done: false },
+                { id: 2, title: "Лист вчителю", desc: "Прочитати та відповісти", done: false },
+                { id: 3, title: "Захист від спаму", desc: "Скинути спам у спам", done: false },
+                { id: 4, title: "Налаштування", desc: "Змінити тему чи підпис", done: false },
+                { id: 5, title: "Власний лист", desc: "Написати нового листа", done: false }
+            ]
+        };
+
+        // INITIALIZATION
+        window.onload = function() {
+            renderQuests();
+            updateQuestProgress();
+        };
+
+        function handleRegistration(event) {
+            event.preventDefault();
+            const fullName = document.getElementById('regFullName').value.trim();
+            const username = document.getElementById('regUsername').value.trim().toLowerCase();
+            const grade = document.getElementById('regGrade').value;
+
+            state.currentUser = {
+                name: fullName,
+                email: `${username}@edumail.ua`,
+                grade: grade
+            };
+
+            // Set default signature based on user name & grade
+            state.signature = `З повагою,\n${fullName},\nучень ${grade}`;
+            document.getElementById('settingsSignatureInput').value = state.signature;
+
+            // Update UI elements with user details
+            document.getElementById('userNameDisplay').innerText = fullName;
+            document.getElementById('userEmailDisplay').innerText = state.currentUser.email;
+            document.getElementById('userAvatar').innerText = fullName.charAt(0).toUpperCase();
+
+            // Hide registration modal
+            document.getElementById('registrationModal').classList.add('hidden');
+
+            // Complete Quest 1
+            completeQuest(1);
+
+            // Populate initial email from teacher
+            initTeacherEmail();
+
+            playSound('success');
+        }
+
+        function getTeacherName() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const teacherParam = urlParams.get('teacher');
+            if (teacherParam && teacherParam.trim() !== '') {
+                return teacherParam.trim();
+            }
+            return 'Данііл Дмитрович';
+        }
+
+        function initTeacherEmail() {
+            const teacherName = getTeacherName();
+            const teacherInitial = teacherName.charAt(0).toUpperCase();
+
+            const initialMail = {
+                id: 'email-teacher-1',
+                folder: 'inbox',
+                senderName: `${teacherName} (Вчитель)`,
+                senderEmail: 'teacher@school.edu.ua',
+                recipient: state.currentUser.email,
+                subject: 'Ласкаво просимо до шкільної пошти EduMail! 🎓',
+                date: 'Сьогодні, ' + getCurrentTime(),
+                read: false,
+                avatarBg: 'bg-indigo-600',
+                avatarInitial: teacherInitial,
+                body: `<p>Доброго дня, <b>${escapeHtml(state.currentUser.name)}</b>!</p>
+                       <p>Вітаю тебе із успішною реєстрацією в нашій навчальній електронній пошті <b>EduMail</b>.</p>
+                       <p>Електронна пошта — це один із найважливіших інструментів для навчання, спілкування та майбутньої професії. На цьому уроці ти навчишся грамотно листуватися, розрізняти безпечні та небезпечні листи (спам), а також налаштовувати свій інтерфейс.</p>
+                       <p><b>Твоє перше завдання:</b> Дай відповідь на цей лист скориставшись формою швидкої відповіді знизу. Напиши, наприклад: <i>"Доброго дня! Дякую, я готовий(а) до уроку!"</i></p>
+                       <br>
+                       <p>Успіхів у навчанні!<br><i>З повагою, ${escapeHtml(teacherName)}, твій вчитель цифрової грамотності.</i></p>`
+            };
+
+            state.emails.push(initialMail);
+            renderEmailList();
+            updateFolderBadges();
+        }
+
+        function switchFolder(folder) {
+            state.currentFolder = folder;
+            state.selectedEmailId = null;
+
+            // Update active sidebar style
+            const folders = ['inbox', 'sent', 'spam', 'trash'];
+            folders.forEach(f => {
+                const btn = document.getElementById(`folder-${f}`);
+                if (btn) {
+                    if (f === folder) {
+                        btn.className = "w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-medium text-xs sm:text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 transition";
+                    } else {
+                        btn.className = "w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-medium text-xs sm:text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition";
+                    }
+                }
+            });
+
+            // Hide settings, show main mail views
+            document.getElementById('settingsView').classList.add('hidden');
+            document.getElementById('emailListSection').classList.remove('hidden');
+
+            const folderTitles = {
+                inbox: 'Вхідні',
+                sent: 'Відправлені',
+                spam: 'Спам',
+                trash: 'Кошик'
+            };
+            document.getElementById('currentFolderName').innerText = folderTitles[folder] || 'Листи';
+
+            renderEmailList();
+            showEmptyMailState();
+        }
+
+        function renderEmailList() {
+            const container = document.getElementById('emailListContainer');
+            const filteredEmails = state.emails.filter(e => e.folder === state.currentFolder);
+            
+            document.getElementById('mailListCounter').innerText = `${filteredEmails.length} листів`;
+
+            if (filteredEmails.length === 0) {
+                container.innerHTML = `
+                    <div class="p-8 text-center text-slate-400 text-xs">
+                        <i class="fa-solid fa-folder-open text-2xl mb-2 block opacity-50"></i>
+                        Папка порожня
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            filteredEmails.forEach(email => {
+                const isSelected = email.id === state.selectedEmailId;
+                const unreadClass = !email.read ? 'font-bold bg-blue-50/50 dark:bg-blue-950/20' : '';
+                const selectedClass = isSelected ? 'bg-blue-100/70 dark:bg-slate-700/80 border-l-4 border-blue-600' : 'hover:bg-slate-100 dark:hover:bg-slate-700/40';
+
+                html += `
+                    <div onclick="selectEmail('${email.id}')" class="p-3.5 cursor-pointer transition flex items-start space-x-3 ${unreadClass} ${selectedClass}">
+                        <div class="w-9 h-9 rounded-full ${email.avatarBg || 'bg-blue-600'} text-white flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                            ${email.avatarInitial || 'M'}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">${escapeHtml(email.senderName)}</span>
+                                <span class="text-[10px] text-slate-400 shrink-0 ml-1">${email.date.split(',')[1] || email.date}</span>
+                            </div>
+                            <div class="text-xs text-slate-800 dark:text-slate-200 truncate ${!email.read ? 'font-semibold' : ''}">${escapeHtml(email.subject)}</div>
+                            <div class="text-[11px] text-slate-400 truncate mt-0.5">${stripHtml(email.body)}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function selectEmail(id) {
+            const email = state.emails.find(e => e.id === id);
+            if (!email) return;
+
+            state.selectedEmailId = id;
+            email.read = true;
+
+            // Render email detail view
+            document.getElementById('emptyMailState').classList.add('hidden');
+            document.getElementById('settingsView').classList.add('hidden');
+            const detailView = document.getElementById('emailDetailView');
+            detailView.classList.remove('hidden');
+            detailView.classList.add('flex');
+
+            document.getElementById('mailDetailSubject').innerText = email.subject;
+            document.getElementById('mailDetailSenderName').innerText = email.senderName;
+            document.getElementById('mailDetailSenderEmail').innerText = `<${email.senderEmail}>`;
+            document.getElementById('mailDetailRecipient').innerText = email.recipient;
+            document.getElementById('mailDetailDate').innerText = email.date;
+            document.getElementById('mailDetailBody').innerHTML = email.body;
+
+            const avatarEl = document.getElementById('mailDetailAvatar');
+            avatarEl.className = `w-11 h-11 rounded-full ${email.avatarBg || 'bg-blue-600'} text-white flex items-center justify-center font-bold text-lg shadow-sm`;
+            avatarEl.innerText = email.avatarInitial || 'M';
+
+            // Hide quick reply if in Spam or Sent folder
+            const quickReply = document.getElementById('quickReplySection');
+            if (email.folder === 'spam' || email.folder === 'sent' || email.folder === 'trash') {
+                quickReply.classList.add('hidden');
+            } else {
+                quickReply.classList.remove('hidden');
+            }
+
+            renderEmailList();
+            updateFolderBadges();
+        }
+
+        function showEmptyMailState() {
+            document.getElementById('emptyMailState').classList.remove('hidden');
+            document.getElementById('emailDetailView').classList.add('hidden');
+            document.getElementById('emailDetailView').classList.remove('flex');
+        }
+
+        function handleSendReply(event) {
+            event.preventDefault();
+            const replyText = document.getElementById('replyTextarea').value.trim();
+            if (!replyText) return;
+
+            const currentMail = state.emails.find(e => e.id === state.selectedEmailId);
+
+            // Create sent mail record
+            const sentMail = {
+                id: 'email-sent-' + Date.now(),
+                folder: 'sent',
+                senderName: state.currentUser.name,
+                senderEmail: state.currentUser.email,
+                recipient: currentMail ? currentMail.senderEmail : 'teacher@school.edu.ua',
+                subject: 'Re: ' + (currentMail ? currentMail.subject : 'Відповідь'),
+                date: 'Сьогодні, ' + getCurrentTime(),
+                read: true,
+                avatarBg: state.avatarColor,
+                avatarInitial: state.currentUser.name.charAt(0).toUpperCase(),
+                body: `<p>${escapeHtml(replyText).replace(/\n/g, '<br>')}</p><br><hr class="my-2 border-slate-200"><p class="text-xs text-slate-400">${escapeHtml(state.signature).replace(/\n/g, '<br>')}</p>`
+            };
+
+            state.emails.push(sentMail);
+            document.getElementById('replyTextarea').value = '';
+            playSound('success');
+
+            // Complete Quest 2
+            completeQuest(2);
+
+            updateFolderBadges();
+
+            // Trigger Spam Simulation after 4 seconds to simulate real-world incoming phishing mail!
+            setTimeout(simulateSpamArrival, 4000);
+        }
+
+        function simulateSpamArrival() {
+            // Check if spam already arrived
+            if (state.emails.some(e => e.id === 'email-spam-simulated')) return;
+
+            const spamMail = {
+                id: 'email-spam-simulated',
+                folder: 'inbox', // Arrives in Inbox first, student needs to flag it!
+                senderName: '🎁 ГОЛОВНИЙ ПРИЗ 2026 🎁',
+                senderEmail: 'win-1000000-grn@prize-jackpot-super.xyz',
+                recipient: state.currentUser.email,
+                subject: '🔥🔥 УВАГА! Ви виграли 100 000 ГРИВЕНЬ! Клікайте негайно!',
+                date: 'Сьогодні, ' + getCurrentTime(),
+                read: false,
+                avatarBg: 'bg-rose-600',
+                avatarInitial: '!',
+                body: `<div class="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-900">
+                        <h3 class="font-bold text-lg mb-2">🎉 ВІТАЄМО! ВИ СТАЛИ ПЕРЕМОЖЦЕМ! 🎉</h3>
+                        <p>Ваша електронна адреса обрана у випадковому розіграші. Ви виграли <b>100 000 грн</b> та новий смарт-телефон!</p>
+                        <p class="mt-2">Щоб забрати приз, перейдіть за посиланням протягом 5 хвилин і введіть свої банківські дані:</p>
+                        <a href="#" onclick="alert('⚠️ УВАГА! Це фальшиве посилання! Ніколи не натискайте на підозрілі посилання у незнайомих листах!'); return false;" class="inline-block mt-3 px-4 py-2 bg-rose-600 text-white font-bold rounded-lg hover:bg-rose-700">ОТРИМАТИ ГРОШІ ЗАРАЗ >>></a>
+                        <p class="text-xs text-rose-500 mt-3">* Завдання уроку: Не переходьте за посиланнями! Перемістіть цей лист у папку "Спам"!</p>
+                       </div>`
+            };
+
+            state.emails.push(spamMail);
+            renderEmailList();
+            updateFolderBadges();
+            playSound('newmail');
+
+            // Show Toast Notification
+            showToast('⚠️ Отримано новий підозрілий лист у Вхідних!');
+        }
+
+        function markCurrentAsSpam() {
+            const currentMail = state.emails.find(e => e.id === state.selectedEmailId);
+            if (!currentMail) return;
+
+            currentMail.folder = 'spam';
+            playSound('spam');
+
+            // If it was the simulated spam email -> complete Quest 3
+            if (currentMail.id === 'email-spam-simulated') {
+                completeQuest(3);
+            }
+
+            renderEmailList();
+            updateFolderBadges();
+            showEmptyMailState();
+            showToast('🗑️ Лист переміщено в папку Спам!');
+        }
+
+        function deleteCurrentEmail() {
+            const currentMail = state.emails.find(e => e.id === state.selectedEmailId);
+            if (!currentMail) return;
+
+            currentMail.folder = 'trash';
+            renderEmailList();
+            updateFolderBadges();
+            showEmptyMailState();
+        }
+
+        function showSettingsView() {
+            document.getElementById('emailListSection').classList.add('hidden');
+            document.getElementById('emptyMailState').classList.add('hidden');
+            document.getElementById('emailDetailView').classList.add('hidden');
+            document.getElementById('settingsView').classList.remove('hidden');
+        }
+
+        function setThemeMode(mode) {
+            state.themeMode = mode;
+            const btnLight = document.getElementById('btnThemeLight');
+            const btnDark = document.getElementById('btnThemeDark');
+
+            if (mode === 'dark') {
+                document.documentElement.classList.add('dark');
+                btnDark.classList.add('border-blue-600');
+                btnDark.classList.remove('border-transparent');
+                btnLight.classList.remove('border-blue-600');
+                btnLight.classList.add('border-transparent');
+            } else {
+                document.documentElement.classList.remove('dark');
+                btnLight.classList.add('border-blue-600');
+                btnLight.classList.remove('border-transparent');
+                btnDark.classList.remove('border-blue-600');
+                btnDark.classList.add('border-transparent');
+            }
+        }
+
+        function setAvatarColor(colorClass) {
+            state.avatarColor = colorClass;
+            const avatarDisplay = document.getElementById('userAvatar');
+            if (avatarDisplay) {
+                avatarDisplay.className = `w-8 h-8 rounded-full ${colorClass} text-white flex items-center justify-center font-bold text-sm uppercase shadow transition-colors`;
+            }
+
+            // Update icon and highlight ring on option buttons
+            const buttons = document.querySelectorAll('#avatarColorPicker button');
+            buttons.forEach(btn => {
+                btn.innerHTML = '';
+                btn.classList.remove('ring-2', 'ring-offset-2', 'ring-slate-400', 'dark:ring-slate-200');
+                if (btn.getAttribute('data-color') === colorClass) {
+                    btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+                    btn.classList.add('ring-2', 'ring-offset-2', 'ring-slate-400', 'dark:ring-slate-200');
+                }
+            });
+        }
+
+        function saveSettings() {
+            const newSig = document.getElementById('settingsSignatureInput').value;
+            state.signature = newSig;
+
+            playSound('success');
+            showToast('✅ Налаштування успішно збережено!');
+
+            // Complete Quest 4
+            completeQuest(4);
+        }
+
+        function openComposeModal() {
+            document.getElementById('composeModal').classList.remove('hidden');
+        }
+
+        function closeComposeModal() {
+            document.getElementById('composeModal').classList.add('hidden');
+        }
+
+        function handleSendNewMail(event) {
+            event.preventDefault();
+            const to = document.getElementById('composeTo').value.trim();
+            const subject = document.getElementById('composeSubject').value.trim();
+            const body = document.getElementById('composeBody').value.trim();
+
+            const newMail = {
+                id: 'email-new-' + Date.now(),
+                folder: 'sent',
+                senderName: state.currentUser ? state.currentUser.name : 'Учень',
+                senderEmail: state.currentUser ? state.currentUser.email : 'user@edumail.ua',
+                recipient: to,
+                subject: subject,
+                date: 'Сьогодні, ' + getCurrentTime(),
+                read: true,
+                avatarBg: state.avatarColor,
+                avatarInitial: state.currentUser ? state.currentUser.name.charAt(0).toUpperCase() : 'U',
+                body: `<p>${escapeHtml(body).replace(/\n/g, '<br>')}</p><br><hr class="my-2 border-slate-200"><p class="text-xs text-slate-400">${escapeHtml(state.signature).replace(/\n/g, '<br>')}</p>`
+            };
+
+            state.emails.push(newMail);
+
+            // Clear inputs
+            document.getElementById('composeTo').value = '';
+            document.getElementById('composeSubject').value = '';
+            document.getElementById('composeBody').value = '';
+
+            closeComposeModal();
+            playSound('success');
+            showToast('✉️ Лист успішно надіслано!');
+
+            // Complete Quest 5
+            completeQuest(5);
+
+            switchFolder('sent');
+        }
+
+        function renderQuests() {
+            const container = document.getElementById('questListContainer');
+            let html = '';
+
+            state.quests.forEach(q => {
+                const statusClass = q.done ? 'bg-emerald-100 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300' : 'bg-white dark:bg-slate-700/50 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300';
+                const icon = q.done ? '<i class="fa-solid fa-circle-check text-emerald-500"></i>' : '<i class="fa-regular fa-circle text-slate-300"></i>';
+
+                html += `
+                    <div class="p-2 rounded-xl border ${statusClass} flex items-center space-x-2 transition">
+                        <span class="text-sm">${icon}</span>
+                        <div class="min-w-0 flex-1">
+                            <div class="font-bold text-[11px] truncate">${q.id}. ${q.title}</div>
+                            <div class="text-[10px] opacity-75 truncate">${q.desc}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function completeQuest(questId) {
+            const quest = state.quests.find(q => q.id === questId);
+            if (quest && !quest.done) {
+                quest.done = true;
+                renderQuests();
+                updateQuestProgress();
+
+                // Check if all quests completed
+                if (state.quests.every(q => q.done)) {
+                    setTimeout(() => {
+                        playSound('success');
+                        document.getElementById('completionModal').classList.remove('hidden');
+                    }, 800);
+                }
+            }
+        }
+
+        function updateQuestProgress() {
+            const doneCount = state.quests.filter(q => q.done).length;
+            const total = state.quests.length;
+            const percentage = (doneCount / total) * 100;
+
+            document.getElementById('questCounterBadge').innerText = `${doneCount}/${total}`;
+            document.getElementById('questProgressBar').style.width = `${percentage}%`;
+        }
+
+        function toggleQuestPanel() {
+            const panel = document.getElementById('questPanel');
+            panel.classList.toggle('hidden');
+        }
+
+        function closeCompletionModal() {
+            document.getElementById('completionModal').classList.add('hidden');
+        }
+
+        function updateFolderBadges() {
+            const unreadInbox = state.emails.filter(e => e.folder === 'inbox' && !e.read).length;
+            const sentCount = state.emails.filter(e => e.folder === 'sent').length;
+            const spamCount = state.emails.filter(e => e.folder === 'spam').length;
+
+            const inboxBadge = document.getElementById('unreadInboxBadge');
+            if (unreadInbox > 0) {
+                inboxBadge.innerText = unreadInbox;
+                inboxBadge.classList.remove('hidden');
+            } else {
+                inboxBadge.classList.add('hidden');
+            }
+
+            document.getElementById('sentCountBadge').innerText = sentCount;
+
+            const spamBadge = document.getElementById('spamCountBadge');
+            if (spamCount > 0) {
+                spamBadge.innerText = spamCount;
+                spamBadge.classList.remove('hidden');
+            } else {
+                spamBadge.classList.add('hidden');
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl text-xs font-semibold flex items-center space-x-2 border border-slate-700 animate-bounce-short';
+            toast.innerHTML = `<span>${message}</span>`;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3500);
+        }
+
+        function getCurrentTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;")
+                      .replace(/</g, "&lt;")
+                      .replace(/>/g, "&gt;")
+                      .replace(/"/g, "&quot;")
+                      .replace(/'/g, "&#039;");
+        }
+
+        function stripHtml(html) {
+            const tmp = document.createElement("DIV");
+            tmp.innerHTML = html;
+            return tmp.textContent || tmp.innerText || "";
+        }
+
+        function filterEmails() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const emailItems = document.querySelectorAll('#emailListContainer > div');
+
+            emailItems.forEach(item => {
+                const text = item.innerText.toLowerCase();
+                if (text.includes(query)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        function closeMobileMailDetail() {
+            showEmptyMailState();
+        }
+
+        // Toggle mobile sidebar
+        document.getElementById('toggleMobileSidebar').addEventListener('click', () => {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('-translate-x-full');
+        });
+    </script>
+</body>
+</html>
