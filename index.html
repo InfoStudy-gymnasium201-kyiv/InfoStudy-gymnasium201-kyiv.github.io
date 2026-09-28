@@ -51,7 +51,7 @@
   <section class="bg-gradient-to-b from-brand-900 via-brand-800 to-emerald-900 text-white py-12 md:py-16 relative overflow-hidden">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
       <div class="inline-flex items-center space-x-2 bg-brand-500/20 backdrop-blur-md border border-brand-400/30 px-3 py-1 rounded-full text-brand-200 text-xs font-medium mb-4">
-        <span>Каталог матеріалів</span>
+        <span>Каталог навчальних матеріалів</span>
       </div>
       <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-heading tracking-tight text-white mb-4">
         Обирай клас та вивчай Інформатику
@@ -60,9 +60,9 @@
         Зручні інтерактивні уроки, структуровані за темами та класами для швидкого та ефективного навчання.
       </p>
 
-      <!-- Перемикач класів -->
+      <!-- Таби класів -->
       <div class="flex flex-wrap justify-center gap-2 sm:gap-3" id="class-tabs">
-        <!-- Кнопки класів рендеряться динамічно через JS -->
+        <span class="text-brand-200 text-sm animate-pulse">Завантаження класів...</span>
       </div>
     </div>
   </section>
@@ -74,7 +74,7 @@
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
       <div class="flex items-center space-x-3">
         <span id="selected-class-badge" class="px-3 py-1 bg-brand-100 text-brand-800 text-sm font-bold rounded-full">
-          7 клас
+          Обраний клас
         </span>
         <span id="lessons-count" class="text-xs font-medium text-slate-500">
           Завантаження...
@@ -92,7 +92,9 @@
 
     <!-- Контейнер для списку тем та уроків -->
     <div id="topics-container" class="space-y-10">
-      <!-- Динамічний вміст -->
+      <div class="text-center py-12 bg-white rounded-2xl border border-slate-200">
+        <p class="text-slate-500">Завантаження уроків з бази даних...</p>
+      </div>
     </div>
 
   </main>
@@ -105,161 +107,112 @@
   </footer>
 
   <script>
-    // Масив доступних класів та їхніх уроків
-    // Ви можете додавати нові класи та нові уроки сюди
-    const DATABASE = {
-      classes: [
-        { id: '5', name: '5 клас' },
-        { id: '6', name: '6 клас' },
-        { id: '7', name: '7 клас' },
-        { id: '8', name: '8 клас' },
-        { id: '9', name: '9 клас' }
-      ],
-      // Структура уроків для кожного класу
-      lessons: {
-        '7': [
-          {
-            topic: 'Тема 1. Мережеві технології та кібербезпека',
-            items: [
-              {
-                id: '2627.7.1',
-                title: 'Поняття комп’ютерної мережі. Локальні та глобальні мережі',
-                desc: 'Основні принципи побудови мереж, їх класифікація та призначення.',
-                badge: '45 хв'
-              },
-              {
-                id: '2627.7.2',
-                title: 'Безпека в Інтернеті та захист персональних даних',
-                desc: 'Правила безпечного користування мережею та запобігання загрозам.',
-                badge: '45 хв'
-              },
-              {
-                id: '2627.7.3',
-                title: 'Сервіси веб-2.0 та хмарні технології',
-                desc: 'Використання хмарних сховищ, онлайн-документів та спільна робота.',
-                badge: '45 хв'
-              }
-            ]
-          },
-          {
-            topic: 'Тема 2. Алгоритми та програмування',
-            items: [
-              {
-                id: '2627.7.4',
-                title: 'Базові алгоритмічні структури: розгалуження та цикли',
-                desc: 'Повторення та поглиблення знань з побудови алгоритмів.',
-                badge: 'Практикум'
-              },
-              {
-                id: '2627.7.5',
-                title: 'Створення проектів із графічним інтерфейсом',
-                desc: 'Розробка програм з кнопками, текстовими полями та написом.',
-                badge: 'Проект'
-              }
-            ]
-          }
-        ],
-        '5': [
-          {
-            topic: 'Тема 1. Інформація та пристрої',
-            items: [
-              {
-                id: '2627.5.1',
-                title: 'Інформаційні процеси та сучасні пристрої',
-                desc: 'Як людина та комп’ютер працюють з інформацією.',
-                badge: 'Вступ'
-              }
-            ]
-          }
-        ]
+    const DB_URL = 'https://raw.githubusercontent.com/InfoStudy-gymnasium201-kyiv/s/refs/heads/main/lessondb.json';
+    
+    let dbData = null;
+    let activeClassIndex = 0;
+
+    async function loadDatabase() {
+      try {
+        const response = await fetch(DB_URL);
+        if (!response.ok) throw new Error('Не вдалося завантажити базу даних уроків');
+        
+        dbData = await response.json();
+
+        if (dbData.classes && dbData.classes.length > 0) {
+          renderClassTabs();
+          selectClass(0);
+        } else {
+          document.getElementById('topics-container').innerHTML = `
+            <div class="text-center py-12 bg-white rounded-2xl border border-slate-200 text-slate-500">
+              База даних порожня.
+            </div>`;
+        }
+      } catch (err) {
+        document.getElementById('topics-container').innerHTML = `
+          <div class="bg-red-50 text-red-700 p-6 rounded-2xl border border-red-200 text-center">
+            <h3 class="font-bold text-lg mb-1">Помилка завантаження</h3>
+            <p class="text-sm">${err.message}</p>
+          </div>`;
       }
-    };
-
-    let activeClassId = '7'; // Клас за замовчуванням
-
-    function init() {
-      renderClassTabs();
-      selectClass(activeClassId);
     }
 
-    // Рендер кнопок вибору класу
+    // Рендер кнопок класів
     function renderClassTabs() {
       const tabsContainer = document.getElementById('class-tabs');
-      tabsContainer.innerHTML = DATABASE.classes.map(cls => `
+      tabsContainer.innerHTML = dbData.classes.map((cls, index) => `
         <button 
-          id="tab-btn-${cls.id}"
-          onclick="selectClass('${cls.id}')"
+          id="tab-btn-${index}"
+          onclick="selectClass(${index})"
           class="px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm duration-200">
-          ${cls.name}
+          ${cls.className}
         </button>
       `).join('');
     }
 
-    // Перемикання активного класу
-    function selectClass(classId) {
-      activeClassId = classId;
+    // Перемикання класу
+    function selectClass(index) {
+      activeClassIndex = index;
 
-      // Оновлення стилів кнопок класів
-      DATABASE.classes.forEach(cls => {
-        const btn = document.getElementById(`tab-btn-${cls.id}`);
-        if (cls.id === classId) {
+      dbData.classes.forEach((cls, idx) => {
+        const btn = document.getElementById(`tab-btn-${idx}`);
+        if (idx === index) {
           btn.className = 'px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-md bg-white text-brand-900 border-2 border-brand-400 scale-105';
         } else {
           btn.className = 'px-5 py-2.5 rounded-xl font-bold text-sm transition-all bg-brand-800/60 hover:bg-brand-700 text-brand-100 border border-brand-700/50';
         }
       });
 
-      // Оновлення заголовка
-      const currentClassName = DATABASE.classes.find(c => c.id === classId)?.name || '';
-      document.getElementById('selected-class-badge').innerText = currentClassName;
+      const currentClass = dbData.classes[index];
+      document.getElementById('selected-class-badge').innerText = currentClass.className;
 
-      // Рендер уроків
       filterLessons();
     }
 
-    // Фільтрація та рендер списку уроків
+    // Фільтрація та виведення тем та уроків
     function filterLessons() {
       const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
       const container = document.getElementById('topics-container');
-      const topicsData = DATABASE.lessons[activeClassId] || [];
+      const currentClass = dbData.classes[activeClassIndex];
+
+      if (!currentClass || !currentClass.topics) return;
 
       let totalLessonsCount = 0;
       let html = '';
 
-      topicsData.forEach(topicObj => {
-        // Фільтрація уроків за пошуковим запитом
-        const filteredItems = topicObj.items.filter(item => 
-          item.title.toLowerCase().includes(searchQuery) || 
-          item.desc.toLowerCase().includes(searchQuery) ||
-          item.id.toLowerCase().includes(searchQuery)
+      currentClass.topics.forEach(topicObj => {
+        const filteredLessons = topicObj.lessons.filter(lesson => 
+          lesson.title.toLowerCase().includes(searchQuery) || 
+          lesson.description.toLowerCase().includes(searchQuery) ||
+          String(lesson.lessonNumber).toLowerCase().includes(searchQuery)
         );
 
-        if (filteredItems.length > 0) {
-          totalLessonsCount += filteredItems.length;
+        if (filteredLessons.length > 0) {
+          totalLessonsCount += filteredLessons.length;
 
           html += `
             <div class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm">
               <h2 class="text-xl font-bold font-heading text-slate-800 mb-6 flex items-center space-x-2">
                 <span class="w-2.5 h-6 bg-brand-500 rounded-full inline-block"></span>
-                <span>${topicObj.topic}</span>
+                <span>${topicObj.topicTitle}</span>
               </h2>
 
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                ${filteredItems.map(lesson => `
-                  <a href="lesson.html?lesson=${lesson.id}" 
+                ${filteredLessons.map(lesson => `
+                  <a href="${lesson.lessonUrl}" 
                      class="group bg-slate-50 hover:bg-brand-50/50 border border-slate-200 hover:border-brand-300 rounded-xl p-5 flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
                     <div>
                       <div class="flex items-center justify-between gap-2 mb-3">
                         <span class="text-[11px] font-bold text-brand-700 bg-brand-100/80 px-2.5 py-0.5 rounded-md uppercase tracking-wider">
-                          Урок ${lesson.id.split('.').pop()}
+                          Урок ${lesson.lessonNumber}
                         </span>
-                        ${lesson.badge ? `<span class="text-[11px] font-medium text-slate-500 bg-slate-200/60 px-2 py-0.5 rounded-md">${lesson.badge}</span>` : ''}
+                        ${lesson.duration ? `<span class="text-[11px] font-medium text-slate-500 bg-slate-200/60 px-2 py-0.5 rounded-md">${lesson.duration}</span>` : ''}
                       </div>
                       <h3 class="font-bold text-slate-800 group-hover:text-brand-700 text-base mb-2 transition-colors line-clamp-2">
                         ${lesson.title}
                       </h3>
                       <p class="text-xs text-slate-600 line-clamp-3 leading-relaxed mb-4">
-                        ${lesson.desc}
+                        ${lesson.description}
                       </p>
                     </div>
 
@@ -277,10 +230,8 @@
         }
       });
 
-      // Підрахунок
       document.getElementById('lessons-count').innerText = `Знайдено уроків: ${totalLessonsCount}`;
 
-      // Якщо нічого не знайдено
       if (totalLessonsCount === 0) {
         html = `
           <div class="text-center py-12 bg-white rounded-2xl border border-slate-200">
@@ -288,7 +239,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
             <h3 class="text-base font-bold text-slate-700 mb-1">Уроків не знайдено</h3>
-            <p class="text-xs text-slate-500">Спробуйте змінити критерії пошуку або обрати інший клас.</p>
+            <p class="text-xs text-slate-500">Спробуйте змінити пошуковий запит або обрати інший клас.</p>
           </div>
         `;
       }
@@ -296,7 +247,7 @@
       container.innerHTML = html;
     }
 
-    window.addEventListener('DOMContentLoaded', init);
+    window.addEventListener('DOMContentLoaded', loadDatabase);
   </script>
 </body>
 </html>
