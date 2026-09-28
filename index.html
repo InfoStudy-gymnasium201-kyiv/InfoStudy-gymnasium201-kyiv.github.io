@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="uk" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InfoStudy — Навчальний портал з інформатики</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4', 100: '#dcfce7', 200: '#bbf7d0', 300: '#86efac',
+              400: '#4ade80', 500: '#22c55e', 600: '#16a34a', 700: '#15803d',
+              800: '#166534', 900: '#14532d', 950: '#052e16'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            heading: ['Plus Jakarta Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#f8faf9] text-slate-800 antialiased selection:bg-brand-200 selection:text-brand-900 min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-brand-100 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <img src="https://github.com/InfoStudy-gymnasium201-kyiv/InfoStudy-gymnasium201-kyiv.github.io/blob/main/Extra/it405_logo.png?raw=true" alt="InfoStudy Logo" class="h-10 w-auto object-contain" />
+        <div>
+          <span class="text-xs font-semibold text-brand-700 uppercase tracking-wider block">Освітній портал</span>
+          <h1 class="text-sm md:text-base font-bold font-heading text-slate-800">InfoStudy</h1>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2 text-xs text-slate-600 bg-brand-50 px-3 py-1.5 rounded-full border border-brand-100">
+        <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
+        <span class="font-medium">Інтерактивні уроки</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-b from-brand-900 via-brand-800 to-emerald-900 text-white py-12 md:py-16 relative overflow-hidden">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+      <div class="inline-flex items-center space-x-2 bg-brand-500/20 backdrop-blur-md border border-brand-400/30 px-3 py-1 rounded-full text-brand-200 text-xs font-medium mb-4">
+        <span>Каталог матеріалів</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-heading tracking-tight text-white mb-4">
+        Обирай клас та вивчай Інформатику
+      </h1>
+      <p class="text-brand-100 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed mb-8">
+        Зручні інтерактивні уроки, структуровані за темами та класами для швидкого та ефективного навчання.
+      </p>
+
+      <!-- Перемикач класів -->
+      <div class="flex flex-wrap justify-center gap-2 sm:gap-3" id="class-tabs">
+        <!-- Кнопки класів рендеряться динамічно через JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Area -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow w-full">
+    
+    <!-- Панель фільтрів та пошуку -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+      <div class="flex items-center space-x-3">
+        <span id="selected-class-badge" class="px-3 py-1 bg-brand-100 text-brand-800 text-sm font-bold rounded-full">
+          7 клас
+        </span>
+        <span id="lessons-count" class="text-xs font-medium text-slate-500">
+          Завантаження...
+        </span>
+      </div>
+
+      <!-- Пошук -->
+      <div class="relative max-w-xs w-full">
+        <input type="text" id="search-input" oninput="filterLessons()" placeholder="Пошук уроку..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 focus:bg-white transition">
+        <svg class="w-4 h-4 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Контейнер для списку тем та уроків -->
+    <div id="topics-container" class="space-y-10">
+      <!-- Динамічний вміст -->
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-6 mt-12">
+    <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
+      &copy; InfoStudy Gymnasium 201 Kyiv. Усі права захищено.
+    </div>
+  </footer>
+
+  <script>
+    // Масив доступних класів та їхніх уроків
+    // Ви можете додавати нові класи та нові уроки сюди
+    const DATABASE = {
+      classes: [
+        { id: '5', name: '5 клас' },
+        { id: '6', name: '6 клас' },
+        { id: '7', name: '7 клас' },
+        { id: '8', name: '8 клас' },
+        { id: '9', name: '9 клас' }
+      ],
+      // Структура уроків для кожного класу
+      lessons: {
+        '7': [
+          {
+            topic: 'Тема 1. Мережеві технології та кібербезпека',
+            items: [
+              {
+                id: '2627.7.1',
+                title: 'Поняття комп’ютерної мережі. Локальні та глобальні мережі',
+                desc: 'Основні принципи побудови мереж, їх класифікація та призначення.',
+                badge: '45 хв'
+              },
+              {
+                id: '2627.7.2',
+                title: 'Безпека в Інтернеті та захист персональних даних',
+                desc: 'Правила безпечного користування мережею та запобігання загрозам.',
+                badge: '45 хв'
+              },
+              {
+                id: '2627.7.3',
+                title: 'Сервіси веб-2.0 та хмарні технології',
+                desc: 'Використання хмарних сховищ, онлайн-документів та спільна робота.',
+                badge: '45 хв'
+              }
+            ]
+          },
+          {
+            topic: 'Тема 2. Алгоритми та програмування',
+            items: [
+              {
+                id: '2627.7.4',
+                title: 'Базові алгоритмічні структури: розгалуження та цикли',
+                desc: 'Повторення та поглиблення знань з побудови алгоритмів.',
+                badge: 'Практикум'
+              },
+              {
+                id: '2627.7.5',
+                title: 'Створення проектів із графічним інтерфейсом',
+                desc: 'Розробка програм з кнопками, текстовими полями та написом.',
+                badge: 'Проект'
+              }
+            ]
+          }
+        ],
+        '5': [
+          {
+            topic: 'Тема 1. Інформація та пристрої',
+            items: [
+              {
+                id: '2627.5.1',
+                title: 'Інформаційні процеси та сучасні пристрої',
+                desc: 'Як людина та комп’ютер працюють з інформацією.',
+                badge: 'Вступ'
+              }
+            ]
+          }
+        ]
+      }
+    };
+
+    let activeClassId = '7'; // Клас за замовчуванням
+
+    function init() {
+      renderClassTabs();
+      selectClass(activeClassId);
+    }
+
+    // Рендер кнопок вибору класу
+    function renderClassTabs() {
+      const tabsContainer = document.getElementById('class-tabs');
+      tabsContainer.innerHTML = DATABASE.classes.map(cls => `
+        <button 
+          id="tab-btn-${cls.id}"
+          onclick="selectClass('${cls.id}')"
+          class="px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm duration-200">
+          ${cls.name}
+        </button>
+      `).join('');
+    }
+
+    // Перемикання активного класу
+    function selectClass(classId) {
+      activeClassId = classId;
+
+      // Оновлення стилів кнопок класів
+      DATABASE.classes.forEach(cls => {
+        const btn = document.getElementById(`tab-btn-${cls.id}`);
+        if (cls.id === classId) {
+          btn.className = 'px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-md bg-white text-brand-900 border-2 border-brand-400 scale-105';
+        } else {
+          btn.className = 'px-5 py-2.5 rounded-xl font-bold text-sm transition-all bg-brand-800/60 hover:bg-brand-700 text-brand-100 border border-brand-700/50';
+        }
+      });
+
+      // Оновлення заголовка
+      const currentClassName = DATABASE.classes.find(c => c.id === classId)?.name || '';
+      document.getElementById('selected-class-badge').innerText = currentClassName;
+
+      // Рендер уроків
+      filterLessons();
+    }
+
+    // Фільтрація та рендер списку уроків
+    function filterLessons() {
+      const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
+      const container = document.getElementById('topics-container');
+      const topicsData = DATABASE.lessons[activeClassId] || [];
+
+      let totalLessonsCount = 0;
+      let html = '';
+
+      topicsData.forEach(topicObj => {
+        // Фільтрація уроків за пошуковим запитом
+        const filteredItems = topicObj.items.filter(item => 
+          item.title.toLowerCase().includes(searchQuery) || 
+          item.desc.toLowerCase().includes(searchQuery) ||
+          item.id.toLowerCase().includes(searchQuery)
+        );
+
+        if (filteredItems.length > 0) {
+          totalLessonsCount += filteredItems.length;
+
+          html += `
+            <div class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+              <h2 class="text-xl font-bold font-heading text-slate-800 mb-6 flex items-center space-x-2">
+                <span class="w-2.5 h-6 bg-brand-500 rounded-full inline-block"></span>
+                <span>${topicObj.topic}</span>
+              </h2>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                ${filteredItems.map(lesson => `
+                  <a href="lesson.html?lesson=${lesson.id}" 
+                     class="group bg-slate-50 hover:bg-brand-50/50 border border-slate-200 hover:border-brand-300 rounded-xl p-5 flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
+                    <div>
+                      <div class="flex items-center justify-between gap-2 mb-3">
+                        <span class="text-[11px] font-bold text-brand-700 bg-brand-100/80 px-2.5 py-0.5 rounded-md uppercase tracking-wider">
+                          Урок ${lesson.id.split('.').pop()}
+                        </span>
+                        ${lesson.badge ? `<span class="text-[11px] font-medium text-slate-500 bg-slate-200/60 px-2 py-0.5 rounded-md">${lesson.badge}</span>` : ''}
+                      </div>
+                      <h3 class="font-bold text-slate-800 group-hover:text-brand-700 text-base mb-2 transition-colors line-clamp-2">
+                        ${lesson.title}
+                      </h3>
+                      <p class="text-xs text-slate-600 line-clamp-3 leading-relaxed mb-4">
+                        ${lesson.desc}
+                      </p>
+                    </div>
+
+                    <div class="flex items-center text-xs font-semibold text-brand-600 group-hover:text-brand-700 pt-2 border-t border-slate-200/60">
+                      <span>Перейти до уроку</span>
+                      <svg class="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                      </svg>
+                    </div>
+                  </a>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }
+      });
+
+      // Підрахунок
+      document.getElementById('lessons-count').innerText = `Знайдено уроків: ${totalLessonsCount}`;
+
+      // Якщо нічого не знайдено
+      if (totalLessonsCount === 0) {
+        html = `
+          <div class="text-center py-12 bg-white rounded-2xl border border-slate-200">
+            <svg class="w-12 h-12 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h3 class="text-base font-bold text-slate-700 mb-1">Уроків не знайдено</h3>
+            <p class="text-xs text-slate-500">Спробуйте змінити критерії пошуку або обрати інший клас.</p>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
