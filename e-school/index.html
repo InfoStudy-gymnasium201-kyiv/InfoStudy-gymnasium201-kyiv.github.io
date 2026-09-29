@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="uk" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InfoStudy — Весела Інформатика 🎈</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Fredoka & Nunito -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            kids: {
+              yellow: '#FFDE59',
+              orange: '#FF914D',
+              pink: '#FF66C4',
+              purple: '#8C52FF',
+              blue: '#5CE1E6',
+              green: '#7ED957',
+              darkBg: '#2C1B4D'
+            }
+          },
+          fontFamily: {
+            sans: ['Nunito', 'sans-serif'],
+            heading: ['Fredoka', 'cursive'],
+          },
+          boxShadow: {
+            'pop': '0 8px 0 0 rgba(0, 0, 0, 0.15)',
+            'pop-sm': '0 4px 0 0 rgba(0, 0, 0, 0.12)',
+            'pop-hover': '0 12px 0 0 rgba(0, 0, 0, 0.15)',
+            'kids': '0 10px 25px -5px rgba(140, 82, 255, 0.25)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom Styles -->
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      background-color: #F4F0FF;
+      background-image: radial-gradient(#E2D5FF 2px, transparent 2px);
+      background-size: 28px 28px;
+    }
+    .font-heading {
+      font-family: 'Fredoka', cursive;
+    }
+
+    /* Bouncy Button Animation */
+    .bounce-hover {
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .bounce-hover:hover {
+      transform: translateY(-4px) scale(1.02);
+    }
+    .bounce-hover:active {
+      transform: translateY(2px) scale(0.98);
+    }
+
+    /* Floating background items */
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-12px) rotate(5deg); }
+    }
+    .animate-float {
+      animation: float 4s ease-in-out infinite;
+    }
+    .animate-float-delayed {
+      animation: float 5s ease-in-out 1.5s infinite;
+    }
+  </style>
+</head>
+<body class="text-slate-800 antialiased selection:bg-kids-pink selection:text-white min-h-screen flex flex-col">
+
+  <!-- Top Kid Header -->
+  <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b-4 border-kids-purple/20 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Logo & Title -->
+      <div class="flex items-center space-x-3 sm:space-x-4">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-kids-purple to-kids-pink flex items-center justify-center text-2xl shadow-pop-sm text-white transform -rotate-3 hover:rotate-0 transition">
+          🚀
+        </div>
+        <div>
+          <span class="text-xs sm:text-sm font-black text-kids-purple uppercase tracking-wider block bg-kids-purple/10 px-2.5 py-0.5 rounded-full w-max">
+            Освітній портал
+          </span>
+          <h1 class="text-base sm:text-xl font-bold font-heading text-slate-800 line-clamp-1">
+            InfoStudy — Весела Інформатика 🎈
+          </h1>
+        </div>
+      </div>
+
+      <!-- Header Status Badge -->
+      <div class="flex items-center space-x-2 text-sm font-bold text-purple-900 bg-kids-yellow px-4 py-2 rounded-2xl border-2 border-yellow-400 shadow-pop-sm">
+        <span>🌟</span>
+        <span class="font-heading uppercase tracking-wide">Інтерактивні уроки</span>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 text-white py-12 md:py-16 relative overflow-hidden shadow-lg border-b-8 border-kids-yellow">
+    
+    <!-- Decorative Floating Elements -->
+    <div class="absolute -top-6 -left-6 text-6xl opacity-30 animate-float pointer-events-none">🎈</div>
+    <div class="absolute top-1/2 right-4 text-7xl opacity-25 animate-float-delayed pointer-events-none">⭐</div>
+    <div class="absolute bottom-2 left-1/3 text-5xl opacity-20 animate-float pointer-events-none">🎨</div>
+
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+      
+      <div class="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-md border-2 border-white/40 px-4 py-1.5 rounded-full text-white text-sm sm:text-base font-bold mb-4 shadow-sm">
+        <span>⭐ Каталог навчальних матеріалів</span>
+      </div>
+
+      <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black font-heading tracking-wide text-white mb-4 drop-shadow-md leading-tight">
+        Обирай клас та вивчай Інформатику 🚀
+      </h1>
+
+      <p class="text-white/95 text-lg sm:text-2xl font-semibold max-w-3xl mx-auto leading-relaxed mb-8 drop-shadow-sm">
+        Зручні та веселі інтерактивні уроки з пригодами для швидкого та цікавого навчання! 🎨✨
+      </p>
+
+      <!-- Класи (Таби) -->
+      <div class="flex flex-wrap justify-center gap-3 sm:gap-4" id="class-tabs">
+        <span class="bg-white/30 text-white font-bold text-lg px-6 py-2.5 rounded-2xl border-2 border-white/50 animate-pulse">
+          Завантаження класів... 🌀
+        </span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Main Content Area -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow w-full">
+    
+    <!-- Панель фільтрів та пошуку -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10 bg-white p-5 rounded-3xl border-4 border-purple-200 shadow-pop">
+      <div class="flex items-center space-x-3">
+        <span id="selected-class-badge" class="px-4 py-1.5 bg-kids-purple text-white text-base font-black font-heading rounded-2xl shadow-sm">
+          Обраний клас
+        </span>
+        <span id="lessons-count" class="text-sm font-extrabold text-purple-900 bg-purple-100 px-3 py-1 rounded-xl">
+          Завантаження...
+        </span>
+      </div>
+
+      <!-- Пошук -->
+      <div class="relative max-w-md w-full">
+        <input type="text" id="search-input" oninput="filterLessons()" placeholder="Пошук уроку або теми..." class="w-full pl-11 pr-4 py-3 bg-purple-50/50 border-2 border-purple-200 rounded-2xl text-base font-bold text-slate-800 placeholder-purple-400 focus:outline-none focus:border-kids-purple focus:bg-white transition">
+        <span class="absolute left-3.5 top-3 text-xl">🔍</span>
+      </div>
+    </div>
+
+    <!-- Контейнер для списку тем та уроків -->
+    <div id="topics-container" class="space-y-10">
+      <div class="text-center py-16 bg-white rounded-3xl border-4 border-purple-200 shadow-pop">
+        <div class="inline-block animate-spin text-6xl mb-4">🌀</div>
+        <p class="text-xl font-bold text-purple-900 font-heading">Завантажуємо веселі уроки з бази даних...</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t-4 border-purple-200 py-8 mt-12">
+    <div class="max-w-7xl mx-auto px-4 text-center text-sm font-bold text-slate-600">
+      &copy; InfoStudy. Вчитель інформатики Гімназії №201 Скопінцев Данііл Дмитрович. Усі права захищено. 🎈
+    </div>
+  </footer>
+
+  <script>
+    // Оновлене посилання на базу даних уроків
+    const DB_URL = 'https://raw.githubusercontent.com/InfoStudy-gymnasium201-kyiv/s/refs/heads/main/e-school/lessondb.json';
+    
+    let dbData = null;
+    let activeClassIndex = 0;
+
+    async function loadDatabase() {
+      try {
+        const response = await fetch(DB_URL);
+        if (!response.ok) throw new Error('Не вдалося завантажити базу даних уроків');
+        
+        dbData = await response.json();
+
+        if (dbData.classes && dbData.classes.length > 0) {
+          renderClassTabs();
+          selectClass(0);
+        } else {
+          document.getElementById('topics-container').innerHTML = `
+            <div class="text-center py-12 bg-white rounded-3xl border-4 border-purple-200 shadow-pop text-purple-900 font-bold text-xl">
+              😿 База даних порожня.
+            </div>`;
+        }
+      } catch (err) {
+        document.getElementById('topics-container').innerHTML = `
+          <div class="bg-red-100 text-red-900 p-8 rounded-3xl border-4 border-red-400 shadow-pop text-center">
+            <div class="text-5xl mb-3">😿</div>
+            <h3 class="font-heading font-black text-2xl mb-2">Помилка завантаження</h3>
+            <p class="text-lg font-bold">${err.message}</p>
+          </div>`;
+      }
+    }
+
+    // Рендер кнопок класів
+    function renderClassTabs() {
+      const tabsContainer = document.getElementById('class-tabs');
+      tabsContainer.innerHTML = dbData.classes.map((cls, index) => `
+        <button 
+          id="tab-btn-${index}"
+          onclick="selectClass(${index})"
+          class="px-6 py-3 rounded-2xl font-black font-heading text-lg transition-all shadow-pop-sm bounce-hover">
+          ${cls.className}
+        </button>
+      `).join('');
+    }
+
+    // Перемикання класу
+    function selectClass(index) {
+      activeClassIndex = index;
+
+      dbData.classes.forEach((cls, idx) => {
+        const btn = document.getElementById(`tab-btn-${idx}`);
+        if (idx === index) {
+          btn.className = 'px-6 py-3 rounded-2xl font-black font-heading text-lg transition-all shadow-pop bg-kids-yellow text-purple-950 border-4 border-yellow-300 scale-105';
+        } else {
+          btn.className = 'px-6 py-3 rounded-2xl font-black font-heading text-lg transition-all bg-white/20 hover:bg-white/30 text-white border-2 border-white/40';
+        }
+      });
+
+      const currentClass = dbData.classes[index];
+      document.getElementById('selected-class-badge').innerText = currentClass.className;
+
+      filterLessons();
+    }
+
+    // Фільтрація та виведення тем та уроків у дитячому стилі
+    function filterLessons() {
+      const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
+      const container = document.getElementById('topics-container');
+      const currentClass = dbData.classes[activeClassIndex];
+
+      if (!currentClass || !currentClass.topics) return;
+
+      let totalLessonsCount = 0;
+      let html = '';
+
+      const topicColors = [
+        'border-kids-purple bg-purple-50/40',
+        'border-kids-pink bg-pink-50/40',
+        'border-kids-orange bg-orange-50/40',
+        'border-kids-blue bg-blue-50/40',
+        'border-kids-green bg-green-50/40'
+      ];
+
+      currentClass.topics.forEach((topicObj, topicIndex) => {
+        // 1. Фільтруємо уроки за полем posted
+        const postedLessons = topicObj.lessons.filter(lesson => lesson.posted !== 0 && lesson.posted !== "0");
+
+        // 2. Фільтруємо за пошуковим запитом
+        const filteredLessons = postedLessons.filter(lesson => 
+          lesson.title.toLowerCase().includes(searchQuery) || 
+          lesson.description.toLowerCase().includes(searchQuery) ||
+          String(lesson.lessonNumber).toLowerCase().includes(searchQuery)
+        );
+
+        if (filteredLessons.length > 0) {
+          totalLessonsCount += filteredLessons.length;
+          const themeColorClass = topicColors[topicIndex % topicColors.length];
+
+          html += `
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border-4 ${themeColorClass} shadow-pop">
+              <h2 class="text-2xl sm:text-3xl font-black font-heading text-slate-800 mb-6 flex items-center space-x-3">
+                <span class="text-3xl">🎯</span>
+                <span>${topicObj.topicTitle}</span>
+              </h2>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                ${filteredLessons.map(lesson => `
+                  <a href="${lesson.lessonUrl}" 
+                     class="group bg-white hover:bg-purple-50/60 border-4 border-purple-200 hover:border-kids-purple rounded-3xl p-6 flex flex-col justify-between transition-all duration-200 shadow-pop-sm hover:shadow-pop bounce-hover">
+                    <div>
+                      <div class="flex items-center justify-between gap-2 mb-4">
+                        <span class="text-xs font-black font-heading text-white bg-kids-purple px-3 py-1 rounded-xl uppercase tracking-wider shadow-sm">
+                          Урок ${lesson.lessonNumber}
+                        </span>
+                        ${lesson.duration ? `<span class="text-xs font-bold text-purple-900 bg-purple-100 px-2.5 py-1 rounded-xl">⏱️ ${lesson.duration}</span>` : ''}
+                      </div>
+                      <h3 class="font-extrabold font-heading text-slate-800 group-hover:text-kids-purple text-lg sm:text-xl mb-3 transition-colors line-clamp-2 leading-snug">
+                        ${lesson.title}
+                      </h3>
+                      <p class="text-sm font-semibold text-slate-600 line-clamp-3 leading-relaxed mb-6">
+                        ${lesson.description}
+                      </p>
+                    </div>
+
+                    <div class="flex items-center justify-between text-sm font-black font-heading text-kids-purple pt-3 border-t-2 border-purple-100">
+                      <span>Розпочати урок</span>
+                      <span class="text-xl transition-transform group-hover:translate-x-2">🚀</span>
+                    </div>
+                  </a>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }
+      });
+
+      document.getElementById('lessons-count').innerText = `Знайдено уроків: ${totalLessonsCount}`;
+
+      if (totalLessonsCount === 0) {
+        html = `
+          <div class="text-center py-16 bg-white rounded-3xl border-4 border-purple-200 shadow-pop">
+            <div class="text-6xl mb-3">🔍</div>
+            <h3 class="text-2xl font-black font-heading text-purple-900 mb-2">Уроків не знайдено</h3>
+            <p class="text-base font-bold text-slate-600">Наразі немає опублікованих уроків у цьому розділі або за вашим запитом.</p>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+    }
+
+    window.addEventListener('DOMContentLoaded', loadDatabase);
+  </script>
+</body>
+</html>
