@@ -79,37 +79,39 @@
 </head>
 <body class="text-slate-800 antialiased selection:bg-kids-pink selection:text-white min-h-screen flex flex-col">
 
-  <!-- Top Kid Header -->
+  <!-- Top Kid Header (Виправлена адаптивність) -->
   <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b-4 border-kids-purple/20 shadow-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-0 sm:h-20 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
       
       <!-- Logo & Title -->
-      <div class="flex items-center space-x-3 sm:space-x-4">
-        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-kids-purple to-kids-pink flex items-center justify-center text-2xl shadow-pop-sm text-white transform -rotate-3 hover:rotate-0 transition">
-          🚀
-        </div>
-        <div>
-          <span class="text-xs sm:text-sm font-black text-kids-purple uppercase tracking-wider block bg-kids-purple/10 px-2.5 py-0.5 rounded-full w-max">
-            Освітній портал
-          </span>
-          <h1 class="text-base sm:text-xl font-bold font-heading text-slate-800 line-clamp-1">
-            InfoStudy — Весела Інформатика 🎈
-          </h1>
+      <div class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-start">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-kids-purple to-kids-pink flex items-center justify-center text-xl sm:text-2xl shadow-pop-sm text-white transform -rotate-3 hover:rotate-0 transition flex-shrink-0">
+            🚀
+          </div>
+          <div>
+            <span class="text-[10px] sm:text-sm font-black text-kids-purple uppercase tracking-wider block bg-kids-purple/10 px-2 py-0.5 rounded-full w-max">
+              Освітній портал
+            </span>
+            <h1 class="text-sm sm:text-xl font-bold font-heading text-slate-800 line-clamp-1">
+              InfoStudy — Весела Інформатика 🎈
+            </h1>
+          </div>
         </div>
       </div>
 
       <!-- Header Action Buttons & Status -->
-      <div class="flex items-center space-x-2 sm:space-x-3">
+      <div class="flex items-center justify-end space-x-2 sm:space-x-3 w-full sm:w-auto">
         <!-- Кнопка 1: Старша школа -->
         <a href="https://infostudy-gymnasium201-kyiv.github.io" 
-           class="flex items-center space-x-1.5 text-xs sm:text-sm font-extrabold font-heading text-white bg-kids-purple hover:bg-purple-700 px-3.5 py-2 rounded-2xl border-2 border-purple-800 shadow-pop-sm bounce-hover transition">
+           class="flex-1 sm:flex-none justify-center flex items-center space-x-1 sm:space-x-1.5 text-xs sm:text-sm font-extrabold font-heading text-white bg-kids-purple hover:bg-purple-700 px-2.5 sm:px-3.5 py-2 rounded-2xl border-2 border-purple-800 shadow-pop-sm bounce-hover transition whitespace-nowrap">
           <span>🏫</span>
           <span>Старша школа</span>
         </a>
 
         <!-- Кнопка 2: Навчальні ігри -->
         <a href="https://infostudy-gymnasium201-kyiv.github.io/games" 
-           class="flex items-center space-x-1.5 text-xs sm:text-sm font-extrabold font-heading text-white bg-kids-pink hover:bg-pink-600 px-3.5 py-2 rounded-2xl border-2 border-pink-700 shadow-pop-sm bounce-hover transition">
+           class="flex-1 sm:flex-none justify-center flex items-center space-x-1 sm:space-x-1.5 text-xs sm:text-sm font-extrabold font-heading text-white bg-kids-pink hover:bg-pink-600 px-2.5 sm:px-3.5 py-2 rounded-2xl border-2 border-pink-700 shadow-pop-sm bounce-hover transition whitespace-nowrap">
           <span>🎮</span>
           <span>Навчальні ігри</span>
         </a>
@@ -125,7 +127,7 @@
   </header>
 
   <!-- Hero Section -->
-  <section class="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 text-white py-12 md:py-16 relative overflow-hidden shadow-lg border-b-8 border-kids-yellow">
+  <section class="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 text-white py-10 md:py-16 relative overflow-hidden shadow-lg border-b-8 border-kids-yellow">
     
     <!-- Decorative Floating Elements -->
     <div class="absolute -top-6 -left-6 text-6xl opacity-30 animate-float pointer-events-none">🎈</div>
@@ -134,21 +136,21 @@
 
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
       
-      <div class="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-md border-2 border-white/40 px-4 py-1.5 rounded-full text-white text-sm sm:text-base font-bold mb-4 shadow-sm">
+      <div class="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-md border-2 border-white/40 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-white text-xs sm:text-base font-bold mb-4 shadow-sm">
         <span>⭐ Каталог навчальних матеріалів</span>
       </div>
 
-      <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black font-heading tracking-wide text-white mb-4 drop-shadow-md leading-tight">
+      <h1 class="text-2xl sm:text-5xl lg:text-6xl font-black font-heading tracking-wide text-white mb-4 drop-shadow-md leading-tight">
         Обирай клас та вивчай Інформатику 🚀
       </h1>
 
-      <p class="text-white/95 text-lg sm:text-2xl font-semibold max-w-3xl mx-auto leading-relaxed mb-8 drop-shadow-sm">
+      <p class="text-white/95 text-base sm:text-2xl font-semibold max-w-3xl mx-auto leading-relaxed mb-6 sm:mb-8 drop-shadow-sm">
         Зручні та веселі інтерактивні уроки з пригодами для швидкого та цікавого навчання! 🎨✨
       </p>
 
       <!-- Класи (Таби) -->
-      <div class="flex flex-wrap justify-center gap-3 sm:gap-4" id="class-tabs">
-        <span class="bg-white/30 text-white font-bold text-lg px-6 py-2.5 rounded-2xl border-2 border-white/50 animate-pulse">
+      <div class="flex flex-wrap justify-center gap-2 sm:gap-4" id="class-tabs">
+        <span class="bg-white/30 text-white font-bold text-sm sm:text-lg px-4 py-2 rounded-2xl border-2 border-white/50 animate-pulse">
           Завантаження класів... 🌀
         </span>
       </div>
@@ -157,45 +159,44 @@
   </section>
 
   <!-- Main Content Area -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow w-full">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 flex-grow w-full">
     
     <!-- Панель фільтрів та пошуку -->
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10 bg-white p-5 rounded-3xl border-4 border-purple-200 shadow-pop">
-      <div class="flex items-center space-x-3">
-        <span id="selected-class-badge" class="px-4 py-1.5 bg-kids-purple text-white text-base font-black font-heading rounded-2xl shadow-sm">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8 sm:mb-10 bg-white p-4 sm:p-5 rounded-3xl border-4 border-purple-200 shadow-pop">
+      <div class="flex items-center justify-between sm:justify-start space-x-3">
+        <span id="selected-class-badge" class="px-3.5 py-1.5 bg-kids-purple text-white text-sm sm:text-base font-black font-heading rounded-2xl shadow-sm">
           Обраний клас
         </span>
-        <span id="lessons-count" class="text-sm font-extrabold text-purple-900 bg-purple-100 px-3 py-1 rounded-xl">
+        <span id="lessons-count" class="text-xs sm:text-sm font-extrabold text-purple-900 bg-purple-100 px-3 py-1 rounded-xl">
           Завантаження...
         </span>
       </div>
 
       <!-- Пошук -->
       <div class="relative max-w-md w-full">
-        <input type="text" id="search-input" oninput="filterLessons()" placeholder="Пошук уроку або теми..." class="w-full pl-11 pr-4 py-3 bg-purple-50/50 border-2 border-purple-200 rounded-2xl text-base font-bold text-slate-800 placeholder-purple-400 focus:outline-none focus:border-kids-purple focus:bg-white transition">
-        <span class="absolute left-3.5 top-3 text-xl">🔍</span>
+        <input type="text" id="search-input" oninput="filterLessons()" placeholder="Пошук уроку або теми..." class="w-full pl-11 pr-4 py-2.5 sm:py-3 bg-purple-50/50 border-2 border-purple-200 rounded-2xl text-sm sm:text-base font-bold text-slate-800 placeholder-purple-400 focus:outline-none focus:border-kids-purple focus:bg-white transition">
+        <span class="absolute left-3.5 top-2.5 sm:top-3 text-lg sm:text-xl">🔍</span>
       </div>
     </div>
 
     <!-- Контейнер для списку тем та уроків -->
-    <div id="topics-container" class="space-y-10">
-      <div class="text-center py-16 bg-white rounded-3xl border-4 border-purple-200 shadow-pop">
-        <div class="inline-block animate-spin text-6xl mb-4">🌀</div>
-        <p class="text-xl font-bold text-purple-900 font-heading">Завантажуємо веселі уроки з бази даних...</p>
+    <div id="topics-container" class="space-y-8 sm:space-y-10">
+      <div class="text-center py-12 sm:py-16 bg-white rounded-3xl border-4 border-purple-200 shadow-pop">
+        <div class="inline-block animate-spin text-5xl sm:text-6xl mb-4">🌀</div>
+        <p class="text-lg sm:text-xl font-bold text-purple-900 font-heading">Завантажуємо веселі уроки з бази даних...</p>
       </div>
     </div>
 
   </main>
 
   <!-- Footer -->
-  <footer class="bg-white border-t-4 border-purple-200 py-8 mt-12">
-    <div class="max-w-7xl mx-auto px-4 text-center text-sm font-bold text-slate-600">
+  <footer class="bg-white border-t-4 border-purple-200 py-6 sm:py-8 mt-8 sm:mt-12">
+    <div class="max-w-7xl mx-auto px-4 text-center text-xs sm:text-sm font-bold text-slate-600">
       &copy; InfoStudy. Вчитель інформатики Гімназії №201 Скопінцев Данііл Дмитрович. Усі права захищено. 🎈
     </div>
   </footer>
 
   <script>
-    // Оновлене посилання на базу даних уроків
     const DB_URL = 'https://raw.githubusercontent.com/InfoStudy-gymnasium201-kyiv/s/refs/heads/main/e-school/lessondb.json';
     
     let dbData = null;
@@ -227,29 +228,27 @@
       }
     }
 
-    // Рендер кнопок класів
     function renderClassTabs() {
       const tabsContainer = document.getElementById('class-tabs');
       tabsContainer.innerHTML = dbData.classes.map((cls, index) => `
         <button 
           id="tab-btn-${index}"
           onclick="selectClass(${index})"
-          class="px-6 py-3 rounded-2xl font-black font-heading text-lg transition-all shadow-pop-sm bounce-hover">
+          class="px-4 py-2 sm:px-6 sm:py-3 rounded-2xl font-black font-heading text-sm sm:text-lg transition-all shadow-pop-sm bounce-hover">
           ${cls.className}
         </button>
       `).join('');
     }
 
-    // Перемикання класу
     function selectClass(index) {
       activeClassIndex = index;
 
       dbData.classes.forEach((cls, idx) => {
         const btn = document.getElementById(`tab-btn-${idx}`);
         if (idx === index) {
-          btn.className = 'px-6 py-3 rounded-2xl font-black font-heading text-lg transition-all shadow-pop bg-kids-yellow text-purple-950 border-4 border-yellow-300 scale-105';
+          btn.className = 'px-4 py-2 sm:px-6 sm:py-3 rounded-2xl font-black font-heading text-sm sm:text-lg transition-all shadow-pop bg-kids-yellow text-purple-950 border-2 sm:border-4 border-yellow-300 scale-105';
         } else {
-          btn.className = 'px-6 py-3 rounded-2xl font-black font-heading text-lg transition-all bg-white/20 hover:bg-white/30 text-white border-2 border-white/40';
+          btn.className = 'px-4 py-2 sm:px-6 sm:py-3 rounded-2xl font-black font-heading text-sm sm:text-lg transition-all bg-white/20 hover:bg-white/30 text-white border-2 border-white/40';
         }
       });
 
@@ -259,7 +258,6 @@
       filterLessons();
     }
 
-    // Фільтрація та виведення тем та уроків у дитячому стилі
     function filterLessons() {
       const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
       const container = document.getElementById('topics-container');
@@ -279,10 +277,8 @@
       ];
 
       currentClass.topics.forEach((topicObj, topicIndex) => {
-        // 1. Фільтруємо уроки за полем posted
         const postedLessons = topicObj.lessons.filter(lesson => lesson.posted !== 0 && lesson.posted !== "0");
 
-        // 2. Фільтруємо за пошуковим запитом
         const filteredLessons = postedLessons.filter(lesson => 
           lesson.title.toLowerCase().includes(searchQuery) || 
           lesson.description.toLowerCase().includes(searchQuery) ||
@@ -294,34 +290,34 @@
           const themeColorClass = topicColors[topicIndex % topicColors.length];
 
           html += `
-            <div class="bg-white rounded-3xl p-6 sm:p-8 border-4 ${themeColorClass} shadow-pop">
-              <h2 class="text-2xl sm:text-3xl font-black font-heading text-slate-800 mb-6 flex items-center space-x-3">
-                <span class="text-3xl">🎯</span>
+            <div class="bg-white rounded-3xl p-4 sm:p-8 border-4 ${themeColorClass} shadow-pop">
+              <h2 class="text-xl sm:text-3xl font-black font-heading text-slate-800 mb-4 sm:mb-6 flex items-center space-x-2 sm:space-x-3">
+                <span class="text-2xl sm:text-3xl">🎯</span>
                 <span>${topicObj.topicTitle}</span>
               </h2>
 
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 ${filteredLessons.map(lesson => `
                   <a href="${lesson.lessonUrl}" 
-                     class="group bg-white hover:bg-purple-50/60 border-4 border-purple-200 hover:border-kids-purple rounded-3xl p-6 flex flex-col justify-between transition-all duration-200 shadow-pop-sm hover:shadow-pop bounce-hover">
+                     class="group bg-white hover:bg-purple-50/60 border-4 border-purple-200 hover:border-kids-purple rounded-3xl p-5 sm:p-6 flex flex-col justify-between transition-all duration-200 shadow-pop-sm hover:shadow-pop bounce-hover">
                     <div>
-                      <div class="flex items-center justify-between gap-2 mb-4">
-                        <span class="text-xs font-black font-heading text-white bg-kids-purple px-3 py-1 rounded-xl uppercase tracking-wider shadow-sm">
+                      <div class="flex items-center justify-between gap-2 mb-3 sm:mb-4">
+                        <span class="text-[10px] sm:text-xs font-black font-heading text-white bg-kids-purple px-2.5 py-1 rounded-xl uppercase tracking-wider shadow-sm">
                           Урок ${lesson.lessonNumber}
                         </span>
-                        ${lesson.duration ? `<span class="text-xs font-bold text-purple-900 bg-purple-100 px-2.5 py-1 rounded-xl">⏱️ ${lesson.duration}</span>` : ''}
+                        ${lesson.duration ? `<span class="text-[10px] sm:text-xs font-bold text-purple-900 bg-purple-100 px-2 py-1 rounded-xl">⏱️ ${lesson.duration}</span>` : ''}
                       </div>
-                      <h3 class="font-extrabold font-heading text-slate-800 group-hover:text-kids-purple text-lg sm:text-xl mb-3 transition-colors line-clamp-2 leading-snug">
+                      <h3 class="font-extrabold font-heading text-slate-800 group-hover:text-kids-purple text-base sm:text-xl mb-2 sm:mb-3 transition-colors line-clamp-2 leading-snug">
                         ${lesson.title}
                       </h3>
-                      <p class="text-sm font-semibold text-slate-600 line-clamp-3 leading-relaxed mb-6">
+                      <p class="text-xs sm:text-sm font-semibold text-slate-600 line-clamp-3 leading-relaxed mb-4 sm:mb-6">
                         ${lesson.description}
                       </p>
                     </div>
 
-                    <div class="flex items-center justify-between text-sm font-black font-heading text-kids-purple pt-3 border-t-2 border-purple-100">
+                    <div class="flex items-center justify-between text-xs sm:text-sm font-black font-heading text-kids-purple pt-3 border-t-2 border-purple-100">
                       <span>Розпочати урок</span>
-                      <span class="text-xl transition-transform group-hover:translate-x-2">🚀</span>
+                      <span class="text-lg sm:text-xl transition-transform group-hover:translate-x-2">🚀</span>
                     </div>
                   </a>
                 `).join('')}
@@ -335,10 +331,10 @@
 
       if (totalLessonsCount === 0) {
         html = `
-          <div class="text-center py-16 bg-white rounded-3xl border-4 border-purple-200 shadow-pop">
-            <div class="text-6xl mb-3">🔍</div>
-            <h3 class="text-2xl font-black font-heading text-purple-900 mb-2">Уроків не знайдено</h3>
-            <p class="text-base font-bold text-slate-600">Наразі немає опублікованих уроків у цьому розділі або за вашим запитом.</p>
+          <div class="text-center py-12 sm:py-16 bg-white rounded-3xl border-4 border-purple-200 shadow-pop">
+            <div class="text-5xl sm:text-6xl mb-3">🔍</div>
+            <h3 class="text-xl sm:text-2xl font-black font-heading text-purple-900 mb-2">Уроків не знайдено</h3>
+            <p class="text-sm sm:text-base font-bold text-slate-600">Наразі немає опублікованих уроків у цьому розділі або за вашим запитом.</p>
           </div>
         `;
       }
