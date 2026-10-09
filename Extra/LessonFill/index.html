@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ІнфоЗаповнювач • Інтерактивний Тренажер Знань</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        techBlue: '#0066FF',
+                        techCyan: '#00F2FE',
+                        techDark: '#0F172A',
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-short': 'bounce 0.8s ease-in-out 1',
+                        'spin-slow': 'spin 3s linear infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            min-height: 100vh;
+            color: #f8fafc;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.5);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.8);
+        }
+
+        /* Glassmorphism effects */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-modal {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        /* Interactive Blank Slot Styling */
+        .blank-slot {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 130px;
+            padding: 4px 14px;
+            margin: 2px 4px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px dashed #6366f1;
+            background: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+            vertical-align: middle;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .blank-slot:hover {
+            background: rgba(99, 102, 241, 0.3);
+            border-color: #818cf8;
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+
+        .blank-slot.filled {
+            border-style: solid;
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.25);
+            color: #60a5fa;
+        }
+
+        .blank-slot.correct {
+            border-style: solid;
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.25);
+            color: #34d399;
+        }
+
+        .blank-slot.incorrect {
+            border-style: solid;
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.25);
+            color: #f87171;
+        }
+
+        /* Confetti canvas */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-slate-100 antialiased selection:bg-indigo-500 selection:text-white">
+
+    <!-- Confetti Canvas for Victory -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Header Section -->
+    <header class="sticky top-0 z-30 glass-card border-b border-slate-700/50 px-4 py-3 sm:px-8">
+        <div class="max-w-5xl mx-auto flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid fa-graduation-cap text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-200 to-cyan-300">
+                        ІнфоЗаповнювач
+                    </h1>
+                    <p id="header-subtitle" class="text-xs text-slate-400 hidden sm:block">Інтерактивний тренажер знань</p>
+                </div>
+            </div>
+
+            <!-- Lesson Code Info & Controls -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- Current Code Badge (Read-Only) -->
+                <div class="bg-slate-800/90 border border-indigo-500/30 px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs sm:text-sm font-semibold">
+                    <i class="fa-solid fa-bookmark text-cyan-400"></i>
+                    <span id="lesson-code-badge" class="text-indigo-200 font-mono">2627.6.7</span>
+                </div>
+
+                <!-- Progress Badge -->
+                <div class="bg-slate-800/80 border border-slate-700 px-3 py-1.5 rounded-xl flex items-center gap-2">
+                    <i class="fa-solid fa-check-circle text-emerald-400 text-sm"></i>
+                    <span id="progress-text" class="text-xs sm:text-sm font-semibold text-slate-200">0/0</span>
+                </div>
+
+                <!-- Reset Button -->
+                <button id="reset-btn" onclick="resetExercise()" title="Скинути всі відповіді" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition-colors">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-5xl w-full mx-auto p-4 sm:p-6 md:p-8">
+
+        <!-- Top Topic & Instructions Card -->
+        <section class="glass-card rounded-2xl p-4 sm:p-6 mb-6 shadow-xl relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="space-y-1 w-full">
+                    <div class="flex items-center justify-between w-full">
+                        <div class="flex items-center gap-2 text-indigo-400 text-xs sm:text-sm font-semibold uppercase tracking-wider">
+                            <i class="fa-solid fa-book-open"></i> Тема уроку
+                        </div>
+                        <span id="lesson-status-tag" class="text-[11px] px-2.5 py-0.5 rounded-full bg-indigo-950/80 border border-indigo-500/40 text-indigo-300 font-medium">
+                            Завантаження...
+                        </span>
+                    </div>
+                    <h2 id="lesson-title" class="text-lg sm:text-2xl font-bold text-white">
+                        Складові компоненти комп'ютера
+                    </h2>
+                    <p id="lesson-description" class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                        Натисніть або торкніться порожнього рамкового поля <span class="px-2 py-0.5 rounded bg-indigo-950 border border-indigo-500/50 text-indigo-300 font-mono text-xs">[ Обрати слово ]</span>, щоб обрати правильний термін зі списку.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Overall Progress Bar -->
+            <div class="mt-4 pt-3 border-t border-slate-700/50">
+                <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                    <div id="overall-progress-bar" class="bg-gradient-to-r from-indigo-500 to-cyan-400 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading State Indicator -->
+        <div id="loading-container" class="glass-card rounded-2xl p-12 text-center space-y-4 my-8">
+            <div class="inline-block p-4 rounded-full bg-indigo-600/20 text-indigo-400 animate-spin-slow">
+                <i class="fa-solid fa-spinner text-3xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-200">Завантаження завдань...</h3>
+            <p id="loading-url-text" class="text-xs font-mono text-slate-400 break-all max-w-md mx-auto"></p>
+        </div>
+
+        <!-- Error State Card (Hidden by default) -->
+        <div id="error-container" class="hidden glass-card rounded-2xl p-8 text-center space-y-4 border-rose-500/40 my-8">
+            <div class="inline-block p-4 rounded-full bg-rose-500/20 text-rose-400">
+                <i class="fa-solid fa-triangle-exclamation text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white">Не вдалося завантажити файл уроку</h3>
+            <p id="error-message-text" class="text-sm text-slate-300 max-w-md mx-auto">
+                Перевірте правильність коду уроку або підключення до мережі Інтернет.
+            </p>
+            <div class="flex items-center justify-center gap-3 pt-2">
+                <button onclick="loadLessonData()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-all shadow-lg shadow-indigo-600/30">
+                    <i class="fa-solid fa-arrows-rotate mr-2"></i> Спробувати знову
+                </button>
+                <button onclick="loadFallbackData()" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 font-semibold text-sm transition-all">
+                    Завантажити базовий тест
+                </button>
+            </div>
+        </div>
+
+        <!-- Sentences Container -->
+        <div id="sentences-list" class="space-y-4 hidden">
+            <!-- Dynamic Content Injected Here -->
+        </div>
+
+        <!-- Action Buttons Bar -->
+        <div id="actions-bar" class="hidden mt-8 flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900/60 p-4 rounded-2xl border border-slate-800 backdrop-blur-md">
+            <div class="flex items-center gap-2 text-xs text-slate-400">
+                <i class="fa-solid fa-circle-info text-indigo-400 text-sm"></i>
+                <span id="action-hint-text">Заповніть усі пропущені поля, щоб завершити перевірку.</span>
+            </div>
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <button id="check-btn" onclick="checkAnswers()" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 active:scale-95">
+                    <i class="fa-solid fa-spell-check"></i>
+                    <span>Перевірити відповіді</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Explanations Modal/Drawer Section (Hidden by default) -->
+        <section id="results-summary" class="hidden mt-8 glass-card rounded-2xl p-6 border-indigo-500/30 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-700 pb-4 mb-4">
+                <div class="flex items-center gap-3">
+                    <div id="summary-icon" class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-bold"></div>
+                    <div>
+                        <h3 id="summary-title" class="text-xl font-bold text-white">Результат перевірки</h3>
+                        <p id="summary-subtitle" class="text-sm text-slate-300"></p>
+                    </div>
+                </div>
+                <div id="summary-score-badge" class="text-2xl sm:text-3xl font-extrabold px-4 py-2 rounded-xl bg-slate-800 text-indigo-400 border border-slate-700">
+                    0/0
+                </div>
+            </div>
+
+            <!-- Explanations List -->
+            <h4 class="text-md font-semibold text-slate-200 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-book-open text-cyan-400"></i> Довідник матеріалів теми:
+            </h4>
+            <div id="explanations-list" class="space-y-3 max-h-96 overflow-y-auto pr-1">
+                <!-- Explanations will be populated here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Option Selector Modal / Mobile Drawer -->
+    <div id="word-modal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/80 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300">
+        <div id="modal-card" class="glass-modal w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl transform translate-y-full sm:translate-y-4 transition-all duration-300 border border-slate-700/80">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-hand-pointer text-indigo-400"></i>
+                    <h3 class="font-bold text-white text-base">Оберіть правильний термін</h3>
+                </div>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Context Sentence Preview -->
+            <div class="my-4 p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs sm:text-sm text-slate-300">
+                <span class="text-indigo-400 font-semibold block mb-1">Речення:</span>
+                <p id="modal-sentence-preview" class="italic text-slate-200"></p>
+            </div>
+
+            <!-- Options Grid/List -->
+            <div id="options-container" class="space-y-2.5 my-4 max-h-60 overflow-y-auto pr-1">
+                <!-- Option buttons generated dynamically -->
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="pt-2 flex justify-end">
+                <button onclick="closeModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 text-xs font-semibold">
+                    Скасувати
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-auto py-6 border-t border-slate-800/80 text-center text-xs text-slate-500">
+        <p>ІнфоЗаповнювач • Інтерактивна навчальна платформа Gymnasium 201 Kyiv</p>
+    </footer>
+
+    <script>
+        // Constants & Config
+        const DEFAULT_VERSION = "2627.6.7";
+        const BASE_GITHUB_URL = "https://raw.githubusercontent.com/InfoStudy-gymnasium201-kyiv/InfoStudy-gymnasium201-kyiv.github.io/refs/heads/main/Extra/LessonFill/";
+
+        // Fallback default dataset for offline or backup usage
+        const fallbackDataset = {
+            title: "Складові компоненти комп'ютера",
+            description: "Вставте пропущені терміни у речення про головні пристрої та вузли комп'ютера.",
+            sentences: [
+                {
+                    id: 1,
+                    icon: "fa-microchip",
+                    partBefore: "Основною складовою комп'ютера, яка виконує обробку даних та керує іншими пристроями, є ",
+                    partAfter: ".",
+                    correctWord: "процесор",
+                    options: ["процесор", "відеокарта", "сканер", "роутер"],
+                    explanation: "Процесор (CPU) — це 'мозок' комп'ютера, що здійснює всі обчислення та виконує інструкції програм."
+                },
+                {
+                    id: 2,
+                    icon: "fa-memory",
+                    partBefore: "Для тимчасового збереження даних та програм під час їх виконання використовується ",
+                    partAfter: ".",
+                    correctWord: "оперативна пам'ять",
+                    options: ["оперативна пам'ять", "жорсткий диск", "флеш-накопичувач", "оптичний диск"],
+                    explanation: "Оперативна пам'ять (RAM) — це швидка енергозалежна пам'ять для тимчасових даних, з якими працює процесор просто зараз."
+                },
+                {
+                    id: 3,
+                    icon: "fa-chess-board",
+                    partBefore: "Головна плата комп'ютера, до якої підключаються всі його внутрішні компоненти, називається ",
+                    partAfter: ".",
+                    correctWord: "материнська плата",
+                    options: ["материнська плата", "мережева карта", "звукова плата", "плата захоплення"],
+                    explanation: "Материнська плата (Motherboard) об'єднує всі вузли комп'ютера в єдину працюючу систему та забезпечує обмін даними між ними."
+                },
+                {
+                    id: 4,
+                    icon: "fa-display",
+                    partBefore: "Обробкою графічної інформації та її виведенням на екран монітора займається ",
+                    partAfter: ".",
+                    correctWord: "відеокарта",
+                    options: ["відеокарта", "оперативна пам'ять", "блок живлення", "звукова карта"],
+                    explanation: "Відеокарта (GPU) відповідає за розрахунок та побудову зображення, графіки у іграх та відео на екрані."
+                },
+                {
+                    id: 5,
+                    icon: "fa-hard-drive",
+                    partBefore: "Для довготривалого збереження файлів, операційної системи та програм використовується ",
+                    partAfter: ".",
+                    correctWord: "накопичувач (SSD/HDD)",
+                    options: ["накопичувач (SSD/HDD)", "оперативна пам'ять", "кулер", "системна шина"],
+                    explanation: "Накопичувач (SSD або жорсткий диск HDD) зберігає файли користувача та операційну систему навіть після вимкнення ПК."
+                },
+                {
+                    id: 6,
+                    icon: "fa-plug",
+                    partBefore: "За забезпечення електричним струмом усіх внутрішніх вузлів комп'ютера відповідає ",
+                    partAfter: ".",
+                    correctWord: "блок живлення",
+                    options: ["блок живлення", "материнська плата", "роз'єм USB", "корпус ПК"],
+                    explanation: "Блок живлення перетворює струм з розетки на необхідні напруги для живлення компонентів системного блоку."
+                },
+                {
+                    id: 7,
+                    icon: "fa-fan",
+                    partBefore: "Щоб запобігти перегріву важливих елементів (наприклад, процесора), використовується ",
+                    partAfter: ".",
+                    correctWord: "система охолодження",
+                    options: ["система охолодження", "звукова карта", "мережевий адаптер", "картрідер"],
+                    explanation: "Система охолодження (кулери, радіатори або рідинне охолодження) відводить тепло від нагрітих мікросхем."
+                },
+                {
+                    id: 8,
+                    icon: "fa-keyboard",
+                    partBefore: "Клавіатура, комп'ютерна миша та сканер належать до групи пристроїв, що мають назву ",
+                    partAfter: ".",
+                    correctWord: "пристрої введення",
+                    options: ["пристрої введення", "пристрої виведення", "пристрої збереження", "мережеві пристрої"],
+                    explanation: "Пристрої введення дозволяють користувачеві передавати дані та команди до комп'ютера."
+                }
+            ]
+        };
+
+        // Application State
+        let currentVersion = DEFAULT_VERSION;
+        let sentencesData = [];
+        let userAnswers = {};
+        let activeSentenceId = null;
+        let isChecked = false;
+
+        // Default icons list to assign if json items lack icons
+        const defaultIcons = ["fa-microchip", "fa-memory", "fa-chess-board", "fa-display", "fa-hard-drive", "fa-plug", "fa-fan", "fa-keyboard", "fa-network-wired", "fa-server", "fa-laptop", "fa-folder-open"];
+
+        // Web Audio Synthesizer
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            try {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'select') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.08);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.08);
+                } else if (type === 'correct') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.35);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                    osc.frequency.setValueAtTime(180, audioCtx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                }
+            } catch (e) {
+                // Audio muted or not supported gracefully ignored
+            }
+        }
+
+        // Initialize on DOM load
+        window.addEventListener('DOMContentLoaded', () => {
+            parseUrlVersion();
+            loadLessonData();
+        });
+
+        // Parse ?v= from URL query string
+        function parseUrlVersion() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const vParam = urlParams.get('v');
+            if (vParam && vParam.trim() !== '') {
+                currentVersion = vParam.trim();
+            } else {
+                currentVersion = DEFAULT_VERSION;
+            }
+            document.getElementById('lesson-code-badge').innerText = currentVersion;
+        }
+
+        // Fetch JSON lesson file dynamically
+        async function loadLessonData() {
+            showLoading(true);
+            hideError();
+
+            const jsonUrl = `${BASE_GITHUB_URL}${currentVersion}.json`;
+            document.getElementById('loading-url-text').innerText = jsonUrl;
+
+            try {
+                const response = await fetch(jsonUrl, { cache: 'no-store' });
+                if (!response.ok) {
+                    throw new Error(`Помилка завантаження [HTTP ${response.status}]`);
+                }
+                const rawData = await response.json();
+                processLessonData(rawData);
+                showLoading(false);
+            } catch (err) {
+                console.warn('Network fetch failed, attempting fallback or showing error', err);
+                if (currentVersion === DEFAULT_VERSION) {
+                    processLessonData(fallbackDataset);
+                    showLoading(false);
+                } else {
+                    showLoading(false);
+                    showError(`Не вдалося завантажити урок за адресою: ${jsonUrl}. Перевірте існування коду "${currentVersion}".`);
+                }
+            }
+        }
+
+        function loadFallbackData() {
+            currentVersion = DEFAULT_VERSION;
+            document.getElementById('lesson-code-badge').innerText = currentVersion;
+            processLessonData(fallbackDataset);
+            showLoading(false);
+            hideError();
+        }
+
+        // Normalize JSON data structure for flexible compatibility
+        function processLessonData(data) {
+            userAnswers = {};
+            isChecked = false;
+            document.getElementById('results-summary').classList.add('hidden');
+
+            // Set Title & Description
+            const title = data.title || data.topic || data.lessonTitle || "Складові компоненти комп'ютера";
+            const description = data.description || "Вставте пропущені терміни у речення.";
+            
+            document.getElementById('lesson-title').innerText = title;
+            document.getElementById('lesson-description').innerText = description;
+            document.getElementById('lesson-status-tag').innerText = `Код: ${currentVersion}`;
+
+            // Parse Sentences
+            const rawItems = data.sentences || data.items || data.questions || [];
+            sentencesData = rawItems.map((item, idx) => {
+                let partBefore = item.partBefore || item.before || "";
+                let partAfter = item.partAfter || item.after || "";
+                let correctWord = item.correctWord || item.correct || item.answer || "";
+                let options = item.options || item.choices || item.variants || [];
+                let explanation = item.explanation || item.hint || item.desc || `Значення терміну "${correctWord}".`;
+                let icon = item.icon || defaultIcons[idx % defaultIcons.length];
+
+                // If sentence is given as a single text with placeholder like "___" or "{blank}"
+                if (!partBefore && !partAfter && (item.text || item.sentence)) {
+                    const textStr = item.text || item.sentence;
+                    const splitRegex = /___|\{\{blank\}\}|\{blank\}|\[blank\]|\.\.\./;
+                    const parts = textStr.split(splitRegex);
+                    if (parts.length >= 2) {
+                        partBefore = parts[0];
+                        partAfter = parts.slice(1).join("");
+                    } else {
+                        partBefore = textStr + " ";
+                        partAfter = "";
+                    }
+                }
+
+                // Ensure options contains correctWord
+                if (correctWord && !options.includes(correctWord)) {
+                    options.push(correctWord);
+                }
+
+                // Shuffle options for variety
+                const shuffledOptions = [...options].sort(() => Math.random() - 0.5);
+
+                return {
+                    id: item.id || idx + 1,
+                    icon: icon,
+                    partBefore: partBefore,
+                    partAfter: partAfter,
+                    correctWord: correctWord,
+                    options: shuffledOptions,
+                    explanation: explanation
+                };
+            });
+
+            // Update UI elements
+            document.getElementById('action-hint-text').innerText = `Заповніть усі ${sentencesData.length} пропусків, щоб завершити перевірку.`;
+            document.getElementById('sentences-list').classList.remove('hidden');
+            document.getElementById('actions-bar').classList.remove('hidden');
+            document.getElementById('actions-bar').classList.add('flex');
+
+            renderSentences();
+            updateProgress();
+        }
+
+        // Render Sentence Cards
+        function renderSentences() {
+            const container = document.getElementById('sentences-list');
+            container.innerHTML = '';
+
+            sentencesData.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = "glass-card rounded-2xl p-4 sm:p-5 transition-all duration-300 hover:border-slate-600/80 relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center gap-4";
+                card.id = `sentence-card-${item.id}`;
+
+                const selectedWord = userAnswers[item.id];
+                
+                // Determine blank slot class based on verification state
+                let slotClass = "blank-slot";
+                let slotIcon = '<i class="fa-solid fa-chevron-down text-xs ml-2 opacity-70"></i>';
+                let slotText = selectedWord || "Обрати слово";
+
+                if (selectedWord) {
+                    slotClass += " filled";
+                }
+
+                if (isChecked) {
+                    if (selectedWord === item.correctWord) {
+                        slotClass = "blank-slot correct";
+                        slotIcon = '<i class="fa-solid fa-circle-check text-xs ml-2"></i>';
+                    } else {
+                        slotClass = "blank-slot incorrect";
+                        slotIcon = '<i class="fa-solid fa-circle-xmark text-xs ml-2"></i>';
+                    }
+                }
+
+                card.innerHTML = `
+                    <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-slate-800 border border-slate-700/70 text-indigo-400 flex items-center justify-center font-bold text-lg shadow-inner">
+                        <i class="fa-solid ${item.icon}"></i>
+                    </div>
+                    <div class="flex-grow text-sm sm:text-base leading-relaxed text-slate-200">
+                        <span class="font-semibold text-indigo-300 mr-1">${index + 1}.</span>
+                        ${item.partBefore}
+                        <button onclick="openWordModal(${item.id})" class="${slotClass}" aria-label="Вибрати пропущене слово">
+                            <span>${escapeHtml(slotText)}</span>
+                            ${slotIcon}
+                        </button>
+                        ${item.partAfter}
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        // Open options selection modal
+        function openWordModal(id) {
+            activeSentenceId = id;
+            const item = sentencesData.find(s => s.id === id);
+            if (!item) return;
+
+            // Set sentence preview text in modal
+            const currentSelected = userAnswers[id] ? `[ ${userAnswers[id]} ]` : '[ _______ ]';
+            document.getElementById('modal-sentence-preview').innerHTML = `${item.partBefore}<b class="text-indigo-300">${escapeHtml(currentSelected)}</b>${item.partAfter}`;
+
+            // Populate options list
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            item.options.forEach(optionText => {
+                const isSelected = userAnswers[id] === optionText;
+                const btn = document.createElement('button');
+                btn.className = `w-full text-left p-3.5 rounded-xl border font-medium text-sm transition-all duration-200 flex items-center justify-between ${
+                    isSelected 
+                    ? 'bg-indigo-600/30 border-indigo-500 text-white shadow-md' 
+                    : 'bg-slate-800/80 hover:bg-slate-700/80 border-slate-700/70 text-slate-200 hover:text-white'
+                }`;
+
+                btn.onclick = () => selectWord(optionText);
+
+                btn.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-5 h-5 rounded-full border border-slate-600 flex items-center justify-center text-xs ${isSelected ? 'border-indigo-400 bg-indigo-500 text-white' : ''}">
+                            ${isSelected ? '<i class="fa-solid fa-check text-[10px]"></i>' : ''}
+                        </div>
+                        <span>${escapeHtml(optionText)}</span>
+                    </div>
+                    <i class="fa-solid fa-angle-right text-slate-500 text-xs"></i>
+                `;
+
+                optionsContainer.appendChild(btn);
+            });
+
+            // Display modal with slide animation
+            const modal = document.getElementById('word-modal');
+            const modalCard = document.getElementById('modal-card');
+            
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modalCard.classList.remove('translate-y-full', 'sm:translate-y-4');
+            modalCard.classList.add('translate-y-0');
+
+            playSound('select');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('word-modal');
+            const modalCard = document.getElementById('modal-card');
+
+            modalCard.classList.remove('translate-y-0');
+            modalCard.classList.add('translate-y-full', 'sm:translate-y-4');
+            
+            setTimeout(() => {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+            }, 200);
+
+            activeSentenceId = null;
+        }
+
+        function selectWord(word) {
+            if (!activeSentenceId) return;
+
+            userAnswers[activeSentenceId] = word;
+            isChecked = false;
+            document.getElementById('results-summary').classList.add('hidden');
+
+            closeModal();
+            renderSentences();
+            updateProgress();
+            playSound('select');
+        }
+
+        function updateProgress() {
+            const answeredCount = Object.keys(userAnswers).length;
+            const total = sentencesData.length;
+            const percentage = total > 0 ? Math.round((answeredCount / total) * 100) : 0;
+
+            document.getElementById('progress-text').innerText = `${answeredCount}/${total}`;
+            document.getElementById('overall-progress-bar').style.width = `${percentage}%`;
+        }
+
+        // Check Answers & Evaluate Score
+        function checkAnswers() {
+            const answeredCount = Object.keys(userAnswers).length;
+            
+            if (answeredCount < sentencesData.length) {
+                const missingCount = sentencesData.length - answeredCount;
+                showNotification(`Будь ласка, заповніть ще ${missingCount} пропущених слів перед перевіркою.`);
+                playSound('error');
+                return;
+            }
+
+            isChecked = true;
+            renderSentences();
+
+            // Calculate Score
+            let correctCount = 0;
+            sentencesData.forEach(item => {
+                if (userAnswers[item.id] === item.correctWord) {
+                    correctCount++;
+                }
+            });
+
+            const summarySection = document.getElementById('results-summary');
+            const summaryIcon = document.getElementById('summary-icon');
+            const summaryTitle = document.getElementById('summary-title');
+            const summarySubtitle = document.getElementById('summary-subtitle');
+            const summaryScoreBadge = document.getElementById('summary-score-badge');
+            const explanationsList = document.getElementById('explanations-list');
+
+            summaryScoreBadge.innerText = `${correctCount}/${sentencesData.length}`;
+
+            if (correctCount === sentencesData.length) {
+                summaryIcon.className = "w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+                summaryIcon.innerHTML = `<i class="fa-solid fa-trophy"></i>`;
+                summaryTitle.innerText = "Чудово! Відмінний результат!";
+                summarySubtitle.innerText = "Ви правильно дали відповідь на всі запитання уроку.";
+                playSound('correct');
+                triggerConfetti();
+            } else if (correctCount >= Math.ceil(sentencesData.length * 0.6)) {
+                summaryIcon.className = "w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30";
+                summaryIcon.innerHTML = `<i class="fa-solid fa-star"></i>`;
+                summaryTitle.innerText = "Добре виконано!";
+                summarySubtitle.innerText = "Ви добре орієнтуєтеся в темі, але є декілька помилок. Ознайомтеся з підказками нижче.";
+                playSound('select');
+            } else {
+                summaryIcon.className = "w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30";
+                summaryIcon.innerHTML = `<i class="fa-solid fa-book-bookmark"></i>`;
+                summaryTitle.innerText = "Потрібно ще повторити!";
+                summarySubtitle.innerText = "Перегляньте виправлення та пояснення нижче для кращого засвоєння матеріалу.";
+                playSound('error');
+            }
+
+            // Generate Explanations List
+            explanationsList.innerHTML = '';
+            sentencesData.forEach(item => {
+                const userChoice = userAnswers[item.id];
+                const isItemCorrect = userChoice === item.correctWord;
+
+                const expCard = document.createElement('div');
+                expCard.className = `p-3.5 rounded-xl border text-xs sm:text-sm ${
+                    isItemCorrect 
+                    ? 'bg-slate-900/60 border-emerald-500/30' 
+                    : 'bg-slate-900/90 border-rose-500/40'
+                }`;
+
+                expCard.innerHTML = `
+                    <div class="flex items-center justify-between font-bold mb-1">
+                        <span class="text-slate-200 flex items-center gap-2">
+                            <i class="fa-solid ${item.icon} text-indigo-400"></i> ${item.correctWord.toUpperCase()}
+                        </span>
+                        <span class="${isItemCorrect ? 'text-emerald-400' : 'text-rose-400'} flex items-center gap-1 font-semibold">
+                            ${isItemCorrect 
+                                ? '<i class="fa-solid fa-check"></i> Правильно' 
+                                : `<i class="fa-solid fa-xmark"></i> Ваш варіант: "${escapeHtml(userChoice || 'не обрано')}"`}
+                        </span>
+                    </div>
+                    <p class="text-slate-300 leading-relaxed">${item.explanation}</p>
+                `;
+
+                explanationsList.appendChild(expCard);
+            });
+
+            summarySection.classList.remove('hidden');
+            summarySection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function resetExercise() {
+            userAnswers = {};
+            isChecked = false;
+            document.getElementById('results-summary').classList.add('hidden');
+            renderSentences();
+            updateProgress();
+            playSound('select');
+        }
+
+        function showLoading(show) {
+            const loader = document.getElementById('loading-container');
+            if (show) {
+                loader.classList.remove('hidden');
+                document.getElementById('sentences-list').classList.add('hidden');
+                document.getElementById('actions-bar').classList.add('hidden');
+            } else {
+                loader.classList.add('hidden');
+            }
+        }
+
+        function showError(msg) {
+            const errorContainer = document.getElementById('error-container');
+            document.getElementById('error-message-text').innerText = msg;
+            errorContainer.classList.remove('hidden');
+            document.getElementById('sentences-list').classList.add('hidden');
+            document.getElementById('actions-bar').classList.add('hidden');
+        }
+
+        function hideError() {
+            document.getElementById('error-container').classList.add('hidden');
+        }
+
+        function showNotification(msg) {
+            const toast = document.createElement('div');
+            toast.className = "fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 bg-slate-900 text-amber-300 border border-amber-500/50 px-5 py-3 rounded-2xl shadow-2xl text-xs sm:text-sm font-semibold flex items-center gap-3 transition-all duration-300 animate-bounce-short";
+            toast.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-base"></i> <span>${escapeHtml(msg)}</span>`;
+            
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text.replace(/[&<>"']/g, function(m) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                }[m];
+            });
+        }
+
+        function triggerConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ['#6366f1', '#38bdf8', '#34d399', '#f43f5e', '#fbbf24'];
+
+            for (let i = 0; i < 100; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speedY: Math.random() * 3 + 2,
+                    speedX: (Math.random() - 0.5) * 2,
+                    rotation: Math.random() * 360,
+                    spin: (Math.random() - 0.5) * 10
+                });
+            }
+
+            let animationFrame;
+            function animateConfetti() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                let stillActive = false;
+
+                particles.forEach(p => {
+                    p.y += p.speedY;
+                    p.x += p.speedX;
+                    p.rotation += p.spin;
+
+                    if (p.y < canvas.height) {
+                        stillActive = true;
+                    }
+
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.rotation * Math.PI) / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    ctx.restore();
+                });
+
+                if (stillActive) {
+                    animationFrame = requestAnimationFrame(animateConfetti);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    cancelAnimationFrame(animationFrame);
+                }
+            }
+
+            animateConfetti();
+        }
+    </script>
+</body>
+</html>
